@@ -1,5 +1,5 @@
 # ベースイメージ
-FROM python:3.11-slim
+FROM python:3.14
 
 # 必要な OS パッケージをインストール（zbar を含む）
 RUN apt-get update && apt-get install -y \
