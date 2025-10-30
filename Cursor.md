@@ -37,3 +37,54 @@
 
 - `spec.md` は仕様書なので編集禁止。
 - 外部サービス (GitHub/Render) へのデプロイはこの環境からは実行できない。利用時はローカルで実施すること。
+
+## 今回の開発で直面した問題と解決策
+
+### 1. ページ遷移の問題
+
+**問題**: 写真アップロード後にレビュー画面に遷移しない
+**原因**: URL 変更がクライアントサイドで即座に反映されない
+**解決策**: registration-store の状態変更をトリガーにして URL 変更を行うコールバックを実装
+
+### 2. Dash コンポーネントの属性エラー
+
+**問題**: `dcc.Checklist`に`disabled=True`属性を設定すると TypeError が発生
+**原因**: Dash の Checklist コンポーネントに disabled 属性が存在しない
+**解決策**: CSS スタイル(`pointerEvents: "none"`, `opacity: "0.6"`)で編集不可を実現
+
+### 3. 状態管理の問題
+
+**問題**: display_page 関数で registration-store が常にリセットされる
+**原因**: `/register`ページアクセス時に常に空の状態を設定していた
+**解決策**: 既存の registration-store データがある場合はリセットせず維持
+
+### 4. 保存機能の変数未定義エラー
+
+**問題**: save_registration 関数で未定義の変数を使用
+**原因**: UI 変更時に古い変数参照が残っていた
+**解決策**: 新しい UI のフィールド（other_tags, memo）を使用するように修正
+
+### 5. コールバック実行順序の問題
+
+**問題**: 複数のコールバックが同時に実行されて競合
+**原因**: registration-store の更新が複数のコールバックをトリガー
+**解決策**: `allow_duplicate=True`を適切に使用し、コールバックの実行順序を考慮
+
+### 6. Supabase RLS (Row Level Security) エラー
+
+**問題**: データベース保存時に「new row violates row-level security policy」エラー
+**原因**: Supabase のテーブルで RLS が有効になっており、適切なポリシーが設定されていない
+**解決策**: SQL Editor で RLS を無効化する
+
+```sql
+ALTER TABLE photo DISABLE ROW LEVEL SECURITY;
+ALTER TABLE registration_product_information DISABLE ROW LEVEL SECURITY;
+```
+
+### 改善点
+
+- URL 変更よりも状態変更ベースのページ遷移の方が安定
+- デバッグログの追加で問題特定が容易に
+- CSS ベースの UI 制御でコンポーネント属性の制約を回避
+- コールバックの State 管理を徹底的に確認
+- Supabase RLS 設定の重要性を理解

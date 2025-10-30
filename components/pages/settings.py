@@ -1,15 +1,11 @@
-from dash import html, dcc
+from dash import html
 import dash_bootstrap_components as dbc
-import dash_daq as daq
 
 
 def render_settings(total_photos: int, current_theme: str = "minty") -> html.Div:
     return html.Div(
         [
-            html.Div(
-                [html.H1([html.I(className="bi bi-gear me-2"), "設定"])],
-                className="header",
-            ),
+            html.Div([html.H1([html.I(className="bi bi-gear me-2"), "設定"])], className="header"),
             html.Div(
                 [
                     html.H4(
@@ -85,143 +81,6 @@ def render_settings(total_photos: int, current_theme: str = "minty") -> html.Div
             html.Div(
                 [
                     html.H4(
-                        "タグ管理",
-                        className="card-title",
-                    ),
-                    html.P(
-                        "カラータグ、カテゴリータグ、収納場所タグの設定ができます。",
-                        className="card-text mb-3",
-                    ),
-                    # Color Tags Section - Temporarily disabled
-                    dbc.Button(
-                        [html.I(className="bi bi-palette me-2"), "カラータグ（準備中）"],
-                        color="secondary",
-                        outline=True,
-                        disabled=True,
-                        className="w-100 text-start mb-3",
-                    ),
-                    html.Div(
-                        id="color-tags-container",
-                        className="row g-3 mb-4",
-                    ),
-                    # Color Tag Editor Modal
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader("カラータグ編集"),
-                            dbc.ModalBody(
-                                [
-                                    html.Div(id="color-tag-editor-content"),
-                                ]
-                            ),
-                            dbc.ModalFooter(
-                                [
-                                    dbc.Button(
-                                        "キャンセル",
-                                        id="color-tag-cancel",
-                                        className="me-2",
-                                    ),
-                                    dbc.Button(
-                                        "保存", id="color-tag-save", color="primary"
-                                    ),
-                                ]
-                            ),
-                        ],
-                        id="color-tag-modal",
-                        size="lg",
-                    ),
-                    # Category Tags Section
-                    dbc.Button(
-                        [html.I(className="bi bi-tags me-2"), "カテゴリータグ"],
-                        color="secondary",
-                        outline=True,
-                        className="w-100 text-start mb-3",
-                        style={"cursor": "pointer", "transition": "all 0.2s ease"},
-                        id="category-tags-button",
-                        n_clicks=0,
-                    ),
-                    html.Div(
-                        id="category-tags-container",
-                        className="row g-3 mb-4",
-                    ),
-                    # Category Tag Editor Modal
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader("カテゴリータグ編集"),
-                            dbc.ModalBody(
-                                [
-                                    html.Div(id="category-tag-editor-content"),
-                                ]
-                            ),
-                            dbc.ModalFooter(
-                                [
-                                    dbc.Button(
-                                        "キャンセル",
-                                        id="category-tag-cancel",
-                                        className="me-2",
-                                    ),
-                                    dbc.Button(
-                                        "保存", id="category-tag-save", color="primary"
-                                    ),
-                                ]
-                            ),
-                        ],
-                        id="category-tag-modal",
-                        size="lg",
-                    ),
-                    # Receipt Location Tags Section
-                    dbc.Button(
-                        [html.I(className="bi bi-box-seam me-2"), "収納場所タグ"],
-                        color="secondary",
-                        outline=True,
-                        className="w-100 text-start mb-3",
-                        style={"cursor": "pointer", "transition": "all 0.2s ease"},
-                        id="receipt-location-tags-button",
-                        n_clicks=0,
-                    ),
-                    html.Div(
-                        id="receipt-location-tags-container",
-                        className="row g-3 mb-4",
-                    ),
-                    # Receipt Location Tag Editor Modal
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader("収納場所タグ編集"),
-                            dbc.ModalBody(
-                                [
-                                    html.Div(id="receipt-location-tag-editor-content"),
-                                ]
-                            ),
-                            dbc.ModalFooter(
-                                [
-                                    dbc.Button(
-                                        "キャンセル",
-                                        id="receipt-location-tag-cancel",
-                                        className="me-2",
-                                    ),
-                                    dbc.Button(
-                                        "保存",
-                                        id="receipt-location-tag-save",
-                                        color="primary",
-                                    ),
-                                ]
-                            ),
-                        ],
-                        id="receipt-location-tag-modal",
-                        size="lg",
-                    ),
-                    html.Button(
-                        "タグ設定を保存",
-                        id="save-tags-button",
-                        n_clicks=0,
-                        className="btn btn-success",
-                    ),
-                    html.Div(id="tags-save-result", className="mt-3"),
-                ],
-                className="card text-white bg-success mb-3",
-            ),
-            html.Div(
-                [
-                    html.H4(
                         "データ管理",
                         className="card-title",
                     ),
@@ -229,8 +88,7 @@ def render_settings(total_photos: int, current_theme: str = "minty") -> html.Div
                         "全てのデータを削除",
                         id="delete-all-button",
                         n_clicks=0,
-                        className="btn btn-danger w-100",
-                        style={"cursor": "pointer", "transition": "all 0.2s ease"},
+                        className="btn btn-danger",
                     ),
                     html.Div(id="delete-result", className="mt-3"),
                 ],

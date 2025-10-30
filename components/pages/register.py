@@ -10,7 +10,7 @@ from components.sections import (
 def render_register_page() -> html.Div:
     return html.Div(
         [
-            html.Div([html.H1("📦 製品を登録する")], className="header"),
+            html.Div([html.H1([html.I(className="bi bi-box-seam me-2"), "製品を登録する"])], className="header"),
             html.Section(
                 [
                     html.H2("STEP 1. バーコードの取得", className="step-title"),

@@ -308,53 +308,54 @@ curl https://api.intelligence.io.solutions/api/v1/chat/completions \
 | 属性           | カテゴリータグアイコン   | category_tag_icon     | 文字列   |             |
 | 属性           | カテゴリータグ使用フラグ | category_tag_use_flag | 整数     |             |
 
-| 役割           | 名称日本語         | メソッド名                       | データ型 | キー設定    |
-| -------------- | ------------------ | -------------------------------- | -------- | ----------- |
-| エンティティ名 | 登録製品情報       | registration_product_information | 文字列   |             |
-| 属性           | 登録製品 ID        | registration_product_id          | 整数     | Primary Key |
-| 属性           | 写真 ID            | photo_id                         | 整数     | Foreign Key |
-| 属性           | 作品シリーズ ID    | works_series_id                  | 整数     | Foreign Key |
-| 属性           | 作品 ID            | works_id                         | 整数     | Foreign Key |
-| 属性           | キャラクター ID    | character_id                     | 整数     | Foreign Key |
-| 属性           | 版権会社 ID        | copyright_company_id             | 整数     | Foreign Key |
-| 属性           | 製品グループ ID    | product_group_id                 | 整数     | Foreign Key |
-| 属性           | 製品サイズ ID      | product_size_id                  | 整数     | Foreign Key |
-| 属性           | 収納場所 ID        | receipt_location_id              | 整数     | Foreign Key |
-| 属性           | 収納場所タグ ID    | receipt_location_tag_id          | 整数     | Foreign Key |
-| 属性           | カラータグ ID      | color_tag_id                     | 整数     | Foreign Key |
-| 属性           | カテゴリータグ ID  | category_tag_id                  | 整数     | Foreign Key |
-| 属性           | キャンペーン ID    | campaign_id                      | 整数     | Foreign Key |
-| 属性           | 貨幣単位 ID        | currency_unit_id                 | 整数     | Foreign Key |
-| 属性           | 作品シリーズ名     | works_series_name                | 文字列   |             |
-| 属性           | 作品名             | title                            | 文字列   |             |
-| 属性           | キャラクター名     | character_name                   | 文字列   |             |
-| 属性           | 版権会社名         | copyright_company_name           | 文字列   |             |
-| 属性           | 製品の形           | product_type                     | 文字列   |             |
-| 属性           | 製品サイズ横       | product_size_horizontal          | 整数     |             |
-| 属性           | 製品サイズ奥行     | product_size_depth               | 整数     |             |
-| 属性           | 製品サイズ縦       | product_size_vertical            | 整数     |             |
-| 属性           | バーコード番号     | barcode_number                   |          |             |
-| 属性           | バーコードタイプ   | barcode_type                     |          |             |
-| 属性           | 製品名             | product_name                     | 文字列   |             |
-| 属性           | 定価               | list_price                       | 整数     |             |
-| 属性           | 購入価格           | purchase_price                   | 整数     |             |
-| 属性           | 登録数量           | registration_quantity            | 整数     |             |
-| 属性           | 販売希望数量       | sales_desired_quantity           | 整数     |             |
-| 属性           | 製品シリーズ数量   | product_series_quantity          | 整数     |             |
-| 属性           | 購入場所           | purchase_location                | 文字列   |             |
-| 属性           | おまけ名           | freebie_name                     | 文字列   |             |
-| 属性           | 購入日             | purchase_date                    | 日付     |             |
-| 属性           | 作成日             | creation_date                    | 日付     |             |
-| 属性           | 更新日             | updated_date                     | 日付     |             |
-| 属性           | その他タグ         | other_tag                        | 文字列   |             |
-| 属性           | メモ               | memo                             | 文字列   |             |
-| 属性           | 製品シリーズフラグ | product_series_flag              | 整数     |             |
-| 属性           | 商用製品フラグ     | commercial_product_flag          | 整数     |             |
-| 属性           | 同人製品フラグ     | personal_product_flag            | 整数     |             |
-| 属性           | デジタル製品フラグ | digital_product_flag             | 整数     |             |
-| 属性           | 販売希望フラグ     | sales_desired_flag               | 整数     |             |
-| 属性           | 欲しい物フラグ     | want_object_flag                 | 整数     |             |
-| 属性           | おまけ付きフラグ   | flag_with_freebie                | 整数     |             |
+| 役割           | 名称日本語                     | メソッド名                       | データ型 | キー設定    |
+| -------------- | ------------------------------ | -------------------------------- | -------- | ----------- |
+| エンティティ名 | 登録製品情報                   | registration_product_information | 文字列   |             |
+| 属性           | 登録製品 ID                    | registration_product_id          | 整数     | Primary Key |
+| 属性           | 写真 ID                        | photo_id                         | 整数     | Foreign Key |
+| 属性           | 作品シリーズ ID                | works_series_id                  | 整数     | Foreign Key |
+| 属性           | 作品 ID                        | works_id                         | 整数     | Foreign Key |
+| 属性           | キャラクター ID                | character_id                     | 整数     | Foreign Key |
+| 属性           | 版権会社 ID                    | copyright_company_id             | 整数     | Foreign Key |
+| 属性           | 製品グループ ID                | product_group_id                 | 整数     | Foreign Key |
+| 属性           | 製品サイズ ID                  | product_size_id                  | 整数     | Foreign Key |
+| 属性           | 収納場所 ID                    | receipt_location_id              | 整数     | Foreign Key |
+| 属性           | 収納場所タグ ID                | receipt_location_tag_id          | 整数     | Foreign Key |
+| 属性           | カラータグ ID                  | color_tag_id                     | 整数     | Foreign Key |
+| 属性           | カテゴリータグ ID              | category_tag_id                  | 整数     | Foreign Key |
+| 属性           | キャンペーン ID                | campaign_id                      | 整数     | Foreign Key |
+| 属性           | 貨幣単位 ID                    | currency_unit_id                 | 整数     | Foreign Key |
+| 属性           | 作品シリーズ名                 | works_series_name                | 文字列   |             |
+| 属性           | 作品名                         | title                            | 文字列   |             |
+| 属性           | キャラクター名                 | character_name                   | 文字列   |             |
+| 属性           | 版権会社名                     | copyright_company_name           | 文字列   |             |
+| 属性           | 製品の形                       | product_type                     | 文字列   |             |
+| 属性           | 製品サイズ横                   | product_size_horizontal          | 整数     |             |
+| 属性           | 製品サイズ奥行                 | product_size_depth               | 整数     |             |
+| 属性           | 製品サイズ縦                   | product_size_vertical            | 整数     |             |
+| 属性           | バーコード番号                 | barcode_number                   |          |             |
+| 属性           | バーコードタイプ               | barcode_type                     |          |             |
+| 属性           | 製品名                         | product_name                     | 文字列   |             |
+| 属性           | 定価                           | list_price                       | 整数     |             |
+| 属性           | 購入価格                       | purchase_price                   | 整数     |             |
+| 属性           | 登録数量                       | registration_quantity            | 整数     |             |
+| 属性           | 販売希望数量                   | sales_desired_quantity           | 整数     |             |
+| 属性           | 製品シリーズ数量               | product_series_quantity          | 整数     |             |
+| 属性           | 購入場所                       | purchase_location                | 文字列   |             |
+| 属性           | おまけ名                       | freebie_name                     | 文字列   |             |
+| 属性           | 購入日                         | purchase_date                    | 日付     |             |
+| 属性           | 作成日                         | creation_date                    | 日付     |             |
+| 属性           | 更新日                         | updated_date                     | 日付     |             |
+| 属性           | その他タグ                     | other_tag                        | 文字列   |             |
+| 属性           | メモ                           | memo                             | 文字列   |             |
+| 属性           | 製品シリーズフラグ             | product_series_flag              | 整数     |             |
+| 属性           | 製品シリーズコンプリートフラグ | product_series_complete_flag     | 整数     |             |
+| 属性           | 商用製品フラグ                 | commercial_product_flag          | 整数     |             |
+| 属性           | 同人製品フラグ                 | personal_product_flag            | 整数     |             |
+| 属性           | デジタル製品フラグ             | digital_product_flag             | 整数     |             |
+| 属性           | 販売希望フラグ                 | sales_desired_flag               | 整数     |             |
+| 属性           | 欲しい物フラグ                 | want_object_flag                 | 整数     |             |
+| 属性           | おまけ付きフラグ               | flag_with_freebie                | 整数     |             |
 
 | 役割           | 名称日本語  | メソッド名       | データ型 | キー設定    |
 | -------------- | ----------- | ---------------- | -------- | ----------- |

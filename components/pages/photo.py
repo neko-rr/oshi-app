@@ -6,7 +6,7 @@ from components.sections import render_front_photo_section
 def render_photo_page() -> html.Div:
     return html.Div(
         [
-            html.Div([html.H1("📦 製品を登録する")], className="header"),
+            html.Div([html.H1([html.I(className="bi bi-box-seam me-2"), "製品を登録する"])], className="header"),
             html.Section(
                 [
                     html.H2("STEP 2. 正面写真の登録", className="step-title"),

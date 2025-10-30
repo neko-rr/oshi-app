@@ -1,6 +1,7 @@
 """Rakuten API lookup utilities."""
 
 import os
+import re
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -22,13 +23,91 @@ def _missing_credentials_response() -> Dict[str, Any]:
     }
 
 
+def _clean_product_name(name: str) -> str:
+    """Clean product name by removing unwanted text patterns."""
+    if not name:
+        return ""
+
+    # Remove common unwanted patterns
+    patterns_to_remove = [
+        r'\s*送料無料\s*',
+        r'\s*代引不可\s*',
+        r'\s*メール便対応\s*',
+        r'\s*\[.*?\]\s*',  # Remove bracketed content
+        r'\s*【.*?】\s*',  # Remove double-bracketed content
+        r'\s*楽天市場\s*',
+        r'\s*Yahoo!ショッピング\s*',
+        r'\s*Amazon\s*',
+        r'\s*価格比較\s*',
+        r'\s*最安値\s*',
+        r'\s*新品\s*',
+        r'\s*中古\s*',
+        r'\s*即納\s*',
+        r'\s*在庫あり\s*',
+        r'\s*限定\s*',
+        r'\s*予約受付中\s*',
+        r'\s*完売\s*',
+    ]
+
+    cleaned_name = name
+    for pattern in patterns_to_remove:
+        cleaned_name = re.sub(pattern, '', cleaned_name, flags=re.IGNORECASE)
+
+    # Clean up extra whitespace
+    cleaned_name = re.sub(r'\s+', ' ', cleaned_name).strip()
+
+    return cleaned_name
+
+
+def _extract_brand_and_series(name: str) -> Dict[str, str]:
+    """Extract brand and series information from product name."""
+    # Common patterns for anime/merchandise
+    patterns = {
+        'brand': [
+            r'(.+?)\s*[【\[][^\]】]*[】\]]\s*(.+)',  # Brand [content] product
+            r'^([^【\[]+?)\s*[【\[](.*?)[】\]]\s*(.+)',  # Brand [series] product
+        ],
+        'series': [
+            r'.*[【\[](.*?)[】\]].*',  # Extract content in brackets
+            r'.*[（(](.*?)[）)].*',    # Extract content in parentheses
+        ]
+    }
+
+    result = {'brand': '', 'series': ''}
+
+    # Try to extract brand
+    for pattern in patterns['brand']:
+        match = re.search(pattern, name, re.IGNORECASE)
+        if match:
+            result['brand'] = match.group(1).strip()
+            break
+
+    # Try to extract series
+    for pattern in patterns['series']:
+        match = re.search(pattern, name, re.IGNORECASE)
+        if match:
+            result['series'] = match.group(1).strip()
+            break
+
+    return result
+
+
 def _normalise_items(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     normalised: List[Dict[str, Any]] = []
     for entry in items:
         item = entry.get("Item", {}) if isinstance(entry, dict) else {}
+
+        # Clean product name
+        raw_name = item.get("itemName", "")
+        cleaned_name = _clean_product_name(raw_name)
+
+        # Extract brand and series
+        brand_series = _extract_brand_and_series(raw_name)
+
         normalised.append(
             {
-                "name": item.get("itemName"),
+                "name": cleaned_name,  # Cleaned product name
+                "raw_name": raw_name,  # Original name for reference
                 "price": item.get("itemPrice"),
                 "url": item.get("itemUrl"),
                 "affiliateUrl": item.get("affiliateUrl"),
@@ -41,6 +120,14 @@ def _normalise_items(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "genreId": item.get("genreId"),
                 "itemCode": item.get("itemCode"),
                 "jan": item.get("janCode") or item.get("isbnjan"),
+                "brand": brand_series.get("brand", ""),
+                "series": brand_series.get("series", ""),
+                "structured_data": {
+                    "product_name": cleaned_name,
+                    "works_series_name": brand_series.get("series", ""),
+                    "copyright_company_name": brand_series.get("brand", ""),
+                    "purchase_price": item.get("itemPrice"),
+                }
             }
         )
     return normalised

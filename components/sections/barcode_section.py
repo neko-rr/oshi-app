@@ -15,7 +15,7 @@ def render_barcode_section() -> html.Div:
                     ),
                     html.Button(
                         [
-                            html.Div("📷", className="camera-icon"),
+                            html.Div([html.I(className="bi bi-camera")], className="camera-icon"),
                             html.Div("カメラを起動", className="camera-label"),
                         ],
                         id="barcode-camera-start",
@@ -49,7 +49,7 @@ def render_barcode_section() -> html.Div:
                     html.Div(
                         [
                             html.Button(
-                                "📸 撮影",
+                                [html.I(className="bi bi-camera me-1"), "撮影"],
                                 id="barcode-camera-capture",
                                 className="btn btn-primary",
                                 **{
@@ -60,7 +60,7 @@ def render_barcode_section() -> html.Div:
                                 style={"display": "none"},
                             ),
                             html.Button(
-                                "❌ キャンセル",
+                                [html.I(className="bi bi-x-circle me-1"), "キャンセル"],
                                 id="barcode-camera-cancel",
                                 className="btn btn-outline-secondary",
                                 **{
@@ -95,7 +95,7 @@ def render_barcode_section() -> html.Div:
                         id="barcode-upload",
                         children=html.Div(
                             [
-                                html.Div("📁", className="upload-icon"),
+                                html.Div([html.I(className="bi bi-folder")], className="upload-icon"),
                                 html.Div("ファイルから選択", className="upload-label"),
                             ]
                         ),

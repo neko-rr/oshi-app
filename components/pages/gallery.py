@@ -6,7 +6,7 @@ Photo = Mapping[str, str]
 
 def render_gallery(photos: Iterable[Photo]) -> html.Div:
     photos = list(photos)
-    header = html.Div([html.H1("🖼️ 写真一覧")], className="header")
+    header = html.Div([html.H1([html.I(className="bi bi-images me-2"), "写真一覧"])], className="header")
 
     if not photos:
         summary = html.Div(

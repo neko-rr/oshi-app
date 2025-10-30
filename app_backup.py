@@ -93,7 +93,6 @@ from services.photo_service import (
     get_product_stats,
     insert_product_record,
     insert_photo_record,
-    list_storage_buckets,
     upload_to_storage,
 )
 from services.supabase_client import get_supabase_client
@@ -103,9 +102,12 @@ supabase = get_supabase_client()
 
 def _fetch_home_metrics() -> Dict[str, int]:
     if supabase is None:
-        # Use local database for demo
-        stats = get_product_stats_local()
-        return {"total": stats["total_products"], "unique": stats["total_products"]}
+        photos = _fetch_photos()
+        total = len(photos)
+        unique = len(
+            set(photo.get("barcode") for photo in photos if photo.get("barcode"))
+        )
+        return {"total": total, "unique": unique}
     try:
         return get_product_stats(supabase)
     except Exception:
@@ -114,8 +116,7 @@ def _fetch_home_metrics() -> Dict[str, int]:
 
 def _fetch_photos() -> List[Dict[str, Any]]:
     if supabase is None:
-        # Use local database for demo
-        return get_all_products_local()
+        return PHOTOS_STORAGE.copy()  # Return in-memory storage for demo
     try:
         return get_all_products(supabase)
     except Exception:
@@ -1000,73 +1001,35 @@ def save_registration(n_clicks, store_data, product_name, product_group_name, wo
 
         # 写真の保存
         photo_id = None
-        if state["front_photo"].get("content"):
-            if supabase is None:
-                # Use local database for demo - create photo record with dummy URL
-                content_string = state["front_photo"]["content"].split(",", 1)[1]
-                file_bytes = base64.b64decode(content_string)
-
-                # Create dummy URL for demo (in real app, would save to local file system)
-                dummy_url = f"data:image/jpeg;base64,{content_string[:50]}...[truncated]"
-                photo_id = insert_photo_record_local(
-                    image_url=dummy_url,
-                    thumbnail_url=dummy_url,
-                    front_flag=1,
-                )
-                print(f"DEBUG: Photo saved locally with ID: {photo_id}")
-            else:
-                # Original Supabase code
-                # デバッグ: 利用可能なバケットを確認
-                list_storage_buckets(supabase)
-                content_string = state["front_photo"]["content"].split(",", 1)[1]
-                file_bytes = base64.b64decode(content_string)
-                photo_id = insert_photo_record(
-                    supabase,
-                    image_url="",  # Will be updated after upload
-                    thumbnail_url="",  # Will be updated after upload
-                    front_flag=1,
-                )
-
-                # 画像をSupabase Storageにアップロード
-                image_url = None
-                if photo_id:
-                    image_url = upload_to_storage(
-                        supabase,
-                        file_bytes,
-                        f"photo_{photo_id}.jpg",
-                        state["front_photo"].get("content_type", "image/jpeg"),
-                    )
-                    if image_url:
-                        # 画像URLを更新 - RLSが原因で失敗する可能性があるのでtry-exceptで囲む
-                        try:
-                            supabase.table("photo").update({"image_url": image_url, "thumbnail_url": image_url}).eq("photo_id", photo_id).execute()
-                            print(f"DEBUG: Photo record updated with image_url: {image_url}")
-                        except Exception as update_error:
-                            print(f"DEBUG: Failed to update photo record: {update_error}")
-                            # URL更新に失敗しても処理を続行
-                            pass
-
-        # 製品情報の保存 - ローカルデータベースを使用
-        if supabase is None:
-            # Use local database for demo
-            insert_product_record_local(
-                photo_id=photo_id,  # photo_idはNULLでも可
+        if supabase is not None and state["front_photo"].get("content"):
+            content_string = state["front_photo"]["content"].split(",", 1)[1]
+            file_bytes = base64.b64decode(content_string)
+            photo_id = insert_photo_record(
+                supabase,
+                photo_id=None,  # Will be auto-generated
                 barcode=state["barcode"].get("value") or "",
                 barcode_type=state["barcode"].get("type") or "UNKNOWN",
-                product_name=product_name,
-                product_group_name=product_group_name or "",
-                works_series_name=works_series_name or "",
-                title=works_name or "",
-                character_name=character_name or "",
-                purchase_price=int(purchase_price) if purchase_price else None,
-                purchase_location=purchase_location or "",
-                memo=memo or "",
+                image_url="",  # Will be updated after upload
+                thumbnail_url="",  # Will be updated after upload
+                front_flag=1,
             )
-        else:
-            # Original Supabase code
+
+            # 画像をSupabase Storageにアップロード
+            if photo_id:
+                image_url = upload_to_storage(
+                    supabase,
+                    file_bytes,
+                    f"photo_{photo_id}.jpg",
+                    state["front_photo"].get("content_type", "image/jpeg"),
+                )
+                # 画像URLを更新
+                supabase.table("photo").update({"image_url": image_url, "thumbnail_url": image_url}).eq("photo_id", photo_id).execute()
+
+        # 製品情報の保存
+        if supabase is not None:
             insert_product_record(
                 supabase,
-                photo_id=photo_id,  # photo_idはNULLでも可
+                photo_id=photo_id,
                 barcode=state["barcode"].get("value") or "",
                 barcode_type=state["barcode"].get("type") or "UNKNOWN",
                 product_name=product_name,
@@ -1085,6 +1048,387 @@ def save_registration(n_clicks, store_data, product_name, product_group_name, wo
     except Exception as e:
         print(f"ERROR: Failed to save product: {e}")
         return html.Div(f"保存中にエラーが発生しました: {str(e)}", className="alert alert-danger")
+    front_status = state["front_photo"]["status"]
+    print(f"DEBUG: barcode_status={barcode_status}, front_status={front_status}")
+    print(f"DEBUG: state keys: {list(state.keys())}")
+
+    if barcode_status not in {"captured", "manual", "skipped"}:
+        return html.Div(
+            "バーコード情報を取得するか、スキップを選択してください。",
+            className="alert alert-warning",
+        )
+
+    if front_status not in {"captured", "skipped"}:
+        return html.Div(
+            "正面写真を撮影するか、スキップを選択してください。",
+            className="alert alert-warning",
+        )
+
+    # 必須項目チェック
+    if not product_name or product_name.strip() == "":
+        return html.Div(
+            "製品名は必須項目です。入力してください。",
+            className="alert alert-danger",
+        )
+
+    print(f"DEBUG: Starting registration process with product_name='{product_name}'")
+
+    # その他タグとメモを使用
+    selected_tags = other_tags or []
+    final_note = memo or ""
+    try:
+        image_url = ""
+        if front_status == "captured" and state["front_photo"].get("content"):
+            if supabase is not None:
+                content_string = state["front_photo"]["content"].split(",", 1)[1]
+                file_bytes = base64.b64decode(content_string)
+                image_url = upload_to_storage(
+                    supabase,
+                    file_bytes,
+                    state["front_photo"].get("filename", "front_photo.jpg"),
+                    state["front_photo"].get("content_type", "image/jpeg"),
+                )
+            else:
+                # For demo, store data URI
+                image_url = state["front_photo"]["content"]
+        elif supabase is not None:
+            # Use placeholder image when photo is skipped
+            image_url = PLACEHOLDER_IMAGE_URL
+
+        description_text = final_note
+        if selected_tags:
+            tags_text = ", ".join(selected_tags)
+            description_text = (
+                f"{final_note}\nTags: {tags_text}"
+                if final_note
+                else f"Tags: {tags_text}"
+            )
+
+        if supabase is not None:
+            print(
+                f"DEBUG: Inserting to Supabase - barcode: {state['barcode'].get('value')}, product_name: {product_name}, image_url: {image_url}"
+            )
+
+            try:
+                # First, insert photo record
+                photo_id = None
+                if image_url:
+                    from services.photo_service import insert_photo_record
+
+                    photo_id = insert_photo_record(
+                        supabase,
+                        image_url=image_url,
+                        thumbnail_url=image_url,  # Use same URL for thumbnail for now
+                        front_flag=1,  # Assume front photo
+                    )
+                    print(f"DEBUG: Photo record inserted with ID: {photo_id}")
+
+                # フラグの処理
+                product_series_flag_int = (
+                    1 if product_series_flag and "series" in product_series_flag else 0
+                )
+                commercial_product_flag = (
+                    1
+                    if product_type_flags and "commercial" in product_type_flags
+                    else 0
+                )
+                personal_product_flag = (
+                    1 if product_type_flags and "doujin" in product_type_flags else 0
+                )
+                digital_product_flag = (
+                    1 if product_type_flags and "digital" in product_type_flags else 0
+                )
+
+                # Then insert product record with new form data
+                insert_product_record(
+                    supabase,
+                    photo_id=photo_id,
+                    barcode=state["barcode"].get("value") or "",
+                    barcode_type=state["barcode"].get("type") or "UNKNOWN",
+                    product_name=product_name or "",
+                    product_group_name=product_group_name or "",
+                    product_size_horizontal=int(product_size_width)
+                    if product_size_width
+                    else None,
+                    product_size_depth=int(product_size_depth)
+                    if product_size_depth
+                    else None,
+                    product_size_vertical=int(product_size_height)
+                    if product_size_height
+                    else None,
+                    works_series_name=works_series_name or "",
+                    title=works_name or "",
+                    character_name=character_name or "",
+                    copyright_company_name=copyright_company_name or "",
+                    list_price=int(list_price) if list_price else None,
+                    purchase_price=int(purchase_price) if purchase_price else None,
+                    purchase_location=purchase_location or "",
+                    purchase_date=purchase_date,
+                    memo=memo or "",
+                    product_series_flag=product_series_flag_int,
+                    product_series_quantity=int(product_series_quantity)
+                    if product_series_quantity
+                    else None,
+                    commercial_product_flag=commercial_product_flag,
+                    personal_product_flag=personal_product_flag,
+                    digital_product_flag=digital_product_flag,
+                )
+                print("DEBUG: Successfully inserted product to Supabase")
+            except Exception as insert_exc:
+                print(f"DEBUG: Failed to insert to Supabase: {insert_exc}")
+                raise
+        else:
+            # For demo, save to in-memory storage
+            import time
+
+            photo_record = {
+                "barcode": state["barcode"].get("value") or "",
+                "barcode_type": state["barcode"].get("type") or "UNKNOWN",
+                "image_url": image_url or "",
+                "description": description_text,
+                "created_at": time.time(),  # Add timestamp for ordering
+            }
+            PHOTOS_STORAGE.append(photo_record)
+    except Exception as exc:  # pragma: no cover - Supabase例外ハンドリング
+        return (
+            html.Div(
+                [
+                    html.Div(
+                        "保存中にエラーが発生しました",
+                        className="alert-heading",
+                    ),
+                    html.P(str(exc)),
+                ],
+                className="alert alert-danger",
+            ),
+            no_update,
+        )
+
+    print(
+        f"保存成功: barcode={state['barcode'].get('value')}, tags={selected_tags}"
+    )  # Debug log
+    success_message = html.Div(
+        [
+            html.Div(
+                "登録が完了しました！",
+                className="alert-heading",
+            ),
+            html.P(
+                f"登録タグ: {', '.join(selected_tags)}"
+                if selected_tags
+                else "タグ: (なし)",
+            ),
+            html.A(
+                "写真一覧を見る",
+                href="/gallery",
+                className="alert-link",
+            ),
+        ],
+        className="alert alert-success",
+    )
+
+    return success_message
+
+
+@app.callback(
+    [
+        Output("theme-save-result", "children"),
+        Output("bootswatch-theme", "href"),
+        Output("theme-selector", "value"),
+    ],
+    Input("save-theme-button", "n_clicks"),
+    State("theme-selector", "value"),
+    prevent_initial_call=True,
+)
+def save_theme(n_clicks, selected_theme):
+    global CURRENT_THEME
+    if not n_clicks:
+        raise PreventUpdate
+
+    if selected_theme in BOOTSWATCH_THEMES:
+        CURRENT_THEME = selected_theme
+        save_theme_to_file(selected_theme)
+        new_css_url = get_bootswatch_css(selected_theme)
+        print(f"Theme changed to: {selected_theme}, new CSS: {new_css_url}")
+        message = html.Div(
+            f"テーマを '{selected_theme.title()}' に変更しました。",
+            className="alert alert-success",
+        )
+        return message, new_css_url, selected_theme
+    else:
+        return (
+            html.Div("無効なテーマが選択されました。", className="alert alert-danger"),
+            no_update,
+            no_update,
+        )
+
+
+@app.callback(
+    Output("delete-result", "children"), Input("delete-all-button", "n_clicks")
+)
+def handle_delete(n_clicks):
+    if not n_clicks:
+        raise PreventUpdate
+
+    if supabase is None:
+        return html.Div(
+            "データベース接続エラー",
+            style={
+                "color": "#ff6b6b",
+                "fontWeight": "600",
+                "textAlign": "center",
+                "marginTop": "10px",
+            },
+        )
+
+    try:
+        delete_all_products(supabase)
+    except Exception as exc:  # pragma: no cover - Supabase例外ハンドリング
+        return html.Div(
+            f"エラー: {exc}",
+            style={
+                "color": "#ff6b6b",
+                "fontWeight": "600",
+                "textAlign": "center",
+                "marginTop": "10px",
+            },
+        )
+
+        return html.Div(
+            "全てのデータを削除しました",
+            style={
+                "color": "#4caf50",
+                "fontWeight": "600",
+                "textAlign": "center",
+                "marginTop": "10px",
+            },
+        )
+
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8050)
+    print("")
+    print("=" * 60)
+    print("写真管理アプリを起動しています...")
+    print("=" * 60)
+    print("")
+    if supabase is None:
+        print("警告: Supabaseに接続されていません")
+        print("    データベース機能を使用するには、.envファイルを設定してください")
+        print("")
+    print("ブラウザで以下のURLにアクセスしてください:")
+    print("   http://localhost:8050")
+    print("")
+    print("スマホからアクセスする場合:")
+    print("   http://[あなたのPCのIPアドレス]:8050")
+    print("")
+    print("=" * 60)
+    print("")
+    app.run(debug=False, host="0.0.0.0", port=8050)
+
+
+# 新しいreview_section用のコールバック
+
+
+@app.callback(
+    Output("series-quantity-container", "style"),
+    Input("product-series-flag", "value"),
+    prevent_initial_call=True,
+)
+def toggle_series_quantity_input(series_flag):
+    """製品シリーズフラグがチェックされたらシリーズ数量入力フィールドを表示"""
+    if series_flag and "series" in series_flag:
+        return {"display": "block"}
+    return {"display": "none"}
+
+
+# populate_review_formコールバックを復元 - STEP4の自動入力を有効化
+
+@app.callback(
+    [
+        Output("photo-thumbnail", "src"),
+        Output("product-name-input", "value"),
+        Output("works-series-name-input", "value"),
+        Output("works-name-input", "value"),
+        Output("character-name-input", "value"),
+        Output("copyright-company-input", "value"),
+        Output("note-editor", "value"),
+    ],
+    Input("registration-store", "data"),
+    prevent_initial_call=True,
+)
+def populate_review_form(store_data):
+    """registration-storeのデータからレビュー画面のフォームに値を設定"""
+    if not store_data:
+        return ["", "", "", "", "", "", ""]
+
+    state = _ensure_state(store_data)
+
+    # 写真の取得
+    photo_src = state.get("front_photo", {}).get("content", "")
+
+    # 製品名の自動入力（楽天API優先）
+    product_name = ""
+    lookup_data = state.get("lookup", {}).get("items", [])
+    if lookup_data:
+        item = lookup_data[0]
+        product_name = item.get("name", "")
+
+    # 作品情報の自動入力
+    works_series_name = ""
+    works_name = ""
+    character_name = ""
+    copyright_company_name = ""
+
+    # 楽天APIのデータ
+    if lookup_data:
+        item = lookup_data[0]
+        structured_data = item.get("structured_data", {})
+        works_series_name = structured_data.get("works_series_name", "")
+        copyright_company_name = structured_data.get("copyright_company_name", "")
+
+        # ブランド/シリーズ情報
+        if item.get("brand"):
+            copyright_company_name = item.get("brand")
+        if item.get("series"):
+            works_series_name = item.get("series")
+
+    # IOインテリジェンスのデータ（補完）
+    description_result = state.get("description", {})
+    if isinstance(description_result, dict) and description_result.get("status") == "success":
+        structured_io_data = description_result.get("structured_data", {})
+
+        if structured_io_data:
+            if not character_name and structured_io_data.get("character_name"):
+                character_name = structured_io_data["character_name"]
+            if not works_name and structured_io_data.get("works_name"):
+                works_name = structured_io_data["works_name"]
+            if not works_series_name and structured_io_data.get("works_series_name"):
+                works_series_name = structured_io_data["works_series_name"]
+            if not copyright_company_name and structured_io_data.get("copyright_company_name"):
+                copyright_company_name = structured_io_data["copyright_company_name"]
+
+    # メモの自動入力
+    memo = ""
+    if isinstance(description_result, dict) and description_result.get("status") == "success":
+        memo = description_result.get("text", "")
+
+    return [
+        photo_src,
+        product_name,
+        works_series_name,
+        works_name,
+        character_name,
+        copyright_company_name,
+        memo,
+    ]
+
+
+# IOインテリジェンスのバックグラウンド処理
+# @app.callback(
+#     Output("registration-store", "data", allow_duplicate=True),
+#     Input("io-intelligence-interval", "n_intervals"),
+#     State("registration-store", "data"),
+#     prevent_initial_call=True,
+# )
+#     """IOインテリジェンスの処理をバックグラウンドで実行"""
+#     # コメントアウトされています

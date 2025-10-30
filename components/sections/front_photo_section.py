@@ -13,7 +13,7 @@ def render_front_photo_section() -> html.Div:
                     ),
                     html.Button(
                         [
-                            html.Div("🎥", className="camera-icon"),
+                            html.Div([html.I(className="bi bi-camera-video")], className="camera-icon"),
                             html.Div("カメラを起動", className="camera-label"),
                         ],
                         id="front-camera-start",
@@ -47,7 +47,7 @@ def render_front_photo_section() -> html.Div:
                     html.Div(
                         [
                             html.Button(
-                                "📸 撮影",
+                                [html.I(className="bi bi-camera me-1"), "撮影"],
                                 id="front-camera-capture",
                                 className="btn btn-primary",
                                 **{
@@ -58,7 +58,7 @@ def render_front_photo_section() -> html.Div:
                                 style={"display": "none"},
                             ),
                             html.Button(
-                                "❌ キャンセル",
+                                [html.I(className="bi bi-x-circle me-1"), "キャンセル"],
                                 id="front-camera-cancel",
                                 className="btn btn-outline-secondary",
                                 **{
@@ -91,27 +91,12 @@ def render_front_photo_section() -> html.Div:
                         id="front-upload",
                         children=html.Div(
                             [
-                                html.Div("🖼️", className="upload-icon"),
+                                html.Div([html.I(className="bi bi-image")], className="upload-icon"),
                                 html.Div("ファイルから選択", className="upload-label"),
                             ]
                         ),
                         className="upload-area",
                         multiple=False,
-                    ),
-                ],
-                className="card-custom",
-            ),
-            html.Div(
-                [
-                    html.Label(
-                        "一言メモ (任意)",
-                        className="form-label fw-semibold text-secondary",
-                    ),
-                    dcc.Input(
-                        id="front-photo-note",
-                        type="text",
-                        placeholder="例: 2025/10/23 ゲームセンターで取得",
-                        className="input-custom",
                     ),
                 ],
                 className="card-custom",

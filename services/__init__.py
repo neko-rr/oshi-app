@@ -4,6 +4,7 @@ from .photo_service import (
     get_all_products,
     get_product_stats,
     insert_product_record,
+    insert_photo_record,
     upload_to_storage,
 )
 from .supabase_client import get_supabase_client
@@ -21,6 +22,7 @@ __all__ = [
     "get_all_products",
     "get_product_stats",
     "insert_product_record",
+    "insert_photo_record",
     "upload_to_storage",
     "get_supabase_client",
     "lookup_product",

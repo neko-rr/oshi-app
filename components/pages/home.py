@@ -6,7 +6,7 @@ def render_home(total_photos: int, unique_barcodes: int) -> html.Div:
         [
             html.Div(
                 [
-                    html.H1("📷 写真管理"),
+                    html.H1([html.I(className="bi bi-camera me-2"), "写真管理"]),
                     html.P(
                         "バーコードで写真を管理",
                         className="text-muted mb-0",
