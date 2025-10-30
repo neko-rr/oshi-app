@@ -416,7 +416,7 @@ def display_page(pathname: str):
         page = render_gallery(_fetch_photos())
     elif pathname == "/settings":
         classes[3] = "nav-link active text-white"
-        page = render_settings(_fetch_total_photos(), CURRENT_THEME)
+        page = render_settings(_fetch_total_photos(), load_theme())
     else:
         classes[0] = "nav-link active text-white"
         metrics = _fetch_home_metrics()
@@ -535,7 +535,9 @@ def handle_barcode_actions(
             )
         else:
             barcode_value = manual_value.strip()
+            print(f"DEBUG: Manual barcode input: {barcode_value}")
             lookup_result = lookup_product_by_barcode(barcode_value)
+            print(f"DEBUG: Rakuten API result for manual: {lookup_result}")
             state["barcode"].update(
                 {
                     "value": barcode_value,
@@ -546,6 +548,7 @@ def handle_barcode_actions(
                 }
             )
             state["lookup"] = lookup_result
+            print(f"DEBUG: Saved lookup to state: {state.get('lookup')}")
             message = success_message(barcode_value, "MANUAL", lookup_result)
     elif trigger_id in {"barcode-upload", "barcode-camera-upload"}:
         contents = (
@@ -602,7 +605,9 @@ def handle_barcode_actions(
             else:
                 barcode_value = decode_result["barcode"]
                 barcode_type = decode_result["barcode_type"]
+                print(f"DEBUG: Decoded barcode: {barcode_value}, type: {barcode_type}")
                 lookup_result = lookup_product_by_barcode(barcode_value)
+                print(f"DEBUG: Rakuten API result for decoded: {lookup_result}")
                 state["barcode"].update(
                     {
                         "value": barcode_value,
@@ -615,6 +620,7 @@ def handle_barcode_actions(
                     }
                 )
                 state["lookup"] = lookup_result
+                print(f"DEBUG: Saved lookup to state: {state.get('lookup')}")
                 message = success_message(barcode_value, barcode_type, lookup_result)
 
     _update_tags(state)
@@ -968,6 +974,57 @@ def render_review_summary(
 
 
 @app.callback(
+    [
+        Output("rakuten-lookup-display", "children"),
+        Output("io-intelligence-tags-display", "children"),
+    ],
+    Input("registration-store", "data"),
+)
+def display_api_results(store_data):
+    """レビュー画面で楽天APIとIO Intelligenceの結果を表示"""
+    print(f"DEBUG: display_api_results called")
+    print(f"DEBUG: store_data keys: {list(store_data.keys()) if store_data else 'None'}")
+
+    state = _ensure_state(store_data)
+
+    # 楽天API結果の表示
+    lookup_result = state.get("lookup")
+    rakuten_display = html.Div("バーコード情報がありません", className="alert alert-info")
+    if lookup_result:
+        try:
+            rakuten_display = _render_lookup_card(lookup_result, title="楽天API照合結果")
+            print("DEBUG: Rakuten lookup card rendered successfully")
+        except Exception as e:
+            print(f"DEBUG: Error rendering rakuten lookup card: {e}")
+            rakuten_display = html.Div(f"楽天API表示エラー: {str(e)}", className="alert alert-danger")
+
+    # IO Intelligenceタグの表示
+    tags_data = state.get("tags", {})
+    tags_display = html.Div("画像分析情報がありません", className="alert alert-info")
+    if tags_data.get("tags"):
+        try:
+            tags_list = tags_data["tags"]
+            if isinstance(tags_list, list) and tags_list:
+                tags_display = html.Div([
+                    html.H5("IO Intelligence タグ抽出結果", className="mb-3"),
+                    html.Div([
+                        html.Span(tag, className="badge bg-secondary me-1 mb-1")
+                        for tag in tags_list[:20]  # 最大20個表示
+                    ])
+                ])
+                print(f"DEBUG: IO Intelligence tags rendered: {len(tags_list)} tags")
+            else:
+                tags_display = html.Div("タグ情報が見つかりません", className="alert alert-warning")
+        except Exception as e:
+            print(f"DEBUG: Error rendering IO Intelligence tags: {e}")
+            tags_display = html.Div(f"タグ表示エラー: {str(e)}", className="alert alert-danger")
+    else:
+        print("DEBUG: No IO Intelligence tags found")
+
+    return rakuten_display, tags_display
+
+
+@app.callback(
     Output("register-alert", "children"),
     [
         Input("save-button", "n_clicks"),
@@ -1014,7 +1071,7 @@ def save_registration(n_clicks, store_data, product_name, product_group_name, wo
                     front_flag=1,
                 )
                 print(f"DEBUG: Photo saved locally with ID: {photo_id}")
-            else:
+        else:
                 # Original Supabase code
                 # デバッグ: 利用可能なバケットを確認
                 list_storage_buckets(supabase)
@@ -1045,6 +1102,8 @@ def save_registration(n_clicks, store_data, product_name, product_group_name, wo
                             print(f"DEBUG: Failed to update photo record: {update_error}")
                             # URL更新に失敗しても処理を続行
                             pass
+
+        # 写真がない場合は photo_id = None のまま
 
         # 製品情報の保存 - ローカルデータベースを使用
         if supabase is None:
@@ -1085,6 +1144,41 @@ def save_registration(n_clicks, store_data, product_name, product_group_name, wo
     except Exception as e:
         print(f"ERROR: Failed to save product: {e}")
         return html.Div(f"保存中にエラーが発生しました: {str(e)}", className="alert alert-danger")
+
+# Theme management callbacks
+@app.callback(
+    Output("theme-save-result", "children"),
+    Input("save-theme-button", "n_clicks"),
+    State("theme-selector", "value"),
+    prevent_initial_call=True,
+)
+def save_theme(n_clicks, selected_theme):
+    """Save selected theme to file."""
+    if not n_clicks:
+        raise PreventUpdate
+
+    try:
+        save_theme_to_file(selected_theme)
+        return html.Div(
+            f"テーマ '{selected_theme}' を保存しました。ページをリロードしてください。",
+            className="alert alert-success"
+        )
+    except Exception as e:
+        return html.Div(
+            f"テーマ保存エラー: {str(e)}",
+            className="alert alert-danger"
+        )
+
+
+@app.callback(
+    Output("bootswatch-theme", "href"),
+    Input("theme-selector", "value"),
+    prevent_initial_call=True,
+)
+def update_theme_css(selected_theme):
+    """Update the CSS href when theme selector changes."""
+    return get_bootswatch_css(selected_theme)
+
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050)

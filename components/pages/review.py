@@ -9,12 +9,13 @@ def render_review_page() -> html.Div:
             html.Div([html.H1([html.I(className="bi bi-box-seam me-2"), "製品を登録する"])], className="header"),
             html.Section(
                 [
-                    html.H2("STEP 3. タグ候補", className="step-title"),
+                    html.H2("STEP 3. API結果とタグ抽出", className="step-title"),
                     html.P(
-                        "楽天APIの照合結果と画像説明から推定されたタグを表示します。",
+                        "バーコードから取得した楽天APIの照合結果と、写真から抽出したタグを表示します。",
                         className="step-description",
                     ),
-                    html.Div(id="tag-feedback"),
+                    html.Div(id="rakuten-lookup-display"),
+                    html.Div(id="io-intelligence-tags-display", className="mt-3"),
                 ],
                 className="step-section",
             ),

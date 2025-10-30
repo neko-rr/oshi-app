@@ -1,0 +1,81 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+demo_database.db
+*.db
+*.sqlite
+*.sqlite3
+theme.txt
+Cursor.md
+app_backup.py
+clean_app.py
+fix_app*.py
+test_*.py
+create_tables.py
+apply_migration.py
+setup.py
+setup.sh
+
+# Documentation
+README.md
+*.md
+!spec.md
+
+# Data files (keep only necessary ones)
+data/
+!data/products.json
+
+# Supabase (keep only necessary migrations)
+supabase/
+!supabase/migrations/

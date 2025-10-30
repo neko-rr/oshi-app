@@ -288,6 +288,78 @@ Supabase を使わない場合でも、バーコード解析とプレビュー�
 
 ---
 
+## 🐳 Docker でのデプロイ
+
+### Docker ビルド & 実行
+
+```bash
+# 1. 環境変数ファイルを準備
+cp .env.example .env
+# .envファイルを編集してAPIキーを設定
+
+# 2. Dockerイメージをビルド
+docker build -t oshi-app .
+
+# 3. コンテナを実行
+docker run -d \
+  --name oshi-app \
+  -p 8050:8050 \
+  --env-file .env \
+  oshi-app
+```
+
+### Docker Compose での実行（推奨）
+
+```bash
+# 1. 環境変数ファイルを準備
+cp .env.example .env
+
+# 2. Docker Composeで起動
+docker-compose up -d
+
+# 3. ログ確認
+docker-compose logs -f app
+
+# 停止
+docker-compose down
+```
+
+### 環境変数設定
+
+`.env` ファイルを作成し、以下の変数を設定してください：
+
+```bash
+# Supabase設定
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+
+# API設定（任意）
+IO_INTELLIGENCE_API_KEY=your-io-api-key
+RAKUTEN_APP_ID=your-rakuten-app-id
+
+# ポート設定
+PORT=8050
+```
+
+### Docker イメージの特徴
+
+- **マルチステージビルド**: ビルドサイズを最適化
+- **セキュリティ**: 非rootユーザーで実行
+- **ヘルスチェック**: コンテナの健全性を監視
+- **最適化設定**: gunicorn のワーカー/スレッドを調整
+
+### 本番環境デプロイ
+
+```bash
+# イメージをビルドしてプッシュ
+docker build -t your-registry/oshi-app:latest .
+docker push your-registry/oshi-app:latest
+
+# docker-compose.prod.yml などで本番設定を使用
+```
+
+---
+
 ## ライセンス
 
 MIT License
