@@ -1,0 +1,44 @@
+=== SUPABASE STORAGE 操作権限設定ガイド ===
+
+📋 表示されている操作:
+- SELECT (読み取り)
+- INSERT (作成/アップロード)
+- UPDATE (更新)
+- DELETE (削除)
+
+🎯 推奨チェック: SELECT + INSERT
+
+📋 各操作の役割:
+
+✅ SELECT (必須)
+- 写真の表示・ダウンロード
+- storage.getPublicUrl() 使用可能
+- アプリでの写真表示に必要
+
+✅ INSERT (必須)
+- 写真のアップロード
+- storage.upload() 使用可能
+- 写真保存に必要
+
+⚠️ UPDATE (任意)
+- 写真のメタデータ更新
+- storage.update() 使用可能
+- 開発中は不要でもOK
+
+⚠️ DELETE (任意)
+- 写真の削除
+- storage.remove() 使用可能
+- 開発中は不要でもOK
+
+📋 開発段階の推奨:
+- ✅ SELECT: 写真表示のため
+- ✅ INSERT: 写真アップロードのため
+- ❌ UPDATE: 後で追加可能
+- ❌ DELETE: 後で追加可能
+
+📋 本番環境では:
+- 全操作を許可するかも
+- より細かい制御が必要
+
+=== 設定完了 ===
+これで写真の保存・表示が可能になります！

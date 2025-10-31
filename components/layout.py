@@ -71,5 +71,6 @@ def create_app_layout(theme_href: str):
                 id="registration-store",
                 data=deepcopy(DEFAULT_REGISTRATION_STATE),
             ),
+            html.Div(id="auto-fill-trigger", style={"display": "none"}),  # 自動反映トリガー用
         ]
     )

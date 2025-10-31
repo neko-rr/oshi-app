@@ -320,6 +320,9 @@ def render_review_section() -> html.Div:
                 disabled=False,
             ),
 
+            # STEP4自動反映用のインターバル（app.pyで定義）
+            # auto_fill_interval は app.py で定義済み
+
             # 隠し要素：元のタグチェックリスト（後方互換性のため）
             dcc.Checklist(id="tag-checklist", style={"display": "none"}),
         ],

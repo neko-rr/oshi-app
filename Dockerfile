@@ -51,15 +51,15 @@ ENV PORT=8050
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/ || exit 1
 
-# gunicorn で Dash のサーバーを起動（最適化設定）
+# gunicorn で Dash のサーバーを起動（Render向け最適化設定）
 CMD gunicorn app:server \
     --bind 0.0.0.0:$PORT \
-    --workers 2 \
-    --threads 4 \
+    --workers 1 \
+    --threads 2 \
     --worker-class gthread \
     --worker-tmp-dir /dev/shm \
-    --max-requests 1000 \
-    --max-requests-jitter 50 \
+    --max-requests 500 \
+    --max-requests-jitter 25 \
     --log-level info \
     --access-logfile - \
     --error-logfile -

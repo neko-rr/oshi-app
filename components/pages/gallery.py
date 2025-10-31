@@ -28,7 +28,7 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             font_family="Arial",
             font_size=12,
             margin=dict(l=20, r=20, t=40, b=20),
-            height=300
+            height=250  # 高さを少し小さく
         )
 
         return fig
@@ -52,7 +52,7 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             font_family="Arial",
             font_size=12,
             margin=dict(l=20, r=20, t=40, b=20),
-            height=300
+            height=250  # 高さを少し小さく
         )
 
         return fig
@@ -116,11 +116,16 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                         html.H6("商品カテゴリ分布", className="text-center mb-3"),
                                         dcc.Graph(
                                             figure=create_category_pie_chart(),
-                                            config={'displayModeBar': False},
-                                            className="border rounded"
+                                            config={
+                                                'displayModeBar': False,
+                                                'responsive': True,
+                                                'autosizable': True
+                                            },
+                                            className="border rounded w-100",
+                                            style={'height': '250px'}
                                         ),
                                     ],
-                                    className="col-md-6 mb-4",
+                                    className="col-12 col-md-6 mb-4",
                                 ),
                                 # 月別棒グラフ
                                 html.Div(
@@ -128,11 +133,16 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                         html.H6("月別収集数", className="text-center mb-3"),
                                         dcc.Graph(
                                             figure=create_monthly_bar_chart(),
-                                            config={'displayModeBar': False},
-                                            className="border rounded"
+                                            config={
+                                                'displayModeBar': False,
+                                                'responsive': True,
+                                                'autosizable': True
+                                            },
+                                            className="border rounded w-100",
+                                            style={'height': '250px'}
                                         ),
                                     ],
-                                    className="col-md-6 mb-4",
+                                    className="col-12 col-md-6 mb-4",
                                 ),
                             ],
                             className="row",
@@ -201,7 +211,7 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                 html.Div(
                     [
                         html.H4("📸 推し活グッズ管理をはじめよう！", className="mb-3"),
-                        html.P(
+                html.P(
                             "バーコードをスキャンしたり写真をアップロードするだけで、簡単にグッズを登録・管理できます。",
                             className="mb-3",
                         ),

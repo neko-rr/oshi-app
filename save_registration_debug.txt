@@ -1,0 +1,6 @@
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2025-11-01 05:34:35.118049
+n_clicks: 1
+product_name: 'ゆるねこさんぽ'
+store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
+

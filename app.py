@@ -4,6 +4,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 import dash
+import dash_core_components as dcc
 from dash import Input, Output, State, callback_context, html, no_update
 from dash.exceptions import PreventUpdate
 
@@ -102,10 +103,6 @@ supabase = get_supabase_client()
 
 
 def _fetch_home_metrics() -> Dict[str, int]:
-    if supabase is None:
-        # Use local database for demo
-        stats = get_product_stats_local()
-        return {"total": stats["total_products"], "unique": stats["total_products"]}
     try:
         return get_product_stats(supabase)
     except Exception:
@@ -113,9 +110,6 @@ def _fetch_home_metrics() -> Dict[str, int]:
 
 
 def _fetch_photos() -> List[Dict[str, Any]]:
-    if supabase is None:
-        # Use local database for demo
-        return get_all_products_local()
     try:
         return get_all_products(supabase)
     except Exception:
@@ -695,11 +689,6 @@ def handle_front_photo(
     state = _ensure_state(store_data)
     message = no_update
 
-    print(f"DEBUG handle_front_photo: START - trigger_id={trigger_id}")
-    print(
-        f"DEBUG handle_front_photo: barcode_status={state['barcode']['status']}, photo_status={state['front_photo']['status']}"
-    )
-
     if trigger_id == "front-skip-button":
         state["front_photo"].update(
             {
@@ -739,7 +728,21 @@ def handle_front_photo(
         print(
             f"DEBUG handle_front_photo: photo captured, new status={state['front_photo']['status']}"
         )
-        print(f"DEBUG handle_front_photo: returning state update")
+
+        # IO Intelligenceで画像説明を生成
+        try:
+            description_result = describe_image(contents)
+            if description_result["status"] == "success":
+                state["front_photo"]["description"] = description_result["text"]
+
+                # タグ生成プロセスを開始
+                if state["lookup"].get("items") or state["front_photo"]["description"]:
+                    state["tags"]["status"] = "loading"
+
+            else:
+                state["front_photo"]["description"] = None
+        except Exception as io_error:
+            state["front_photo"]["description"] = None
 
         preview_card = html.Div(
             [
@@ -789,6 +792,7 @@ def handle_front_photo(
 #     """写真がアップロードされたら自動的にレビュー画面に遷移"""
 #     # コメントアウトされています
 
+
 # 写真アップロード後のページ遷移
 @app.callback(
     Output("url", "pathname", allow_duplicate=True),
@@ -804,8 +808,12 @@ def auto_navigate_on_photo_upload(store_data):
     barcode_ready = state["barcode"]["status"] in {"captured", "manual", "skipped"}
     photo_ready = state["front_photo"]["status"] in {"captured", "skipped"}
 
-    print(f"DEBUG auto_navigate_on_photo_upload: barcode_ready={barcode_ready}, photo_ready={photo_ready}")
-    print(f"DEBUG auto_navigate_on_photo_upload: barcode_status={state['barcode']['status']}, photo_status={state['front_photo']['status']}")
+    print(
+        f"DEBUG auto_navigate_on_photo_upload: barcode_ready={barcode_ready}, photo_ready={photo_ready}"
+    )
+    print(
+        f"DEBUG auto_navigate_on_photo_upload: barcode_status={state['barcode']['status']}, photo_status={state['front_photo']['status']}"
+    )
 
     # バーコードのみ完了の場合は写真ページに遷移
     if barcode_ready and not photo_ready:
@@ -826,11 +834,10 @@ def toggle_save_button(data):
     state = _ensure_state(data)
     barcode_ready = state["barcode"]["status"] in {"captured", "manual", "skipped"}
     photo_ready = state["front_photo"]["status"] in {"captured", "skipped"}
-    # IOインテリジェンスの処理を待たずに、バーコードと写真の準備ができていれば保存可能
-    disabled = not (barcode_ready and photo_ready)
-    print(
-        f"DEBUG toggle_save_button: barcode_ready={barcode_ready}, photo_ready={photo_ready}, disabled={disabled}"
-    )
+
+    # バーコードまたは写真のどちらかが準備できていれば保存可能
+    disabled = not (barcode_ready or photo_ready)
+
     return disabled
 
 
@@ -974,6 +981,206 @@ def render_review_summary(
 
 
 @app.callback(
+    Output("photo-thumbnail", "src"),
+    Input("registration-store", "data"),
+)
+def update_photo_thumbnail(store_data):
+    """レビュー画面で写真サムネールを表示"""
+    print("DEBUG: update_photo_thumbnail called")
+
+    if not store_data:
+        print("DEBUG: No store data")
+        return ""
+
+    state = _ensure_state(store_data)
+    front_photo = state.get("front_photo", {})
+
+    if front_photo.get("content"):
+        # Base64エンコードされた画像データを直接使用
+        content = front_photo["content"]
+        print(f"DEBUG: Photo content found, length: {len(content)}")
+        if content.startswith("data:image"):
+            print("DEBUG: Content is data URL format")
+        else:
+            print("DEBUG: Content is NOT data URL format")
+        print(f"DEBUG: Content preview: {content[:50]}...")
+        return content
+    else:
+        print("DEBUG: No photo content")
+        return ""
+
+
+# STEP4自動反映用のインターバル（レイアウト関数内で定義）
+
+
+@app.callback(
+    Output("auto-fill-trigger", "children"),
+    Input("url", "pathname"),
+    prevent_initial_call=True,
+)
+def trigger_auto_fill_on_page_change(pathname):
+    """ページ遷移時に自動反映をトリガー"""
+    if pathname == "/register":
+        print("DEBUG: Triggering auto-fill for STEP4")
+        return "trigger"  # トリガー
+    return ""
+
+
+@app.callback(
+    [
+        Output("product-group-name-input", "value"),
+        Output("works-series-name-input", "value"),
+        Output("works-name-input", "value"),
+        Output("character-name-input", "value"),
+        Output("copyright-company-input", "value"),
+        Output("note-editor", "value"),
+        Output("other-tags-checklist", "value"),
+    ],
+    Input("auto-fill-trigger", "children"),
+    State("registration-store", "data"),
+    State("url", "pathname"),
+    prevent_initial_call=True,
+)
+def auto_fill_form_from_tags(trigger, store_data, pathname):
+    """STEP4でページ遷移後にタグから自動でフォームを埋める"""
+    print(
+        f"DEBUG: auto_fill_form_from_tags called (trigger: {trigger}, pathname: {pathname})"
+    )
+
+    # STEP4のページのみ処理
+    if pathname != "/register" or not trigger:
+        print("DEBUG: Not on register page or no trigger, skipping")
+        return [""] * 7
+
+    if not store_data:
+        print("DEBUG: No store data")
+        return [""] * 7
+
+    state = _ensure_state(store_data)
+
+    # 写真データがあるか確認
+    front_photo = state.get("front_photo", {})
+    if not front_photo.get("content"):
+        print("DEBUG: No photo content, skipping auto-fill")
+        return [""] * 7
+
+    # IO Intelligenceタグがあるか確認
+    tags_data = state.get("tags", {})
+    if not tags_data.get("tags") or not isinstance(tags_data["tags"], list):
+        print("DEBUG: No IO Intelligence tags")
+        return [""] * 7
+
+    # すでに自動反映済みかチェック
+    if state.get("auto_filled", False):
+        print("DEBUG: Already auto-filled")
+        return [""] * 7
+
+    tags = tags_data["tags"][:10]  # 最大10個のタグを使用
+    print(f"DEBUG: Processing {len(tags)} tags: {tags}")
+
+    # デフォルト値
+    product_group_name = ""
+    works_series_name = ""
+    works_name = ""
+    character_name = ""
+    copyright_company_name = ""
+    memo = ""
+    other_tags = []
+
+    # タグを分類して各フィールドに割り当て
+    product_related = []  # 製品関連
+    character_related = []  # キャラクター関連
+    work_related = []  # 作品関連
+    other_features = []  # その他の特徴
+
+    # タグを分類
+    for tag in tags:
+        tag_lower = tag.lower()
+        if any(
+            keyword in tag_lower
+            for keyword in [
+                "badge",
+                "keychain",
+                "sticker",
+                "poster",
+                "card",
+                "figure",
+                "goods",
+                "merchandise",
+                "pin",
+                "button",
+                "acrylic",
+            ]
+        ):
+            product_related.append(tag)
+        elif any(
+            keyword in tag_lower
+            for keyword in [
+                "character",
+                "girl",
+                "boy",
+                "person",
+                "anime",
+                "manga",
+                "chibi",
+                "cute",
+            ]
+        ):
+            character_related.append(tag)
+        elif any(
+            keyword in tag_lower
+            for keyword in ["bangdream", "lovelive", "idol", "music", "band", "series"]
+        ):
+            work_related.append(tag)
+        else:
+            other_features.append(tag)
+
+    # 各フィールドに割り当て
+    if product_related:
+        product_group_name = product_related[0]  # 最初の製品関連タグ
+
+    if work_related:
+        # 作品シリーズと作品名を分離
+        if len(work_related) >= 2:
+            works_series_name = work_related[0]
+            works_name = work_related[1]
+        elif len(work_related) == 1:
+            works_series_name = work_related[0]
+
+    if character_related:
+        character_name = " ".join(
+            character_related[:2]
+        )  # 最大2つのキャラクター関連タグ
+
+    # 残りのタグをその他タグとメモに分配
+    remaining_tags = other_features[:5]  # 最大5個をその他タグに
+    memo_tags = other_features[5:8]  # 残りをメモに
+
+    if remaining_tags:
+        other_tags = [{"label": tag, "value": tag} for tag in remaining_tags]
+
+    if memo_tags:
+        memo = f"特徴: {', '.join(memo_tags)}"
+
+    print(
+        f"DEBUG: Auto-filled - product_group: '{product_group_name}', works_series: '{works_series_name}', works: '{works_name}', character: '{character_name}', memo: '{memo}', other_tags: {[t.get('value') for t in other_tags]}"
+    )
+
+    # 自動反映済みフラグを設定（次の呼び出しでスキップするため）
+    state["auto_filled"] = True
+
+    return (
+        product_group_name,
+        works_series_name,
+        works_name,
+        character_name,
+        copyright_company_name,
+        memo,
+        other_tags,
+    )
+
+
+@app.callback(
     [
         Output("rakuten-lookup-display", "children"),
         Output("io-intelligence-tags-display", "children"),
@@ -983,20 +1190,28 @@ def render_review_summary(
 def display_api_results(store_data):
     """レビュー画面で楽天APIとIO Intelligenceの結果を表示"""
     print(f"DEBUG: display_api_results called")
-    print(f"DEBUG: store_data keys: {list(store_data.keys()) if store_data else 'None'}")
+    print(
+        f"DEBUG: store_data keys: {list(store_data.keys()) if store_data else 'None'}"
+    )
 
     state = _ensure_state(store_data)
 
     # 楽天API結果の表示
     lookup_result = state.get("lookup")
-    rakuten_display = html.Div("バーコード情報がありません", className="alert alert-info")
+    rakuten_display = html.Div(
+        "バーコード情報がありません", className="alert alert-info"
+    )
     if lookup_result:
         try:
-            rakuten_display = _render_lookup_card(lookup_result, title="楽天API照合結果")
+            rakuten_display = _render_lookup_card(
+                lookup_result, title="楽天API照合結果"
+            )
             print("DEBUG: Rakuten lookup card rendered successfully")
         except Exception as e:
             print(f"DEBUG: Error rendering rakuten lookup card: {e}")
-            rakuten_display = html.Div(f"楽天API表示エラー: {str(e)}", className="alert alert-danger")
+            rakuten_display = html.Div(
+                f"楽天API表示エラー: {str(e)}", className="alert alert-danger"
+            )
 
     # IO Intelligenceタグの表示
     tags_data = state.get("tags", {})
@@ -1005,19 +1220,27 @@ def display_api_results(store_data):
         try:
             tags_list = tags_data["tags"]
             if isinstance(tags_list, list) and tags_list:
-                tags_display = html.Div([
-                    html.H5("IO Intelligence タグ抽出結果", className="mb-3"),
-                    html.Div([
-                        html.Span(tag, className="badge bg-secondary me-1 mb-1")
-                        for tag in tags_list[:20]  # 最大20個表示
-                    ])
-                ])
+                tags_display = html.Div(
+                    [
+                        html.H5("IO Intelligence タグ抽出結果", className="mb-3"),
+                        html.Div(
+                            [
+                                html.Span(tag, className="badge bg-secondary me-1 mb-1")
+                                for tag in tags_list[:20]  # 最大20個表示
+                            ]
+                        ),
+                    ]
+                )
                 print(f"DEBUG: IO Intelligence tags rendered: {len(tags_list)} tags")
             else:
-                tags_display = html.Div("タグ情報が見つかりません", className="alert alert-warning")
+                tags_display = html.Div(
+                    "タグ情報が見つかりません", className="alert alert-warning"
+                )
         except Exception as e:
             print(f"DEBUG: Error rendering IO Intelligence tags: {e}")
-            tags_display = html.Div(f"タグ表示エラー: {str(e)}", className="alert alert-danger")
+            tags_display = html.Div(
+                f"タグ表示エラー: {str(e)}", className="alert alert-danger"
+            )
     else:
         print("DEBUG: No IO Intelligence tags found")
 
@@ -1040,110 +1263,154 @@ def display_api_results(store_data):
         State("purchase-date-input", "date"),
         State("note-editor", "value"),
     ],
-    prevent_initial_call=True,
+    prevent_initial_call=True,  # 本番用に戻す
 )
-def save_registration(n_clicks, store_data, product_name, product_group_name, works_series_name, works_name, character_name, copyright_company_name, purchase_price, purchase_location, purchase_date, memo):
+def save_registration(
+    n_clicks,
+    store_data,
+    product_name,
+    product_group_name,
+    works_series_name,
+    works_name,
+    character_name,
+    copyright_company_name,
+    purchase_price,
+    purchase_location,
+    purchase_date,
+    memo,
+):
     """製品情報を保存"""
+    print("=== SAVE_REGISTRATION STARTED ===")
+    print(f"n_clicks: {n_clicks}")
+    print(f"product_name: '{product_name}'")
+
+    # デバッグ情報を専用ファイルに書き込み
+    debug_info = f"""=== SAVE REGISTRATION DEBUG ===
+Called at: {__import__("datetime").datetime.now()}
+n_clicks: {n_clicks}
+product_name: '{product_name}'
+store_data keys: {list(store_data.keys()) if store_data else "None"}
+"""
+
+    # 専用ログファイルに書き込み（最も確実）
+    try:
+        with open("save_registration_debug.txt", "a", encoding="utf-8") as f:
+            f.write(debug_info + "\n")
+            f.flush()
+    except Exception as e:
+        pass  # ファイル書き込み失敗でも処理続行
+
+    # コンソール出力（一応）
+    print(f"SAVE_CALLBACK: n_clicks={n_clicks}, product='{product_name}'")
+
     if not n_clicks:
+        try:
+            with open("debug_log.txt", "a", encoding="utf-8") as f:
+                f.write(f"DEBUG: n_clicks is falsy, raising PreventUpdate\n")
+        except Exception as debug_error:
+            print(f"DEBUG WRITE ERROR: {debug_error}")
         raise PreventUpdate
 
-    # 必須項目チェック
+    # 必須項目チェック（製品名のみ必須）
     if not product_name or product_name.strip() == "":
-        return html.Div("製品名は必須項目です。入力してください。", className="alert alert-danger")
+        return html.Div(
+            "製品名は必須項目です。入力してください。", className="alert alert-danger"
+        )
 
     try:
         # registration-storeからデータを取得
         state = _ensure_state(store_data)
+        print(f"State retrieved, keys: {list(state.keys())}")
 
         # 写真の保存
         photo_id = None
-        if state["front_photo"].get("content"):
-            if supabase is None:
-                # Use local database for demo - create photo record with dummy URL
+        print(f"front_photo data: {state.get('front_photo', 'NO_DATA')}")
+        print(
+            f"front_photo content exists: {bool(state.get('front_photo', {}).get('content'))}"
+        )
+
+        with open("debug_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"DEBUG: front_photo data: {state.get('front_photo', 'NO_DATA')}\n")
+            f.write(
+                f"DEBUG: front_photo content exists: {bool(state.get('front_photo', {}).get('content'))}\n"
+            )
+
+        # 写真データの保存（写真なしでもOK）
+        photo_id = None
+        if state.get("front_photo", {}).get("content"):
+            print("Starting photo processing...")
+            try:
+                # Supabase Storageを使用
                 content_string = state["front_photo"]["content"].split(",", 1)[1]
                 file_bytes = base64.b64decode(content_string)
 
-                # Create dummy URL for demo (in real app, would save to local file system)
-                dummy_url = f"data:image/jpeg;base64,{content_string[:50]}...[truncated]"
-                photo_id = insert_photo_record_local(
-                    image_url=dummy_url,
-                    thumbnail_url=dummy_url,
-                    front_flag=1,
-                )
-                print(f"DEBUG: Photo saved locally with ID: {photo_id}")
-        else:
-                # Original Supabase code
-                # デバッグ: 利用可能なバケットを確認
-                list_storage_buckets(supabase)
-                content_string = state["front_photo"]["content"].split(",", 1)[1]
-                file_bytes = base64.b64decode(content_string)
+                # photoレコードを作成
+                print("Inserting photo record...")
                 photo_id = insert_photo_record(
                     supabase,
                     image_url="",  # Will be updated after upload
                     thumbnail_url="",  # Will be updated after upload
                     front_flag=1,
                 )
+                print(f"Photo record inserted, photo_id: {photo_id}")
 
                 # 画像をSupabase Storageにアップロード
-                image_url = None
                 if photo_id:
+                    print("Photo ID exists, uploading to storage...")
                     image_url = upload_to_storage(
                         supabase,
                         file_bytes,
                         f"photo_{photo_id}.jpg",
                         state["front_photo"].get("content_type", "image/jpeg"),
                     )
+                    print(f"Upload result: {image_url}")
+
                     if image_url:
-                        # 画像URLを更新 - RLSが原因で失敗する可能性があるのでtry-exceptで囲む
-                        try:
-                            supabase.table("photo").update({"image_url": image_url, "thumbnail_url": image_url}).eq("photo_id", photo_id).execute()
-                            print(f"DEBUG: Photo record updated with image_url: {image_url}")
-                        except Exception as update_error:
-                            print(f"DEBUG: Failed to update photo record: {update_error}")
-                            # URL更新に失敗しても処理を続行
-                            pass
+                        print("Updating photo record with URL...")
+                        # 画像URLを更新
+                        supabase.table("photo").update(
+                            {"image_url": image_url, "thumbnail_url": image_url}
+                        ).eq("photo_id", photo_id).execute()
+                        print("Photo record updated with URL")
 
-        # 写真がない場合は photo_id = None のまま
-
-        # 製品情報の保存 - ローカルデータベースを使用
-        if supabase is None:
-            # Use local database for demo
-            insert_product_record_local(
-                photo_id=photo_id,  # photo_idはNULLでも可
-                barcode=state["barcode"].get("value") or "",
-                barcode_type=state["barcode"].get("type") or "UNKNOWN",
-                product_name=product_name,
-                product_group_name=product_group_name or "",
-                works_series_name=works_series_name or "",
-                title=works_name or "",
-                character_name=character_name or "",
-                purchase_price=int(purchase_price) if purchase_price else None,
-                purchase_location=purchase_location or "",
-                memo=memo or "",
-            )
+            except Exception as photo_error:
+                print(f"Photo processing failed: {photo_error}")
+                # 写真保存失敗でも製品登録は続行（photo_id = None）
         else:
-            # Original Supabase code
-            insert_product_record(
-                supabase,
-                photo_id=photo_id,  # photo_idはNULLでも可
-                barcode=state["barcode"].get("value") or "",
-                barcode_type=state["barcode"].get("type") or "UNKNOWN",
-                product_name=product_name,
-                product_group_name=product_group_name or "",
-                works_series_name=works_series_name or "",
-                title=works_name or "",
-                character_name=character_name or "",
-                purchase_price=int(purchase_price) if purchase_price else None,
-                purchase_location=purchase_location or "",
-                memo=memo or "",
-            )
+            print("No photo content found, skipping photo processing")
 
-        print(f"DEBUG: Successfully saved product - Name: {product_name}, Photo ID: {photo_id}")
+        print(f"Final photo_id: {photo_id}")
+
+        # 製品情報の保存 - Supabaseを使用（ローカルDB分岐削除）
+        insert_product_record(
+            supabase,
+            photo_id=photo_id,  # photo_idはNULLでも可
+            barcode=state["barcode"].get("value") or "",
+            barcode_type=state["barcode"].get("type") or "UNKNOWN",
+            product_name=product_name,
+            product_group_name=product_group_name or "",
+            works_series_name=works_series_name or "",
+            title=works_name or "",
+            character_name=character_name or "",
+            purchase_price=int(purchase_price) if purchase_price else None,
+            purchase_location=purchase_location or "",
+            memo=memo or "",
+        )
+
+        with open("debug_log.txt", "a", encoding="utf-8") as f:
+            f.write(
+                f"DEBUG: Successfully saved product - Name: {product_name}, Photo ID: {photo_id}\n"
+            )
+            f.write(f"DEBUG: Returning success message\n")
         return html.Div("製品情報を保存しました！", className="alert alert-success")
 
     except Exception as e:
-        print(f"ERROR: Failed to save product: {e}")
-        return html.Div(f"保存中にエラーが発生しました: {str(e)}", className="alert alert-danger")
+        with open("debug_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"ERROR: Failed to save product: {e}\n")
+        return html.Div(
+            f"保存中にエラーが発生しました: {str(e)}", className="alert alert-danger"
+        )
+
 
 # Theme management callbacks
 @app.callback(
@@ -1161,13 +1428,10 @@ def save_theme(n_clicks, selected_theme):
         save_theme_to_file(selected_theme)
         return html.Div(
             f"テーマ '{selected_theme}' を保存しました。ページをリロードしてください。",
-            className="alert alert-success"
+            className="alert alert-success",
         )
     except Exception as e:
-        return html.Div(
-            f"テーマ保存エラー: {str(e)}",
-            className="alert alert-danger"
-        )
+        return html.Div(f"テーマ保存エラー: {str(e)}", className="alert alert-danger")
 
 
 @app.callback(
@@ -1181,4 +1445,6 @@ def update_theme_css(selected_theme):
 
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8050)
+    import os
+    port = int(os.environ.get("PORT", 8050))
+    app.run_server(host="0.0.0.0", port=port)

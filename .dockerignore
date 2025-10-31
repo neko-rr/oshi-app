@@ -53,29 +53,32 @@ Thumbs.db
 
 # Project specific
 demo_database.db
+theme.txt
+debug_log.txt
+save_registration_debug.txt
 *.db
 *.sqlite
 *.sqlite3
-theme.txt
-Cursor.md
-app_backup.py
-clean_app.py
-fix_app*.py
+
+# Test files
 test_*.py
-create_tables.py
-apply_migration.py
-setup.py
-setup.sh
+*_test.py
+tests/
 
 # Documentation
-README.md
 *.md
-!spec.md
+!README.md
 
-# Data files (keep only necessary ones)
-data/
-!data/products.json
+# Build artifacts
+build/
+dist/
+*.egg-info/
 
-# Supabase (keep only necessary migrations)
-supabase/
-!supabase/migrations/
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
