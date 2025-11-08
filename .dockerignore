@@ -1,3 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+venv/
+.env
+.python-version
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+
+# Local artifacts and logs
+app_run.log
+debug_log.txt
+save_registration_debug.txt
+demo_database.db
+*.sqlite
+*.db
+
+# Supabase local scripts and backups
+supabase/
+storage_policies.sql
+supabase_*.*
+table_constraints_*.sql
+
+# Notebooks / large binaries (if any)
+*.ipynb_checkpoints
+
 # Git
 .git
 .gitignore

@@ -1,4 +1,4 @@
-from dash import dcc, html
+from dash import html, dcc
 
 
 def render_barcode_section() -> html.Div:

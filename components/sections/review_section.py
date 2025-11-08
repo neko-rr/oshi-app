@@ -1,5 +1,5 @@
 import datetime
-from dash import dcc, html
+from dash import html, dcc
 
 
 def render_review_section() -> html.Div:

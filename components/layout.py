@@ -1,5 +1,6 @@
 from copy import deepcopy
-from dash import dcc, html
+from dash import html
+from dash import dcc
 
 NAV_ITEMS = [
     {"href": "/", "label": "ホーム", "icon": "bi-house", "id": "nav-home"},

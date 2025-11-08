@@ -1,4 +1,4 @@
-from dash import dcc, html
+from dash import html, dcc
 
 
 def render_front_photo_section() -> html.Div:

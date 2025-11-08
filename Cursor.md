@@ -88,3 +88,19 @@ ALTER TABLE registration_product_information DISABLE ROW LEVEL SECURITY;
 - CSS ベースの UI 制御でコンポーネント属性の制約を回避
 - コールバックの State 管理を徹底的に確認
 - Supabase RLS 設定の重要性を理解
+
+## 2025-11-08 フォルダ整理メモ
+
+- Supabase 関連ファイルは `supabase/docs`（ガイドのテキスト）と `supabase/sql`（SQL スクリプト）に再配置。`supabase/migrations` は従来どおり保持。
+- ルート直下にあったテストスクリプトを `tests/` に集約し、パッケージ初期化用の `tests/__init__.py` を追加。
+- `.dockerignore` を作成し、`venv/` やローカル DB、ログ類など Docker イメージに不要なファイルを除外。
+- デプロイ用途の Docker は `Dockerfile` を使用。ローカル検証でのみ `docker-compose.yml` を利用。Render 起動コマンドは既存の `Procfile` を継続使用。
+
+### アプリ起動方法メモ
+
+- **ログ付き強制起動（PowerShell）**  
+  `powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1`  
+  ※ 起動前に既存プロセスやポート 8050 を解放し、`app_run.log` に出力を保存。
+- **通常起動（開発確認用）**  
+  `python app.py`  
+  ※ 環境変数を設定した PowerShell / venv 上で実行。終了は `Ctrl+C`。

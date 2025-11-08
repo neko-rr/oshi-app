@@ -4,11 +4,19 @@ import re
 from typing import Any, Dict, List, Optional
 
 import dash
-import dash_core_components as dcc
-from dash import Input, Output, State, callback_context, html, no_update
+from dash import Input, Output, State, callback_context, html, dcc, no_update
 from dash.exceptions import PreventUpdate
 
 from components.layout import create_app_layout
+
+# Load environment variables EARLY so services read correct .env (models, flags)
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    print("DEBUG: Early .env loaded before services imports")
+except Exception as _early_env_err:
+    print(f"DEBUG: Early .env load skipped: {_early_env_err}")
 
 # In-memory storage for demo purposes when Supabase is not available
 PHOTOS_STORAGE: List[Dict[str, Any]] = []
@@ -138,6 +146,11 @@ def _empty_registration_state() -> Dict[str, Any]:
             "content_type": None,
             "status": "idle",
             "description": None,
+            "model_used": None,
+            "description_status": "idle",
+            "vision_source": None,
+            "vision_raw": None,
+            "structured_data": None,
         },
         "lookup": {
             "status": "idle",
@@ -178,6 +191,13 @@ def _ensure_state(data: Dict[str, Any]) -> Dict[str, Any]:
             "content_type": front.get("content_type"),
             "status": front.get("status", state["front_photo"]["status"]),
             "description": front.get("description"),
+            "model_used": front.get("model_used"),
+            "description_status": front.get(
+                "description_status", state["front_photo"]["description_status"]
+            ),
+            "vision_source": front.get("vision_source"),
+            "vision_raw": front.get("vision_raw"),
+            "structured_data": front.get("structured_data"),
         }
     )
 
@@ -301,17 +321,21 @@ def _render_tags_card(tag_result: Dict[str, Any]) -> html.Div:
     tags = tag_result.get("tags", [])
     message = tag_result.get("message")
 
-    if status == "loading":
-        return html.Div(
-            [
-                html.Div("タグを生成中です...", className="card-text"),
-                html.Div("⏳", className="loading-spinner"),
-            ],
-            className="card bg-info text-white",
-        )
-
     children: List[Any] = []
-    if message:
+    if status == "loading":
+        children.append(
+            html.Div(
+                [
+                    html.Div(
+                        message or "タグを生成中です...",
+                        className="card-text fw-semibold mb-2",
+                    ),
+                    html.Div("⏳", className="loading-spinner"),
+                ],
+                className="tag-loading d-flex align-items-center gap-2",
+            )
+        )
+    elif message:
         children.append(html.Div(message, className="lookup-message"))
 
     if tags:
@@ -320,6 +344,10 @@ def _render_tags_card(tag_result: Dict[str, Any]) -> html.Div:
     elif status == "success":
         children.append(
             html.Div("タグ候補が見つかりませんでした。", className="lookup-message")
+        )
+    elif status == "loading":
+        children.append(
+            html.Div("タグを生成中です...", className="lookup-message")
         )
 
     if not children:
@@ -334,13 +362,17 @@ def _update_tags(state: Dict[str, Any]) -> Dict[str, Any]:
     items = state["lookup"].get("items") or []
     description = state["front_photo"].get("description")
 
-    print(f"DEBUG: _update_tags called - items: {len(items)}, description: {bool(description)}")
+    print(
+        f"DEBUG: _update_tags called - items: {len(items)}, description: {bool(description)}"
+    )
 
     # 4つのパターンを適切に処理
     has_rakuten_data = bool(items)
     has_image_description = bool(description)
 
-    print(f"DEBUG: has_rakuten_data: {has_rakuten_data}, has_image_description: {has_image_description}")
+    print(
+        f"DEBUG: has_rakuten_data: {has_rakuten_data}, has_image_description: {has_image_description}"
+    )
 
     if not has_rakuten_data and not has_image_description:
         state["tags"] = {
@@ -352,17 +384,24 @@ def _update_tags(state: Dict[str, Any]) -> Dict[str, Any]:
 
     # IO Intelligence APIでタグを生成
     print("DEBUG: Calling extract_tags...")
-    tag_result = extract_tags(items, description)
+    photo_content = state.get("front_photo", {}).get("content")
+    tag_result = extract_tags(items, description, photo_content)
     print(f"DEBUG: extract_tags result: {tag_result}")
 
-    # タグ生成結果に応じてメッセージを調整
-    if tag_result["status"] == "success":
+    # タグ生成結果に応じてメッセージを調整（既にメッセージがあれば優先）
+    if tag_result["status"] == "success" and not tag_result.get("message"):
         if has_rakuten_data and has_image_description:
-            tag_result["message"] = f"楽天API情報と画像説明から{len(tag_result['tags'])}個のタグを生成しました。"
+            tag_result["message"] = (
+                f"楽天API情報と画像説明から{len(tag_result['tags'])}個のタグを生成しました。"
+            )
         elif has_rakuten_data:
-            tag_result["message"] = f"楽天API情報から{len(tag_result['tags'])}個のタグを生成しました。"
+            tag_result["message"] = (
+                f"楽天API情報から{len(tag_result['tags'])}個のタグを生成しました。"
+            )
         elif has_image_description:
-            tag_result["message"] = f"画像説明から{len(tag_result['tags'])}個のタグを生成しました。"
+            tag_result["message"] = (
+                f"画像説明から{len(tag_result['tags'])}個のタグを生成しました。"
+            )
 
     state["tags"] = tag_result
     return tag_result
@@ -407,7 +446,6 @@ app.layout = serve_layout
         Output("nav-settings", "className"),
     ],
     Input("url", "pathname"),
-    prevent_initial_call="initial_duplicate",
 )
 def display_page(pathname: str):
     classes = [
@@ -417,19 +455,27 @@ def display_page(pathname: str):
         "nav-link text-white-50",
     ]
 
-    if pathname == "/register":
+    path = pathname or "/"
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+
+    if path == "/" or path == "":
+        classes[0] = "nav-link active text-white"
+        metrics = _fetch_home_metrics()
+        page = render_home(metrics["total"], metrics["unique"])
+    elif path == "/register":
         classes[1] = "nav-link active text-white"
         page = render_barcode_page()
-    elif pathname == "/register/photo":
+    elif path == "/register/photo":
         classes[1] = "nav-link active text-white"
         page = render_photo_page()
-    elif pathname == "/register/review":
+    elif path == "/register/review":
         classes[1] = "nav-link active text-white"
         page = render_review_page()
-    elif pathname == "/gallery":
+    elif path == "/gallery":
         classes[2] = "nav-link active text-white"
         page = render_gallery(_fetch_photos())
-    elif pathname == "/settings":
+    elif path == "/settings":
         classes[3] = "nav-link active text-white"
         page = render_settings(_fetch_total_photos(), load_theme())
     else:
@@ -442,8 +488,27 @@ def display_page(pathname: str):
 
 @app.callback(
     [
+        Output("x-share-config", "style"),
+        Output("x-share-count", "children"),
+    ],
+    [
+        Input("btn-x-share", "n_clicks"),
+        Input("x-share-textarea", "value"),
+    ],
+    prevent_initial_call="initial_duplicate",
+)
+def toggle_x_share(n_clicks, text_value):
+    # Show config after first click; keep visible afterwards
+    visible = {"display": "block"} if (n_clicks or 0) > 0 else {"display": "none"}
+    length = len(text_value) if text_value else 0
+    return visible, f"文字数: {length}/280"
+
+
+@app.callback(
+    [
         Output("registration-store", "data", allow_duplicate=True),
         Output("barcode-feedback", "children"),
+        Output("url", "pathname", allow_duplicate=True),
     ],
     [
         Input("barcode-upload", "contents"),
@@ -638,11 +703,12 @@ def handle_barcode_actions(
                 print(f"DEBUG: Saved lookup to state: {state.get('lookup')}")
                 message = success_message(barcode_value, barcode_type, lookup_result)
 
+    print(f"DEBUG: Calling _update_tags after barcode processing")
     _update_tags(state)
 
     if trigger_id == "barcode-skip-button":
         url = "/register/photo"
-    elif state["lookup"]["status"] == "success":
+    elif state["barcode"]["status"] in {"captured", "manual"}:
         url = "/register/photo"
     else:
         url = no_update
@@ -655,26 +721,10 @@ def handle_barcode_actions(
                 ]
             )
 
-    return _serialise_state(state), message
+    return _serialise_state(state), message, url
 
 
-@app.callback(
-    Output("registration-store", "data", allow_duplicate=True),
-    Input("registration-store", "data"),
-    prevent_initial_call="initial_duplicate",
-)
-def process_tags(store_data):
-    print("DEBUG: process_tags called")
-    state = _ensure_state(store_data)
-    print(f"DEBUG: tags status: {state['tags'].get('status')}")
-    if state["tags"]["status"] == "loading":
-        print("DEBUG: Calling _update_tags...")
-        _update_tags(state)
-        result = _serialise_state(state)
-        print(f"DEBUG: process_tags returning updated state")
-        return result
-    print("DEBUG: process_tags raising PreventUpdate")
-    raise PreventUpdate
+# 古いprocess_tags関数は削除（インターバルベースに変更）
 
 
 @app.callback(Output("tag-feedback", "children"), Input("registration-store", "data"))
@@ -724,6 +774,11 @@ def handle_front_photo(
                 "content_type": None,
                 "status": "skipped",
                 "description": None,
+                "model_used": None,
+                "description_status": "skipped",
+                "vision_source": None,
+                "vision_raw": None,
+                "structured_data": None,
             }
         )
         message = html.Div(
@@ -756,22 +811,79 @@ def handle_front_photo(
             f"DEBUG handle_front_photo: photo captured, new status={state['front_photo']['status']}"
         )
 
-        # IO Intelligenceで画像説明を生成
-        try:
-            description_result = describe_image(contents)
-            if description_result["status"] == "success":
-                state["front_photo"]["description"] = description_result["text"]
-                print(f"DEBUG: Image description generated: {description_result['text'][:100]}...")
-            else:
-                state["front_photo"]["description"] = None
-                print("DEBUG: Image description generation failed")
-        except Exception as io_error:
-            state["front_photo"]["description"] = None
-            print(f"DEBUG: Image description generation error: {io_error}")
+        print("DEBUG: Preparing vision payload for asynchronous processing...")
+        print(f"DEBUG: Image contents length: {len(contents) if contents else 0}")
 
-        # 画像がアップロードされた時点でタグ生成プロセスを開始（バーコード情報がなくても画像説明があれば生成）
-        print(f"DEBUG: Starting tag generation process - lookup items: {len(state['lookup'].get('items', []))}, description: {bool(state['front_photo']['description'])}")
+        api_contents = contents
+        vision_raw = None
+        public_url = None
+
+        if contents:
+            try:
+                import base64
+                from PIL import Image
+                import io
+
+                if contents.startswith("data:image"):
+                    _, base64_data = contents.split(",", 1)
+                    original_bytes = base64.b64decode(base64_data)
+                else:
+                    original_bytes = base64.b64decode(contents)
+
+                if len(original_bytes) > 100000:  # 100KB以上ならリサイズ
+                    print(
+                        f"DEBUG: Image is large ({len(original_bytes)} bytes), resizing for vision call..."
+                    )
+                    image = Image.open(io.BytesIO(original_bytes))
+                    max_size = (512, 512)
+                    image.thumbnail(max_size, Image.LANCZOS)
+
+                    if image.mode != "RGB":
+                        image = image.convert("RGB")
+
+                    output_buffer = io.BytesIO()
+                    image.save(output_buffer, format="JPEG", quality=90)
+                    file_bytes_for_upload = output_buffer.getvalue()
+                    vision_raw = base64.b64encode(file_bytes_for_upload).decode("utf-8")
+                    api_contents = f"data:image/jpeg;base64,{vision_raw}"
+                    print(f"DEBUG: Resized image for vision payload: {len(api_contents)} bytes")
+
+                    try:
+                        public_url = upload_to_storage(
+                            supabase,
+                            file_bytes_for_upload,
+                            filename or "vision_tmp.jpg",
+                            "image/jpeg",
+                        )
+                        if public_url:
+                            api_contents = public_url
+                            print(f"DEBUG: Using public URL for vision: {public_url}")
+                    except Exception as vision_upload_error:
+                        print(
+                            f"DEBUG: Vision temp upload failed, fallback to data URI: {vision_upload_error}"
+                        )
+                else:
+                    # 元データが十分小さい場合も raw を保持しておく（フォールバック用）
+                    vision_raw = base64.b64encode(original_bytes).decode("utf-8")
+            except Exception as resize_error:
+                print(f"DEBUG: Vision payload preparation failed: {resize_error}")
+                api_contents = contents
+                vision_raw = None
+
+        # 画像アップロード時にタグ生成フローを開始（非同期処理に移行）
+        print(
+            f"DEBUG: Tag generation marked as loading - lookup items: {len(state['lookup'].get('items', []))}, photo uploaded: True"
+        )
+        state["front_photo"]["description"] = None
+        state["front_photo"]["model_used"] = None
+        state["front_photo"]["structured_data"] = None
+        state["front_photo"]["description_status"] = "pending"
+        state["front_photo"]["vision_source"] = api_contents
+        state["front_photo"]["vision_raw"] = vision_raw
+
+        # 直前までのタグは保持しつつ、ステータスのみ更新
         state["tags"]["status"] = "loading"
+        state["tags"]["message"] = "タグを生成中です..."
 
         preview_card = html.Div(
             [
@@ -799,7 +911,6 @@ def handle_front_photo(
         # IOインテリジェンスの処理をバックグラウンドで開始
         # ここでは状態のみ更新し、実際の処理は後で行う
         state["description"] = {"status": "processing"}
-        state["tags"]["status"] = "processing"
 
         cards = [preview_card]
         message = html.Div(cards)
@@ -826,9 +937,10 @@ def handle_front_photo(
 @app.callback(
     Output("url", "pathname", allow_duplicate=True),
     Input("registration-store", "data"),
+    State("url", "pathname"),
     prevent_initial_call=True,
 )
-def auto_navigate_on_photo_upload(store_data):
+def auto_navigate_on_photo_upload(store_data, current_pathname):
     """写真がアップロードされたら自動的にレビュー画面に遷移"""
     if not store_data:
         raise PreventUpdate
@@ -844,16 +956,24 @@ def auto_navigate_on_photo_upload(store_data):
         f"DEBUG auto_navigate_on_photo_upload: barcode_status={state['barcode']['status']}, photo_status={state['front_photo']['status']}"
     )
 
-    # バーコードのみ完了の場合は写真ページに遷移
-    if barcode_ready and not photo_ready:
-        print(f"DEBUG auto_navigate_on_photo_upload: navigating to /register/photo")
-        return "/register/photo"
-    # バーコードと写真が両方完了の場合はレビュー画面に遷移
-    elif barcode_ready and photo_ready:
-        print(f"DEBUG auto_navigate_on_photo_upload: navigating to /register/review")
-        return "/register/review"
+    current_path = current_pathname or ""
 
-    print(f"DEBUG auto_navigate_on_photo_upload: not navigating")
+    # 正面写真が完了したら即レビュー画面へ
+    if photo_ready and current_path != "/register/review":
+        print(
+            f"DEBUG auto_navigate_on_photo_upload: navigating to /register/review (current_path={current_path})"
+        )
+        return "/register/review"
+    # バーコードのみ完了の場合は写真ページに遷移
+    if barcode_ready and not photo_ready and current_path != "/register/photo":
+        print(
+            f"DEBUG auto_navigate_on_photo_upload: navigating to /register/photo (current_path={current_path})"
+        )
+        return "/register/photo"
+
+    print(
+        f"DEBUG auto_navigate_on_photo_upload: not navigating (current_path={current_path})"
+    )
     raise PreventUpdate
 
 
@@ -957,6 +1077,9 @@ def render_review_summary(
     other_tags = other_tags or []
     note_text = (note_text or "").strip()
 
+    # 画像説明（IOインテリジェンスの説明）
+    description = state.get("front_photo", {}).get("description")
+
     barcode_value = state["barcode"].get("value") or "未取得"
     barcode_type = state["barcode"].get("type") or "不明"
 
@@ -1052,20 +1175,22 @@ def update_photo_thumbnail(store_data):
             print(f"DEBUG: Resized image size: {image.size}")
 
             # RGBモードに変換（JPEG保存のため）
-            if image.mode != 'RGB':
-                image = image.convert('RGB')
+            if image.mode != "RGB":
+                image = image.convert("RGB")
 
             # リサイズした画像をBase64にエンコード
             output_buffer = io.BytesIO()
-            image.save(output_buffer, format='JPEG', quality=85)
-            resized_base64 = base64.b64encode(output_buffer.getvalue()).decode('utf-8')
+            image.save(output_buffer, format="JPEG", quality=85)
+            resized_base64 = base64.b64encode(output_buffer.getvalue()).decode("utf-8")
             resized_content = f"data:image/jpeg;base64,{resized_base64}"
 
             print(f"DEBUG: Resized data URL length: {len(resized_content)}")
 
             # 最終チェック：500KB以内に収まるか
             if len(resized_content) > 512 * 1024:  # 512KB
-                print(f"DEBUG: Resized image still too large ({len(resized_content)} bytes), skipping display")
+                print(
+                    f"DEBUG: Resized image still too large ({len(resized_content)} bytes), skipping display"
+                )
                 return ""
 
             return resized_content
@@ -1075,7 +1200,9 @@ def update_photo_thumbnail(store_data):
             # エラーが発生した場合は元のコンテンツを返す（フォールバック）
             # ただしサイズチェックは行う
             if len(content) > 512 * 1024:  # 512KB
-                print(f"DEBUG: Original image too large ({len(content)} bytes), skipping display")
+                print(
+                    f"DEBUG: Original image too large ({len(content)} bytes), skipping display"
+                )
                 return ""
             return content
     else:
@@ -1083,9 +1210,120 @@ def update_photo_thumbnail(store_data):
         return ""
 
 
-# STEP4自動反映用のインターバル（レイアウト関数内で定義）
+@app.callback(
+    Output("registration-store", "data", allow_duplicate=True),
+    Input("registration-store", "data"),
+    prevent_initial_call="initial_duplicate",
+)
+def process_tags(store_data):
+    print(f"DEBUG: process_tags called")
+    state = _ensure_state(store_data)
+    tags_status = state["tags"].get("status")
+    print(f"DEBUG: tags status: {tags_status}")
+
+    if tags_status != "loading":
+        print("DEBUG: process_tags skipping - status is not loading")
+        raise PreventUpdate
+
+    front_photo = state.get("front_photo", {})
+    photo_status = front_photo.get("status")
+    description_status = front_photo.get("description_status", "idle")
+
+    # 1. 必要であれば画像説明を生成
+    if photo_status == "captured" and description_status == "pending":
+        print("DEBUG: process_tags generating image description asynchronously")
+        state["front_photo"]["description_status"] = "processing"
+        vision_source = front_photo.get("vision_source") or front_photo.get("content")
+        vision_raw = front_photo.get("vision_raw")
+
+        try:
+            description_result = describe_image(vision_source, raw_base64=vision_raw)
+            print(
+                f"DEBUG: describe_image result status: {description_result.get('status')}"
+            )
+        except Exception as io_error:
+            print(f"DEBUG: describe_image raised exception inside process_tags: {io_error}")
+            import traceback
+
+            print(f"DEBUG: Full traceback: {traceback.format_exc()}")
+            state["front_photo"]["description"] = None
+            state["front_photo"]["model_used"] = None
+            state["front_photo"]["structured_data"] = None
+            state["front_photo"]["description_status"] = "error"
+        else:
+            status = description_result.get("status")
+            if status == "success":
+                generated_text = (description_result.get("text") or "").strip()
+                state["front_photo"]["model_used"] = description_result.get("model_used")
+                state["front_photo"]["structured_data"] = description_result.get(
+                    "structured_data"
+                )
+
+                import re
+
+                has_japanese = bool(
+                    re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", generated_text)
+                )
+                lower_text = generated_text.lower()
+                jp_apology_phrases = [
+                    "申し訳ありません",
+                    "画像が提供されていません",
+                    "画像がありません",
+                    "画像を提供",
+                    "画像を直接確認することができません",
+                    "画像を確認することができません",
+                    "画像を確認できません",
+                    "画像を読み込めません",
+                    "指示では画像",
+                ]
+                invalid = (
+                    not generated_text
+                    or len(generated_text) < 12
+                    or ("ready to help" in lower_text)
+                    or ("ready to describe" in lower_text)
+                    or ("please provide the image" in lower_text)
+                    or ("what's the first photo" in lower_text)
+                    or ("how can i" in lower_text)
+                    or any(p in generated_text for p in jp_apology_phrases)
+                    or not has_japanese
+                )
+
+                if invalid:
+                    print(
+                        f"DEBUG: Generated description judged invalid, keeping None. Preview: '{generated_text[:50]}'"
+                    )
+                    state["front_photo"]["description"] = None
+                else:
+                    preview_len = min(300, len(generated_text))
+                    print(
+                        f"DEBUG: Image description generated successfully (first {preview_len} chars): {generated_text[:preview_len]}"
+                    )
+                    state["front_photo"]["description"] = generated_text
+
+                state["front_photo"]["description_status"] = "done"
+            else:
+                print(
+                    f"DEBUG: describe_image returned non-success status: {status}, message={description_result.get('message')}"
+                )
+                state["front_photo"]["description"] = None
+                state["front_photo"]["model_used"] = None
+                state["front_photo"]["structured_data"] = None
+                state["front_photo"]["description_status"] = "error"
+
+    elif photo_status == "captured" and description_status == "processing":
+        # 別の呼び出しで処理中の場合は完了を待つ
+        print("DEBUG: process_tags found description still processing, skipping this round")
+        raise PreventUpdate
+
+    # 2. タグ生成を試みる
+    print("DEBUG: Calling _update_tags from process_tags")
+    _update_tags(state)
+    result = _serialise_state(state)
+    print("DEBUG: process_tags completed")
+    return result
 
 
+# STEP4自動反映用のトリガー
 @app.callback(
     Output("auto-fill-trigger", "children"),
     Input("url", "pathname"),
@@ -1288,45 +1526,72 @@ def display_api_results(store_data):
 
     # IO Intelligenceタグの表示
     tags_data = state.get("tags", {})
-    print(f"DEBUG: tags_data status: {tags_data.get('status')}, tags: {tags_data.get('tags', [])}")
-
-    # デフォルトメッセージを変更
-    tags_display = html.Div(
-        "バーコード照合または画像説明の結果が揃うとタグを生成します。",
-        className="alert alert-info"
+    print(
+        f"DEBUG: tags_data status: {tags_data.get('status')}, tags: {tags_data.get('tags', [])}"
     )
 
-    if not tags_data or tags_data.get("status") == "not_ready":
+    # デフォルトメッセージ
+    tags_display = html.Div(
+        "バーコード照合または画像説明の結果が揃うとタグを生成します。",
+        className="alert alert-info",
+    )
+
+    # タグが1件でもあれば、ステータスに関わらず即表示（逐次反映）
+    current_tags = tags_data.get("tags") or []
+    if isinstance(current_tags, list) and current_tags:
         tags_display = html.Div(
-            "バーコード照合または画像説明の結果が揃うとタグを生成します。",
-            className="alert alert-info"
+            [
+                html.H5("タグ候補", className="mb-3"),
+                html.Div(
+                    [
+                        html.Span(tag, className="badge bg-secondary me-1 mb-1")
+                        for tag in current_tags[:20]
+                    ]
+                ),
+                html.Div(
+                    tags_data.get("message", ""),
+                    className="text-muted small mt-2",
+                ),
+                html.Div(
+                    f"Vision: {state.get('front_photo', {}).get('model_used') or '-'}",
+                    className="text-muted small mt-1",
+                ),
+            ]
         )
+
+    if not tags_data or tags_data.get("status") == "not_ready":
+        pass
     elif tags_data.get("status") == "missing_credentials":
         tags_display = html.Div(
             "IO Intelligence APIキーが設定されていません。",
-            className="alert alert-warning"
+            className="alert alert-warning",
         )
     elif tags_data.get("status") == "error":
         tags_display = html.Div(
             f"タグ生成エラー: {tags_data.get('message', '不明なエラー')}",
-            className="alert alert-danger"
+            className="alert alert-danger",
         )
     elif tags_data.get("status") == "success" and tags_data.get("tags"):
         try:
             tags_list = tags_data["tags"]
             if isinstance(tags_list, list) and tags_list:
+                # 上の逐次反映表示と同じだが、明示しておく
                 tags_display = html.Div(
                     [
-                        html.H5("IO Intelligence タグ抽出結果", className="mb-3"),
+                        html.H5("タグ候補", className="mb-3"),
                         html.Div(
                             [
                                 html.Span(tag, className="badge bg-secondary me-1 mb-1")
-                                for tag in tags_list[:20]  # 最大20個表示
+                                for tag in tags_list[:20]
                             ]
                         ),
                         html.Div(
                             tags_data.get("message", ""),
-                            className="text-muted small mt-2"
+                            className="text-muted small mt-2",
+                        ),
+                        html.Div(
+                            f"Vision: {state.get('front_photo', {}).get('model_used') or '-'}",
+                            className="text-muted small mt-1",
                         ),
                     ]
                 )
@@ -1545,5 +1810,42 @@ def update_theme_css(selected_theme):
 
 if __name__ == "__main__":
     import os
+
     port = int(os.environ.get("PORT", 8050))
-    app.run_server(host="0.0.0.0", port=port)
+
+    # .envファイルから環境変数を読み込む
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+        print("DEBUG: Loaded environment variables from .env file")
+    except ImportError:
+        print("DEBUG: python-dotenv not available, using system environment variables")
+
+    # テスト: IO Intelligence APIキーの確認
+    import os
+
+    # 環境変数が設定されていない場合のみテスト用キーを設定
+    current_key = os.getenv("IO_INTELLIGENCE_API_KEY")
+    if not current_key:
+        os.environ["IO_INTELLIGENCE_API_KEY"] = "test_key_for_debugging"
+        print("DEBUG: Set test IO_INTELLIGENCE_API_KEY for debugging")
+    else:
+        print(
+            f"DEBUG: Using existing IO_INTELLIGENCE_API_KEY (length: {len(current_key)})"
+        )
+
+    from services.io_intelligence import IO_API_KEY, describe_image
+
+    print(f"DEBUG: IO_API_KEY is set: {bool(IO_API_KEY)}")
+    if IO_API_KEY:
+        print(f"DEBUG: IO_API_KEY length: {len(IO_API_KEY)}")
+        print(
+            f"DEBUG: IO_API_KEY starts with: {IO_API_KEY[:10] if IO_API_KEY else 'None'}..."
+        )
+
+        # 本番では起動時のdescribe_imageテスト呼び出しは行わない
+    else:
+        print("DEBUG: IO_API_KEY is still not set - this should not happen")
+
+    app.run(host="0.0.0.0", port=port)

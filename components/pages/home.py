@@ -1,4 +1,4 @@
-from dash import html
+from dash import html, dcc
 
 
 def render_home(total_photos: int, unique_barcodes: int) -> html.Div:
@@ -57,35 +57,65 @@ def render_home(total_photos: int, unique_barcodes: int) -> html.Div:
                 ],
                 className="card bg-light p-3",
             ),
+            # タグ検索（見かけのみ）
             html.Div(
                 [
-                    html.H4(
-                        "使い方",
-                        className="card-title",
-                    ),
-                    html.Ol(
+                    html.H4("タグ検索", className="card-title"),
+                    html.Div(
                         [
-                            html.Li(
-                                "「写真を登録」から写真をアップロード",
-                                className="mb-2",
+                            dcc.Input(
+                                placeholder="タグで検索（例: 猫、白、キーホルダー）",
+                                className="form-control me-2",
+                                style={"maxWidth": "420px"},
                             ),
-                            html.Li(
-                                "写真からバーコードを自動検出",
-                                className="mb-2",
-                            ),
-                            html.Li(
-                                "説明を追加して保存",
-                                className="mb-2",
-                            ),
-                            html.Li(
-                                "「写真一覧」で確認",
-                                className="mb-2",
-                            ),
+                            html.Button("検索", className="btn btn-light mt-2 mt-md-0"),
                         ],
-                        className="card-text ps-3",
+                        className="d-flex flex-column flex-md-row align-items-start",
                     ),
                 ],
-                className="card bg-primary text-white mb-3 mt-3",
+                className="card text-white bg-secondary mb-3",
+            ),
+            # 画像一覧（見かけのみのサムネイル）
+            html.Div(
+                [
+                    html.H4("最近の写真", className="card-title mb-3"),
+                    html.Div(
+                        [
+                            *[
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.I(
+                                                    className="bi bi-image",
+                                                    style={"fontSize": "28px"},
+                                                )
+                                            ],
+                                            className="d-flex align-items-center justify-content-center",
+                                            style={
+                                                "height": "150px",
+                                                "background": "var(--bs-secondary-bg)",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Span("タグ: ", className="text-muted me-1"),
+                                                html.Span("猫", className="badge bg-light text-dark me-1"),
+                                                html.Span("白", className="badge bg-light text-dark me-1"),
+                                                html.Span("キーホルダー", className="badge bg-light text-dark"),
+                                            ],
+                                            className="photo-info",
+                                        ),
+                                    ],
+                                    className="photo-card",
+                                )
+                                for _ in range(12)
+                            ]
+                        ],
+                        className="photo-grid",
+                    ),
+                ],
+                className="card bg-light p-3 mb-3",
             ),
         ]
     )

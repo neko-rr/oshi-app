@@ -1,12 +1,28 @@
-from dash import html, dcc
+from dash import html
+from dash import dcc
+from dash import callback, Output, Input, State
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from typing import Iterable, Mapping
+import random
 
 Photo = Mapping[str, str]
 
 
 def render_gallery(photos: Iterable[Photo]) -> html.Div:
     photos = list(photos)
+    TARGET_CARD_COUNT = 8  # ダミーカードを含めた表示枚数（見かけだけ）
+
+    # 不足分をダミーで補完
+    if len(photos) < TARGET_CARD_COUNT:
+        for i in range(TARGET_CARD_COUNT - len(photos)):
+            photos.append({
+                "image_url": None,
+                "barcode": "DUMMY",
+                "description": None,
+                "tags": None,
+                "_dummy": True,
+            })
 
     # ヘッダー
     header = html.Div([html.H1([html.I(className="bi bi-speedometer2 me-2"), "ダッシュボード"])], className="header")
@@ -57,10 +73,133 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
 
         return fig
 
+    # タグ検索（見かけだけ）
+    color_tag_palette = [
+        ("赤", "danger"), ("青", "primary"), ("緑", "success"), ("黄", "warning"),
+        ("紫", "secondary"), ("黒", "dark"), ("白", "light"),
+    ]
+
+    tag_search = html.Div(
+        [
+            html.H4("タグ検索", className="card-title"),
+            html.Div(
+                [
+                    dcc.Input(
+                        placeholder="タグで検索（例: 猫、白、キーホルダー）",
+                        className="form-control me-2",
+                        style={"maxWidth": "420px"},
+                        type="text",
+                    ),
+                    html.Button("検索", className="btn btn-light mt-2 mt-md-0"),
+                ],
+                className="d-flex flex-column flex-md-row align-items-start",
+            ),
+            html.Div(
+                [
+                    dbc.Badge(name, color=color, className=("me-2 mb-2" + (" text-dark" if color == "light" else "")))
+                    for name, color in color_tag_palette
+                ],
+                className="mt-2",
+            ),
+        ],
+        className="card text-white bg-secondary mb-3",
+    )
+
+    # 収納場所タグ × 製品種類（乱数・見かけだけ）
+    def create_storage_chart_data() -> dict:
+        product_types = ['ポストカード', '缶バッチ', 'アクリルスタンド']
+        storage_tags = ['クリアファイル', 'タンス', 'ディスプレイ']
+        colors = {
+            'クリアファイル': '#0d6efd',
+            'タンス': '#6c757d',
+            'ディスプレイ': '#ffc107',
+        }
+        counts = {tag: [random.randint(2, 12) for _ in product_types] for tag in storage_tags}
+        # 余り数は「全数より少ない」ことを保証（最大で全数の半分）
+        surplus = {}
+        flags = {}
+        for tag in storage_tags:
+            surplus_list = []
+            flags_list = []
+            for base in counts[tag]:
+                max_extra = max(0, base // 2)
+                extra = random.randint(0, max_extra)
+                surplus_list.append(extra)
+                flags_list.append(extra > 0)
+            surplus[tag] = surplus_list
+            flags[tag] = flags_list
+        return {
+            'product_types': product_types,
+            'storage_tags': storage_tags,
+            'colors': colors,
+            'counts': counts,
+            'surplus': surplus,
+            'flags': flags,
+        }
+
+    def create_storage_location_chart_from_data(data: dict, show_surplus: bool) -> go.Figure:
+        product_types = data['product_types']
+        storage_tags = data['storage_tags']
+        colors = data['colors']
+        counts = data['counts']
+        surplus = data.get('surplus') or {tag: [0]*len(product_types) for tag in storage_tags}
+        flags = data['flags']
+
+        fig = go.Figure()
+        for tag in storage_tags:
+            base_vals = counts[tag]
+            extra_vals = surplus.get(tag, [0]*len(product_types))
+            # ON時は「余り」だけ、OFF時は全数
+            y_vals = [extra_vals[i] if show_surplus else base_vals[i] for i in range(len(product_types))]
+            tag_flags = flags[tag]
+            texts = [('余' if (show_surplus and tag_flags[i]) else '') for i in range(len(product_types))]
+            hover_flags = [('あり (' + str(extra_vals[i]) + ')' if tag_flags[i] else 'なし') for i in range(len(product_types))]
+            fig.add_bar(
+                name=tag,
+                x=product_types,
+                y=y_vals,
+                marker_color=colors[tag],
+                text=texts,
+                textposition='outside',
+                cliponaxis=False,
+                customdata=hover_flags,
+                hovertemplate='%{x}<br>%{y} 個<br>余り: %{customdata}<extra>' + tag + '</extra>',
+            )
+
+        fig.update_layout(
+            title='収納場所タグ × 製品種類（プレゼン用・乱数）',
+            xaxis_title='製品種類',
+            yaxis_title='個数',
+            barmode='group',
+            legend_title_text='収納場所タグ',
+            margin=dict(l=20, r=20, t=40, b=20),
+            height=320,
+        )
+        return fig
+
+    storage_chart_data = create_storage_chart_data()
+    storage_chart_card = html.Div(
+        [
+            html.H4("収納場所タグ 集計", className="mb-2"),
+            dbc.Switch(id='gallery-surplus-toggle', label='余りフラグを表示（ダブり把握）', value=False, className='mb-2'),
+            dcc.Store(id='gallery-storage-chart-data', data=storage_chart_data),
+            dcc.Graph(
+                id='gallery-storage-chart',
+                figure=create_storage_location_chart_from_data(storage_chart_data, False),
+                config={'displayModeBar': False, 'responsive': True, 'autosizable': True},
+                className="border rounded w-100",
+                style={'height': '320px'},
+            ),
+        ],
+        className="card p-4 mb-4",
+    )
+
     if not photos:
         # ダッシュボードコンテンツ（写真がない場合）
         dashboard_content = html.Div(
             [
+                tag_search,
+                storage_chart_card,
                 # 統計カード
                 html.Div(
                     [
@@ -245,14 +384,14 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                     [
                         html.Div(
                             [
-                                html.Img(
+                                # サムネイル（URLが無ければプレースホルダー）
+                                (html.Img(
                                     src=photo.get("image_url"),
-                                    style={
-                                        "width": "100%",
-                                        "height": "150px",
-                                        "objectFit": "cover",
-                                    },
-                                ),
+                                    style={"width": "100%", "height": "150px", "objectFit": "cover"},
+                                ) if photo.get("image_url") else html.Div(
+                                    [html.I(className="bi bi-image", style={"fontSize": "28px"})],
+                                    className="d-flex align-items-center justify-content-center photo-placeholder",
+                                )),
                                 html.Div(
                                     [
                                         html.Div(
@@ -263,6 +402,17 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                             photo.get("description") or "説明なし",
                                             className="text-muted small",
                                         ),
+                                        html.Div(
+                                            [
+                                                # カラータグ風のダミータグ（見かけだけ）
+                                                *[dbc.Badge(n, color=c, className=("me-1" + (" text-dark" if c == "light" else "")))
+                                                  for n, c in (
+                                                      [color_tag_palette[(i*2) % len(color_tag_palette)],
+                                                       color_tag_palette[(i*2+1) % len(color_tag_palette)]]
+                                                  )]
+                                            ],
+                                            className="mt-1",
+                                        ),
                                     ],
                                     className="photo-info",
                                 ),
@@ -271,10 +421,55 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                         )
                     ]
                 )
-                for photo in photos
+                for i, photo in enumerate(photos)
             ],
             className="photo-grid",
         )
-        dashboard_content = html.Div([summary, grid])
+        dashboard_content = html.Div([tag_search, storage_chart_card, summary, grid])
 
     return html.Div([header, dashboard_content])
+
+
+@callback(
+    Output('gallery-storage-chart', 'figure'),
+    Input('gallery-surplus-toggle', 'value'),
+    State('gallery-storage-chart-data', 'data'),
+)
+def _update_storage_chart(show_surplus: bool, data: dict):
+    product_types = data['product_types']
+    storage_tags = data['storage_tags']
+    colors = data['colors']
+    counts = data['counts']
+    surplus = data.get('surplus') or {tag: [0]*len(product_types) for tag in storage_tags}
+    flags = data['flags']
+
+    fig = go.Figure()
+    for tag in storage_tags:
+        base_vals = counts[tag]
+        extra_vals = surplus.get(tag, [0]*len(product_types))
+        y_vals = [extra_vals[i] if show_surplus else base_vals[i] for i in range(len(product_types))]
+        tag_flags = flags[tag]
+        texts = [('余' if (show_surplus and tag_flags[i]) else '') for i in range(len(product_types))]
+        hover_flags = [('あり (' + str(extra_vals[i]) + ')' if tag_flags[i] else 'なし') for i in range(len(product_types))]
+        fig.add_bar(
+            name=tag,
+            x=product_types,
+            y=y_vals,
+            marker_color=colors[tag],
+            text=texts,
+            textposition='outside',
+            cliponaxis=False,
+            customdata=hover_flags,
+            hovertemplate='%{x}<br>%{y} 個<br>余り: %{customdata}<extra>' + tag + '</extra>',
+        )
+
+    fig.update_layout(
+        title='収納場所タグ × 製品種類（プレゼン用・乱数）',
+        xaxis_title='製品種類',
+        yaxis_title='個数',
+        barmode='group',
+        legend_title_text='収納場所タグ',
+        margin=dict(l=20, r=20, t=40, b=20),
+        height=320,
+    )
+    return fig
