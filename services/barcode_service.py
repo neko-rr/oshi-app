@@ -9,51 +9,49 @@ from pyzbar.pyzbar import decode as decode_barcode
 def decode_from_base64(contents: str) -> Optional[dict]:
     """Decode barcode information from a dash upload base64 string."""
     try:
-        content_header, content_string = contents.split(",")
-        mime_type = content_header.replace("data:", "").split(";")[0]
+        content_header, content_string = contents.split(",", 1)
         decoded = base64.b64decode(content_string)
-        image = Image.open(io.BytesIO(decoded))
     except Exception as exc:
         raise ValueError("画像の解析に失敗しました。別の写真でお試しください。") from exc
 
-    # 複数パスでデコード精度を上げる
-    attempts = []
     try:
-        attempts.append(image)
-    except Exception:
-        pass
-    try:
-        attempts.append(image.convert("L"))  # グレースケール
-    except Exception:
-        pass
-    try:
-        w, h = image.size
-        attempts.append(image.resize((int(w * 1.8), int(h * 1.8))))  # 拡大
-    except Exception:
-        pass
-    try:
-        attempts.append(image.rotate(90, expand=True))  # 回転
-        attempts.append(image.rotate(180, expand=True))
-        attempts.append(image.rotate(270, expand=True))
-    except Exception:
-        pass
+        with Image.open(io.BytesIO(decoded)) as pil_image:
+            pil_image = pil_image.convert("L")
+            max_dim = 640
+            if max(pil_image.size) > max_dim:
+                pil_image.thumbnail((max_dim, max_dim), Image.LANCZOS)
 
-    barcodes = []
-    for img in attempts:
-        try:
-            barcodes = decode_barcode(img)
-            if barcodes:
-                break
-        except Exception:
-            continue
+            attempts = [pil_image.copy()]
+            try:
+                attempts.append(pil_image.transpose(Image.FLIP_LEFT_RIGHT))
+            except Exception:
+                pass
 
-    if not barcodes:
-        return None
+            try:
+                attempts.append(pil_image.rotate(90, expand=True))
+                attempts.append(pil_image.rotate(180, expand=True))
+                attempts.append(pil_image.rotate(270, expand=True))
+            except Exception:
+                pass
 
-    barcode = barcodes[0]
-    return {
-        "barcode": barcode.data.decode("utf-8"),
-        "barcode_type": barcode.type,
-        "image_bytes": decoded,
-        "content_type": mime_type,
-    }
+            barcodes = []
+            for attempt in attempts:
+                try:
+                    barcodes = decode_barcode(attempt)
+                    if barcodes:
+                        break
+                finally:
+                    if attempt is not pil_image:
+                        attempt.close()
+            attempts[0].close()
+
+        if not barcodes:
+            return None
+
+        barcode = barcodes[0]
+        return {
+            "barcode": barcode.data.decode("utf-8"),
+            "barcode_type": barcode.type,
+        }
+    finally:
+        del decoded
