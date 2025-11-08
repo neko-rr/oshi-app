@@ -874,9 +874,9 @@ def handle_front_photo(
                 reduced_bytes_for_vision = original_bytes
                 try:
                     vision_image = Image.open(io.BytesIO(original_bytes))
-                    vision_image.thumbnail((256, 256), Image.LANCZOS)
+                    vision_image.thumbnail((384, 384), Image.LANCZOS)
                     vision_buffer = io.BytesIO()
-                    vision_image.save(vision_buffer, format="JPEG", quality=70)
+                    vision_image.save(vision_buffer, format="JPEG", quality=85)
                     reduced_bytes_for_vision = vision_buffer.getvalue()
                     vision_image.close()
                 except Exception as reduce_error:
