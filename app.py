@@ -1815,7 +1815,10 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                         print("Updating photo record with URL...")
                         # 画像URLを更新
                         supabase.table("photo").update(
-                            {"image_url": image_url, "thumbnail_url": image_url}
+                            {
+                                "photo_high_resolution_url": image_url,
+                                "photo_thumbnail_url": image_url,
+                            }
                         ).eq("photo_id", photo_id).execute()
                         print("Photo record updated with URL")
 

@@ -1,12 +1,102 @@
 from dash import html
 from dash import dcc
-from dash import callback, Output, Input, State
+from dash import callback, Output, Input, State, callback_context
+from dash.dependencies import ALL
+from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from typing import Iterable, Mapping
 import random
 
 Photo = Mapping[str, str]
+
+
+def _photo_unique_id(photo: Photo, fallback: str) -> str:
+    return (
+        photo.get("registration_product_id")
+        or photo.get("photo_id")
+        or photo.get("barcode_number")
+        or fallback
+    )
+
+
+def _photo_thumb_url(photo: Photo):
+    nested = photo.get("photo") or {}
+    return (
+        photo.get("image_url")
+        or nested.get("photo_thumbnail_url")
+        or nested.get("photo_high_resolution_url")
+    )
+
+
+def _photo_full_url(photo: Photo):
+    nested = photo.get("photo") or {}
+    return nested.get("photo_high_resolution_url") or _photo_thumb_url(photo)
+
+
+def _render_detail_content(photo: Photo) -> html.Div:
+    thumbnail = _photo_full_url(photo)
+    info_rows = [
+        ("製品名", photo.get("product_name") or "未設定"),
+        ("分類", photo.get("product_group_name") or "未設定"),
+        ("作品シリーズ", photo.get("works_series_name") or "未設定"),
+        ("作品名", photo.get("title") or "未設定"),
+        ("キャラクター", photo.get("character_name") or "未設定"),
+        ("バーコード", photo.get("barcode_number") or "未取得"),
+        ("メモ", photo.get("memo") or "記録なし"),
+    ]
+
+    info_list = html.Ul(
+        [
+            html.Li(
+                [
+                    html.Span(f"{label}：", className="fw-semibold me-1"),
+                    html.Span(value),
+                ],
+                className="mb-2",
+            )
+            for label, value in info_rows
+        ],
+        className="list-unstyled mb-0",
+    )
+
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Div(
+                        html.Img(
+                            src=thumbnail,
+                            className="img-fluid rounded shadow-sm",
+                            style={"maxHeight": "320px", "objectFit": "cover"},
+                        )
+                        if thumbnail
+                        else html.Div(
+                            [
+                                html.I(
+                                    className="bi bi-image",
+                                    style={"fontSize": "48px"},
+                                ),
+                                html.P(
+                                    "画像が登録されていません", className="text-muted"
+                                ),
+                            ],
+                            className="d-flex flex-column align-items-center justify-content-center border rounded p-4 text-center",
+                        ),
+                        className="col-12 col-md-5",
+                    ),
+                    html.Div(
+                        [
+                            html.H5("登録情報", className="mb-3"),
+                            info_list,
+                        ],
+                        className="col-12 col-md-7",
+                    ),
+                ],
+                className="row g-4 align-items-start",
+            )
+        ]
+    )
 
 
 def render_gallery(photos: Iterable[Photo]) -> html.Div:
@@ -16,50 +106,61 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
     # 不足分をダミーで補完
     if len(photos) < TARGET_CARD_COUNT:
         for i in range(TARGET_CARD_COUNT - len(photos)):
-            photos.append({
-                "image_url": None,
-                "barcode": "DUMMY",
-                "description": None,
-                "tags": None,
-                "_dummy": True,
-            })
+            photos.append(
+                {
+                    "image_url": None,
+                    "barcode": "DUMMY",
+                    "description": None,
+                    "tags": None,
+                    "_dummy": True,
+                }
+            )
+
+    real_photos_for_store = [p for p in photos if not p.get("_dummy")]
+    photo_store_component = dcc.Store(
+        id="gallery-photo-data", data=real_photos_for_store
+    )
 
     # ヘッダー
-    header = html.Div([html.H1([html.I(className="bi bi-speedometer2 me-2"), "ダッシュボード"])], className="header")
+    header = html.Div(
+        [html.H1([html.I(className="bi bi-speedometer2 me-2"), "ダッシュボード"])],
+        className="header",
+    )
 
     # デモ用グラフデータ
     def create_category_pie_chart():
         """カテゴリ別商品数の円グラフ"""
-        labels = ['キーホルダー', '缶バッジ', 'アクリルスタンド', 'その他']
+        labels = ["キーホルダー", "缶バッジ", "アクリルスタンド", "その他"]
         values = [0, 0, 0, 0]  # デモ用に全て0
 
-        fig = go.Figure(data=[go.Pie(
-            labels=labels,
-            values=values,
-            marker_colors=['#FF6B9D', '#4ECDC4', '#45B7D1', '#96CEB4'],
-            title="商品カテゴリ分布"
-        )])
+        fig = go.Figure(
+            data=[
+                go.Pie(
+                    labels=labels,
+                    values=values,
+                    marker_colors=["#FF6B9D", "#4ECDC4", "#45B7D1", "#96CEB4"],
+                    title="商品カテゴリ分布",
+                )
+            ]
+        )
 
         fig.update_layout(
             font_family="Arial",
             font_size=12,
             margin=dict(l=20, r=20, t=40, b=20),
-            height=250  # 高さを少し小さく
+            height=250,  # 高さを少し小さく
         )
 
         return fig
 
     def create_monthly_bar_chart():
         """月別収集数の棒グラフ"""
-        months = ['1月', '2月', '3月', '4月', '5月', '6月']
+        months = ["1月", "2月", "3月", "4月", "5月", "6月"]
         counts = [0, 0, 0, 0, 0, 0]  # デモ用に全て0
 
-        fig = go.Figure(data=[go.Bar(
-            x=months,
-            y=counts,
-            marker_color='#FF6B9D',
-            name='収集数'
-        )])
+        fig = go.Figure(
+            data=[go.Bar(x=months, y=counts, marker_color="#FF6B9D", name="収集数")]
+        )
 
         fig.update_layout(
             title="月別収集数",
@@ -68,15 +169,20 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             font_family="Arial",
             font_size=12,
             margin=dict(l=20, r=20, t=40, b=20),
-            height=250  # 高さを少し小さく
+            height=250,  # 高さを少し小さく
         )
 
         return fig
 
     # タグ検索（見かけだけ）
     color_tag_palette = [
-        ("赤", "danger"), ("青", "primary"), ("緑", "success"), ("黄", "warning"),
-        ("紫", "secondary"), ("黒", "dark"), ("白", "light"),
+        ("赤", "danger"),
+        ("青", "primary"),
+        ("緑", "success"),
+        ("黄", "warning"),
+        ("紫", "secondary"),
+        ("黒", "dark"),
+        ("白", "light"),
     ]
 
     tag_search = html.Div(
@@ -96,7 +202,13 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             ),
             html.Div(
                 [
-                    dbc.Badge(name, color=color, className=("me-2 mb-2" + (" text-dark" if color == "light" else "")))
+                    dbc.Badge(
+                        name,
+                        color=color,
+                        className=(
+                            "me-2 mb-2" + (" text-dark" if color == "light" else "")
+                        ),
+                    )
                     for name, color in color_tag_palette
                 ],
                 className="mt-2",
@@ -107,14 +219,16 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
 
     # 収納場所タグ × 製品種類（乱数・見かけだけ）
     def create_storage_chart_data() -> dict:
-        product_types = ['ポストカード', '缶バッチ', 'アクリルスタンド']
-        storage_tags = ['クリアファイル', 'タンス', 'ディスプレイ']
+        product_types = ["ポストカード", "缶バッチ", "アクリルスタンド"]
+        storage_tags = ["クリアファイル", "タンス", "ディスプレイ"]
         colors = {
-            'クリアファイル': '#0d6efd',
-            'タンス': '#6c757d',
-            'ディスプレイ': '#ffc107',
+            "クリアファイル": "#0d6efd",
+            "タンス": "#6c757d",
+            "ディスプレイ": "#ffc107",
         }
-        counts = {tag: [random.randint(2, 12) for _ in product_types] for tag in storage_tags}
+        counts = {
+            tag: [random.randint(2, 12) for _ in product_types] for tag in storage_tags
+        }
         # 余り数は「全数より少ない」ことを保証（最大で全数の半分）
         surplus = {}
         flags = {}
@@ -129,49 +243,64 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             surplus[tag] = surplus_list
             flags[tag] = flags_list
         return {
-            'product_types': product_types,
-            'storage_tags': storage_tags,
-            'colors': colors,
-            'counts': counts,
-            'surplus': surplus,
-            'flags': flags,
+            "product_types": product_types,
+            "storage_tags": storage_tags,
+            "colors": colors,
+            "counts": counts,
+            "surplus": surplus,
+            "flags": flags,
         }
 
-    def create_storage_location_chart_from_data(data: dict, show_surplus: bool) -> go.Figure:
-        product_types = data['product_types']
-        storage_tags = data['storage_tags']
-        colors = data['colors']
-        counts = data['counts']
-        surplus = data.get('surplus') or {tag: [0]*len(product_types) for tag in storage_tags}
-        flags = data['flags']
+    def create_storage_location_chart_from_data(
+        data: dict, show_surplus: bool
+    ) -> go.Figure:
+        product_types = data["product_types"]
+        storage_tags = data["storage_tags"]
+        colors = data["colors"]
+        counts = data["counts"]
+        surplus = data.get("surplus") or {
+            tag: [0] * len(product_types) for tag in storage_tags
+        }
+        flags = data["flags"]
 
         fig = go.Figure()
         for tag in storage_tags:
             base_vals = counts[tag]
-            extra_vals = surplus.get(tag, [0]*len(product_types))
+            extra_vals = surplus.get(tag, [0] * len(product_types))
             # ON時は「余り」だけ、OFF時は全数
-            y_vals = [extra_vals[i] if show_surplus else base_vals[i] for i in range(len(product_types))]
+            y_vals = [
+                extra_vals[i] if show_surplus else base_vals[i]
+                for i in range(len(product_types))
+            ]
             tag_flags = flags[tag]
-            texts = [('余' if (show_surplus and tag_flags[i]) else '') for i in range(len(product_types))]
-            hover_flags = [('あり (' + str(extra_vals[i]) + ')' if tag_flags[i] else 'なし') for i in range(len(product_types))]
+            texts = [
+                ("余" if (show_surplus and tag_flags[i]) else "")
+                for i in range(len(product_types))
+            ]
+            hover_flags = [
+                ("あり (" + str(extra_vals[i]) + ")" if tag_flags[i] else "なし")
+                for i in range(len(product_types))
+            ]
             fig.add_bar(
                 name=tag,
                 x=product_types,
                 y=y_vals,
                 marker_color=colors[tag],
                 text=texts,
-                textposition='outside',
+                textposition="outside",
                 cliponaxis=False,
                 customdata=hover_flags,
-                hovertemplate='%{x}<br>%{y} 個<br>余り: %{customdata}<extra>' + tag + '</extra>',
+                hovertemplate="%{x}<br>%{y} 個<br>余り: %{customdata}<extra>"
+                + tag
+                + "</extra>",
             )
 
         fig.update_layout(
-            title='収納場所タグ × 製品種類（プレゼン用・乱数）',
-            xaxis_title='製品種類',
-            yaxis_title='個数',
-            barmode='group',
-            legend_title_text='収納場所タグ',
+            title="収納場所タグ × 製品種類（プレゼン用・乱数）",
+            xaxis_title="製品種類",
+            yaxis_title="個数",
+            barmode="group",
+            legend_title_text="収納場所タグ",
             margin=dict(l=20, r=20, t=40, b=20),
             height=320,
         )
@@ -181,14 +310,25 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
     storage_chart_card = html.Div(
         [
             html.H4("収納場所タグ 集計", className="mb-2"),
-            dbc.Switch(id='gallery-surplus-toggle', label='余りフラグを表示（ダブり把握）', value=False, className='mb-2'),
-            dcc.Store(id='gallery-storage-chart-data', data=storage_chart_data),
+            dbc.Switch(
+                id="gallery-surplus-toggle",
+                label="余りフラグを表示（ダブり把握）",
+                value=False,
+                className="mb-2",
+            ),
+            dcc.Store(id="gallery-storage-chart-data", data=storage_chart_data),
             dcc.Graph(
-                id='gallery-storage-chart',
-                figure=create_storage_location_chart_from_data(storage_chart_data, False),
-                config={'displayModeBar': False, 'responsive': True, 'autosizable': True},
+                id="gallery-storage-chart",
+                figure=create_storage_location_chart_from_data(
+                    storage_chart_data, False
+                ),
+                config={
+                    "displayModeBar": False,
+                    "responsive": True,
+                    "autosizable": True,
+                },
                 className="border rounded w-100",
-                style={'height': '320px'},
+                style={"height": "320px"},
             ),
         ],
         className="card p-4 mb-4",
@@ -198,6 +338,7 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
         # ダッシュボードコンテンツ（写真がない場合）
         dashboard_content = html.Div(
             [
+                photo_store_component,
                 tag_search,
                 storage_chart_card,
                 # 統計カード
@@ -208,7 +349,10 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                 html.Div(
                                     [
                                         html.Div("0", className="card-title h2 mb-0"),
-                                        html.Div("登録商品数", className="card-subtitle text-muted"),
+                                        html.Div(
+                                            "登録商品数",
+                                            className="card-subtitle text-muted",
+                                        ),
                                     ],
                                     className="card-body",
                                 ),
@@ -220,7 +364,10 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                 html.Div(
                                     [
                                         html.Div("¥0", className="card-title h2 mb-0"),
-                                        html.Div("総購入額", className="card-subtitle text-muted"),
+                                        html.Div(
+                                            "総購入額",
+                                            className="card-subtitle text-muted",
+                                        ),
                                     ],
                                     className="card-body",
                                 ),
@@ -232,7 +379,10 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                 html.Div(
                                     [
                                         html.Div("0", className="card-title h2 mb-0"),
-                                        html.Div("カテゴリ数", className="card-subtitle text-muted"),
+                                        html.Div(
+                                            "カテゴリ数",
+                                            className="card-subtitle text-muted",
+                                        ),
                                     ],
                                     className="card-body",
                                 ),
@@ -242,7 +392,6 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                     ],
                     className="row g-3 mb-4",
                 ),
-
                 # グラフセクション
                 html.Div(
                     [
@@ -252,16 +401,19 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                 # カテゴリ別円グラフ
                                 html.Div(
                                     [
-                                        html.H6("商品カテゴリ分布", className="text-center mb-3"),
+                                        html.H6(
+                                            "商品カテゴリ分布",
+                                            className="text-center mb-3",
+                                        ),
                                         dcc.Graph(
                                             figure=create_category_pie_chart(),
                                             config={
-                                                'displayModeBar': False,
-                                                'responsive': True,
-                                                'autosizable': True
+                                                "displayModeBar": False,
+                                                "responsive": True,
+                                                "autosizable": True,
                                             },
                                             className="border rounded w-100",
-                                            style={'height': '250px'}
+                                            style={"height": "250px"},
                                         ),
                                     ],
                                     className="col-12 col-md-6 mb-4",
@@ -269,16 +421,18 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                                 # 月別棒グラフ
                                 html.Div(
                                     [
-                                        html.H6("月別収集数", className="text-center mb-3"),
+                                        html.H6(
+                                            "月別収集数", className="text-center mb-3"
+                                        ),
                                         dcc.Graph(
                                             figure=create_monthly_bar_chart(),
                                             config={
-                                                'displayModeBar': False,
-                                                'responsive': True,
-                                                'autosizable': True
+                                                "displayModeBar": False,
+                                                "responsive": True,
+                                                "autosizable": True,
                                             },
                                             className="border rounded w-100",
-                                            style={'height': '250px'}
+                                            style={"height": "250px"},
                                         ),
                                     ],
                                     className="col-12 col-md-6 mb-4",
@@ -289,7 +443,6 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                     ],
                     className="card p-4 mb-4",
                 ),
-
                 # クイックアクション
                 html.Div(
                     [
@@ -317,7 +470,6 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                     ],
                     className="card p-4 mb-4",
                 ),
-
                 # 最近の活動（デモデータ）
                 html.Div(
                     [
@@ -326,16 +478,25 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                             [
                                 html.Div(
                                     [
-                                        html.I(className="bi bi-circle-fill text-primary me-2"),
-                                        html.Span("アプリを起動しました", className="me-2"),
+                                        html.I(
+                                            className="bi bi-circle-fill text-primary me-2"
+                                        ),
+                                        html.Span(
+                                            "アプリを起動しました", className="me-2"
+                                        ),
                                         html.Small("たった今", className="text-muted"),
                                     ],
                                     className="d-flex align-items-center mb-2",
                                 ),
                                 html.Div(
                                     [
-                                        html.I(className="bi bi-circle-fill text-secondary me-2"),
-                                        html.Span("ダッシュボードを表示しました", className="me-2"),
+                                        html.I(
+                                            className="bi bi-circle-fill text-secondary me-2"
+                                        ),
+                                        html.Span(
+                                            "ダッシュボードを表示しました",
+                                            className="me-2",
+                                        ),
                                         html.Small("たった今", className="text-muted"),
                                     ],
                                     className="d-flex align-items-center mb-2",
@@ -345,12 +506,11 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
                     ],
                     className="card p-4 mb-4",
                 ),
-
                 # ウェルカムメッセージ
                 html.Div(
                     [
                         html.H4("📸 推し活グッズ管理をはじめよう！", className="mb-3"),
-                html.P(
+                        html.P(
                             "バーコードをスキャンしたり写真をアップロードするだけで、簡単にグッズを登録・管理できます。",
                             className="mb-3",
                         ),
@@ -382,42 +542,119 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             [
                 html.Div(
                     [
-                        html.Div(
-                            [
-                                # サムネイル（URLが無ければプレースホルダー）
-                                (html.Img(
-                                    src=photo.get("image_url"),
-                                    style={"width": "100%", "height": "150px", "objectFit": "cover"},
-                                ) if photo.get("image_url") else html.Div(
-                                    [html.I(className="bi bi-image", style={"fontSize": "28px"})],
-                                    className="d-flex align-items-center justify-content-center photo-placeholder",
-                                )),
+                        (
+                            html.Button(
                                 html.Div(
                                     [
-                                        html.Div(
-                                            f"バーコード: {photo.get('barcode', '')[:15]}...",
-                                            className="fw-bold text-dark mb-1",
-                                        ),
-                                        html.Div(
-                                            photo.get("description") or "説明なし",
-                                            className="text-muted small",
+                                        (
+                                            html.Img(
+                                                src=_photo_thumb_url(photo),
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "150px",
+                                                    "objectFit": "cover",
+                                                },
+                                            )
+                                            if _photo_thumb_url(photo)
+                                            else html.Div(
+                                                [
+                                                    html.I(
+                                                        className="bi bi-image",
+                                                        style={"fontSize": "28px"},
+                                                    )
+                                                ],
+                                                className="d-flex align-items-center justify-content-center photo-placeholder",
+                                            )
                                         ),
                                         html.Div(
                                             [
-                                                # カラータグ風のダミータグ（見かけだけ）
-                                                *[dbc.Badge(n, color=c, className=("me-1" + (" text-dark" if c == "light" else "")))
-                                                  for n, c in (
-                                                      [color_tag_palette[(i*2) % len(color_tag_palette)],
-                                                       color_tag_palette[(i*2+1) % len(color_tag_palette)]]
-                                                  )]
+                                                html.Div(
+                                                    f"バーコード: {(photo.get('barcode_number') or photo.get('barcode') or '')[:15]}...",
+                                                    className="fw-bold text-dark mb-1",
+                                                ),
+                                                html.Div(
+                                                    photo.get("description")
+                                                    or "説明なし",
+                                                    className="text-muted small",
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        *[
+                                                            dbc.Badge(
+                                                                n,
+                                                                color=c,
+                                                                className=(
+                                                                    "me-1"
+                                                                    + (
+                                                                        " text-dark"
+                                                                        if c == "light"
+                                                                        else ""
+                                                                    )
+                                                                ),
+                                                            )
+                                                            for n, c in (
+                                                                [
+                                                                    color_tag_palette[
+                                                                        (i * 2)
+                                                                        % len(
+                                                                            color_tag_palette
+                                                                        )
+                                                                    ],
+                                                                    color_tag_palette[
+                                                                        (i * 2 + 1)
+                                                                        % len(
+                                                                            color_tag_palette
+                                                                        )
+                                                                    ],
+                                                                ]
+                                                            )
+                                                        ]
+                                                    ],
+                                                    className="mt-1",
+                                                ),
                                             ],
-                                            className="mt-1",
+                                            className="photo-info",
                                         ),
                                     ],
-                                    className="photo-info",
+                                    className="photo-card",
                                 ),
-                            ],
-                            className="photo-card",
+                                id={
+                                    "type": "gallery-thumb",
+                                    "index": _photo_unique_id(photo, f"photo-{i}"),
+                                },
+                                className="photo-card-btn",
+                                n_clicks=0,
+                            )
+                            if not photo.get("_dummy")
+                            else html.Div(
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.I(
+                                                    className="bi bi-image",
+                                                    style={"fontSize": "28px"},
+                                                )
+                                            ],
+                                            className="d-flex align-items-center justify-content-center photo-placeholder",
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "サンプル枠",
+                                                    className="fw-bold text-dark mb-1",
+                                                ),
+                                                html.Div(
+                                                    "追加の写真が表示されます",
+                                                    className="text-muted small",
+                                                ),
+                                            ],
+                                            className="photo-info",
+                                        ),
+                                    ],
+                                    className="photo-card",
+                                )
+                            )
                         )
                     ]
                 )
@@ -425,51 +662,113 @@ def render_gallery(photos: Iterable[Photo]) -> html.Div:
             ],
             className="photo-grid",
         )
-        dashboard_content = html.Div([tag_search, storage_chart_card, summary, grid])
+        detail_panel = html.Div(
+            [
+                html.H4("写真の詳細", className="mb-3"),
+                html.Div(
+                    "サムネイルをクリックすると詳細を表示します。",
+                    id="gallery-detail-content",
+                    className="text-muted",
+                ),
+            ],
+            className="card p-4 mb-4",
+        )
+        dashboard_content = html.Div(
+            [
+                photo_store_component,
+                tag_search,
+                storage_chart_card,
+                summary,
+                grid,
+                detail_panel,
+            ]
+        )
 
     return html.Div([header, dashboard_content])
 
 
 @callback(
-    Output('gallery-storage-chart', 'figure'),
-    Input('gallery-surplus-toggle', 'value'),
-    State('gallery-storage-chart-data', 'data'),
+    Output("gallery-storage-chart", "figure"),
+    Input("gallery-surplus-toggle", "value"),
+    State("gallery-storage-chart-data", "data"),
 )
 def _update_storage_chart(show_surplus: bool, data: dict):
-    product_types = data['product_types']
-    storage_tags = data['storage_tags']
-    colors = data['colors']
-    counts = data['counts']
-    surplus = data.get('surplus') or {tag: [0]*len(product_types) for tag in storage_tags}
-    flags = data['flags']
+    product_types = data["product_types"]
+    storage_tags = data["storage_tags"]
+    colors = data["colors"]
+    counts = data["counts"]
+    surplus = data.get("surplus") or {
+        tag: [0] * len(product_types) for tag in storage_tags
+    }
+    flags = data["flags"]
 
     fig = go.Figure()
     for tag in storage_tags:
         base_vals = counts[tag]
-        extra_vals = surplus.get(tag, [0]*len(product_types))
-        y_vals = [extra_vals[i] if show_surplus else base_vals[i] for i in range(len(product_types))]
+        extra_vals = surplus.get(tag, [0] * len(product_types))
+        y_vals = [
+            extra_vals[i] if show_surplus else base_vals[i]
+            for i in range(len(product_types))
+        ]
         tag_flags = flags[tag]
-        texts = [('余' if (show_surplus and tag_flags[i]) else '') for i in range(len(product_types))]
-        hover_flags = [('あり (' + str(extra_vals[i]) + ')' if tag_flags[i] else 'なし') for i in range(len(product_types))]
+        texts = [
+            ("余" if (show_surplus and tag_flags[i]) else "")
+            for i in range(len(product_types))
+        ]
+        hover_flags = [
+            ("あり (" + str(extra_vals[i]) + ")" if tag_flags[i] else "なし")
+            for i in range(len(product_types))
+        ]
         fig.add_bar(
             name=tag,
             x=product_types,
             y=y_vals,
             marker_color=colors[tag],
             text=texts,
-            textposition='outside',
+            textposition="outside",
             cliponaxis=False,
             customdata=hover_flags,
-            hovertemplate='%{x}<br>%{y} 個<br>余り: %{customdata}<extra>' + tag + '</extra>',
+            hovertemplate="%{x}<br>%{y} 個<br>余り: %{customdata}<extra>"
+            + tag
+            + "</extra>",
         )
 
     fig.update_layout(
-        title='収納場所タグ × 製品種類（プレゼン用・乱数）',
-        xaxis_title='製品種類',
-        yaxis_title='個数',
-        barmode='group',
-        legend_title_text='収納場所タグ',
+        title="収納場所タグ × 製品種類（プレゼン用・乱数）",
+        xaxis_title="製品種類",
+        yaxis_title="個数",
+        barmode="group",
+        legend_title_text="収納場所タグ",
         margin=dict(l=20, r=20, t=40, b=20),
         height=320,
     )
     return fig
+
+
+@callback(
+    Output("gallery-detail-content", "children"),
+    Input({"type": "gallery-thumb", "index": ALL}, "n_clicks"),
+    State("gallery-photo-data", "data"),
+    prevent_initial_call=True,
+)
+def _show_photo_detail(_, stored_photos):
+    ctx = callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    triggered = ctx.triggered_id
+    if not isinstance(triggered, dict):
+        raise PreventUpdate
+
+    target_index = str(triggered.get("index"))
+    if not stored_photos:
+        raise PreventUpdate
+
+    for photo in stored_photos:
+        unique = str(
+            _photo_unique_id(photo, photo.get("registration_product_id") or "")
+        )
+        if unique == target_index:
+            return _render_detail_content(photo)
+
+    return html.Div("詳細データを取得できませんでした。", className="text-danger")
