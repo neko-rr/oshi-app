@@ -1,57 +1,55 @@
-# マルチステージビルドを使用
-FROM python:3.11-slim as builder
+# マルチステージビルド (Render 用軽量構成)
+FROM python:3.11-slim AS builder
 
-# 必要な OS パッケージをインストール
-RUN apt-get update && apt-get install -y \
+# 必要なビルド依存 / zbar を導入
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libzbar0 \
     libzbar-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 作業ディレクトリを設定
 WORKDIR /app
 
-# 依存関係をコピーしてインストール
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
-# 本番用イメージ
+
+# 本番イメージ
 FROM python:3.11-slim
 
-# 必要なランタイムパッケージをインストール
-RUN apt-get update && apt-get install -y \
+# ランタイムに必要な最低限のパッケージ
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libzbar0 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 非rootユーザーを作成
+# 非 root ユーザー
 RUN useradd --create-home --shell /bin/bash app
-
-# 作業ディレクトリを設定
 WORKDIR /app
 
-# builderステージからPythonパッケージをコピー
+# Python ユーザーインストールのパスをコピー
 COPY --from=builder /root/.local /home/app/.local
 
-# アプリケーションのソースコードをコピー
+# アプリソースをコピー
 COPY . .
 
-# 権限を設定
+# 権限
 RUN chown -R app:app /app
 USER app
 
-# Pythonパスを設定
-ENV PATH=/home/app/.local/bin:$PATH
-ENV PYTHONUNBUFFERED=1
+# 環境変数
+ENV PATH=/home/app/.local/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8050
 
-# ポート設定（デフォルト8050、環境変数で上書き可能）
-ENV PORT=8050
+EXPOSE 8050
 
 # ヘルスチェック
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/ || exit 1
 
-# gunicorn で Dash のサーバーを起動（Render向け最適化設定）
+# Render 想定の起動コマンド (Gunicorn + gthread)
 CMD gunicorn app:server \
     --bind 0.0.0.0:$PORT \
     --workers 1 \
