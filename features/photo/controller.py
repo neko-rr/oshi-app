@@ -76,12 +76,9 @@ def register_photo_callbacks(app):
                     "original_tmp_path": None,
                 }
             )
-            message = html.Div(
-                "正面写真は後からでも登録できます。",
-                className="card-custom",
-            )
+            message = ""
             print("DEBUG handle_front_photo: photo skipped")
-            url = "/register/review"
+            url = no_update  # 遷移は store リスナーに任せる
             return serialise_state(state), message, url
         else:
             contents = (
@@ -281,8 +278,8 @@ def register_photo_callbacks(app):
             )
 
             print("DEBUG handle_front_photo: photo uploaded successfully")
-            # 写真取得後は次のステップへ
-            url = "/register/review"
+            # 遷移は store リスナーに任せる
+            url = no_update
             return serialise_state(state), message, url
 
 

@@ -166,6 +166,7 @@ def register_barcode_callbacks(app):
         trigger_id = triggered[0]["prop_id"].split(".")[0]
         state = ensure_state(store_data)
         message = no_update
+        nav_path = no_update
 
         def success_message(
             barcode_value: str, barcode_type: str, lookup_result: Dict[str, Any]
@@ -208,11 +209,11 @@ def register_barcode_callbacks(app):
             state["lookup"] = {
                 "status": "skipped",
                 "items": [],
-                "message": "バーコード登録をスキップしました。必要に応じて後から登録できます。",
+                "message": "",
                 "source": "skip",
                 "keyword": None,
             }
-            message = html.Div(state["lookup"]["message"], className="card-custom")
+            message = ""
         elif trigger_id == "barcode-retry-button":
             state["barcode"] = empty_registration_state()["barcode"].copy()
             state["lookup"] = empty_registration_state()["lookup"].copy()
@@ -331,19 +332,14 @@ def register_barcode_callbacks(app):
         print(f"DEBUG: Calling _update_tags after barcode processing")
         _update_tags(state)
 
-        if trigger_id == "barcode-skip-button":
-            url = "/register/photo"
-        elif state["barcode"]["status"] in {"captured", "manual"}:
-            url = "/register/photo"
-        else:
-            url = no_update
-            if state["barcode"]["status"] in ["captured", "error"]:
-                message = html.Div(
-                    [
-                        message,
-                        html.Button("もう一度挑戦する", id="barcode-retry-button"),
-                        html.Button("スキップ", id="barcode-skip-button"),
-                    ]
-                )
+        url = no_update  # 遷移は store リスナーに任せる
+        if state["barcode"]["status"] in ["captured", "error"]:
+            message = html.Div(
+                [
+                    message,
+                    html.Button("もう一度挑戦する", id="barcode-retry-button"),
+                    html.Button("スキップ", id="barcode-skip-button"),
+                ]
+            )
 
         return serialise_state(state), message, url

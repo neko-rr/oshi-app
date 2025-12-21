@@ -2,3 +2,6 @@ DEBUG: n_clicks is falsy, raising PreventUpdate
 DEBUG: n_clicks is falsy, raising PreventUpdate
 DEBUG: n_clicks is falsy, raising PreventUpdate
 DEBUG: n_clicks is falsy, raising PreventUpdate
+DEBUG: n_clicks is falsy, raising PreventUpdate
+DEBUG: n_clicks is falsy, raising PreventUpdate
+DEBUG: n_clicks is falsy, raising PreventUpdate

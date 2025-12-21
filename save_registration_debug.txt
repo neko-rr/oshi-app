@@ -22,3 +22,21 @@ n_clicks: None
 product_name: 'None'
 store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
 
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2025-12-21 17:50:25.190648
+n_clicks: None
+product_name: 'None'
+store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2025-12-21 19:43:41.246541
+n_clicks: None
+product_name: 'None'
+store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2025-12-21 23:14:30.482444
+n_clicks: None
+product_name: 'None'
+store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
+

@@ -105,7 +105,7 @@ def register_theme_callbacks(app):
     from dash import Input, Output, State, html
 
     @app.callback(
-        Output("register-alert", "children", allow_duplicate=True),
+        Output("theme-save-result", "children", allow_duplicate=True),
         Input("save-theme-button", "n_clicks"),
         State("theme-selector", "value"),
         prevent_initial_call="initial_duplicate",

@@ -708,14 +708,21 @@ def register_review_callbacks(app):
             Output("rakuten-lookup-display", "children"),
             Output("io-intelligence-tags-display", "children"),
         ],
-        Input("registration-store", "data"),
+        [
+            Input("registration-store", "data"),
+            State("_pages_location", "pathname"),
+        ],
     )
-    def display_api_results(store_data):
+    def display_api_results(store_data, pathname):
         """レビュー画面で楽天APIとIO Intelligenceの結果を表示"""
         print(f"DEBUG: display_api_results called")
         print(
             f"DEBUG: store_data keys: {list(store_data.keys()) if store_data else 'None'}"
         )
+
+        # Step3 以外では描画しない
+        if pathname != "/register/review":
+            raise PreventUpdate
 
         state = ensure_state(store_data)
 

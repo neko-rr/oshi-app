@@ -90,7 +90,6 @@ Thumbs.db
 
 # Project specific
 demo_database.db
-theme.txt
 debug_log.txt
 save_registration_debug.txt
 *.db
