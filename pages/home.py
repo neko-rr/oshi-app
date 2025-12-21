@@ -1,17 +1,99 @@
-from dash import html, dcc, register_page
-from services.photo_service import get_product_stats
+from dash import html, register_page
+from services.photo_service import (
+    get_product_stats,
+    get_random_product_with_photo,
+)
 from services.supabase_client import get_supabase_client
 
 
 def render_home() -> html.Div:
     supabase = get_supabase_client()
-    if supabase is None:
-        total_photos = 0
-        unique_barcodes = 0
-    else:
-        stats = get_product_stats(supabase)
-        total_photos = stats.get("total_photos", 0)
-        unique_barcodes = stats.get("unique_barcodes", 0)
+    stats = get_product_stats(supabase)
+    total_photos = stats.get("total_photos") or stats.get("total") or 0
+    unique_barcodes = stats.get("unique_barcodes") or stats.get("unique") or 0
+
+    random_product = (
+        get_random_product_with_photo(supabase) if supabase is not None else None
+    )
+
+    def _random_photo_card():
+        if not random_product:
+            return html.Div(
+                [
+                    html.Div(
+                        "まだ写真付きの登録がありません。", className="text-muted"
+                    ),
+                    html.A(
+                        "写真を登録する",
+                        href="/register/barcode",
+                        className="btn btn-primary btn-sm mt-2",
+                    ),
+                ],
+                className="card p-3",
+            )
+
+        photo = random_product.get("photo") or {}
+        img_url = photo.get("photo_thumbnail_url") or photo.get(
+            "photo_high_resolution_url"
+        )
+        product_name = random_product.get("product_name") or "名称未設定"
+        barcode = random_product.get("barcode_number") or "未取得"
+
+        return html.Div(
+            [
+                html.Div("ランダムに1件表示中", className="text-muted small mb-2"),
+                html.Div(
+                    [
+                        html.Img(
+                            src=img_url,
+                            style={
+                                "width": "100%",
+                                "height": "220px",
+                                "objectFit": "cover",
+                                "borderRadius": "12px",
+                            },
+                        )
+                        if img_url
+                        else html.Div(
+                            [
+                                html.I(
+                                    className="bi bi-image",
+                                    style={"fontSize": "32px"},
+                                ),
+                                html.Div("画像URLがありません", className="text-muted"),
+                            ],
+                            className="d-flex flex-column align-items-center justify-content-center",
+                            style={
+                                "height": "220px",
+                                "background": "var(--bs-secondary-bg)",
+                                "borderRadius": "12px",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.H5(product_name, className="mb-1"),
+                                html.Div(
+                                    f"バーコード: {barcode}", className="text-muted"
+                                ),
+                            ],
+                            className="mt-2",
+                        ),
+                        html.A(
+                            "ギャラリーで見る",
+                            href="/gallery",
+                            className="btn btn-outline-primary btn-sm mt-3",
+                        ),
+                    ],
+                    className="card-body",
+                ),
+                html.Div(
+                    f"登録ID: {random_product.get('registration_product_id')}",
+                    className="text-muted small ps-3 pb-3",
+                ),
+            ],
+            className="card",
+        )
+
     return html.Div(
         [
             html.Div(
@@ -67,75 +149,11 @@ def render_home() -> html.Div:
                 ],
                 className="card bg-light p-3",
             ),
-            # タグ検索（見かけのみ）
+            # ランダム1件の写真表示
             html.Div(
                 [
-                    html.H4("タグ検索", className="card-title"),
-                    html.Div(
-                        [
-                            dcc.Input(
-                                placeholder="タグで検索（例: 猫、白、キーホルダー）",
-                                className="form-control me-2",
-                                style={"maxWidth": "420px"},
-                            ),
-                            html.Button("検索", className="btn btn-light mt-2 mt-md-0"),
-                        ],
-                        className="d-flex flex-column flex-md-row align-items-start",
-                    ),
-                ],
-                className="card text-white bg-secondary mb-3",
-            ),
-            # 画像一覧（見かけのみのサムネイル）
-            html.Div(
-                [
-                    html.H4("最近の写真", className="card-title mb-3"),
-                    html.Div(
-                        [
-                            *[
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.I(
-                                                    className="bi bi-image",
-                                                    style={"fontSize": "28px"},
-                                                )
-                                            ],
-                                            className="d-flex align-items-center justify-content-center",
-                                            style={
-                                                "height": "150px",
-                                                "background": "var(--bs-secondary-bg)",
-                                            },
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.Span(
-                                                    "タグ: ",
-                                                    className="text-muted me-1",
-                                                ),
-                                                html.Span(
-                                                    "猫",
-                                                    className="badge bg-light text-dark me-1",
-                                                ),
-                                                html.Span(
-                                                    "白",
-                                                    className="badge bg-light text-dark me-1",
-                                                ),
-                                                html.Span(
-                                                    "キーホルダー",
-                                                    className="badge bg-light text-dark",
-                                                ),
-                                            ],
-                                            className="photo-info",
-                                        ),
-                                    ],
-                                    className="photo-card",
-                                )
-                                for _ in range(12)
-                            ]
-                        ],
-                        className="photo-grid",
-                    ),
+                    html.H4("登録済みの写真からランダムに1枚", className="card-title"),
+                    _random_photo_card(),
                 ],
                 className="card bg-light p-3 mb-3",
             ),

@@ -1,5 +1,5 @@
 from dash import html, dcc, register_page
-from components.theme_utils import load_theme
+from components.theme_utils import load_theme, CURRENT_THEME
 from services.photo_service import get_product_stats
 from services.supabase_client import get_supabase_client
 import dash_bootstrap_components as dbc
@@ -97,7 +97,7 @@ def render_settings() -> html.Div:
                                 "zephyr",
                             ]
                         ],
-                        value=current_theme,
+                        value=current_theme or CURRENT_THEME,
                         className="mb-3",
                     ),
                     html.Button(

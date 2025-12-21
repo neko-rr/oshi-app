@@ -1,7 +1,6 @@
 import os
 import gc
 import tempfile
-from typing import Any, Dict
 from dash import html, callback_context, no_update, Input, Output, State
 from dash.exceptions import PreventUpdate
 
@@ -81,7 +80,7 @@ def register_photo_callbacks(app):
                 "正面写真は後からでも登録できます。",
                 className="card-custom",
             )
-            print(f"DEBUG handle_front_photo: photo skipped")
+            print("DEBUG handle_front_photo: photo skipped")
             url = "/register/review"
             return serialise_state(state), message, url
         else:
@@ -122,10 +121,18 @@ def register_photo_callbacks(app):
             display_data_url = contents
 
             if contents:
+                original_bytes = None
                 try:
                     import base64
                     from PIL import Image
                     import io
+
+                    # Pillow のバージョン差異を吸収（pyright対策も兼ねる）
+                    from typing import Any, cast
+
+                    resample = cast(
+                        Any, getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+                    )
 
                     if contents.startswith("data:image"):
                         _, base64_data = contents.split(",", 1)
@@ -134,9 +141,10 @@ def register_photo_callbacks(app):
                         original_bytes = base64.b64decode(contents)
 
                     preview_bytes = None
+                    preview_buffer = None
                     try:
                         preview_image = Image.open(io.BytesIO(original_bytes))
-                        preview_image.thumbnail((256, 256), Image.LANCZOS)
+                        preview_image.thumbnail((256, 256), resample)
                         preview_buffer = io.BytesIO()
                         preview_image.save(preview_buffer, format="JPEG", quality=70)
                         preview_bytes = preview_buffer.getvalue()
@@ -152,14 +160,15 @@ def register_photo_callbacks(app):
                     finally:
                         if preview_bytes is not None:
                             del preview_bytes
-                        if "preview_buffer" in locals():
+                        if preview_buffer is not None:
                             del preview_buffer
                         gc.collect()
 
                     reduced_bytes_for_vision = original_bytes
+                    vision_buffer = None
                     try:
                         vision_image = Image.open(io.BytesIO(original_bytes))
-                        vision_image.thumbnail((384, 384), Image.LANCZOS)
+                        vision_image.thumbnail((384, 384), resample)
                         vision_buffer = io.BytesIO()
                         vision_image.save(vision_buffer, format="JPEG", quality=85)
                         reduced_bytes_for_vision = vision_buffer.getvalue()
@@ -169,7 +178,7 @@ def register_photo_callbacks(app):
                             f"DEBUG: Failed to reduce image for vision payload: {reduce_error}"
                         )
                     finally:
-                        if "vision_buffer" in locals():
+                        if vision_buffer is not None:
                             del vision_buffer
                         gc.collect()
 
@@ -195,12 +204,14 @@ def register_photo_callbacks(app):
                     )
 
                     try:
-                        public_url = upload_to_storage(
-                            get_supabase_client(),
-                            reduced_bytes_for_vision,
-                            filename or "vision_tmp.jpg",
-                            "image/jpeg",
-                        )
+                        supabase = get_supabase_client()
+                        if supabase is not None:
+                            public_url = upload_to_storage(
+                                supabase,
+                                reduced_bytes_for_vision,
+                                filename or "vision_tmp.jpg",
+                                "image/jpeg",
+                            )
                         if public_url:
                             api_contents = public_url
                             print(f"DEBUG: Using public URL for vision: {public_url}")
@@ -216,7 +227,8 @@ def register_photo_callbacks(app):
                     api_contents = contents
                     vision_raw = None
                 finally:
-                    del original_bytes
+                    if original_bytes is not None:
+                        del original_bytes
                     gc.collect()
 
             # 画像アップロード時にタグ生成フローを開始（非同期処理に移行）
@@ -268,14 +280,13 @@ def register_photo_callbacks(app):
                 f"DEBUG handle_front_photo: photo processing started, status={state['front_photo']['status']}"
             )
 
-            print(f"DEBUG handle_front_photo: photo uploaded successfully")
+            print("DEBUG handle_front_photo: photo uploaded successfully")
             # 写真取得後は次のステップへ
             url = "/register/review"
+            return serialise_state(state), message, url
 
-        return serialise_state(state), message, url
 
-
-def register_photo_callbacks(app):
+def register_x_share_callbacks(app):
     @app.callback(
         [
             Output("x-share-config", "style"),

@@ -1,3 +1,86 @@
+# 開発者向けメモ（最新仕様・起動手順）
+
+## 現状と重要ポイント
+
+- Dash Pages 多ページ構成。登録フロー: `/register/barcode` → `/register/photo` → `/register/review`
+- ページ遷移は独自の `dcc.Location(id="nav-redirect")` に pathname を書き込んで実施（バーコード/写真コールバックがここに出力）。Dash 内部の `_pages_location` は Pages 用に存在するが遷移には使わない。
+- UI/ロジック分離: `components/`（UI）、`services/`（API・処理）、`assets/`（CSS/JS）。`spec.md` は編集禁止。
+- Supabase は任意設定。未設定でも UI 起動可だが保存/ギャラリーは無効。
+
+## 起動手順（必ず残す）
+
+### 通常起動
+
+```powershell
+cd C:\Users\ryone\Desktop\oshi-app
+python app.py
+```
+
+### ログ付き強制起動（PowerShell）※依頼されたら必ずこれを使う
+
+```powershell
+cd C:\Users\ryone\Desktop\oshi-app
+powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1
+```
+
+- 既存 python/ポート 8050 を停止し、UTF-8・アンバッファで `python app.py` を実行。ログは `app_run.log`。
+- `.venv` を優先利用（スクリプト内検索順）。`.venv` が無ければ環境に応じて Python を探索。
+- ログ確認: `Get-Content app_run.log -Tail 50`
+
+### ブラウザ確認
+
+- `http://127.0.0.1:8050`（ハードリロード推奨: Ctrl+Shift+R）
+
+## ページ遷移仕様
+
+- バーコード: 成功/スキップで `nav-redirect.pathname = "/register/photo"`
+- 正面写真: 成功/スキップで `nav-redirect.pathname = "/register/review"`
+- 重複出力は `allow_duplicate=True` を付与（registration-store 等）。
+
+## Supabase / 環境変数
+
+- `.env` に `SUPABASE_URL`, `SUPABASE_KEY`, `IO_INTELLIGENCE_API_KEY`, `RAKUTEN_APP_ID` 等を設定。未設定でも UI は起動（保存は無効）。
+- RLS エラー時はポリシー確認（開発中は RLS 無効化が早い）。
+
+### Supabase 接続確認（ローカル）
+
+- **DB/Storage まで含めて一発で切り分ける**: `python .\scripts\check_supabase.py`
+  - **JSON で見たい**: `python .\scripts\check_supabase.py --json`
+  - **書き込み確認（安全なテスト行）**: `python .\scripts\check_supabase.py --write`
+- **判定の目安**
+  - `db.*.ok=False` で error が `permission denied` 系 → **RLS/ポリシー**の可能性が高い
+  - `db.*.ok=True` で `rows=0` → **権限は OK だがデータ 0 件**
+  - `storage.photos_list.ok=False` → **Storage ポリシー/バケット/キー**の可能性
+
+## デプロイ（Render/Docker）
+
+- `Dockerfile`（python:3.11-slim, libzbar0, gunicorn app:server, PORT=8050）。
+- `docker-compose.yml` はローカル検証用。Render では `Procfile` / `render.yaml` 利用。
+
+## 仮想環境
+
+- `.venv` と `venv` が共存。`start_with_logs.ps1` は `.venv` を優先。統一したい場合はスクリプト内の検索順を調整。
+
+## トラブルシュート
+
+- 遷移しない: `nav-redirect` への pathname 出力がブロックされていないか、ブラウザコンソール赤エラーと `/_dash-update-component` のレスポンスを確認。広告/セキュリティ系拡張がブロックする場合あり。
+- Supabase 取得エラー: Network タブで `supabase.co` へのリクエスト失敗内容（ステータス/本文）を確認し、キー/RLS を見直す。
+- カメラ不具合: `assets/camera.js` がロードされているか、ブラウザのカメラ許可を確認。
+
+## 主要ディレクトリ概要
+
+- `app.py`: Dash エントリ。`nav-redirect` による遷移、テーマ適用、コールバック登録。
+- `components/`: レイアウト・各ページ・セクションの UI。
+- `services/`: バーコード解析、Supabase、タグ抽出、画像説明生成などの処理。
+- `assets/`: `styles.css`, `camera.js`（自動ロード）。
+- `supabase/`: SQL, migrations, ガイド。
+- `start_with_logs.ps1`: ログ付き強制起動スクリプト（必ず保持）。
+
+## 起動依頼時のルール
+
+- 「ログ付き強制起動で」と指示されたら、必ず `powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1` で起動すること。
+- 必要に応じて起動前に `Stop-Process -Name python -ErrorAction SilentlyContinue` で既存プロセスを停止。
+
 # Cursor メモ
 
 ## 目的

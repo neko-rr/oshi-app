@@ -16,3 +16,9 @@ n_clicks: None
 product_name: 'None'
 store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
 
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2025-12-21 17:24:47.037023
+n_clicks: None
+product_name: 'None'
+store_data keys: ['barcode', 'front_photo', 'lookup', 'tags']
+

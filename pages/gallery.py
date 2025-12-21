@@ -21,15 +21,33 @@ def _photo_unique_id(photo: Photo, fallback: str) -> str:
 
 
 def _photo_thumb_url(photo: Photo):
-    nested = photo.get("photo") or {}
-    return (
+    """サムネイルURLを解決する（製品行/写真行どちらの形でも対応）。"""
+    if not isinstance(photo, dict):
+        return None
+
+    # top-level（photo行/旧データ形）を優先
+    direct = (
         photo.get("image_url")
-        or nested.get("photo_thumbnail_url")
-        or nested.get("photo_high_resolution_url")
+        or photo.get("photo_thumbnail_url")
+        or photo.get("photo_high_resolution_url")
     )
+    if direct:
+        return direct
+
+    # registration_product_information の行（photo をネスト）に対応
+    nested = photo.get("photo") or {}
+    return nested.get("photo_thumbnail_url") or nested.get("photo_high_resolution_url")
 
 
 def _photo_full_url(photo: Photo):
+    """フルサイズURLを解決する（製品行/写真行どちらの形でも対応）。"""
+    if not isinstance(photo, dict):
+        return None
+
+    direct = photo.get("photo_high_resolution_url")
+    if direct:
+        return direct
+
     nested = photo.get("photo") or {}
     return nested.get("photo_high_resolution_url") or _photo_thumb_url(photo)
 
@@ -105,30 +123,41 @@ def render_gallery() -> html.Div:
 
     supabase = get_supabase_client()
     if supabase is None:
-        photos_data = []
+        products = []
     else:
-        photos_data = get_all_products(supabase)
-    photos = []
-    for item in photos_data:
-        photo = item.get("photo", {})
-        if photo:
-            photos.append(photo)
+        # get_all_products は registration_product_information の行に photo をネストした形で返す
+        products = get_all_products(supabase) or []
+
+    # 実データが0件かどうかの判定用（ダミー補完前）
+    real_products_count = len([p for p in products if isinstance(p, dict)])
+
     TARGET_CARD_COUNT = 8  # ダミーカードを含めた表示枚数（見かけだけ）
 
     # 不足分をダミーで補完
-    if len(photos) < TARGET_CARD_COUNT:
-        for i in range(TARGET_CARD_COUNT - len(photos)):
-            photos.append(
+    if len(products) < TARGET_CARD_COUNT:
+        for i in range(TARGET_CARD_COUNT - len(products)):
+            products.append(
                 {
-                    "image_url": None,
-                    "barcode": "DUMMY",
-                    "description": None,
-                    "tags": None,
+                    "registration_product_id": f"dummy-{i}",
+                    "barcode_number": "DUMMY",
+                    "product_name": None,
+                    "product_group_name": None,
+                    "works_series_name": None,
+                    "title": None,
+                    "character_name": None,
+                    "memo": None,
+                    "photo": {
+                        "photo_thumbnail_url": None,
+                        "photo_high_resolution_url": None,
+                    },
                     "_dummy": True,
                 }
             )
 
-    real_photos_for_store = [p for p in photos if not p.get("_dummy")]
+    # 詳細表示は実データのみ（ダミーは除外）
+    real_photos_for_store = [
+        p for p in products if isinstance(p, dict) and not p.get("_dummy")
+    ]
     photo_store_component = dcc.Store(
         id="gallery-photo-data", data=real_photos_for_store
     )
@@ -346,7 +375,7 @@ def render_gallery() -> html.Div:
         className="card p-4 mb-4",
     )
 
-    if not photos:
+    if real_products_count == 0:
         # ダッシュボードコンテンツ（写真がない場合）
         dashboard_content = html.Div(
             [
@@ -466,7 +495,7 @@ def render_gallery() -> html.Div:
                                         html.I(className="bi bi-camera me-2"),
                                         "写真を登録する",
                                     ],
-                                    href="/register",
+                                    href="/register/barcode",
                                     className="btn btn-primary btn-lg me-3 mb-2",
                                 ),
                                 html.A(
@@ -545,7 +574,7 @@ def render_gallery() -> html.Div:
         summary = html.Div(
             [
                 html.P(
-                    f"全 {len(photos)} 枚の写真が登録されています",
+                    f"全 {len(real_photos_for_store)} 件の登録があります",
                     className="text-muted text-center mb-4",
                 )
             ]
@@ -670,7 +699,7 @@ def render_gallery() -> html.Div:
                         )
                     ]
                 )
-                for i, photo in enumerate(photos)
+                for i, photo in enumerate(products)
             ],
             className="photo-grid",
         )

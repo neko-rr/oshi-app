@@ -1,4 +1,14 @@
 # Available Bootswatch themes
+from typing import Optional
+
+from services.theme_service import (
+    DEFAULT_THEME,
+    get_theme,
+    set_theme,
+    GUEST_MEMBERS_ID,
+    GUEST_MEMBERS_TYPE_NAME,
+)
+
 BOOTSWATCH_THEMES = [
     "cerulean",
     "cosmo",
@@ -27,11 +37,11 @@ BOOTSWATCH_THEMES = [
     "zephyr",
 ]
 
-# Load/save theme
+# Load/save theme (ローカルフォールバック用)
 THEME_FILE = "theme.txt"
 
 
-def load_theme() -> str:
+def _load_theme_from_file() -> str:
     try:
         with open(THEME_FILE, "r") as f:
             theme = f.read().strip()
@@ -39,12 +49,44 @@ def load_theme() -> str:
                 return theme
     except FileNotFoundError:
         pass
-    return "minty"
+    return DEFAULT_THEME
 
 
-def save_theme_to_file(theme: str):
-    with open(THEME_FILE, "w") as f:
-        f.write(theme)
+def _save_theme_to_file(theme: str):
+    try:
+        with open(THEME_FILE, "w") as f:
+            f.write(theme)
+    except Exception as exc:
+        print(f"DEBUG: save_theme_to_file failed: {exc}")
+
+
+def load_theme(
+    members_id: Optional[int] = None, members_type_name: Optional[str] = None
+) -> str:
+    """Supabase 優先でテーマ取得。未設定/失敗時はローカル→デフォルト minty。"""
+    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
+    mtype = (
+        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
+    )
+    theme = get_theme(mid, mtype)
+    if theme:
+        return theme
+    return _load_theme_from_file()
+
+
+def save_theme(
+    theme: str,
+    members_id: Optional[int] = None,
+    members_type_name: Optional[str] = None,
+) -> None:
+    """Supabase に保存し、失敗時はローカルファイルにフォールバック。"""
+    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
+    mtype = (
+        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
+    )
+    saved = set_theme(theme, mid, mtype)
+    if not saved:
+        _save_theme_to_file(theme)
 
 
 # Current theme
@@ -68,12 +110,12 @@ def register_theme_callbacks(app):
         State("theme-selector", "value"),
         prevent_initial_call="initial_duplicate",
     )
-    def save_theme(n_clicks, selected_theme):
+    def save_theme_callback(n_clicks, selected_theme):
         if not n_clicks or not selected_theme:
             return ""
 
         try:
-            save_theme_to_file(selected_theme)
+            save_theme(selected_theme)
             return html.Div(
                 f"テーマ '{selected_theme}' を保存しました。",
                 className="alert alert-success",

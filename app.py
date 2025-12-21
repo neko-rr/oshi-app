@@ -1,29 +1,12 @@
-import base64
-import datetime
-import gc
-import os
-import re
-import tempfile
-from typing import Any, Dict, List, Optional
-
 import dash
-from dash import (
-    Input,
-    Output,
-    State,
-    callback_context,
-    html,
-    dcc,
-    no_update,
-    page_container,
-)
+from dash import Input, Output, html, dcc
 from dash.exceptions import PreventUpdate
-
-from components.layout import create_app_layout
-from components.theme_utils import load_theme, get_bootswatch_css
-from components.state_utils import empty_registration_state
-from components.layout import _build_navigation
 from copy import deepcopy
+
+from components.theme_utils import load_theme, get_bootswatch_css
+from components.layout import _build_navigation
+from components.state_utils import empty_registration_state
+from services.supabase_client import get_supabase_client
 
 # Load environment variables EARLY so services read correct .env (models, flags)
 try:
@@ -34,43 +17,7 @@ try:
 except Exception as _early_env_err:
     print(f"DEBUG: Early .env load skipped: {_early_env_err}")
 
-# In-memory storage for demo purposes when Supabase is not available
-PHOTOS_STORAGE: List[Dict[str, Any]] = []
-
-# テーマ関連関数は components/theme_utils.py に移動
-
-
-# pages機能によりページ関数は直接インポート不要
-from services.barcode_lookup import (
-    lookup_product_by_barcode,
-    lookup_product_by_keyword,
-)
-from services.io_intelligence import describe_image
-from services.tag_extraction import extract_tags
-from services.barcode_service import decode_from_base64
-from services.photo_service import (
-    delete_all_products,
-    get_all_products,
-    get_product_stats,
-    insert_product_record,
-    insert_photo_record,
-    list_storage_buckets,
-    upload_to_storage,
-)
-from services.supabase_client import get_supabase_client
-from components.state_utils import (
-    empty_registration_state,
-    ensure_state,
-    serialise_state,
-)
-
 supabase = get_supabase_client()
-
-
-# データ取得関数は services/data_service.py に移動
-
-
-PLACEHOLDER_IMAGE_URL = "https://placehold.co/600x600?text=No+Photo"
 
 
 # UIレンダリング関数は components/ui_components.py に移動
@@ -86,7 +33,7 @@ app = dash.Dash(
     suppress_callback_exceptions=True,
     use_pages=True,
     # allow_duplicate を使うコールバックがあるため initial_duplicate を指定
-    prevent_initial_callbacks="initial_duplicate",
+    prevent_initial_callbacks="initial_duplicate",  # type: ignore[arg-type]
     meta_tags=[
         {
             "name": "viewport",
@@ -191,7 +138,7 @@ if __name__ == "__main__":
             f"DEBUG: Using existing IO_INTELLIGENCE_API_KEY (length: {len(current_key)})"
         )
 
-    from services.io_intelligence import IO_API_KEY, describe_image
+    from services.io_intelligence import IO_API_KEY
 
     print(f"DEBUG: IO_API_KEY is set: {bool(IO_API_KEY)}")
     if IO_API_KEY:
@@ -206,14 +153,29 @@ if __name__ == "__main__":
 
     # 機能別controllerの登録
     from features.barcode.controller import register_barcode_callbacks
-    from features.photo.controller import register_photo_callbacks
+    from features.photo.controller import (
+        register_photo_callbacks,
+        register_x_share_callbacks,
+    )
     from features.review.controller import register_review_callbacks
     from components.theme_utils import register_theme_callbacks
 
     register_barcode_callbacks(app)
     register_photo_callbacks(app)
+    register_x_share_callbacks(app)
     register_review_callbacks(app)
     register_theme_callbacks(app)
+
+    # /register への直接アクセスを /register/barcode にリダイレクト
+    @app.callback(
+        Output("nav-redirect", "pathname", allow_duplicate=True),
+        Input("_pages_location", "pathname"),
+        prevent_initial_call=True,
+    )
+    def _redirect_register(pathname):
+        if pathname == "/register":
+            return "/register/barcode"
+        raise PreventUpdate
 
     # Dash Pages推奨: page_container に任せ、Location はPages側を使用
     app.layout = html.Div(

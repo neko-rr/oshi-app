@@ -738,8 +738,8 @@ def register_review_callbacks(app):
     )
     def trigger_auto_fill_on_page_change(pathname):
         """ページ遷移時に自動反映をトリガー"""
-        if pathname == "/register":
-            print("DEBUG: Triggering auto-fill for STEP4")
+        if pathname == "/register/review":
+            print("DEBUG: Triggering auto-fill for review page")
             return "trigger"  # トリガー
         return ""
 

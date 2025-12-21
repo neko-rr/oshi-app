@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from supabase import Client
 
@@ -165,7 +165,7 @@ def get_all_products(supabase: Client):
         supabase.table("registration_product_information")
         .select("""
             *,
-            photo!inner(
+            photo(
                 photo_thumbnail_url,
                 photo_high_resolution_url,
                 front_flag,
@@ -182,22 +182,88 @@ def get_all_products(supabase: Client):
 
 def get_product_stats(supabase: Client):
     """Get product statistics from registration_product_information table"""
-    # Total products
-    total_response = supabase.table("registration_product_information").select("*").execute()
-    total = (
-        len(total_response.data)
-        if hasattr(total_response, "data") and total_response.data
-        else 0
+    if supabase is None:
+        return {
+            "total": 0,
+            "unique": 0,
+            "total_photos": 0,
+            "unique_barcodes": 0,
+        }
+
+    # registration_product_information の総件数
+    total_response = (
+        supabase.table("registration_product_information")
+        .select("photo_id,barcode_number")
+        .execute()
+    )
+    total_rows = total_response.data if hasattr(total_response, "data") else []
+
+    # 写真付き登録件数 (photo_id が NULL でないもの)
+    total_photos = len(
+        [
+            row
+            for row in total_rows
+            if row is not None and row.get("photo_id") not in (None, "")
+        ]
     )
 
-    # Unique barcodes
-    unique_response = supabase.table("registration_product_information").select("barcode_number").execute()
-    unique_barcodes = (
-        len(
-            set(item["barcode_number"] for item in unique_response.data if item.get("barcode_number"))
+    # ユニークバーコード（空文字/None除外）
+    unique_barcodes = len(
+        {
+            row.get("barcode_number")
+            for row in total_rows
+            if row is not None and row.get("barcode_number")
+        }
+    )
+
+    # 互換性維持のため従来キーも併記
+    return {
+        "total": len(total_rows),
+        "unique": unique_barcodes,
+        "total_photos": total_photos,
+        "unique_barcodes": unique_barcodes,
+    }
+
+
+def get_random_product_with_photo(
+    supabase: Client, sample_size: int = 50
+) -> Optional[Dict[str, Any]]:
+    """
+    registration_product_information から photo を含む行を最大 sample_size 件取得し、
+    写真URLを持つものからランダムに1件返す。
+    """
+    if supabase is None:
+        return None
+
+    response = (
+        supabase.table("registration_product_information")
+        .select(
+            """
+            *,
+            photo(
+                photo_thumbnail_url,
+                photo_high_resolution_url
+            )
+        """
         )
-        if hasattr(unique_response, "data") and unique_response.data
-        else 0
+        .order("creation_date", desc=True)
+        .limit(sample_size)
+        .execute()
     )
+    rows = response.data if hasattr(response, "data") else []
+    candidates = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        photo = row.get("photo") or {}
+        if not isinstance(photo, dict):
+            continue
+        url = photo.get("photo_thumbnail_url") or photo.get("photo_high_resolution_url")
+        if url:
+            candidates.append(row)
+    if not candidates:
+        return None
 
-    return {"total": total, "unique": unique_barcodes}
+    import random
+
+    return random.choice(candidates)
