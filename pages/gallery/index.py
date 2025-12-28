@@ -1,6 +1,6 @@
 from dash import html
 from dash import dcc
-from dash import callback, Output, Input, State, callback_context, register_page
+from dash import callback, Output, Input, State, callback_context, register_page, no_update
 from dash.dependencies import ALL
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
@@ -39,21 +39,8 @@ def _photo_thumb_url(photo: Photo):
     return nested.get("photo_thumbnail_url") or nested.get("photo_high_resolution_url")
 
 
-def _photo_full_url(photo: Photo):
-    """フルサイズURLを解決する（製品行/写真行どちらの形でも対応）。"""
-    if not isinstance(photo, dict):
-        return None
-
-    direct = photo.get("photo_high_resolution_url")
-    if direct:
-        return direct
-
-    nested = photo.get("photo") or {}
-    return nested.get("photo_high_resolution_url") or _photo_thumb_url(photo)
-
-
 def _render_detail_content(photo: Photo) -> html.Div:
-    thumbnail = _photo_full_url(photo)
+    thumbnail = _photo_thumb_url(photo)
     info_rows = [
         ("製品名", photo.get("product_name") or "未設定"),
         ("分類", photo.get("product_group_name") or "未設定"),
@@ -117,9 +104,10 @@ def _render_detail_content(photo: Photo) -> html.Div:
     )
 
 
-def render_gallery() -> html.Div:
+def render_gallery(search: str = "") -> html.Div:
     from services.photo_service import get_all_products
     from services.supabase_client import get_supabase_client
+    from urllib.parse import parse_qs
 
     supabase = get_supabase_client()
     if supabase is None:
@@ -162,58 +150,15 @@ def render_gallery() -> html.Div:
         id="gallery-photo-data", data=real_photos_for_store
     )
 
+    # search の view パラメータから初期表示を決定
+    qs = parse_qs(search.lstrip("?") if search else "")
+    initial_view = qs.get("view", ["thumb"])[0] or "thumb"
+
     # ヘッダー
     header = html.Div(
         [html.H1([html.I(className="bi bi-images me-2"), "ギャラリー"])],
         className="header",
     )
-
-    # デモ用グラフデータ
-    def create_category_pie_chart():
-        """カテゴリ別商品数の円グラフ"""
-        labels = ["キーホルダー", "缶バッジ", "アクリルスタンド", "その他"]
-        values = [0, 0, 0, 0]  # デモ用に全て0
-
-        fig = go.Figure(
-            data=[
-                go.Pie(
-                    labels=labels,
-                    values=values,
-                    marker_colors=["#FF6B9D", "#4ECDC4", "#45B7D1", "#96CEB4"],
-                    title="商品カテゴリ分布",
-                )
-            ]
-        )
-
-        fig.update_layout(
-            font_family="Arial",
-            font_size=12,
-            margin=dict(l=20, r=20, t=40, b=20),
-            height=250,  # 高さを少し小さく
-        )
-
-        return fig
-
-    def create_monthly_bar_chart():
-        """月別収集数の棒グラフ"""
-        months = ["1月", "2月", "3月", "4月", "5月", "6月"]
-        counts = [0, 0, 0, 0, 0, 0]  # デモ用に全て0
-
-        fig = go.Figure(
-            data=[go.Bar(x=months, y=counts, marker_color="#FF6B9D", name="収集数")]
-        )
-
-        fig.update_layout(
-            title="月別収集数",
-            xaxis_title="月",
-            yaxis_title="個数",
-            font_family="Arial",
-            font_size=12,
-            margin=dict(l=20, r=20, t=40, b=20),
-            height=250,  # 高さを少し小さく
-        )
-
-        return fig
 
     # タグ検索（見かけだけ）
     color_tag_palette = [
@@ -258,8 +203,11 @@ def render_gallery() -> html.Div:
         className="card text-white bg-secondary mb-3",
     )
 
+    # 初期表示のスタイル（view パラメータに従う）
+    grid_style = {} if initial_view == "thumb" else {"display": "none"}
+    list_style = {} if initial_view == "list" else {"display": "none"}
+
     if real_products_count == 0:
-        # ギャラリーコンテンツ（写真がない場合）
         dashboard_content = html.Div(
             [
                 photo_store_component,
@@ -299,7 +247,7 @@ def render_gallery() -> html.Div:
                         {"label": "サムネイル", "value": "thumb"},
                         {"label": "リスト", "value": "list"},
                     ],
-                    value="thumb",
+                    value=initial_view,
                     inline=True,
                     className="mb-3",
                 )
@@ -344,41 +292,6 @@ def render_gallery() -> html.Div:
                                                     photo.get("description")
                                                     or "説明なし",
                                                     className="text-muted small",
-                                                ),
-                                                html.Div(
-                                                    [
-                                                        *[
-                                                            dbc.Badge(
-                                                                n,
-                                                                color=c,
-                                                                className=(
-                                                                    "me-1"
-                                                                    + (
-                                                                        " text-dark"
-                                                                        if c == "light"
-                                                                        else ""
-                                                                    )
-                                                                ),
-                                                            )
-                                                            for n, c in (
-                                                                [
-                                                                    color_tag_palette[
-                                                                        (i * 2)
-                                                                        % len(
-                                                                            color_tag_palette
-                                                                        )
-                                                                    ],
-                                                                    color_tag_palette[
-                                                                        (i * 2 + 1)
-                                                                        % len(
-                                                                            color_tag_palette
-                                                                        )
-                                                                    ],
-                                                                ]
-                                                            )
-                                                        ]
-                                                    ],
-                                                    className="mt-1",
                                                 ),
                                             ],
                                             className="photo-info",
@@ -429,6 +342,8 @@ def render_gallery() -> html.Div:
                 for i, photo in enumerate(products)
             ],
             className="photo-grid",
+            id="gallery-grid-wrapper",
+            style=grid_style,
         )
         list_view = html.Div(
             [
@@ -497,31 +412,21 @@ def render_gallery() -> html.Div:
             ],
             className="list-group mb-4",
             id="gallery-list-wrapper",
+            style=list_style,
         )
-        detail_panel = html.Div(
-            [
-                html.H4("写真の詳細", className="mb-3"),
-                html.Div(
-                    "サムネイルをクリックすると詳細を表示します。",
-                    id="gallery-detail-content",
-                    className="text-muted",
-                ),
-            ],
-            className="card p-4 mb-4",
-        )
+
         dashboard_content = html.Div(
             [
                 photo_store_component,
                 tag_search,
                 summary,
                 view_toggle,
-                html.Div(grid, id="gallery-grid-wrapper"),
+                grid,
                 list_view,
-                detail_panel,
             ]
         )
 
-    return html.Div([header, dashboard_content])
+    return html.Div([header, dashboard_content, dcc.Location(id="gallery-location", refresh=False)])
 
 
 @callback(
@@ -530,20 +435,21 @@ def render_gallery() -> html.Div:
     Input("gallery-view-mode", "value"),
 )
 def _toggle_gallery_view(mode: str):
-    # 初回/不正値でも安全に
     mode = mode or "thumb"
     if mode == "list":
-        return {"display": "none"}, {"display": "block"}
-    return {"display": "block"}, {"display": "none"}
+        return {"display": "none"}, {}
+    return {}, {"display": "none"}
 
 
 @callback(
-    Output("gallery-detail-content", "children"),
+    Output("_pages_location", "pathname", allow_duplicate=True),
+    Output("_pages_location", "search", allow_duplicate=True),
     Input({"type": "gallery-thumb", "index": ALL}, "n_clicks"),
     State("gallery-photo-data", "data"),
-    prevent_initial_call=True,
+    State("gallery-view-mode", "value"),
+    prevent_initial_call="initial_duplicate",
 )
-def _show_photo_detail(_, stored_photos):
+def _navigate_to_detail(clicks, stored_photos, view_mode):
     ctx = callback_context
     if not ctx.triggered:
         raise PreventUpdate
@@ -561,9 +467,11 @@ def _show_photo_detail(_, stored_photos):
             _photo_unique_id(photo, photo.get("registration_product_id") or "")
         )
         if unique == target_index:
-            return _render_detail_content(photo)
+            pid = photo.get("registration_product_id") or unique
+            # 詳細ページへ遷移
+            return "/gallery/detail", f"?registration_product_id={pid}&view={view_mode or 'thumb'}"
 
-    return html.Div("詳細データを取得できませんでした。", className="text-danger")
+    raise PreventUpdate
 
 
 register_page(
@@ -578,3 +486,5 @@ except Exception as e:
     layout = html.Div(
         f"Gallery page error: {str(e)}", style={"color": "red", "padding": "20px"}
     )
+
+
