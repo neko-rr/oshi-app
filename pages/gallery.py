@@ -258,205 +258,31 @@ def render_gallery() -> html.Div:
         className="card text-white bg-secondary mb-3",
     )
 
-    # 収納場所タグ 集計カードは /dashboard に移動したため、このページでは表示しない
-    storage_chart_card = None
-
     if real_products_count == 0:
-        # ダッシュボードコンテンツ（写真がない場合）
+        # ギャラリーコンテンツ（写真がない場合）
         dashboard_content = html.Div(
             [
                 photo_store_component,
                 tag_search,
-                storage_chart_card,
-                # 統計カード
                 html.Div(
                     [
+                        html.H4("まだ写真が登録されていません", className="mb-2"),
                         html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Div("0", className="card-title h2 mb-0"),
-                                        html.Div(
-                                            "登録商品数",
-                                            className="card-subtitle text-muted",
-                                        ),
-                                    ],
-                                    className="card-body",
-                                ),
-                            ],
-                            className="card text-white bg-primary mb-3",
+                            "「写真を登録」からバーコードまたは写真で登録を開始できます。",
+                            className="text-muted",
                         ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Div("¥0", className="card-title h2 mb-0"),
-                                        html.Div(
-                                            "総購入額",
-                                            className="card-subtitle text-muted",
-                                        ),
-                                    ],
-                                    className="card-body",
-                                ),
-                            ],
-                            className="card text-white bg-success mb-3",
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Div("0", className="card-title h2 mb-0"),
-                                        html.Div(
-                                            "カテゴリ数",
-                                            className="card-subtitle text-muted",
-                                        ),
-                                    ],
-                                    className="card-body",
-                                ),
-                            ],
-                            className="card text-white bg-info mb-3",
-                        ),
-                    ],
-                    className="row g-3 mb-4",
-                ),
-                # グラフセクション
-                html.Div(
-                    [
-                        html.H4("📊 データ分析", className="mb-3"),
-                        html.Div(
-                            [
-                                # カテゴリ別円グラフ
-                                html.Div(
-                                    [
-                                        html.H6(
-                                            "商品カテゴリ分布",
-                                            className="text-center mb-3",
-                                        ),
-                                        dcc.Graph(
-                                            figure=create_category_pie_chart(),
-                                            config={
-                                                "displayModeBar": False,
-                                                "responsive": True,
-                                                "autosizable": True,
-                                            },
-                                            className="border rounded w-100",
-                                            style={"height": "250px"},
-                                        ),
-                                    ],
-                                    className="col-12 col-md-6 mb-4",
-                                ),
-                                # 月別棒グラフ
-                                html.Div(
-                                    [
-                                        html.H6(
-                                            "月別収集数", className="text-center mb-3"
-                                        ),
-                                        dcc.Graph(
-                                            figure=create_monthly_bar_chart(),
-                                            config={
-                                                "displayModeBar": False,
-                                                "responsive": True,
-                                                "autosizable": True,
-                                            },
-                                            className="border rounded w-100",
-                                            style={"height": "250px"},
-                                        ),
-                                    ],
-                                    className="col-12 col-md-6 mb-4",
-                                ),
-                            ],
-                            className="row",
+                        html.A(
+                            [html.I(className="bi bi-camera me-2"), "写真を登録する"],
+                            href="/register/barcode",
+                            className="btn btn-primary mt-3",
                         ),
                     ],
                     className="card p-4 mb-4",
-                ),
-                # クイックアクション
-                html.Div(
-                    [
-                        html.H4("クイックアクション", className="mb-3"),
-                        html.Div(
-                            [
-                                html.A(
-                                    [
-                                        html.I(className="bi bi-camera me-2"),
-                                        "写真を登録する",
-                                    ],
-                                    href="/register/barcode",
-                                    className="btn btn-primary btn-lg me-3 mb-2",
-                                ),
-                                html.A(
-                                    [
-                                        html.I(className="bi bi-gear me-2"),
-                                        "設定",
-                                    ],
-                                    href="/settings",
-                                    className="btn btn-outline-secondary btn-lg mb-2",
-                                ),
-                            ]
-                        ),
-                    ],
-                    className="card p-4 mb-4",
-                ),
-                # 最近の活動（デモデータ）
-                html.Div(
-                    [
-                        html.H4("最近の活動", className="mb-3"),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.I(
-                                            className="bi bi-circle-fill text-primary me-2"
-                                        ),
-                                        html.Span(
-                                            "アプリを起動しました", className="me-2"
-                                        ),
-                                        html.Small("たった今", className="text-muted"),
-                                    ],
-                                    className="d-flex align-items-center mb-2",
-                                ),
-                                html.Div(
-                                    [
-                                        html.I(
-                                            className="bi bi-circle-fill text-secondary me-2"
-                                        ),
-                                        html.Span(
-                                            "ダッシュボードを表示しました",
-                                            className="me-2",
-                                        ),
-                                        html.Small("たった今", className="text-muted"),
-                                    ],
-                                    className="d-flex align-items-center mb-2",
-                                ),
-                            ]
-                        ),
-                    ],
-                    className="card p-4 mb-4",
-                ),
-                # ウェルカムメッセージ
-                html.Div(
-                    [
-                        html.H4("📸 推し活グッズ管理をはじめよう！", className="mb-3"),
-                        html.P(
-                            "バーコードをスキャンしたり写真をアップロードするだけで、簡単にグッズを登録・管理できます。",
-                            className="mb-3",
-                        ),
-                        html.Ul(
-                            [
-                                html.Li("📱 スマホで簡単に登録"),
-                                html.Li("🏷️ 自動でタグ付け"),
-                                html.Li("📊 収集状況を一目で確認"),
-                                html.Li("🎨 テーマ変更可能"),
-                            ],
-                            className="mb-0",
-                        ),
-                    ],
-                    className="card p-4 bg-light",
                 ),
             ]
         )
     else:
-        # 写真がある場合は従来のギャラリー表示
+        # 写真がある場合はギャラリー表示
         summary = html.Div(
             [
                 html.P(
@@ -464,6 +290,21 @@ def render_gallery() -> html.Div:
                     className="text-muted text-center mb-4",
                 )
             ]
+        )
+        view_toggle = html.Div(
+            [
+                dbc.RadioItems(
+                    id="gallery-view-mode",
+                    options=[
+                        {"label": "サムネイル", "value": "thumb"},
+                        {"label": "リスト", "value": "list"},
+                    ],
+                    value="thumb",
+                    inline=True,
+                    className="mb-3",
+                )
+            ],
+            className="card p-3 mb-3",
         )
         grid = html.Div(
             [
@@ -589,6 +430,74 @@ def render_gallery() -> html.Div:
             ],
             className="photo-grid",
         )
+        list_view = html.Div(
+            [
+                html.Button(
+                    [
+                        (
+                            html.Img(
+                                src=_photo_thumb_url(photo),
+                                style={
+                                    "width": "56px",
+                                    "height": "56px",
+                                    "objectFit": "cover",
+                                    "borderRadius": "10px",
+                                },
+                            )
+                            if _photo_thumb_url(photo)
+                            else html.Div(
+                                html.I(
+                                    className="bi bi-image", style={"fontSize": "22px"}
+                                ),
+                                className="d-flex align-items-center justify-content-center border rounded",
+                                style={"width": "56px", "height": "56px"},
+                            )
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    photo.get("product_name") or "名称未設定",
+                                    className="fw-semibold text-dark",
+                                ),
+                                html.Div(
+                                    [
+                                        *[
+                                            dbc.Badge(
+                                                n,
+                                                color=c,
+                                                className=(
+                                                    "me-1"
+                                                    + (" text-dark" if c == "light" else "")
+                                                ),
+                                            )
+                                            for n, c in (
+                                                [
+                                                    color_tag_palette[
+                                                        (i * 2) % len(color_tag_palette)
+                                                    ],
+                                                    color_tag_palette[
+                                                        (i * 2 + 1)
+                                                        % len(color_tag_palette)
+                                                    ],
+                                                ]
+                                            )
+                                        ]
+                                    ],
+                                    className="mt-1",
+                                ),
+                            ],
+                            className="flex-grow-1 text-start",
+                        ),
+                    ],
+                    id={"type": "gallery-thumb", "index": _photo_unique_id(photo, f"photo-{i}")},
+                    className="list-group-item list-group-item-action d-flex align-items-center gap-3",
+                    n_clicks=0,
+                )
+                for i, photo in enumerate(real_photos_for_store)
+            ],
+            className="list-group mb-4",
+            id="gallery-list-wrapper",
+        )
         detail_panel = html.Div(
             [
                 html.H4("写真の詳細", className="mb-3"),
@@ -605,12 +514,27 @@ def render_gallery() -> html.Div:
                 photo_store_component,
                 tag_search,
                 summary,
-                grid,
+                view_toggle,
+                html.Div(grid, id="gallery-grid-wrapper"),
+                list_view,
                 detail_panel,
             ]
         )
 
     return html.Div([header, dashboard_content])
+
+
+@callback(
+    Output("gallery-grid-wrapper", "style"),
+    Output("gallery-list-wrapper", "style"),
+    Input("gallery-view-mode", "value"),
+)
+def _toggle_gallery_view(mode: str):
+    # 初回/不正値でも安全に
+    mode = mode or "thumb"
+    if mode == "list":
+        return {"display": "none"}, {"display": "block"}
+    return {"display": "block"}, {"display": "none"}
 
 
 @callback(
