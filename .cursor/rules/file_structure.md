@@ -59,8 +59,19 @@ Apply Mode: Always Apply
   - /register/review（登録 STEP3: 確認・登録）
     - 定義: pages/review.py
 - /gallery（ギャラリー）
-  - 定義: pages/gallery.py
+  - 定義: pages/gallery/index.py
+  - /gallery（ギャラリー：詳細ページ）
+  - 定義: pages/gallery/detail.py
 - /dashboard（ダッシュボード）
   - 定義: pages/dashboard.py
 - /settings（設定）
   - 定義: pages/settings.py
+
+# 複雑なページ遷移詳細
+
+## ギャラリー関連
+
+URL: /gallery/detail?registration_product_id=<id>&view=<thumb|list>
+クリック挙動: pages/gallery/index.py（現ギャラリー）で、クリック時に \_pages_location.pathname と \_pages_location.search を更新して詳細へ遷移
+詳細ページ: pages/gallery/detail.py で query を読み取り、Supabase から該当 registration_product_information を photo(...) 付きで取得して表示
+戻る導線: 詳細ページの先頭に href="/gallery?view=<...>" の戻る矢印ボタンを配置

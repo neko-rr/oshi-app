@@ -1,0 +1,155 @@
+BOOTSWATCH_SWATCH = {
+    # values sourced from Bootswatch 5.3.3 theme variables
+    "cerulean": {
+        "primary": "#0d6efd",
+        "secondary": "#6c757d",
+        "body_bg": "#fff",
+        "body_color": "#212529",
+    },
+    "cosmo": {
+        "primary": "#2780e3",
+        "secondary": "#373a3c",
+        "body_bg": "#fff",
+        "body_color": "#373a3c",
+    },
+    "cyborg": {
+        "primary": "#2a9fd6",
+        "secondary": "#555",
+        "body_bg": "#060606",
+        "body_color": "#f5f5f5",
+    },
+    "darkly": {
+        "primary": "#375a7f",
+        "secondary": "#444",
+        "body_bg": "#222",
+        "body_color": "#fff",
+    },
+    "flatly": {
+        "primary": "#2c3e50",
+        "secondary": "#95a5a6",
+        "body_bg": "#ecf0f1",
+        "body_color": "#2c3e50",
+    },
+    "journal": {
+        "primary": "#eb6864",
+        "secondary": "#aaa",
+        "body_bg": "#fff",
+        "body_color": "#555",
+    },
+    "litera": {
+        "primary": "#4582ec",
+        "secondary": "#adb5bd",
+        "body_bg": "#fff",
+        "body_color": "#343a40",
+    },
+    "lumen": {
+        "primary": "#158cba",
+        "secondary": "#f0ad4e",
+        "body_bg": "#f8f9fa",
+        "body_color": "#555",
+    },
+    "lux": {
+        "primary": "#1a1a1a",
+        "secondary": "#adb5bd",
+        "body_bg": "#f8f9fa",
+        "body_color": "#343a40",
+    },
+    "materia": {
+        "primary": "#2196f3",
+        "secondary": "#6c757d",
+        "body_bg": "#fff",
+        "body_color": "#212529",
+    },
+    "minty": {
+        "primary": "#78c2ad",
+        "secondary": "#f3969a",
+        "body_bg": "#f8f9fa",
+        "body_color": "#212529",
+    },
+    "morph": {
+        "primary": "#007bff",
+        "secondary": "#6c757d",
+        "body_bg": "#f8f9fa",
+        "body_color": "#212529",
+    },
+    "pulse": {
+        "primary": "#593196",
+        "secondary": "#adb5bd",
+        "body_bg": "#f8f9fa",
+        "body_color": "#343a40",
+    },
+    "quartz": {
+        "primary": "#bd5fff",
+        "secondary": "#f2f2f2",
+        "body_bg": "#0c0c0d",
+        "body_color": "#e5e5e6",
+    },
+    "sandstone": {
+        "primary": "#325d88",
+        "secondary": "#93c54b",
+        "body_bg": "#f8f5f0",
+        "body_color": "#3e3f3a",
+    },
+    "simplex": {
+        "primary": "#d9230f",
+        "secondary": "#fff",
+        "body_bg": "#fcfcfc",
+        "body_color": "#4c4c4c",
+    },
+    "sketchy": {
+        "primary": "#333",
+        "secondary": "#e83e8c",
+        "body_bg": "#fff",
+        "body_color": "#212529",
+    },
+    "slate": {
+        "primary": "#007bff",
+        "secondary": "#6c757d",
+        "body_bg": "#272b30",
+        "body_color": "#f8f9fa",
+    },
+    "solar": {
+        "primary": "#b58900",
+        "secondary": "#586e75",
+        "body_bg": "#fdf6e3",
+        "body_color": "#657b83",
+    },
+    "spacelab": {
+        "primary": "#446e9b",
+        "secondary": "#999",
+        "body_bg": "#f6f6f6",
+        "body_color": "#333",
+    },
+    "superhero": {
+        "primary": "#df691a",
+        "secondary": "#4e5d6c",
+        "body_bg": "#2b3e50",
+        "body_color": "#ebebeb",
+    },
+    "united": {
+        "primary": "#e95420",
+        "secondary": "#f0ad4e",
+        "body_bg": "#fff",
+        "body_color": "#111",
+    },
+    "vapor": {
+        "primary": "#b07cc6",
+        "secondary": "#adb5bd",
+        "body_bg": "#0b0f19",
+        "body_color": "#e5e5e6",
+    },
+    "yeti": {
+        "primary": "#008cba",
+        "secondary": "#e5e5e5",
+        "body_bg": "#fff",
+        "body_color": "#222",
+    },
+    "zephyr": {
+        "primary": "#3459e6",
+        "secondary": "#adb5bd",
+        "body_bg": "#f8f9fa",
+        "body_color": "#343a40",
+    },
+}
+
+

@@ -258,6 +258,17 @@ body {
   margin-top: 10px;
 }
 
+.theme-card {
+  border: 1px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.theme-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
 .tag-chip {
   background: var(--bs-primary-bg-subtle, var(--bs-light));
   color: var(--bs-primary-text-emphasis, var(--bs-primary));

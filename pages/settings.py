@@ -1,5 +1,6 @@
 from dash import html, dcc, register_page
 from components.theme_utils import load_theme, CURRENT_THEME
+from components.theme_palette import BOOTSWATCH_SWATCH
 from services.photo_service import get_product_stats
 from services.supabase_client import get_supabase_client
 import dash_bootstrap_components as dbc
@@ -62,51 +63,96 @@ def render_settings() -> html.Div:
                         className="card-title",
                     ),
                     html.P(
-                        "アプリの見た目を変更できます。変更後はページをリロードしてください。",
+                        "カードを選ぶとすぐプレビューと適用が切り替わります。保存ボタンで永続化します。",
                         className="card-text mb-3",
                     ),
-                    dbc.Select(
-                        id="theme-selector",
-                        options=[
-                            {"label": theme.title(), "value": theme}
-                            for theme in [
-                                "cerulean",
-                                "cosmo",
-                                "cyborg",
-                                "darkly",
-                                "flatly",
-                                "journal",
-                                "litera",
-                                "lumen",
-                                "lux",
-                                "materia",
-                                "minty",
-                                "morph",
-                                "pulse",
-                                "quartz",
-                                "sandstone",
-                                "simplex",
-                                "sketchy",
-                                "slate",
-                                "solar",
-                                "spacelab",
-                                "superhero",
-                                "united",
-                                "vapor",
-                                "yeti",
-                                "zephyr",
-                            ]
+                    dcc.Store(id="theme-preview-store", data=current_theme or CURRENT_THEME),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.Div(theme.title(), className="fw-semibold mb-2"),
+                                            html.Div(
+                                                [
+                                                    html.Span(
+                                                        "",
+                                                        style={
+                                                            "display": "inline-block",
+                                                            "width": "32px",
+                                                            "height": "32px",
+                                                            "background": BOOTSWATCH_SWATCH[theme]["primary"],
+                                                            "borderRadius": "8px",
+                                                        },
+                                                    ),
+                                                    html.Span(
+                                                        "",
+                                                        style={
+                                                            "display": "inline-block",
+                                                            "width": "32px",
+                                                            "height": "32px",
+                                                            "background": BOOTSWATCH_SWATCH[theme]["secondary"],
+                                                            "borderRadius": "8px",
+                                                        },
+                                                    ),
+                                                    html.Span(
+                                                        "",
+                                                        style={
+                                                            "display": "inline-block",
+                                                            "width": "32px",
+                                                            "height": "32px",
+                                                            "background": BOOTSWATCH_SWATCH[theme]["body_color"],
+                                                            "borderRadius": "8px",
+                                                        },
+                                                    ),
+                                                    html.Span(
+                                                        "",
+                                                        style={
+                                                            "display": "inline-block",
+                                                            "width": "32px",
+                                                            "height": "32px",
+                                                            "background": BOOTSWATCH_SWATCH[theme]["body_bg"],
+                                                            "border": "1px solid #dee2e6",
+                                                            "borderRadius": "8px",
+                                                        },
+                                                    ),
+                                                ],
+                                                className="theme-swatch-grid",
+                                            ),
+                                        ],
+                                        className="card-body p-3",
+                                    ),
+                                ],
+                                className="card theme-card",
+                                id={"type": "theme-card", "theme": theme},
+                                n_clicks=0,
+                                style={
+                                    "minWidth": "170px",
+                                    "maxWidth": "180px",
+                                    "minHeight": "140px",
+                                },
+                            )
+                            for theme in BOOTSWATCH_SWATCH.keys()
                         ],
-                        value=current_theme or CURRENT_THEME,
-                        className="mb-3",
+                        className="d-flex flex-row flex-nowrap gap-3 mb-3",
+                        style={"overflowX": "auto"},
                     ),
-                    html.Button(
-                        "テーマを保存",
-                        id="save-theme-button",
-                        n_clicks=0,
-                        className="btn btn-light",
+                    html.Div(
+                        html.Button(
+                            "テーマを保存",
+                            id="save-theme-button",
+                            n_clicks=0,
+                            className="btn btn-outline-light",
+                        ),
+                        className="mb-2",
                     ),
-                    html.Div(id="theme-save-result", className="mt-3"),
+                    html.Div(
+                        id="theme-preview-name",
+                        className="text-white-50 small mb-1",
+                        children=f"選択中: {current_theme or CURRENT_THEME}",
+                    ),
+                    html.Div(id="theme-save-result", className="mt-2"),
                 ],
                 className="card text-white bg-primary mb-3",
             ),
