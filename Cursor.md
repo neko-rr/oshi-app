@@ -51,7 +51,7 @@
 
 ## Render / Docker
 
-- `Dockerfile`: python:3.11-slim, `libzbar0` 必要、`gunicorn app:server`、`PORT` デフォルト 8050、`EXPOSE 8050`、ヘルスチェック有り。
+- `Dockerfile`: python:3.11-slim, `libzbar0` 必要、`gunicorn server:app`、`PORT` デフォルト 8050、`EXPOSE 8050`、ヘルスチェック有り。
 - Render (docker_web_service) では ENV に `SUPABASE_URL`, `SUPABASE_KEY`, `RAKUTEN_APP_ID`, `IO_INTELLIGENCE_API_KEY` 等を設定すること。
 - `.dockerignore` で `.env`, ログ, DB, tests などを除外済み。
 
