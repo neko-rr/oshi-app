@@ -149,26 +149,34 @@ flask_app = Flask(__name__)
 def _require_auth():
     # OAuth state エラー時は自動再試行させず、その場で説明を返す
     if request.args.get("error_code") == "bad_oauth_state":
-        return render_template_string(
-            """
-            <!doctype html>
-            <html>
-              <head><meta charset="utf-8"><title>Auth error</title></head>
-              <body style="font-family:sans-serif; max-width:640px; margin:40px auto;">
-                <h2>ログインに失敗しました</h2>
-                <p>原因: OAuth state が一致しませんでした（bad_oauth_state）。</p>
-                <ul>
-                  <li>複数タブで同時にログインを開始した</li>
-                  <li>ブラウザ拡張/プライバシー設定で Cookie がブロックされた</li>
-                  <li>前回のログイン途中で戻る/更新した</li>
-                </ul>
-                <p>対処: Cookie を削除し、タブを1つにして再試行してください。</p>
-                <p><a href="/login">ログイン画面へ戻る</a></p>
-              </body>
-            </html>
-            """,
+        resp = make_response(
+            render_template_string(
+                """
+                <!doctype html>
+                <html>
+                  <head><meta charset="utf-8"><title>Auth error</title></head>
+                  <body style="font-family:sans-serif; max-width:640px; margin:40px auto;">
+                    <h2>ログインに失敗しました</h2>
+                    <p>原因: OAuth state が一致しませんでした（bad_oauth_state）。</p>
+                    <ul>
+                      <li>複数タブで同時にログインを開始した</li>
+                      <li>ブラウザ拡張/プライバシー設定で Cookie がブロックされた</li>
+                      <li>前回のログイン途中で戻る/更新した</li>
+                    </ul>
+                    <p>対処: Cookie を削除し、タブを1つにして再試行してください。</p>
+                    <p><a href="/login">ログイン画面へ戻る</a></p>
+                  </body>
+                </html>
+                """
+            ),
             400,
         )
+        # state / verifier を破棄して再試行をクリア
+        resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+        resp.set_cookie(
+            CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
+        )
+        return resp
 
     if _is_public_path(request.path):
         return None
