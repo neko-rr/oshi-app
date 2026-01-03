@@ -46,6 +46,7 @@ AUTH_COOKIE = "sb-access-token"
 REFRESH_COOKIE = "sb-refresh-token"
 STATE_COOKIE = "sb-oauth-state"
 CODE_VERIFIER_COOKIE = "sb-pkce-verifier"
+REDIRECT_COOKIE = "sb-redirect-to"
 
 
 def _cookie_kwargs(http_only: bool = True, max_age: Optional[int] = None) -> dict:
@@ -145,6 +146,28 @@ def _is_public_path(path: str) -> bool:
 flask_app = Flask(__name__)
 
 
+def _safe_redirect_target(base_url: str, target: Optional[str]) -> str:
+    """外部リダイレクトを防ぎつつ、指定がなければ / に戻す。"""
+    if not target:
+        return "/"
+
+    parsed = urlparse(target)
+    # 絶対URLの場合は同一ホストのみ許可
+    if parsed.scheme or parsed.netloc:
+        base_host = urlparse(base_url).netloc
+        if parsed.netloc == base_host:
+            path = parsed.path or "/"
+            query = f"?{parsed.query}" if parsed.query else ""
+            fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+            return f"{path}{query}{fragment}"
+        return "/"
+
+    # 相対パスの場合
+    if not target.startswith("/"):
+        return f"/{target}"
+    return target
+
+
 @flask_app.before_request
 def _require_auth():
     # OAuth state エラー時は自動再試行させず、その場で説明を返す
@@ -176,6 +199,7 @@ def _require_auth():
         resp.set_cookie(
             CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
         )
+        resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
         return resp
 
     if _is_public_path(request.path):
@@ -259,19 +283,26 @@ def auth_login():
             f"ローカルURL不一致です。ブラウザは APP_BASE_URL に統一してください。（{exc}）",
             400,
         )
-    state = secrets.token_urlsafe(16)
+    state = secrets.token_urlsafe(32)
     verifier = _pkce_verifier()
     challenge = _pkce_challenge(verifier)
+    redirect_to_param = request.args.get("redirect_to", "/")
+    redirect_to = _safe_redirect_target(base_url, redirect_to_param)
 
     # authorize URL に code_challenge を付与
     url = _build_authorize_url(state, base_url)
     url = f"{url}&code_challenge={challenge}&code_challenge_method=S256"
 
     resp = make_response(redirect(url))
-    # state は JS に見えても問題ないが、改竄防止のため HttpOnly=False を維持
-    resp.set_cookie(STATE_COOKIE, state, **_cookie_kwargs(http_only=False))
+    # state / redirect は JS から見えても機密でないため HttpOnly=False
+    resp.set_cookie(STATE_COOKIE, state, **_cookie_kwargs(http_only=False, max_age=600))
+    resp.set_cookie(
+        REDIRECT_COOKIE, redirect_to, **_cookie_kwargs(http_only=False, max_age=600)
+    )
     # code_verifier は秘密なので HttpOnly
-    resp.set_cookie(CODE_VERIFIER_COOKIE, verifier, **_cookie_kwargs(http_only=True))
+    resp.set_cookie(
+        CODE_VERIFIER_COOKIE, verifier, **_cookie_kwargs(http_only=True, max_age=600)
+    )
     return resp
 
 
@@ -285,19 +316,20 @@ def auth_callback():
             400,
         )
     code = request.args.get("code")
+    verifier = request.cookies.get(CODE_VERIFIER_COOKIE)
+    state_cookie = request.cookies.get(STATE_COOKIE)
+    state_param = request.args.get("state")
+
     if not code:
         return (
             "No authorization code returned. ブラウザのCookieや拡張機能を確認してください。",
             400,
         )
-
-    verifier = request.cookies.get(CODE_VERIFIER_COOKIE)
-    state_cookie = request.cookies.get(STATE_COOKIE)
-    state_param = request.args.get("state")
-
     if not verifier:
         return "Missing PKCE verifier cookie.", 400
-    if state_param and state_cookie and state_param != state_cookie:
+    if not state_param or not state_cookie:
+        return "Missing state. Please retry login.", 400
+    if state_param != state_cookie:
         return "State mismatch. Please retry login.", 400
 
     try:
@@ -311,13 +343,18 @@ def auth_callback():
     if not access_token:
         return f"No access_token in session response: {session}", 400
 
-    resp = make_response(redirect("/"))
+    redirect_to_cookie = request.cookies.get(REDIRECT_COOKIE)
+    base_url = _get_base_url()
+    redirect_to = _safe_redirect_target(base_url, redirect_to_cookie)
+
+    resp = make_response(redirect(redirect_to))
     _set_session_cookies(resp, access_token, refresh_token, expires_in)
     # state / verifier を破棄
     resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     resp.set_cookie(
         CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
     )
+    resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     return resp
 
 
@@ -346,6 +383,7 @@ def auth_session():
     _set_session_cookies(resp, access_token, refresh_token, expires_in)
     # state cookie を削除
     resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     return resp
 
 
