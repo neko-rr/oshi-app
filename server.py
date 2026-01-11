@@ -318,20 +318,41 @@ def _require_auth():
         return resp
 
     # 認証済み: g にセット（services 側で利用）
-    g.user_id = getattr(user, "id", None)
+    user_id = None
+    user_email = None
+    if isinstance(user, dict):
+        user_id = user.get("id") or user.get("user", {}).get("id")
+        user_email = user.get("email") or user.get("user", {}).get("email")
+    else:
+        user_id = getattr(user, "id", None)
+        user_email = getattr(user, "email", None)
+
+    g.user_id = user_id
+    g.user_email = user_email
     g.access_token = access_token
-    _dbg("require_auth_ok", path=request.path, user_id=g.user_id)
+    _dbg(
+        "require_auth_ok",
+        path=request.path,
+        user_id=g.user_id,
+        user_email=_mask_email(g.user_email),
+    )
     return None
 
 
 @flask_app.get("/login")
 def login_page():
+    logout_flag = request.args.get("logout") == "1"
     return render_template_string(
         """
         <!doctype html>
         <html>
           <head><meta charset="utf-8"><title>Login</title></head>
           <body style="font-family:sans-serif; max-width:520px; margin:40px auto;">
+            {% if logout_flag %}
+              <div style="padding:10px 12px; margin-bottom:16px; background:#e6ffed; color:#046c4e; border:1px solid #b6f0c2; border-radius:6px;">
+                ログアウトしました
+              </div>
+            {% endif %}
             <h2>ログイン</h2>
             <p>Google または メール/パスワードでログインできます。</p>
 
@@ -438,7 +459,8 @@ def login_page():
             </script>
           </body>
         </html>
-        """
+        """,
+        logout_flag=logout_flag,
     )
 
 
@@ -775,7 +797,7 @@ def auth_email_reset():
 
 @flask_app.post("/auth/logout")
 def auth_logout():
-    resp = make_response(jsonify({"ok": True}))
+    resp = make_response(redirect("/login?logout=1"))
     _clear_session_cookies(resp)
     return resp
 

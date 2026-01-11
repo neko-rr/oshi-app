@@ -20,6 +20,56 @@ def render_settings() -> html.Div:
                 [html.H1([html.I(className="bi bi-gear me-2"), "設定"])],
                 className="header",
             ),
+            # 認証情報 + ログアウト（テーマに追従する中立カード）
+            html.Div(
+                [
+                    html.H4("認証情報", className="card-title"),
+                    html.Div(
+                        id="settings-user-info",
+                        children="ログイン中のユーザーを取得中...",
+                        className="mb-2",
+                    ),
+                    html.Div(
+                        id="settings-logout-msg",
+                        style={"color": "red", "marginTop": "4px"},
+                        className="small",
+                    ),
+                    html.Form(
+                        action="/auth/logout",
+                        method="post",
+                        children=[
+                            html.Button(
+                                "ログアウト",
+                                type="submit",
+                                className="btn btn-outline-primary mt-2",
+                            )
+                        ],
+                    ),
+                    # /auth/me で email/id を取得して表示する簡易スクリプト
+                    html.Script(
+                        """
+                        document.addEventListener('DOMContentLoaded', () => {
+                          const infoEl = document.getElementById('settings-user-info');
+                          if (infoEl) {
+                            fetch('/auth/me', { credentials: 'include' })
+                              .then(r => r.json())
+                              .then(d => {
+                                if (d.error || (!d.email && !d.id)) {
+                                  infoEl.textContent = '取得できませんでした';
+                                  return;
+                                }
+                                const email = d.email || '(emailなし)';
+                                const uid = d.id || '(id不明)';
+                                infoEl.textContent = `${email} / id: ${uid}`;
+                              })
+                              .catch(() => { infoEl.textContent = '取得できませんでした'; });
+                          }
+                        });
+                        """
+                    ),
+                ],
+                className="card-custom",
+            ),
             html.Div(
                 [
                     html.H4(
@@ -54,7 +104,7 @@ def render_settings() -> html.Div:
                         className="mt-3 d-inline-flex align-items-center gap-2",
                     ),
                 ],
-                className="card text-white bg-primary mb-3",
+                className="card-custom",
             ),
             html.Div(
                 [
@@ -143,7 +193,7 @@ def render_settings() -> html.Div:
                             "テーマを保存",
                             id="save-theme-button",
                             n_clicks=0,
-                            className="btn btn-outline-light",
+                            className="btn btn-outline-primary",
                         ),
                         className="mb-2",
                     ),
@@ -154,7 +204,7 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(id="theme-save-result", className="mt-2"),
                 ],
-                className="card text-white bg-primary mb-3",
+                className="card-custom",
             ),
             html.Div(
                 [
@@ -167,22 +217,22 @@ def render_settings() -> html.Div:
                             html.Button(
                                 "カラータグ",
                                 n_clicks=0,
-                                className="btn btn-light me-2 mb-2",
+                                className="btn btn-outline-primary me-2 mb-2",
                             ),
                             html.Button(
                                 "カテゴリータグ",
                                 n_clicks=0,
-                                className="btn btn-light me-2 mb-2",
+                                className="btn btn-outline-primary me-2 mb-2",
                             ),
                             html.Button(
                                 "収納場所タグ",
                                 n_clicks=0,
-                                className="btn btn-light mb-2",
+                                className="btn btn-outline-primary mb-2",
                             ),
                         ]
                     ),
                 ],
-                className="card text-white bg-secondary mb-3",
+                className="card-custom",
             ),
             html.Div(
                 [
@@ -195,18 +245,18 @@ def render_settings() -> html.Div:
                             html.Button(
                                 "X用",
                                 n_clicks=0,
-                                className="btn btn-light me-2 mb-2",
+                                className="btn btn-outline-primary me-2 mb-2",
                                 id="btn-x-share",
                             ),
                             html.Button(
                                 "Instagram用",
                                 n_clicks=0,
-                                className="btn btn-light me-2 mb-2",
+                                className="btn btn-outline-primary me-2 mb-2",
                             ),
                             html.Button(
                                 "LINE用",
                                 n_clicks=0,
-                                className="btn btn-light mb-2",
+                                className="btn btn-outline-primary mb-2",
                             ),
                         ]
                     ),
@@ -229,12 +279,12 @@ def render_settings() -> html.Div:
                                 "設定",
                                 id="x-share-save-dummy",
                                 n_clicks=0,
-                                className="btn btn-light mt-2",
+                                className="btn btn-outline-primary mt-2",
                             ),
                         ],
                     ),
                 ],
-                className="card text-white bg-secondary mb-3",
+                className="card-custom",
             ),
             html.Div(
                 [
@@ -250,7 +300,7 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(id="delete-result", className="mt-3"),
                 ],
-                className="card text-white bg-secondary mb-3",
+                className="card-custom",
             ),
             html.Div(
                 [
@@ -267,7 +317,7 @@ def render_settings() -> html.Div:
                         className="card-text mb-0",
                     ),
                 ],
-                className="card text-white bg-primary mb-3",
+                className="card-custom",
             ),
         ]
     )
