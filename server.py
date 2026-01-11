@@ -25,26 +25,25 @@ from flask import (
 )
 
 from app import create_app
-from services.supabase_client import get_user_client
+# get_user_client は REST 検証に移行したため未使用
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DOTENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 load_dotenv(dotenv_path=DOTENV_PATH, override=False)
 
-SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL") or ""
-PUBLISHABLE_KEY = (
-    os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY")
-    or os.getenv("SUPABASE_KEY")
-    or ""
-)
+SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL") or ""
+# publishable key: PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY のみ使用（フォールバックなし）
+PUBLISHABLE_KEY = os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY") or ""
 APP_BASE_URL = (os.getenv("APP_BASE_URL") or "").rstrip("/")
 COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "Lax")
 COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
+AUTH_DEBUG = os.getenv("AUTH_DEBUG", "").lower() in {"1", "true", "yes"}
 
 AUTH_COOKIE = "sb-access-token"
 REFRESH_COOKIE = "sb-refresh-token"
-STATE_COOKIE = "sb-oauth-state"
+# Supabase側の state には依存せず、アプリ独自の app_state でCSRF対策
+APP_STATE_COOKIE = "app-oauth-state"
 CODE_VERIFIER_COOKIE = "sb-pkce-verifier"
 REDIRECT_COOKIE = "sb-redirect-to"
 
@@ -58,6 +57,63 @@ def _cookie_kwargs(http_only: bool = True, max_age: Optional[int] = None) -> dic
         "path": "/",
         **({"max_age": max_age} if max_age is not None else {}),
     }
+
+
+def _mask_token(val: Optional[str]) -> str:
+    if not val:
+        return ""
+    tail = val[-4:] if len(val) >= 4 else val
+    return f"***{tail}"
+
+
+def _mask_email(val: Optional[str]) -> str:
+    if not val:
+        return ""
+    if "@" not in val:
+        return f"{val[0]}***" if val else ""
+    name, domain = val.split("@", 1)
+    head = name[:1] if name else ""
+    return f"{head}***@{domain}"
+
+
+def _mask_generic(val: Optional[str]) -> str:
+    if not val:
+        return ""
+    if len(val) <= 8:
+        return "***"
+    return f"***{val[-4:]}"
+
+
+def _dbg(event: str, **fields) -> None:
+    """AUTH_DEBUG=1 のときだけ安全な print を行う。"""
+    if not AUTH_DEBUG:
+        return
+
+    safe = {}
+    for k, v in fields.items():
+        if v is None:
+            safe[k] = None
+            continue
+        if isinstance(v, bool):
+            safe[k] = v
+            continue
+        if isinstance(v, (int, float)):
+            safe[k] = v
+            continue
+        # list/tuple はマスク不要（Cookie名の配列など）
+        if isinstance(v, (list, tuple)):
+            safe[k] = v
+            continue
+        vs = str(v)
+        key = k.lower()
+        if any(x in key for x in ["token", "secret", "cookie", "verifier"]):
+            safe[k] = _mask_token(vs)
+        elif "email" in key:
+            safe[k] = _mask_email(vs)
+        else:
+            # 長すぎるログは避け、末尾だけ残す
+            safe[k] = vs if len(vs) <= 64 else f"{vs[:30]}...{vs[-6:]}"
+    print(f"AUTHDBG {event} {safe}")
 
 
 def _get_base_url() -> str:
@@ -85,13 +141,18 @@ def _get_base_url() -> str:
     raise RuntimeError("APP_BASE_URL is not set")
 
 
-def _build_authorize_url(state: str, base_url: str) -> str:
-    redirect_uri = f"{base_url}/auth/callback"
+def _build_authorize_url(app_state: str, base_url: str, code_challenge: str) -> str:
+    """
+    Supabaseには独自stateを渡さず、アプリ側のapp_stateをredirect_toに埋め込む。
+    """
+    redirect_uri = (
+        f"{base_url}/auth/callback?{urllib.parse.urlencode({'app_state': app_state})}"
+    )
     params = {
         "provider": "google",
         "redirect_to": redirect_uri,
-        "state": state,
-        # PKCE は /auth/login で付与する（code_challenge）
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
     }
     return f"{SUPABASE_URL}/auth/v1/authorize?{urllib.parse.urlencode(params)}"
 
@@ -123,15 +184,33 @@ def _clear_session_cookies(resp) -> None:
 
 
 def _verify_token(access_token: str):
-    """Supabase Auth で検証し、ユーザー情報を返す。失敗時は None."""
+    """
+    Supabase REST (/auth/v1/user) で検証し、ユーザー情報を返す。失敗時は None。
+    - ヘッダ: apikey(PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY) + Authorization: Bearer <token>
+    - AUTH_DEBUG=1 のときだけ簡易ログを出す（ボディは先頭のみ）
+    """
+    if not access_token:
+        return None
+    headers = {
+        "apikey": PUBLISHABLE_KEY,
+        "Authorization": f"Bearer {access_token}",
+    }
     try:
-        client = get_user_client(access_token)
-        if not client:
+        resp = requests.get(f"{SUPABASE_URL}/auth/v1/user", headers=headers, timeout=10)
+        if resp.status_code >= 400:
+            if AUTH_DEBUG:
+                body = resp.text or ""
+                trimmed = body[:200] + ("..." if len(body) > 200 else "")
+                _dbg(
+                    "verify_token_failed",
+                    status=resp.status_code,
+                    body=trimmed,
+                )
             return None
-        result = client.auth.get_user(access_token)
-        user = getattr(result, "user", None)
-        return user
-    except Exception:
+        return resp.json()
+    except Exception as exc:
+        if AUTH_DEBUG:
+            _dbg("verify_token_exception", error=str(exc))
         return None
 
 
@@ -158,6 +237,8 @@ def _is_public_path(path: str) -> bool:
 
 # Flask app
 flask_app = Flask(__name__)
+flask_app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+_dbg("secret_key_loaded", provided=bool(os.getenv("SECRET_KEY")))
 
 
 def _safe_redirect_target(base_url: str, target: Optional[str]) -> str:
@@ -209,22 +290,29 @@ def _require_auth():
             400,
         )
         # state / verifier を破棄して再試行をクリア
-        resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+        resp.set_cookie(
+            APP_STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0)
+        )
         resp.set_cookie(
             CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
         )
-        resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+        resp.set_cookie(
+            REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0)
+        )
         return resp
 
     if _is_public_path(request.path):
+        _dbg("require_auth_public", path=request.path)
         return None
 
     access_token = request.cookies.get(AUTH_COOKIE)
     if not access_token:
+        _dbg("require_auth_no_token", path=request.path)
         return redirect("/login")
 
     user = _verify_token(access_token)
     if not user:
+        _dbg("require_auth_invalid_token", path=request.path)
         resp = make_response(redirect("/login"))
         _clear_session_cookies(resp)
         return resp
@@ -232,6 +320,7 @@ def _require_auth():
     # 認証済み: g にセット（services 側で利用）
     g.user_id = getattr(user, "id", None)
     g.access_token = access_token
+    _dbg("require_auth_ok", path=request.path, user_id=g.user_id)
     return None
 
 
@@ -395,25 +484,38 @@ def auth_login():
             f"ローカルURL不一致です。ブラウザは APP_BASE_URL に統一してください。（{exc}）",
             400,
         )
-    state = secrets.token_urlsafe(32)
+    app_state = secrets.token_urlsafe(32)
     verifier = _pkce_verifier()
     challenge = _pkce_challenge(verifier)
     redirect_to_param = request.args.get("redirect_to", "/")
     redirect_to = _safe_redirect_target(base_url, redirect_to_param)
 
-    # authorize URL に code_challenge を付与
-    url = _build_authorize_url(state, base_url)
-    url = f"{url}&code_challenge={challenge}&code_challenge_method=S256"
+    # authorize URL を組み立て（stateは渡さず、app_stateをredirect_toに埋め込む）
+    url = _build_authorize_url(app_state, base_url, challenge)
+    _dbg(
+        "login_start",
+        host=request.host,
+        base_url=base_url,
+        redirect_to=redirect_to,
+        app_state_len=len(app_state),
+        verifier_len=len(verifier),
+    )
 
     resp = make_response(redirect(url))
-    # state / redirect は JS から見えても機密でないため HttpOnly=False
-    resp.set_cookie(STATE_COOKIE, state, **_cookie_kwargs(http_only=False, max_age=600))
+    # app_state / redirect は JS から見えても機密でないため HttpOnly=False
+    resp.set_cookie(
+        APP_STATE_COOKIE, app_state, **_cookie_kwargs(http_only=False, max_age=600)
+    )
     resp.set_cookie(
         REDIRECT_COOKIE, redirect_to, **_cookie_kwargs(http_only=False, max_age=600)
     )
     # code_verifier は秘密なので HttpOnly
     resp.set_cookie(
         CODE_VERIFIER_COOKIE, verifier, **_cookie_kwargs(http_only=True, max_age=600)
+    )
+    _dbg(
+        "login_set_cookies",
+        cookie_names=[APP_STATE_COOKIE, REDIRECT_COOKIE, CODE_VERIFIER_COOKIE],
     )
     return resp
 
@@ -429,8 +531,18 @@ def auth_callback():
         )
     code = request.args.get("code")
     verifier = request.cookies.get(CODE_VERIFIER_COOKIE)
-    state_cookie = request.cookies.get(STATE_COOKIE)
-    state_param = request.args.get("state")
+    app_state_cookie = request.cookies.get(APP_STATE_COOKIE)
+    app_state_param = request.args.get("app_state")
+    _dbg(
+        "callback_start",
+        has_code=bool(code),
+        has_verifier=bool(verifier),
+        has_app_state_cookie=bool(app_state_cookie),
+        has_app_state_param=bool(app_state_param),
+        app_state_match=bool(
+            app_state_param and app_state_cookie and app_state_param == app_state_cookie
+        ),
+    )
 
     if not code:
         return (
@@ -439,14 +551,26 @@ def auth_callback():
         )
     if not verifier:
         return "Missing PKCE verifier cookie.", 400
-    if not state_param or not state_cookie:
-        return "Missing state. Please retry login.", 400
-    if state_param != state_cookie:
-        return "State mismatch. Please retry login.", 400
+    if not app_state_param or not app_state_cookie:
+        return "Missing app_state. Please retry login.", 400
+    if app_state_param != app_state_cookie:
+        _dbg(
+            "callback_app_state_mismatch",
+            app_state_param=_mask_token(app_state_param),
+            app_state_cookie=_mask_token(app_state_cookie),
+        )
+        return "app_state mismatch. Please retry login.", 400
 
     try:
         session = _exchange_code_for_session(code, verifier)
+        _dbg(
+            "callback_exchange_ok",
+            access_token=_mask_token(session.get("access_token")),
+            refresh_token=_mask_token(session.get("refresh_token")),
+            expires_in=session.get("expires_in"),
+        )
     except Exception as exc:  # pragma: no cover
+        _dbg("callback_exchange_failed", error=str(exc))
         return f"Failed to exchange code: {exc}", 400
 
     access_token = session.get("access_token")
@@ -461,12 +585,18 @@ def auth_callback():
 
     resp = make_response(redirect(redirect_to))
     _set_session_cookies(resp, access_token, refresh_token, expires_in)
-    # state / verifier を破棄
-    resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    # app_state / verifier を破棄
+    resp.set_cookie(APP_STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     resp.set_cookie(
         CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
     )
     resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    _dbg(
+        "callback_set_cookies",
+        redirect_to=redirect_to,
+        access_token=_mask_token(access_token),
+        refresh_token=_mask_token(refresh_token),
+    )
     return resp
 
 
@@ -493,8 +623,8 @@ def auth_session():
 
     resp = make_response(jsonify({"ok": True}))
     _set_session_cookies(resp, access_token, refresh_token, expires_in)
-    # state cookie を削除
-    resp.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    # app_state cookie を削除（念のため）
+    resp.set_cookie(APP_STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     resp.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
     return resp
 
@@ -514,7 +644,9 @@ def auth_email_signin():
     email = (data.get("email") or "").strip()
     password = data.get("password") or ""
     if not email or not password:
-        return jsonify({"error": "validation", "message": "email と password は必須です"}), 400
+        return jsonify(
+            {"error": "validation", "message": "email と password は必須です"}
+        ), 400
 
     try:
         resp = _supabase_auth_post(
@@ -544,12 +676,16 @@ def auth_email_signin():
 
     resp_out = make_response(jsonify({"ok": True}))
     _set_session_cookies(resp_out, access_token, refresh_token, expires_in)
-    # state / redirect をクリア（念のため）
-    resp_out.set_cookie(STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    # app_state / redirect をクリア（念のため）
+    resp_out.set_cookie(
+        APP_STATE_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0)
+    )
     resp_out.set_cookie(
         CODE_VERIFIER_COOKIE, "", **_cookie_kwargs(http_only=True, max_age=0)
     )
-    resp_out.set_cookie(REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0))
+    resp_out.set_cookie(
+        REDIRECT_COOKIE, "", **_cookie_kwargs(http_only=False, max_age=0)
+    )
     return resp_out
 
 
@@ -568,7 +704,9 @@ def auth_email_signup():
     email = (data.get("email") or "").strip()
     password = data.get("password") or ""
     if not email or not password:
-        return jsonify({"error": "validation", "message": "email と password は必須です"}), 400
+        return jsonify(
+            {"error": "validation", "message": "email と password は必須です"}
+        ), 400
 
     payload = {
         "email": email,
@@ -630,7 +768,9 @@ def auth_email_reset():
             detail = {"message": resp.text}
         return jsonify({"error": "reset_failed", "detail": detail}), 400
 
-    return jsonify({"ok": True, "message": "パスワードリセット用メールを送信しました。"})
+    return jsonify(
+        {"ok": True, "message": "パスワードリセット用メールを送信しました。"}
+    )
 
 
 @flask_app.post("/auth/logout")

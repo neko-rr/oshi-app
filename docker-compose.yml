@@ -9,9 +9,15 @@ services:
       - "8050:8050"
     environment:
       - PORT=8050
-      # Supabase設定（必要に応じて変更）
-      - SUPABASE_URL=${SUPABASE_URL:-}
-      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      # Supabase設定（必須）
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL:-}
+      - PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY:-}
+      # Flask/認証
+      - APP_BASE_URL=${APP_BASE_URL:-http://127.0.0.1:8050}
+      - SECRET_KEY=${SECRET_KEY:-}
+      # Cookie設定（本番Renderは secure/Lax 推奨）
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE:-Lax}
       # API設定（必要に応じて変更）
       - IO_INTELLIGENCE_API_KEY=${IO_INTELLIGENCE_API_KEY:-}
       - RAKUTEN_APP_ID=${RAKUTEN_APP_ID:-}

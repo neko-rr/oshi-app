@@ -40,15 +40,17 @@ def check_supabase_health(write: bool = False) -> Dict[str, Any]:
     - 注意: ログに SUPABASE_KEY をそのまま出さない。
     """
     started_at = datetime.now(timezone.utc).isoformat()
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
+    url = os.getenv("PUBLIC_SUPABASE_URL")
+    key = os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY")
 
     report: Dict[str, Any] = {
         "started_at": started_at,
         "env": {
-            "SUPABASE_URL_set": bool(url),
-            "SUPABASE_KEY_set": bool(key),
-            "SUPABASE_KEY_masked": _mask_key(key),
+            "PUBLIC_SUPABASE_URL_set": bool(os.getenv("PUBLIC_SUPABASE_URL")),
+            "PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY_set": bool(
+                os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY")
+            ),
+            "publishable_masked": _mask_key(key),
         },
         "client": {"ok": False, "error": None},
         "db": {},

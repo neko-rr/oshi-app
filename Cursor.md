@@ -7,7 +7,7 @@
 
 ## 起動手順（PowerShell / ローカル開発・認証動作確認）
 
-- 事前確認: `.env` に **PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / SUPABASE_SECRET_DEFAULT_KEY / DATABASE_URL / APP_BASE_URL** を設定
+- 事前確認: `.env` に **PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / SUPABASE_SECRET_DEFAULT_KEY / DATABASE_URL / APP_BASE_URL** を設定（互換で `SUPABASE_ANON_KEY` も可）
 - 通常（Flask+Dash 入口は `server.py`）:
   ```powershell
   cd C:\Users\ryone\Desktop\oshi-app
@@ -23,9 +23,10 @@
 - ブラウザ: **必ず `http://127.0.0.1:8050` に統一**（`localhost` と混在させない）。
   - 以後、リンクを踏む/ブックマークも含めて **127.0.0.1 側だけ** を使ってください。
   - 既にループしている場合は、`127.0.0.1` と `localhost` の両方の Cookie を削除してから再アクセスしてください。
-  - 認証確認フロー: `http://127.0.0.1:8050/login` を開く → ボタンで Google ログイン → `/auth/callback?code=...` に戻り、Cookie がセットされトップへ遷移することを確認。
-    - state / PKCE / redirect_to は当ドメインの Cookie に保存し、/auth/callback で照合 → 交換 → 即削除。Supabase 側の state Cookie 依存ではない。
-    - `bad_oauth_state` や state mismatch 表示時は、Cookie を削除して単一タブで再試行する。
+- 認証確認フロー: `http://127.0.0.1:8050/login` を開く → ボタンで Google ログイン → `/auth/callback?code=...&app_state=...` に戻り、Cookie がセットされトップへ遷移することを確認。
+  - app_state / PKCE / redirect_to は当ドメインの Cookie に保存し、/auth/callback で照合 → 交換 → 即削除。Supabase 側の state には依存しない。
+  - `bad_oauth_state` が出る場合は、Supabase が state 検証に失敗して Site URL にエラーを返した可能性があるため、app_state 方式にそろえた上で単一タブで再試行する。
+  - 調査時は `AUTH_DEBUG=1` を設定し、ログの `AUTHDBG login_* / callback_* / require_auth_* / verify_token_*` で進捗と失敗箇所を確認（値はマスク済み）。出ない場合は PowerShell で `$env:AUTH_DEBUG=1` を設定してから `python server.py` を実行。
   - メール/パスワード認証:
     - サインイン: `/auth/email/signin` に email/password を POST（ログイン画面のフォームで実行）。成功すると HttpOnly Cookie にセッションが入る。
     - サインアップ: `/auth/email/signup` に email/password を POST。メール確認が完了するまでセッションは発行されない。確認後にサインインを実施。
@@ -35,7 +36,8 @@
 ## 環境変数
 
 - ローカルは `.env`（例: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SECRET_DEFAULT_KEY`, `DATABASE_URL`, `RAKUTEN_APPLICATION_ID`, `IO_INTELLIGENCE_API_KEY` など）。
-- 互換性のため、当面は旧名 `SUPABASE_URL` / `SUPABASE_KEY` でも動作します（推奨は `PUBLIC_SUPABASE_*`）。
+- 環境変数は `PUBLIC_SUPABASE_URL` と `PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` を必須とし、フォールバックはありません（起動は `python server.py`）。
+- デバッグ用: `AUTH_DEBUG=1` で認証フローのマスク済み print ログを出力（state/token は末尾のみ表示）。本番ではオフ推奨。
 - `.dockerignore` により `.env` はイメージに入らない。Render では Environment Variables で同名を必ず設定。
 
 ## 登録 3 ステップ仕様（正しい挙動）

@@ -47,7 +47,7 @@ EXPOSE 8050
 
 # ヘルスチェック
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/ || exit 1
+    CMD curl -f http://localhost:$PORT/login || exit 1
 
 # Render 想定の起動コマンド (Gunicorn + gthread)
 CMD gunicorn server:app \

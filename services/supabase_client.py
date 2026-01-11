@@ -15,10 +15,9 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOTENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 load_dotenv(dotenv_path=DOTENV_PATH, override=False)
 
-SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL") or os.getenv("SUPABASE_URL")
-PUBLISHABLE_KEY = (
-    os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY") or os.getenv("SUPABASE_KEY")
-)
+SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL") or ""
+# publishable key は PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY のみを使用（フォールバック無し）
+PUBLISHABLE_KEY = os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY") or ""
 SECRET_KEY = os.getenv("SUPABASE_SECRET_DEFAULT_KEY")
 
 
