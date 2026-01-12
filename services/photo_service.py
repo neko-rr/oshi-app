@@ -1,5 +1,7 @@
 import uuid
-from typing import Any, Dict, Optional
+import os
+import requests
+from typing import Any, Dict, Optional, List
 
 from supabase import Client
 
@@ -9,6 +11,8 @@ except Exception:  # pragma: no cover
     g = None
     has_app_context = lambda: False  # type: ignore
 
+from services.supabase_client import SUPABASE_URL, PUBLISHABLE_KEY
+
 
 def _current_members_id() -> Optional[str]:
     """flask.g から現在のユーザーIDを取得（無ければ None）。"""
@@ -16,6 +20,70 @@ def _current_members_id() -> Optional[str]:
         return None
     uid = getattr(g, "user_id", None)
     return str(uid) if uid else None
+
+
+def _current_access_token() -> Optional[str]:
+    """flask.g から現在のユーザーaccess_tokenを取得（無ければ None）。"""
+    if g is None or not has_app_context():
+        return None
+    token = getattr(g, "access_token", None)
+    return str(token) if token else None
+
+
+def _sign_url_if_needed(supabase: Client, url: Optional[str]) -> Optional[str]:
+    """http(s)でなければ object path とみなし、signed URL を発行する。"""
+    if not url:
+        return None
+    lower = url.lower()
+    if lower.startswith("http://") or lower.startswith("https://"):
+        return url
+    return create_signed_url_for_object(supabase, url)
+
+
+def _with_signed_photo_urls(supabase: Client, rows: Any) -> Any:
+    """products配列に対し、photo内のobject pathをsigned URLに置き換える。"""
+    if not isinstance(rows, list):
+        return rows
+    signed_rows: List[Dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            signed_rows.append(row)
+            continue
+        photo_field = row.get("photo")
+        if isinstance(photo_field, dict):
+            pf = dict(photo_field)
+            pf["photo_thumbnail_url"] = _sign_url_if_needed(
+                supabase, pf.get("photo_thumbnail_url")
+            )
+            pf["photo_high_resolution_url"] = _sign_url_if_needed(
+                supabase, pf.get("photo_high_resolution_url")
+            )
+            row = dict(row)
+            row["photo"] = pf
+        elif isinstance(photo_field, list):
+            signed_list = []
+            for item in photo_field:
+                if not isinstance(item, dict):
+                    continue
+                it = dict(item)
+                it["photo_thumbnail_url"] = _sign_url_if_needed(
+                    supabase, it.get("photo_thumbnail_url")
+                )
+                it["photo_high_resolution_url"] = _sign_url_if_needed(
+                    supabase, it.get("photo_high_resolution_url")
+                )
+                signed_list.append(it)
+            row = dict(row)
+            row["photo"] = signed_list
+        # top-level fallback
+        row["photo_thumbnail_url"] = _sign_url_if_needed(
+            supabase, row.get("photo_thumbnail_url")
+        )
+        row["photo_high_resolution_url"] = _sign_url_if_needed(
+            supabase, row.get("photo_high_resolution_url")
+        )
+        signed_rows.append(row)
+    return signed_rows
 
 
 def list_storage_buckets(supabase: Client) -> None:
@@ -29,52 +97,65 @@ def list_storage_buckets(supabase: Client) -> None:
 
 def upload_to_storage(
     supabase: Client,
+    members_id: str,
     file_bytes: bytes,
     original_filename: str,
     content_type: str,
 ) -> Optional[str]:
+    """
+    photosバケット(Private想定)に {members_id}/{uuid}.{ext} で保存し、object path を返す。
+    public URL は返さない。バケット未作成/権限不足なら例外を投げる。
+    """
+    if not members_id:
+        raise RuntimeError("members_id is required for upload.")
     file_ext = (original_filename or "jpg").split(".")[-1]
-    file_name = f"{uuid.uuid4()}.{file_ext}"
+    object_path = f"{members_id}/{uuid.uuid4()}.{file_ext}"
 
     try:
-        print(f"DEBUG: Checking bucket policies")
-        # Check bucket policies
-        try:
-            policies = supabase.storage.from_("photos").list_policies()
-            print(f"DEBUG: Bucket policies: {policies}")
-        except Exception as policy_error:
-            print(f"DEBUG: Could not check policies: {policy_error}")
-
-        print(f"DEBUG: Uploading file {file_name} to photos bucket")
         supabase.storage.from_("photos").upload(
-            file_name,
+            object_path,
             file_bytes,
             file_options={"content-type": content_type or f"image/{file_ext}"},
         )
-        print(f"DEBUG: Upload successful, getting public URL")
-        # Get public URL
-        public_url = supabase.storage.from_("photos").get_public_url(file_name)
-        print(f"DEBUG: Public URL: {public_url}")
-        return public_url
-    except Exception as e:
-        print(f"DEBUG: First upload attempt failed: {e}")
-        try:
-            print(f"DEBUG: Creating photos bucket")
-            supabase.storage.create_bucket("photos", options={"public": True})
-            print(f"DEBUG: Retrying upload to photos bucket")
-            supabase.storage.from_("photos").upload(
-                file_name,
-                file_bytes,
-                file_options={"content-type": content_type or f"image/{file_ext}"},
-            )
-            print(f"DEBUG: Second upload successful, getting public URL")
-            # Get public URL
-            public_url = supabase.storage.from_("photos").get_public_url(file_name)
-            print(f"DEBUG: Public URL: {public_url}")
-            return public_url
-        except Exception as exc:
-            print(f"DEBUG: Second upload attempt failed: {exc}")
-            raise RuntimeError(f"画像のアップロードに失敗しました: {str(exc)}") from exc
+        print(f"DEBUG: Upload successful, object_path={object_path}")
+        return object_path
+    except Exception as exc:
+        print(f"DEBUG: Upload failed: {exc}")
+        raise
+
+
+def create_signed_url_for_object(
+    supabase: Client,
+    object_path: str,
+    expires_in: int = 3600,
+) -> Optional[str]:
+    """
+    Storage REST API を直接叩いて signed URL を作成する。
+    """
+    if not supabase or not object_path or not SUPABASE_URL or not PUBLISHABLE_KEY:
+        return None
+
+    access_token = _current_access_token()
+    if not access_token:
+        return None
+
+    url = f"{SUPABASE_URL}/storage/v1/object/sign/photos/{object_path.lstrip('/')}"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "apikey": PUBLISHABLE_KEY,
+        "Content-Type": "application/json",
+    }
+    payload = {"expiresIn": expires_in}
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+        if resp.status_code >= 400:
+            print(f"DEBUG: create_signed_url failed: {resp.status_code} {resp.text}")
+            return None
+        data = resp.json()
+        return data.get("signedURL") or data.get("signedUrl") or data.get("signed_url")
+    except Exception as exc:
+        print(f"DEBUG: create_signed_url exception: {exc}")
+        return None
 
 
 def insert_photo_record(
@@ -210,7 +291,8 @@ def get_all_products(supabase: Client):
     )
     if getattr(response, "error", None):
         raise RuntimeError(f"製品取得に失敗しました: {response.error}")
-    return response.data if hasattr(response, "data") else []
+    data = response.data if hasattr(response, "data") else []
+    return _with_signed_photo_urls(supabase, data)
 
 
 def get_product_stats(supabase: Client):
@@ -291,16 +373,24 @@ def get_random_product_with_photo(
         .execute()
     )
     rows = response.data if hasattr(response, "data") else []
+    rows = _with_signed_photo_urls(supabase, rows)
     candidates = []
     for row in rows or []:
         if not isinstance(row, dict):
             continue
         photo = row.get("photo") or {}
-        if not isinstance(photo, dict):
-            continue
-        url = photo.get("photo_thumbnail_url") or photo.get("photo_high_resolution_url")
-        if url:
-            candidates.append(row)
+        if isinstance(photo, dict):
+            url = photo.get("photo_thumbnail_url") or photo.get("photo_high_resolution_url")
+            if url:
+                candidates.append(row)
+        elif isinstance(photo, list):
+            for item in photo:
+                if not isinstance(item, dict):
+                    continue
+                url = item.get("photo_thumbnail_url") or item.get("photo_high_resolution_url")
+                if url:
+                    candidates.append(row)
+                    break
     if not candidates:
         return None
 

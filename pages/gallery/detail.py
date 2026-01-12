@@ -4,6 +4,7 @@ from dash import html, dcc, register_page, callback, Input, Output, State, no_up
 from dash.exceptions import PreventUpdate
 
 from services.supabase_client import get_supabase_client
+from services.photo_service import create_signed_url_for_object
 
 
 def _read_query(search: str) -> tuple[str | None, str]:
@@ -34,13 +35,34 @@ def _render_error(message: str) -> html.Div:
     )
 
 
-def _render_detail_card(record: dict, back_view: str) -> html.Div:
-    photo = record.get("photo") or {}
-    thumb = (
-        photo.get("photo_high_resolution_url")
-        or photo.get("photo_thumbnail_url")
-        or record.get("photo_thumbnail_url")
-        or record.get("photo_high_resolution_url")
+def _resolve_thumb_from_photo(photo_field, supabase):
+    """photoフィールドが list/dict いずれでもサムネURLを返す。object path は signed URL に変換。"""
+    if isinstance(photo_field, list):
+        candidate = None
+        for item in photo_field:
+            if isinstance(item, dict) and item.get("front_flag") == 1:
+                candidate = item
+                break
+        if candidate is None and photo_field:
+            first = photo_field[0]
+            candidate = first if isinstance(first, dict) else None
+        if candidate:
+            url = candidate.get("photo_high_resolution_url") or candidate.get(
+                "photo_thumbnail_url"
+            )
+            return create_signed_url_for_object(supabase, url) if url else None
+    elif isinstance(photo_field, dict):
+        url = photo_field.get("photo_high_resolution_url") or photo_field.get(
+            "photo_thumbnail_url"
+        )
+        return create_signed_url_for_object(supabase, url) if url else None
+    return None
+
+
+def _render_detail_card(record: dict, back_view: str, supabase) -> html.Div:
+    photo = record.get("photo")
+    thumb = _resolve_thumb_from_photo(photo, supabase) or create_signed_url_for_object(
+        supabase, record.get("photo_high_resolution_url") or record.get("photo_thumbnail_url")
     )
 
     rows = [
@@ -157,7 +179,7 @@ def render_detail_page(search: str) -> html.Div:
     except Exception as e:
         return _render_error(f"データ取得に失敗しました: {e}")
 
-    return _render_detail_card(record, back_view=view)
+    return _render_detail_card(record, back_view=view, supabase=supabase)
 
 
 @callback(

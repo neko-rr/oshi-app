@@ -131,8 +131,8 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                 photo_id = insert_photo_record(
                     supabase,
                     members_id=members_id,
-                    image_url="",  # Will be updated after upload
-                    thumbnail_url="",  # Will be updated after upload
+                    image_url="",  # Will be updated after upload (object path)
+                    thumbnail_url="",  # Will be updated after upload (object path)
                     front_flag=1,
                 )
                 print(f"Photo record inserted, photo_id: {photo_id}")
@@ -140,21 +140,22 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                 # 画像をSupabase Storageにアップロード
                 if photo_id:
                     print("Photo ID exists, uploading to storage...")
-                    image_url = upload_to_storage(
+                    object_path = upload_to_storage(
                         supabase,
+                        members_id,
                         file_bytes,
                         f"photo_{photo_id}.jpg",
                         state["front_photo"].get("content_type", "image/jpeg"),
                     )
-                    print(f"Upload result: {image_url}")
+                    print(f"Upload result (object_path): {object_path}")
 
-                    if image_url:
+                    if object_path:
                         print("Updating photo record with URL...")
                         # 画像URLを更新
                         supabase.table("photo").update(
                             {
-                                "photo_high_resolution_url": image_url,
-                                "photo_thumbnail_url": image_url,
+                                "photo_high_resolution_url": object_path,
+                                "photo_thumbnail_url": object_path,
                             }
                         ).eq("photo_id", photo_id).eq("members_id", members_id).execute()
                         print("Photo record updated with URL")
@@ -281,18 +282,19 @@ def save_quick_registration_with_photo(store_data: Dict[str, Any]) -> Dict[str, 
         )
 
         # ストレージアップロード
-        image_url = upload_to_storage(
+        object_path = upload_to_storage(
             supabase,
+            members_id,
             file_bytes,
             f"photo_{photo_id}.jpg",
             content_type,
         )
 
-        if image_url and photo_id:
+        if object_path and photo_id:
             supabase.table("photo").update(
                 {
-                    "photo_high_resolution_url": image_url,
-                    "photo_thumbnail_url": image_url,
+                    "photo_high_resolution_url": object_path,
+                    "photo_thumbnail_url": object_path,
                 }
             ).eq("photo_id", photo_id).eq("members_id", members_id).execute()
 
@@ -301,6 +303,7 @@ def save_quick_registration_with_photo(store_data: Dict[str, Any]) -> Dict[str, 
 
         insert_product_record(
             supabase,
+            members_id=members_id,
             photo_id=photo_id,
             barcode=state["barcode"].get("value") or "",
             barcode_type=state["barcode"].get("type") or "UNKNOWN",

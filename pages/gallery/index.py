@@ -35,8 +35,25 @@ def _photo_thumb_url(photo: Photo):
         return direct
 
     # registration_product_information の行（photo をネスト）に対応
-    nested = photo.get("photo") or {}
-    return nested.get("photo_thumbnail_url") or nested.get("photo_high_resolution_url")
+    nested = photo.get("photo")
+    if isinstance(nested, list):
+        # front_flag==1 を優先、無ければ先頭
+        candidate = None
+        for item in nested:
+            if isinstance(item, dict) and item.get("front_flag") == 1:
+                candidate = item
+                break
+        if candidate is None and nested:
+            candidate = nested[0] if isinstance(nested[0], dict) else None
+        if candidate:
+            return candidate.get("photo_thumbnail_url") or candidate.get(
+                "photo_high_resolution_url"
+            )
+    elif isinstance(nested, dict):
+        return nested.get("photo_thumbnail_url") or nested.get(
+            "photo_high_resolution_url"
+        )
+    return None
 
 
 def _attach_color_slots(
@@ -273,7 +290,7 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
     return html.Div([summary, grid, list_view])
 
 
-def render_gallery(search: str = "") -> html.Div:
+def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
     from services.photo_service import get_all_products
     from services.supabase_client import get_supabase_client
     from urllib.parse import parse_qs
@@ -292,7 +309,7 @@ def render_gallery(search: str = "") -> html.Div:
     color_filter_store = dcc.Store(id="gallery-color-filter", data=[])
 
     qs = parse_qs(search.lstrip("?") if search else "")
-    initial_view = qs.get("view", ["thumb"])[0] or "thumb"
+    initial_view = view or qs.get("view", ["thumb"])[0] or "thumb"
 
     # ヘッダー
     header = html.Div(

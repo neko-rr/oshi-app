@@ -235,25 +235,10 @@ def register_photo_callbacks(app):
                         f"DEBUG: Vision payload prepared (len={len(api_contents)} bytes, reduced resolution)"
                     )
 
-                    try:
-                        supabase = get_supabase_client()
-                        if supabase is not None:
-                            public_url = upload_to_storage(
-                                supabase,
-                                reduced_bytes_for_vision,
-                                filename or "vision_tmp.jpg",
-                                "image/jpeg",
-                            )
-                        if public_url:
-                            api_contents = public_url
-                            print(f"DEBUG: Using public URL for vision: {public_url}")
-                    except Exception as vision_upload_error:
-                        print(
-                            f"DEBUG: Vision temp upload failed, fallback to data URI: {vision_upload_error}"
-                        )
-                    finally:
-                        del reduced_bytes_for_vision
-                        gc.collect()
+                    # Private運用のため、vision用の一時アップロードは行わない（data URI を優先）
+                    public_url = None
+                    del reduced_bytes_for_vision
+                    gc.collect()
                 except Exception as resize_error:
                     print(f"DEBUG: Vision payload preparation failed: {resize_error}")
                     api_contents = contents
