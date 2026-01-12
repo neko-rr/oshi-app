@@ -7,18 +7,24 @@
 
 ## 起動手順（PowerShell / ローカル開発・認証動作確認）
 
-- 事前確認: `.env` に **PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / SUPABASE_SECRET_DEFAULT_KEY / DATABASE_URL / APP_BASE_URL** を設定（互換で `SUPABASE_ANON_KEY` も可）
-- 通常（Flask+Dash 入口は `server.py`）:
+- 事前準備（初回/再セットアップ時）:
   ```powershell
   cd C:\Users\ryone\Desktop\oshi-app
+  python -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  pip install -r requirements.txt
+  ```
+- `.env` に **PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / APP_BASE_URL / SECRET_KEY / COOKIE_SECURE / COOKIE_SAMESITE** を設定（フォールバック無し、`SUPABASE_ANON_KEY` は使用しない）。
+- 通常起動（Flask+Dash 入口は `server.py`）:
+  ```powershell
+  .\.venv\Scripts\Activate.ps1
   python server.py
   ```
-- ログ付き強制起動（必要時）:
+- ログ付き強制起動（同じく `server.py` を実行）:
   ```powershell
-  cd C:\Users\ryone\Desktop\oshi-app
+  .\.venv\Scripts\Activate.ps1
   powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1
   ```
-  - `start_with_logs.ps1` が `app.py` を指している場合は、`server.py` に読み替えて実行してください。
   - ログ確認: `Get-Content app_run.log -Tail 50`
 - ブラウザ: **必ず `http://127.0.0.1:8050` に統一**（`localhost` と混在させない）。
   - 以後、リンクを踏む/ブックマークも含めて **127.0.0.1 側だけ** を使ってください。
@@ -63,7 +69,7 @@
 ## Render / Docker
 
 - `Dockerfile`: python:3.11-slim, `libzbar0` 必要、`gunicorn server:app`、`PORT` デフォルト 8050、`EXPOSE 8050`、ヘルスチェック有り。
-- Render (docker_web_service) では ENV に `SUPABASE_URL`, `SUPABASE_KEY`, `RAKUTEN_APP_ID`, `IO_INTELLIGENCE_API_KEY` 等を設定すること。
+- Render (docker_web_service) では ENV に `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SECRET_DEFAULT_KEY`, `APP_BASE_URL`, `SECRET_KEY`, `RAKUTEN_APP_ID`, `IO_INTELLIGENCE_API_KEY` 等を設定すること。
 - `.dockerignore` で `.env`, ログ, DB, tests などを除外済み。
 
 ## よくある不具合と確認ポイント

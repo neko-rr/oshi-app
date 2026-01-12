@@ -3,6 +3,20 @@ from typing import Any, Dict, Optional
 
 from supabase import Client
 
+try:
+    from flask import g, has_app_context
+except Exception:  # pragma: no cover
+    g = None
+    has_app_context = lambda: False  # type: ignore
+
+
+def _current_members_id() -> Optional[str]:
+    """flask.g から現在のユーザーIDを取得（無ければ None）。"""
+    if g is None or not has_app_context():
+        return None
+    uid = getattr(g, "user_id", None)
+    return str(uid) if uid else None
+
 
 def list_storage_buckets(supabase: Client) -> None:
     """List all storage buckets for debugging"""
@@ -65,13 +79,17 @@ def upload_to_storage(
 
 def insert_photo_record(
     supabase: Client,
+    members_id: str,
     image_url: str,
     thumbnail_url: str = None,
     front_flag: int = 1,
     theme_color: int = None,
 ) -> Optional[int]:
     """Insert photo record and return photo_id"""
+    if not members_id:
+        raise RuntimeError("members_id is required to insert photo.")
     data = {
+        "members_id": members_id,
         "photo_thumbnail_url": thumbnail_url or image_url,
         "photo_high_resolution_url": image_url,
         "front_flag": front_flag,
@@ -94,6 +112,7 @@ def insert_photo_record(
 
 def insert_product_record(
     supabase: Client,
+    members_id: str,
     photo_id: int = None,
     barcode: str = None,
     barcode_type: str = None,
@@ -115,7 +134,10 @@ def insert_product_record(
     flag_with_freebie: int = 0,
 ) -> None:
     """Insert product record into registration_product_information table"""
+    if not members_id:
+        raise RuntimeError("members_id is required to insert product.")
     data = {
+        "members_id": members_id,
         "photo_id": photo_id,
         "product_name": product_name,
         "product_group_name": product_group_name,
@@ -149,10 +171,13 @@ def insert_product_record(
 
 def delete_all_products(supabase: Client) -> None:
     """Delete all products from registration_product_information table"""
+    members_id = _current_members_id()
+    if not members_id:
+        raise RuntimeError("members_id is required to delete products.")
     response = (
         supabase.table("registration_product_information")
         .delete()
-        .neq("registration_product_id", 0)
+        .eq("members_id", members_id)
         .execute()
     )
     if getattr(response, "error", None):
@@ -161,6 +186,9 @@ def delete_all_products(supabase: Client) -> None:
 
 def get_all_products(supabase: Client):
     """Get all products from registration_product_information table with photo data"""
+    members_id = _current_members_id()
+    if not members_id:
+        return []
     response = (
         supabase.table("registration_product_information")
         .select("""
@@ -172,6 +200,7 @@ def get_all_products(supabase: Client):
                 photo_theme_color
             )
         """)
+        .eq("members_id", members_id)
         .order("creation_date", desc=True)
         .execute()
     )
@@ -182,7 +211,8 @@ def get_all_products(supabase: Client):
 
 def get_product_stats(supabase: Client):
     """Get product statistics from registration_product_information table"""
-    if supabase is None:
+    members_id = _current_members_id()
+    if supabase is None or not members_id:
         return {
             "total": 0,
             "unique": 0,
@@ -194,6 +224,7 @@ def get_product_stats(supabase: Client):
     total_response = (
         supabase.table("registration_product_information")
         .select("photo_id,barcode_number")
+        .eq("members_id", members_id)
         .execute()
     )
     total_rows = total_response.data if hasattr(total_response, "data") else []
@@ -235,6 +266,10 @@ def get_random_product_with_photo(
     if supabase is None:
         return None
 
+    members_id = _current_members_id()
+    if not members_id:
+        return None
+
     response = (
         supabase.table("registration_product_information")
         .select(
@@ -246,6 +281,7 @@ def get_random_product_with_photo(
             )
         """
         )
+        .eq("members_id", members_id)
         .order("creation_date", desc=True)
         .limit(sample_size)
         .execute()

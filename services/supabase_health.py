@@ -1,8 +1,9 @@
 import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from uuid import uuid4
 
-from services.supabase_client import get_supabase_client
+from services.supabase_client import get_secret_client, get_supabase_client
 
 
 def _mask_key(key: Optional[str]) -> str:
@@ -58,16 +59,22 @@ def check_supabase_health(write: bool = False) -> Dict[str, Any]:
         "ok": False,
     }
 
+    # 優先: ユーザー/公開クライアント → 取得できなければサービスロール（診断用）
     client = get_supabase_client()
+    used_secret = False
+    if client is None:
+        client = get_secret_client()
+        used_secret = client is not None
+
     if client is None:
         report["client"]["ok"] = False
-        report["client"]["error"] = (
-            "Supabase client is None (missing env or init failed)"
-        )
+        report["client"]["error"] = "Supabase client is None (missing env or init failed)"
+        report["client"]["used_secret"] = used_secret
         report["ok"] = False
         return report
 
     report["client"]["ok"] = True
+    report["client"]["used_secret"] = used_secret
 
     # --- DB READ: theme_settings ---
     try:
@@ -156,8 +163,11 @@ def check_supabase_health(write: bool = False) -> Dict[str, Any]:
     # --- Optional DB WRITE (safe test row) ---
     if write:
         try:
+            test_member_id = os.getenv("HEALTH_TEST_USER_ID")
+            if not test_member_id:
+                raise RuntimeError("HEALTH_TEST_USER_ID が未設定のため書き込みテストをスキップしました。")
             test_payload = {
-                "members_id": 9998,
+                "members_id": test_member_id,
                 "members_type_name": "healthcheck",
                 "theme": "minty",
             }
@@ -171,7 +181,7 @@ def check_supabase_health(write: bool = False) -> Dict[str, Any]:
             res2 = (
                 client.table("theme_settings")
                 .select("members_id,members_type_name,theme")
-                .eq("members_id", 9998)
+                .eq("members_id", test_member_id)
                 .eq("members_type_name", "healthcheck")
                 .limit(1)
                 .execute()

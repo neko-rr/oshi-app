@@ -123,6 +123,16 @@ def create_app(server=None) -> dash.Dash:
         ]
     )
 
+    # ページ遷移/初回ロードごとに最新テーマを同期（全ページで反映）
+    @app.callback(
+        Output("bootswatch-theme", "href", allow_duplicate=True),
+        Input("_pages_location", "pathname"),
+        prevent_initial_call=False,
+    )
+    def sync_theme_on_navigation(_pathname):
+        theme = load_theme()
+        return get_bootswatch_css(theme)
+
     return app
 
 

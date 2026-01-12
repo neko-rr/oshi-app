@@ -9,6 +9,22 @@ from components.state_utils import ensure_state, serialise_state
 from services.photo_service import insert_photo_record, upload_to_storage
 from services.supabase_client import get_supabase_client
 
+try:
+    from flask import g, has_app_context
+except Exception:  # pragma: no cover
+    g = None
+    has_app_context = lambda: False  # type: ignore
+
+
+def _current_members_id() -> str:
+    """flask.g から現在のユーザーIDを取得。無ければ例外にして保存を止める。"""
+    if g is None or not has_app_context():
+        raise RuntimeError("メンバーIDが取得できません（未ログイン）。")
+    uid = getattr(g, "user_id", None)
+    if not uid:
+        raise RuntimeError("メンバーIDが取得できません（未ログイン）。")
+    return str(uid)
+
 
 def save_registration(
     n_clicks,
@@ -30,6 +46,11 @@ def save_registration(
     print(f"product_name: '{product_name}'")
 
     supabase = get_supabase_client()
+    members_id = None
+    try:
+        members_id = _current_members_id()
+    except Exception as e:
+        return html.Div(f"ログイン情報が取得できません: {str(e)}", className="alert alert-danger")
 
     # デバッグ情報を専用ファイルに書き込み
     debug_info = f"""=== SAVE REGISTRATION DEBUG ===
@@ -108,6 +129,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                 print("Inserting photo record...")
                 photo_id = insert_photo_record(
                     supabase,
+                    members_id=members_id,
                     image_url="",  # Will be updated after upload
                     thumbnail_url="",  # Will be updated after upload
                     front_flag=1,
@@ -133,7 +155,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                                 "photo_high_resolution_url": image_url,
                                 "photo_thumbnail_url": image_url,
                             }
-                        ).eq("photo_id", photo_id).execute()
+                        ).eq("photo_id", photo_id).eq("members_id", members_id).execute()
                         print("Photo record updated with URL")
 
             except Exception as photo_error:
@@ -160,6 +182,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
         from services.photo_service import insert_product_record
         insert_product_record(
             supabase,
+            members_id=members_id,
             photo_id=photo_id,  # photo_idはNULLでも可
             barcode=state["barcode"].get("value") or "",
             barcode_type=state["barcode"].get("type") or "UNKNOWN",
@@ -210,6 +233,7 @@ def save_quick_registration_with_photo(store_data: Dict[str, Any]) -> Dict[str, 
         }
 
     supabase = get_supabase_client()
+    members_id = _current_members_id()
 
     photo_id = None
     product_name = f"未設定_{__import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -240,6 +264,7 @@ def save_quick_registration_with_photo(store_data: Dict[str, Any]) -> Dict[str, 
         # photoレコード作成
         photo_id = insert_photo_record(
             supabase,
+            members_id=members_id,
             image_url="",
             thumbnail_url="",
             front_flag=1,
@@ -259,7 +284,7 @@ def save_quick_registration_with_photo(store_data: Dict[str, Any]) -> Dict[str, 
                     "photo_high_resolution_url": image_url,
                     "photo_thumbnail_url": image_url,
                 }
-            ).eq("photo_id", photo_id).execute()
+            ).eq("photo_id", photo_id).eq("members_id", members_id).execute()
 
         # productレコード作成（バーコードがなくても登録可）
         from services.photo_service import insert_product_record

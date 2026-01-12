@@ -59,8 +59,8 @@ try {
     }
   }
 
-  # Start the app with live tee logging
-  & $pythonExe -u app.py 2>&1 | Tee-Object -FilePath app_run.log -Append
+  # Start the app (Flask+Dash entrypoint) with live tee logging
+  & $pythonExe -u server.py 2>&1 | Tee-Object -FilePath app_run.log -Append
 }
 catch {
   Write-Error $_

@@ -3,15 +3,34 @@
 from typing import Dict, List, Any, Optional
 from services.supabase_client import get_supabase_client
 
+try:
+    from flask import g, has_app_context
+except Exception:  # pragma: no cover
+    g = None
+    has_app_context = lambda: False  # type: ignore
+
+
+def _current_members_id() -> Optional[str]:
+    if g is None or not has_app_context():
+        return None
+    uid = getattr(g, "user_id", None)
+    return str(uid) if uid else None
+
 
 def get_color_tags() -> List[Dict[str, Any]]:
     """Get all color tags."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return []
 
     try:
-        response = supabase.table("color_tag").select("*").execute()
+        response = (
+            supabase.table("color_tag")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
         return response.data if response.data else []
     except Exception:
         return []
@@ -20,11 +39,17 @@ def get_color_tags() -> List[Dict[str, Any]]:
 def get_category_tags() -> List[Dict[str, Any]]:
     """Get all category tags."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return []
 
     try:
-        response = supabase.table("category_tag").select("*").execute()
+        response = (
+            supabase.table("category_tag")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
         return response.data if response.data else []
     except Exception:
         return []
@@ -46,13 +71,14 @@ def get_receipt_location_tags() -> List[Dict[str, Any]]:
 def update_color_tag(color_tag_id: int, name: str, color: str) -> bool:
     """Update a color tag."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
 
     try:
         supabase.table("color_tag").update(
             {"color_tag_name": name, "color_tag_color": color}
-        ).eq("color_tag_id", color_tag_id).execute()
+        ).eq("color_tag_id", color_tag_id).eq("members_id", members_id).execute()
         return True
     except Exception:
         return False
@@ -61,7 +87,8 @@ def update_color_tag(color_tag_id: int, name: str, color: str) -> bool:
 def update_category_tag(category_tag_id: int, name: str, color: str, icon: str) -> bool:
     """Update a category tag."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
 
     try:
@@ -71,7 +98,7 @@ def update_category_tag(category_tag_id: int, name: str, color: str, icon: str) 
                 "category_tag_color": color,
                 "category_tag_icon": icon,
             }
-        ).eq("category_tag_id", category_tag_id).execute()
+        ).eq("category_tag_id", category_tag_id).eq("members_id", members_id).execute()
         return True
     except Exception:
         return False
@@ -95,12 +122,13 @@ def update_receipt_location_tag(receipt_location_id: int, name: str, icon: str) 
 def create_color_tag(name: str, color: str) -> bool:
     """Create a new color tag."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
 
     try:
         supabase.table("color_tag").insert(
-            {"color_tag_name": name, "color_tag_color": color}
+            {"color_tag_name": name, "color_tag_color": color, "members_id": members_id}
         ).execute()
         return True
     except Exception:
@@ -110,12 +138,14 @@ def create_color_tag(name: str, color: str) -> bool:
 def create_category_tag(name: str, color: str, icon: str) -> bool:
     """Create a new category tag."""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
 
     try:
         supabase.table("category_tag").insert(
             {
+                "members_id": members_id,
                 "category_tag_name": name,
                 "category_tag_color": color,
                 "category_tag_icon": icon,

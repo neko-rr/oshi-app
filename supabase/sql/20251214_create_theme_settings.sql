@@ -1,6 +1,6 @@
 -- テーマ設定テーブル（将来ユーザー毎に設定可能）
 create table if not exists theme_settings (
-  members_id int4 not null,
+  members_id uuid not null references public.member_information(members_id) on delete cascade,
   members_type_name text not null,
   theme text not null default 'minty',
   created_at timestamptz default now(),

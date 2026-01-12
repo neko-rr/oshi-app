@@ -3,11 +3,18 @@ from typing import Optional
 
 from services.theme_service import (
     DEFAULT_THEME,
+    DEFAULT_MEMBERS_TYPE_NAME,
     get_theme,
     set_theme,
-    GUEST_MEMBERS_ID,
-    GUEST_MEMBERS_TYPE_NAME,
 )
+
+try:
+    from flask import g, has_app_context
+except Exception:  # pragma: no cover
+    g = None
+
+    def has_app_context() -> bool:  # type: ignore
+        return False
 
 BOOTSWATCH_THEMES = [
     "cerulean",
@@ -60,37 +67,50 @@ def _save_theme_to_file(theme: str):
         print(f"DEBUG: save_theme_to_file failed: {exc}")
 
 
+def _infer_members_id(members_id: Optional[str]) -> Optional[str]:
+    if members_id:
+        return members_id
+
+    # アプリコンテキストが無い（起動時など）場合は g に触れない
+    if g is None or not has_app_context():
+        return None
+
+    uid = getattr(g, "user_id", None)
+    if uid:
+        return str(uid)
+    return None
+
+
 def load_theme(
-    members_id: Optional[int] = None, members_type_name: Optional[str] = None
+    members_id: Optional[str] = None, members_type_name: Optional[str] = None
 ) -> str:
     """Supabase 優先でテーマ取得。未設定/失敗時はローカル→デフォルト minty。"""
-    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
-    mtype = (
-        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
-    )
-    theme = get_theme(mid, mtype)
-    if theme:
-        return theme
+    mid = _infer_members_id(members_id)
+    mtype = members_type_name or DEFAULT_MEMBERS_TYPE_NAME
+    if mid:
+        theme = get_theme(mid, mtype)
+        if theme:
+            return theme
     return _load_theme_from_file()
 
 
 def save_theme(
     theme: str,
-    members_id: Optional[int] = None,
+    members_id: Optional[str] = None,
     members_type_name: Optional[str] = None,
 ) -> None:
     """Supabase に保存し、失敗時はローカルファイルにフォールバック。"""
-    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
-    mtype = (
-        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
-    )
-    saved = set_theme(theme, mid, mtype)
+    mid = _infer_members_id(members_id)
+    mtype = members_type_name or DEFAULT_MEMBERS_TYPE_NAME
+    saved = False
+    if mid:
+        saved = set_theme(theme, mid, mtype)
     if not saved:
         _save_theme_to_file(theme)
 
 
-# Current theme
-CURRENT_THEME = load_theme()
+# Current theme（初期値はデフォルトのみ、DBアクセスは行わない）
+CURRENT_THEME = DEFAULT_THEME
 
 
 def get_bootswatch_css(theme: str) -> str:
@@ -125,14 +145,20 @@ def register_theme_callbacks(app):
 
         try:
             save_theme(selected_theme)
-            return html.Div(
-                f"テーマ '{selected_theme}' を保存しました。",
-                className="alert alert-success",
+            return (
+                html.Div(
+                    f"テーマ '{selected_theme}' を保存しました。",
+                    className="alert alert-success",
+                ),
+                get_bootswatch_css(selected_theme),
             )
         except Exception as e:
-            return html.Div(
-                f"テーマの保存に失敗しました: {str(e)}",
-                className="alert alert-danger",
+            return (
+                html.Div(
+                    f"テーマの保存に失敗しました: {str(e)}",
+                    className="alert alert-danger",
+                ),
+                no_update,
             )
 
     @app.callback(

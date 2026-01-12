@@ -11,6 +11,12 @@ except Exception:  # pragma: no cover
     g = None
     has_app_context = lambda: False  # type: ignore
 
+# supabase-py v2 の ClientOptions（options に dict を渡すと壊れるため型を揃える）
+try:
+    from supabase.lib.client_options import ClientOptions
+except Exception:  # pragma: no cover
+    ClientOptions = None  # type: ignore
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOTENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 load_dotenv(dotenv_path=DOTENV_PATH, override=False)
@@ -27,7 +33,13 @@ def _create_client(api_key: str, access_token: Optional[str] = None) -> Optional
     headers = None
     if access_token:
         headers = {"Authorization": f"Bearer {access_token}"}
-    return create_client(SUPABASE_URL, api_key, options={"headers": headers} if headers else None)
+
+    # supabase-py v2: options は ClientOptions を渡す（dict は不可）
+    if headers and ClientOptions is not None:
+        return create_client(SUPABASE_URL, api_key, options=ClientOptions(headers=headers))
+
+    # フォールバック: headers が無い場合、または ClientOptions が import できない場合
+    return create_client(SUPABASE_URL, api_key)
 
 
 @lru_cache(maxsize=1)

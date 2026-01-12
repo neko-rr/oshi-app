@@ -4,30 +4,27 @@ from services.supabase_client import get_supabase_client
 
 DEFAULT_THEME = "minty"
 TABLE_NAME = "theme_settings"
-
-# ゲスト固定値（認証導入前は全員これを使う）
-GUEST_MEMBERS_ID = 9999
-GUEST_MEMBERS_TYPE_NAME = "guest"
+DEFAULT_MEMBERS_TYPE_NAME = "default"
 
 
 def get_theme(
-    members_id: Optional[int] = None, members_type_name: Optional[str] = None
+    members_id: Optional[str] = None, members_type_name: Optional[str] = None
 ) -> str:
-    """Supabase からテーマ設定を取得。未設定・未接続時はデフォルトを返す。"""
+    """
+    Supabase からテーマ設定を取得。未設定・未接続時はデフォルトを返す。
+    members_id が無い場合はデフォルトを返す（ゲスト固定IDは廃止）。
+    """
     supabase = get_supabase_client()
-    if supabase is None:
+    if supabase is None or not members_id:
         return DEFAULT_THEME
 
-    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
-    mtype = (
-        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
-    )
+    mtype = members_type_name or DEFAULT_MEMBERS_TYPE_NAME
 
     try:
         res = (
             supabase.table(TABLE_NAME)
             .select("theme")
-            .eq("members_id", mid)
+            .eq("members_id", members_id)
             .eq("members_type_name", mtype)
             .limit(1)
             .execute()
@@ -43,22 +40,21 @@ def get_theme(
 
 def set_theme(
     theme: str,
-    members_id: Optional[int] = None,
+    members_id: Optional[str] = None,
     members_type_name: Optional[str] = None,
 ) -> bool:
-    """Supabase にテーマ設定を保存。接続不可時は False を返す。"""
+    """
+    Supabase にテーマ設定を保存。members_id が無い場合は保存せず False。
+    """
     supabase = get_supabase_client()
-    if supabase is None:
+    if supabase is None or not members_id:
         return False
 
-    mid = members_id if members_id is not None else GUEST_MEMBERS_ID
-    mtype = (
-        members_type_name if members_type_name is not None else GUEST_MEMBERS_TYPE_NAME
-    )
+    mtype = members_type_name or DEFAULT_MEMBERS_TYPE_NAME
 
     try:
         payload = {
-            "members_id": mid,
+            "members_id": members_id,
             "members_type_name": mtype,
             "theme": theme,
         }
