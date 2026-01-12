@@ -198,10 +198,18 @@ def render_gallery(search: str = "") -> html.Div:
             ),
             html.Div(
                 [
-                    dbc.Badge(
-                        name,
+                    html.Span(
+                        "",
+                        title=str(name),
                         className="me-2 mb-2",
-                        style={"backgroundColor": color, "color": "#000000"},
+                        style={
+                            "display": "inline-block",
+                            "width": "32px",
+                            "height": "32px",
+                            "background": color,
+                            "borderRadius": "8px",
+                            "border": "1px solid rgba(0,0,0,0.15)",
+                        },
                     )
                     for name, color in color_tag_palette
                 ],
