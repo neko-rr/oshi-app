@@ -1,8 +1,36 @@
 import datetime
 from dash import html, dcc
+from services.tag_service import ensure_default_color_tags
 
 
 def render_review_section() -> html.Div:
+    color_tags = ensure_default_color_tags()
+    color_options = [
+        {
+            "label": html.Span(
+                [
+                    html.Span(
+                        "",
+                        style={
+                            "display": "inline-block",
+                            "width": "18px",
+                            "height": "18px",
+                            "background": item.get("color_tag_color") or "#6c757d",
+                            "borderRadius": "6px",
+                            "border": "1px solid rgba(0,0,0,0.2)",
+                            "marginRight": "8px",
+                        },
+                    ),
+                    html.Span(item.get("color_tag_name") or f"slot {item.get('slot')}"),
+                ],
+                className="d-inline-flex align-items-center",
+            ),
+            "value": int(item.get("slot") or 0),
+        }
+        for item in color_tags
+        if item.get("slot")
+    ]
+
     return html.Div(
         [
             # 写真サムネールと製品名
@@ -266,6 +294,21 @@ def render_review_section() -> html.Div:
                             ),
                         ],
                         className="row",
+                    ),
+                ],
+                className="card bg-light p-3 mb-4",
+            ),
+
+            # カラータグ選択（複数）
+            html.Div(
+                [
+                    html.H4("カラータグ", className="card-title"),
+                    html.P("色見本を複数選択できます（最大7）。", className="text-muted"),
+                    dcc.Checklist(
+                        id="color-tag-select",
+                        options=color_options,
+                        value=[],
+                        className="d-flex flex-wrap gap-3",
                     ),
                 ],
                 className="card bg-light p-3 mb-4",

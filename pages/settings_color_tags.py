@@ -48,18 +48,19 @@ def render_color_tags_settings():
                                 [
                                     html.Div(
                                         [
-                                            html.Span(
-                                                "",
+                                            dcc.Input(
+                                                type="color",
+                                                id={
+                                                    "type": "color-tag-color",
+                                                    "slot": int(item.get("slot") or 0),
+                                                },
+                                                value=item.get("color_tag_color")
+                                                or "#ffffff",
+                                                className="form-control form-control-color",
                                                 style={
-                                                    "display": "inline-block",
-                                                    "width": "32px",
-                                                    "height": "32px",
-                                                    "background": item.get(
-                                                        "color_tag_color"
-                                                    )
-                                                    or "#6c757d",
-                                                    "borderRadius": "8px",
-                                                    "border": "1px solid rgba(0,0,0,0.15)",
+                                                    "width": "56px",
+                                                    "height": "56px",
+                                                    "padding": "0",
                                                 },
                                             ),
                                             html.Span(
@@ -69,25 +70,28 @@ def render_color_tags_settings():
                                         ],
                                         className="d-flex align-items-center gap-2",
                                     ),
-                                    dcc.Input(
-                                        type="color",
-                                        id={
-                                            "type": "color-tag-color",
-                                            "slot": int(item.get("slot") or 0),
-                                        },
-                                        value=item.get("color_tag_color") or "#ffffff",
-                                        className="form-control form-control-color",
-                                        style={"minWidth": "64px"},
-                                    ),
-                                    dcc.Input(
-                                        type="text",
-                                        id={
-                                            "type": "color-tag-name",
-                                            "slot": int(item.get("slot") or 0),
-                                        },
-                                        value=item.get("color_tag_name") or "",
-                                        className="form-control",
-                                        placeholder="色名（例: 赤）",
+                                    html.Div(
+                                        [
+                                            html.Label(
+                                                "名称",
+                                                htmlFor={
+                                                    "type": "color-tag-name",
+                                                    "slot": int(item.get("slot") or 0),
+                                                },
+                                                className="form-label mb-1",
+                                            ),
+                                            dcc.Input(
+                                                type="text",
+                                                id={
+                                                    "type": "color-tag-name",
+                                                    "slot": int(item.get("slot") or 0),
+                                                },
+                                                value=item.get("color_tag_name") or "",
+                                                className="form-control",
+                                                placeholder="色名（例: 赤）",
+                                            ),
+                                        ],
+                                        className="d-flex flex-column",
                                     ),
                                 ],
                                 className="d-flex flex-column gap-2 p-3 border rounded mb-2",

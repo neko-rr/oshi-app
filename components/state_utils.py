@@ -43,6 +43,10 @@ def empty_registration_state() -> Dict[str, Any]:
             "tags": [],
             "message": "",
         },
+        # 製品に付与するカラータグの slot (1..7) を保持
+        "color_tags": {
+            "selected_slots": [],
+        },
     }
 
 
@@ -111,6 +115,14 @@ def ensure_state(data: Dict[str, Any]) -> Dict[str, Any]:
         }
     )
 
+    color_tags = data.get("color_tags") or {}
+    state["color_tags"].update(
+        {
+            "selected_slots": color_tags.get("selected_slots", [])
+            or state["color_tags"]["selected_slots"],
+        }
+    )
+
     return state
 
 
@@ -138,5 +150,8 @@ def serialise_state(state: Dict[str, Any]) -> Dict[str, Any]:
             "status": state["tags"].get("status"),
             "tags": list(state["tags"].get("tags", [])),
             "message": state["tags"].get("message"),
+        },
+        "color_tags": {
+            "selected_slots": list(state["color_tags"].get("selected_slots", [])),
         },
     }

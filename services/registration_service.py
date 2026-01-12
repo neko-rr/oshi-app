@@ -8,6 +8,7 @@ from dash.exceptions import PreventUpdate
 from components.state_utils import ensure_state, serialise_state
 from services.photo_service import insert_photo_record, upload_to_storage
 from services.supabase_client import get_supabase_client
+from services.product_color_tag_service import set_product_color_tags
 
 try:
     from flask import g, has_app_context
@@ -180,7 +181,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
 
         # 製品情報の保存 - Supabaseを使用（ローカルDB分岐削除）
         from services.photo_service import insert_product_record
-        insert_product_record(
+        product_id = insert_product_record(
             supabase,
             members_id=members_id,
             photo_id=photo_id,  # photo_idはNULLでも可
@@ -195,6 +196,15 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
             purchase_location=purchase_location or "",
             memo=memo or "",
         )
+        # カラータグ（slot）を保存（最大7・OR用）
+        slots = state.get("color_tags", {}).get("selected_slots", []) or []
+        if product_id:
+            set_product_color_tags(
+                supabase,
+                members_id=members_id,
+                registration_product_id=product_id,
+                slots=slots,
+            )
 
         with open("debug_log.txt", "a", encoding="utf-8") as f:
             f.write(

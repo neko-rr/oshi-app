@@ -132,8 +132,8 @@ def insert_product_record(
     sales_desired_flag: int = 0,
     want_object_flag: int = 0,
     flag_with_freebie: int = 0,
-) -> None:
-    """Insert product record into registration_product_information table"""
+) -> Optional[int]:
+    """Insert product record and return registration_product_id."""
     if not members_id:
         raise RuntimeError("members_id is required to insert product.")
     data = {
@@ -167,6 +167,10 @@ def insert_product_record(
     response = supabase.table("registration_product_information").insert(data).execute()
     if getattr(response, "error", None):
         raise RuntimeError(f"製品レコードの挿入に失敗しました: {response.error}")
+
+    if hasattr(response, "data") and response.data:
+        return response.data[0].get("registration_product_id")
+    return None
 
 
 def delete_all_products(supabase: Client) -> None:

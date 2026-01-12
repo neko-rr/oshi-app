@@ -54,6 +54,26 @@ def _render_tags_card(tag_result: Dict[str, Any]) -> html.Div:
 
 def register_review_callbacks(app):
     @app.callback(
+        Output("color-tag-select", "value"),
+        Input("registration-store", "data"),
+        prevent_initial_call=False,
+    )
+    def _sync_color_tag_select(store_data):
+        state = ensure_state(store_data)
+        return state.get("color_tags", {}).get("selected_slots", []) or []
+
+    @app.callback(
+        Output("registration-store", "data", allow_duplicate=True),
+        Input("color-tag-select", "value"),
+        State("registration-store", "data"),
+        prevent_initial_call=True,
+    )
+    def _update_color_tags(selected, store_data):
+        state = ensure_state(store_data)
+        state["color_tags"]["selected_slots"] = selected or []
+        return state
+
+    @app.callback(
         Output("tag-feedback", "children"), Input("registration-store", "data")
     )
     def render_tag_feedback(store_data):

@@ -1,13 +1,12 @@
 from dash import html
 from dash import dcc
-from dash import callback, Output, Input, State, callback_context, register_page, no_update
+from dash import callback, Output, Input, State, callback_context, register_page
 from dash.dependencies import ALL
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
-from typing import Iterable, Mapping
-import random
+from typing import Mapping, List, Dict, Any
 from services.tag_service import ensure_default_color_tags
+from services.product_color_tag_service import get_product_color_tag_slots
 
 Photo = Mapping[str, str]
 
@@ -40,69 +39,238 @@ def _photo_thumb_url(photo: Photo):
     return nested.get("photo_thumbnail_url") or nested.get("photo_high_resolution_url")
 
 
-def _render_detail_content(photo: Photo) -> html.Div:
-    thumbnail = _photo_thumb_url(photo)
-    info_rows = [
-        ("製品名", photo.get("product_name") or "未設定"),
-        ("分類", photo.get("product_group_name") or "未設定"),
-        ("作品シリーズ", photo.get("works_series_name") or "未設定"),
-        ("作品名", photo.get("title") or "未設定"),
-        ("キャラクター", photo.get("character_name") or "未設定"),
-        ("バーコード", photo.get("barcode_number") or "未取得"),
-        ("メモ", photo.get("memo") or "記録なし"),
+def _attach_color_slots(
+    supabase, products: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """製品リストに color_slots を付与する。"""
+    if not products:
+        return products
+    ids = [
+        p.get("registration_product_id")
+        for p in products
+        if isinstance(p, dict) and p.get("registration_product_id")
     ]
+    slots_map = get_product_color_tag_slots(supabase, None, ids)
+    for p in products:
+        pid = p.get("registration_product_id")
+        p["color_slots"] = slots_map.get(pid, [])
+    return products
 
-    info_list = html.Ul(
-        [
-            html.Li(
-                [
-                    html.Span(f"{label}：", className="fw-semibold me-1"),
-                    html.Span(value),
-                ],
-                className="mb-2",
-            )
-            for label, value in info_rows
-        ],
-        className="list-unstyled mb-0",
-    )
 
-    return html.Div(
+def _filter_products(products: List[Dict[str, Any]], text: str, slots: List[int]):
+    """テキストとカラータグでフィルタ。slotsはOR、テキストはAND適用。"""
+    text = (text or "").strip().lower()
+    slots_set = set(int(s) for s in slots or [])
+
+    def match_text(p: Dict[str, Any]) -> bool:
+        if not text:
+            return True
+        fields = [
+            p.get("product_name"),
+            p.get("product_group_name"),
+            p.get("works_series_name"),
+            p.get("title"),
+            p.get("character_name"),
+            p.get("memo"),
+        ]
+        return any((f or "").lower().find(text) >= 0 for f in fields)
+
+    def match_slots(p: Dict[str, Any]) -> bool:
+        if not slots_set:
+            return True
+        ps = set(int(s) for s in p.get("color_slots") or [])
+        return bool(ps & slots_set)  # OR
+
+    return [p for p in products if match_text(p) and match_slots(p)]
+
+
+def _render_cards(products: List[Dict[str, Any]], view_mode: str):
+    if not products:
+        return html.Div(
+            [
+                html.H4("まだ写真が登録されていません", className="mb-2"),
+                html.Div(
+                    "「写真を登録」からバーコードまたは写真で登録を開始できます。",
+                    className="text-muted",
+                ),
+                html.A(
+                    [html.I(className="bi bi-camera me-2"), "写真を登録する"],
+                    href="/register/barcode",
+                    className="btn btn-primary mt-3",
+                ),
+            ],
+            className="card p-4 mb-4",
+        )
+
+    summary = html.Div(
         [
-            html.Div(
-                [
-                    html.Div(
-                        html.Img(
-                            src=thumbnail,
-                            className="img-fluid rounded shadow-sm",
-                            style={"maxHeight": "320px", "objectFit": "cover"},
-                        )
-                        if thumbnail
-                        else html.Div(
-                            [
-                                html.I(
-                                    className="bi bi-image",
-                                    style={"fontSize": "48px"},
-                                ),
-                                html.P(
-                                    "画像が登録されていません", className="text-muted"
-                                ),
-                            ],
-                            className="d-flex flex-column align-items-center justify-content-center border rounded p-4 text-center",
-                        ),
-                        className="col-12 col-md-5",
-                    ),
-                    html.Div(
-                        [
-                            html.H5("登録情報", className="mb-3"),
-                            info_list,
-                        ],
-                        className="col-12 col-md-7",
-                    ),
-                ],
-                className="row g-4 align-items-start",
+            html.P(
+                f"全 {len(products)} 件の登録があります",
+                className="text-muted text-center mb-4",
             )
         ]
     )
+    grid = html.Div(
+        [
+            html.Div(
+                [
+                    (
+                        html.Button(
+                            html.Div(
+                                [
+                                    (
+                                        html.Img(
+                                            src=_photo_thumb_url(photo),
+                                            style={
+                                                "width": "100%",
+                                                "height": "150px",
+                                                "objectFit": "cover",
+                                            },
+                                        )
+                                        if _photo_thumb_url(photo)
+                                        else html.Div(
+                                            [
+                                                html.I(
+                                                    className="bi bi-image",
+                                                    style={"fontSize": "28px"},
+                                                )
+                                            ],
+                                            className="d-flex align-items-center justify-content-center photo-placeholder",
+                                        )
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                photo.get("product_name")
+                                                or "名称未設定",
+                                                className="fw-semibold",
+                                            ),
+                                            html.Div(
+                                                photo.get("title")
+                                                or photo.get("character_name")
+                                                or photo.get("works_series_name")
+                                                or "説明なし",
+                                                className="text-muted small",
+                                            ),
+                                        ],
+                                        className="mt-2 text-start",
+                                    ),
+                                ],
+                                className="photo-card",
+                            ),
+                            id={
+                                "type": "gallery-thumb",
+                                "index": photo.get("registration_product_id"),
+                            },
+                            className="photo-card-btn",
+                        )
+                        if not photo.get("_dummy")
+                        else html.Div(
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.I(
+                                                className="bi bi-image",
+                                                style={"fontSize": "28px"},
+                                            )
+                                        ],
+                                        className="d-flex align-items-center justify-content-center photo-placeholder",
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                "サンプル枠",
+                                                className="fw-bold text-dark mb-1",
+                                            ),
+                                            html.Div(
+                                                "追加の写真が表示されます",
+                                                className="text-muted small",
+                                            ),
+                                        ],
+                                        className="photo-info",
+                                    ),
+                                ],
+                                className="photo-card",
+                            )
+                        )
+                    )
+                    for photo in products
+                ]
+            )
+        ],
+        className="photo-grid",
+        id="gallery-grid-wrapper",
+        style={} if view_mode == "thumb" else {"display": "none"},
+    )
+
+    list_view = html.Div(
+        [
+            html.Div(
+                [
+                    dbc.ListGroup(
+                        [
+                            dbc.ListGroupItem(
+                                [
+                                    html.Img(
+                                        src=_photo_thumb_url(photo),
+                                        style={
+                                            "width": "56px",
+                                            "height": "56px",
+                                            "objectFit": "cover",
+                                        },
+                                        className="rounded",
+                                    )
+                                    if _photo_thumb_url(photo)
+                                    else html.Div(
+                                        html.I(
+                                            className="bi bi-image",
+                                            style={"fontSize": "22px"},
+                                        ),
+                                        className="d-flex align-items-center justify-content-center border rounded",
+                                        style={"width": "56px", "height": "56px"},
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                photo.get("product_name")
+                                                or "名称未設定",
+                                                className="fw-semibold text-dark",
+                                            ),
+                                            html.Div(
+                                                photo.get("title")
+                                                or photo.get("character_name")
+                                                or photo.get("works_series_name")
+                                                or "説明なし",
+                                                className="text-muted small",
+                                            ),
+                                            html.Div(
+                                                photo.get("memo") or "",
+                                                className="text-muted small",
+                                            ),
+                                        ],
+                                        className="flex-grow-1 text-start",
+                                    ),
+                                ],
+                                id={
+                                    "type": "gallery-thumb",
+                                    "index": photo.get("registration_product_id"),
+                                },
+                                className="list-group-item list-group-item-action d-flex align-items-center gap-3",
+                                n_clicks=0,
+                            )
+                            for photo in products
+                        ]
+                    )
+                ]
+            )
+        ],
+        className="list-group mb-4",
+        id="gallery-list-wrapper",
+        style={} if view_mode == "list" else {"display": "none"},
+    )
+
+    return html.Div([summary, grid, list_view])
 
 
 def render_gallery(search: str = "") -> html.Div:
@@ -114,43 +282,15 @@ def render_gallery(search: str = "") -> html.Div:
     if supabase is None:
         products = []
     else:
-        # get_all_products は registration_product_information の行に photo をネストした形で返す
         products = get_all_products(supabase) or []
+        products = _attach_color_slots(supabase, products)
 
-    # 実データが0件かどうかの判定用（ダミー補完前）
-    real_products_count = len([p for p in products if isinstance(p, dict)])
+    real_photos_for_store = [p for p in products if isinstance(p, dict)]
+    photo_store_component = dcc.Store(
+        id="gallery-products-store", data=real_photos_for_store
+    )
+    color_filter_store = dcc.Store(id="gallery-color-filter", data=[])
 
-    TARGET_CARD_COUNT = 8  # ダミーカードを含めた表示枚数（見かけだけ）
-
-    # 不足分をダミーで補完
-    if len(products) < TARGET_CARD_COUNT:
-        for i in range(TARGET_CARD_COUNT - len(products)):
-            products.append(
-                {
-                    "registration_product_id": f"dummy-{i}",
-                    "barcode_number": "DUMMY",
-                    "product_name": None,
-                    "product_group_name": None,
-                    "works_series_name": None,
-                    "title": None,
-                    "character_name": None,
-                    "memo": None,
-                    "photo": {
-                        "photo_thumbnail_url": None,
-                        "photo_high_resolution_url": None,
-                    },
-                    "_dummy": True,
-                }
-            )
-
-    # 詳細表示は実データのみ（ダミーは除外）
-    real_photos_for_store = [
-        p for p in products if isinstance(p, dict) and not p.get("_dummy")
-    ]
-    # ※ State依存を避けるため、詳細遷移でこのStoreは参照しない（残置は将来の拡張用）
-    photo_store_component = dcc.Store(id="gallery-photo-data", data=real_photos_for_store)
-
-    # search の view パラメータから初期表示を決定
     qs = parse_qs(search.lstrip("?") if search else "")
     initial_view = qs.get("view", ["thumb"])[0] or "thumb"
 
@@ -160,7 +300,6 @@ def render_gallery(search: str = "") -> html.Div:
         className="header",
     )
 
-    # タグ検索（見かけだけ）: ユーザー設定のカラータグを使用
     user_color_tags = ensure_default_color_tags()
     if user_color_tags:
         color_tag_palette = [
@@ -187,21 +326,22 @@ def render_gallery(search: str = "") -> html.Div:
             html.Div(
                 [
                     dcc.Input(
+                        id="gallery-search-input",
                         placeholder="タグで検索（例: 猫、白、キーホルダー）",
                         className="form-control me-2",
                         style={"maxWidth": "420px"},
                         type="text",
                     ),
-                    html.Button("検索", className="btn btn-light mt-2 mt-md-0"),
                 ],
                 className="d-flex flex-column flex-md-row align-items-start",
             ),
             html.Div(
                 [
-                    html.Span(
+                    html.Button(
                         "",
+                        id={"type": "gallery-color-swatch", "slot": idx + 1},
                         title=str(name),
-                        className="me-2 mb-2",
+                        className="btn p-0 border-0 me-2 mb-2",
                         style={
                             "display": "inline-block",
                             "width": "32px",
@@ -210,8 +350,9 @@ def render_gallery(search: str = "") -> html.Div:
                             "borderRadius": "8px",
                             "border": "1px solid rgba(0,0,0,0.15)",
                         },
+                        n_clicks=0,
                     )
-                    for name, color in color_tag_palette
+                    for idx, (name, color) in enumerate(color_tag_palette)
                 ],
                 className="mt-2",
             ),
@@ -219,242 +360,124 @@ def render_gallery(search: str = "") -> html.Div:
         className="card text-white bg-secondary mb-3",
     )
 
-    # 初期表示のスタイル（view パラメータに従う）
-    grid_style = {} if initial_view == "thumb" else {"display": "none"}
-    list_style = {} if initial_view == "list" else {"display": "none"}
+    view_toggle = html.Div(
+        [
+            dbc.RadioItems(
+                id="gallery-view-mode",
+                options=[
+                    {"label": "サムネイル", "value": "thumb"},
+                    {"label": "リスト", "value": "list"},
+                ],
+                value=initial_view,
+                inline=True,
+                className="mb-3",
+            )
+        ],
+        className="card p-3 mb-3",
+    )
 
-    if real_products_count == 0:
-        dashboard_content = html.Div(
-            [
-                photo_store_component,
-                tag_search,
-                html.Div(
-                    [
-                        html.H4("まだ写真が登録されていません", className="mb-2"),
-                        html.Div(
-                            "「写真を登録」からバーコードまたは写真で登録を開始できます。",
-                            className="text-muted",
-                        ),
-                        html.A(
-                            [html.I(className="bi bi-camera me-2"), "写真を登録する"],
-                            href="/register/barcode",
-                            className="btn btn-primary mt-3",
-                        ),
-                    ],
-                    className="card p-4 mb-4",
-                ),
-            ]
-        )
-    else:
-        # 写真がある場合はギャラリー表示
-        summary = html.Div(
-            [
-                html.P(
-                    f"全 {len(real_photos_for_store)} 件の登録があります",
-                    className="text-muted text-center mb-4",
-                )
-            ]
-        )
-        view_toggle = html.Div(
-            [
-                dbc.RadioItems(
-                    id="gallery-view-mode",
-                    options=[
-                        {"label": "サムネイル", "value": "thumb"},
-                        {"label": "リスト", "value": "list"},
-                    ],
-                    value=initial_view,
-                    inline=True,
-                    className="mb-3",
-                )
-            ],
-            className="card p-3 mb-3",
-        )
-        grid = html.Div(
-            [
-                html.Div(
-                    [
-                        (
-                            html.Button(
-                                html.Div(
-                                    [
-                                        (
-                                            html.Img(
-                                                src=_photo_thumb_url(photo),
-                                                style={
-                                                    "width": "100%",
-                                                    "height": "150px",
-                                                    "objectFit": "cover",
-                                                },
-                                            )
-                                            if _photo_thumb_url(photo)
-                                            else html.Div(
-                                                [
-                                                    html.I(
-                                                        className="bi bi-image",
-                                                        style={"fontSize": "28px"},
-                                                    )
-                                                ],
-                                                className="d-flex align-items-center justify-content-center photo-placeholder",
-                                            )
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    f"バーコード: {(photo.get('barcode_number') or photo.get('barcode') or '')[:15]}...",
-                                                    className="fw-bold text-dark mb-1",
-                                                ),
-                                                html.Div(
-                                                    photo.get("description")
-                                                    or "説明なし",
-                                                    className="text-muted small",
-                                                ),
-                                            ],
-                                            className="photo-info",
-                                        ),
-                                    ],
-                                    className="photo-card",
-                                ),
-                                id={
-                                    "type": "gallery-thumb",
-                                    "index": _photo_unique_id(photo, f"photo-{i}"),
-                                },
-                                className="photo-card-btn",
-                                n_clicks=0,
-                            )
-                            if not photo.get("_dummy")
-                            else html.Div(
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.I(
-                                                    className="bi bi-image",
-                                                    style={"fontSize": "28px"},
-                                                )
-                                            ],
-                                            className="d-flex align-items-center justify-content-center photo-placeholder",
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "サンプル枠",
-                                                    className="fw-bold text-dark mb-1",
-                                                ),
-                                                html.Div(
-                                                    "追加の写真が表示されます",
-                                                    className="text-muted small",
-                                                ),
-                                            ],
-                                            className="photo-info",
-                                        ),
-                                    ],
-                                    className="photo-card",
-                                )
-                            )
-                        )
-                    ]
-                )
-                for i, photo in enumerate(products)
-            ],
-            className="photo-grid",
-            id="gallery-grid-wrapper",
-            style=grid_style,
-        )
-        list_view = html.Div(
-            [
-                html.Button(
-                    [
-                        (
-                            html.Img(
-                                src=_photo_thumb_url(photo),
-                                style={
-                                    "width": "56px",
-                                    "height": "56px",
-                                    "objectFit": "cover",
-                                    "borderRadius": "10px",
-                                },
-                            )
-                            if _photo_thumb_url(photo)
-                            else html.Div(
-                                html.I(
-                                    className="bi bi-image", style={"fontSize": "22px"}
-                                ),
-                                className="d-flex align-items-center justify-content-center border rounded",
-                                style={"width": "56px", "height": "56px"},
-                            )
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    photo.get("product_name") or "名称未設定",
-                                    className="fw-semibold text-dark",
-                                ),
-                                html.Div(
-                                    [
-                                        *[
-                                            dbc.Badge(
-                                                n,
-                                                color=c,
-                                                className=(
-                                                    "me-1"
-                                                    + (" text-dark" if c == "light" else "")
-                                                ),
-                                            )
-                                            for n, c in (
-                                                [
-                                                    color_tag_palette[
-                                                        (i * 2) % len(color_tag_palette)
-                                                    ],
-                                                    color_tag_palette[
-                                                        (i * 2 + 1)
-                                                        % len(color_tag_palette)
-                                                    ],
-                                                ]
-                                            )
-                                        ]
-                                    ],
-                                    className="mt-1",
-                                ),
-                            ],
-                            className="flex-grow-1 text-start",
-                        ),
-                    ],
-                    id={"type": "gallery-thumb", "index": photo.get("registration_product_id")},
-                    className="list-group-item list-group-item-action d-flex align-items-center gap-3",
-                    n_clicks=0,
-                )
-                for i, photo in enumerate(real_photos_for_store)
-            ],
-            className="list-group mb-4",
-            id="gallery-list-wrapper",
-            style=list_style,
-        )
+    dashboard_content = html.Div(
+        [
+            photo_store_component,
+            color_filter_store,
+            tag_search,
+            view_toggle,
+            html.Div(id="gallery-content"),
+        ]
+    )
 
-        dashboard_content = html.Div(
-            [
-                photo_store_component,
-                tag_search,
-                summary,
-                view_toggle,
-                grid,
-                list_view,
-            ]
-        )
-
-    return html.Div([header, dashboard_content, dcc.Location(id="gallery-location", refresh=False)])
+    return html.Div(
+        [header, dashboard_content, dcc.Location(id="gallery-location", refresh=False)]
+    )
 
 
 @callback(
-    Output("gallery-grid-wrapper", "style"),
-    Output("gallery-list-wrapper", "style"),
-    Input("gallery-view-mode", "value"),
+    Output({"type": "gallery-color-swatch", "slot": ALL}, "style"),
+    Input("gallery-color-filter", "data"),
+    State({"type": "gallery-color-swatch", "slot": ALL}, "style"),
+    prevent_initial_call=False,
 )
-def _toggle_gallery_view(mode: str):
-    mode = mode or "thumb"
-    if mode == "list":
-        return {"display": "none"}, {}
-    return {}, {"display": "none"}
+def _update_swatch_styles(selected_slots, styles):
+    selected_set = set(int(s) for s in (selected_slots or []))
+    user_color_tags = ensure_default_color_tags() or []
+    slot_to_color = {
+        int(item.get("slot")): (item.get("color_tag_color") or "#6c757d")
+        for item in user_color_tags
+        if item.get("slot")
+    }
+    fallback_colors = [
+        "#dc3545",
+        "#0d6efd",
+        "#198754",
+        "#ffc107",
+        "#6f42c1",
+        "#212529",
+        "#f8f9fa",
+    ]
+
+    updated = []
+    target_count = len(styles or [])
+    for idx in range(target_count):
+        slot = idx + 1
+        base_color = slot_to_color.get(slot)
+        if not base_color and idx < len(fallback_colors):
+            base_color = fallback_colors[idx]
+        base_color = base_color or "#6c757d"
+
+        style = {
+            "display": "inline-block",
+            "width": "32px",
+            "height": "32px",
+            "background": base_color,
+            "borderRadius": "8px",
+            "border": "3px solid #0d6efd"
+            if slot in selected_set
+            else "1px solid rgba(0,0,0,0.15)",
+        }
+        if slot in selected_set:
+            style["boxShadow"] = "0 0 0 0.2rem rgba(13, 110, 253, 0.25)"
+        updated.append(style)
+    return updated
+
+
+@callback(
+    Output("gallery-color-filter", "data"),
+    Input({"type": "gallery-color-swatch", "slot": ALL}, "n_clicks"),
+    State("gallery-color-filter", "data"),
+    prevent_initial_call=True,
+)
+def _toggle_color_filter(n_clicks, selected):
+    ctx = callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+    trig = ctx.triggered_id
+    if not isinstance(trig, dict):
+        raise PreventUpdate
+    slot = trig.get("slot")
+    if slot is None:
+        raise PreventUpdate
+    current = set(int(s) for s in (selected or []))
+    if int(slot) in current:
+        current.remove(int(slot))
+    else:
+        if len(current) < 7:
+            current.add(int(slot))
+    return sorted(current)
+
+
+@callback(
+    Output("gallery-content", "children"),
+    Input("gallery-products-store", "data"),
+    Input("gallery-color-filter", "data"),
+    Input("gallery-search-input", "value"),
+    Input("gallery-view-mode", "value"),
+    prevent_initial_call=False,
+)
+def _render_filtered_content(products, selected_slots, text, view_mode):
+    view_mode = view_mode or "thumb"
+    products = products or []
+    filtered = _filter_products(products, text, selected_slots)
+    return _render_cards(filtered, view_mode)
 
 
 @callback(
@@ -477,7 +500,10 @@ def _navigate_to_detail(clicks, view_mode):
     if not pid:
         raise PreventUpdate
 
-    return "/gallery/detail", f"?registration_product_id={pid}&view={view_mode or 'thumb'}"
+    return (
+        "/gallery/detail",
+        f"?registration_product_id={pid}&view={view_mode or 'thumb'}",
+    )
 
 
 register_page(
@@ -486,11 +512,4 @@ register_page(
     title="ギャラリー - おしごとアプリ",
 )
 
-try:
-    layout = render_gallery()
-except Exception as e:
-    layout = html.Div(
-        f"Gallery page error: {str(e)}", style={"color": "red", "padding": "20px"}
-    )
-
-
+layout = render_gallery
