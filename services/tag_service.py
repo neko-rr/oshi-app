@@ -1,5 +1,6 @@
 """Tag management service for color tags, category tags, and receipt location tags."""
 
+import re
 from typing import Dict, List, Any, Optional
 from services.supabase_client import get_supabase_client
 
@@ -15,6 +16,114 @@ def _current_members_id() -> Optional[str]:
         return None
     uid = getattr(g, "user_id", None)
     return str(uid) if uid else None
+
+
+# 初期7色（slot固定）
+DEFAULT_COLOR_TAGS: List[Dict[str, Any]] = [
+    {"slot": 1, "color_tag_name": "赤", "color_tag_color": "#dc3545"},
+    {"slot": 2, "color_tag_name": "青", "color_tag_color": "#0d6efd"},
+    {"slot": 3, "color_tag_name": "緑", "color_tag_color": "#198754"},
+    {"slot": 4, "color_tag_name": "黄", "color_tag_color": "#ffc107"},
+    {"slot": 5, "color_tag_name": "紫", "color_tag_color": "#6f42c1"},
+    {"slot": 6, "color_tag_name": "黒", "color_tag_color": "#212529"},
+    {"slot": 7, "color_tag_name": "白", "color_tag_color": "#f8f9fa"},
+]
+
+HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+
+def _validate_color_tag_entries(entries: List[Dict[str, Any]]) -> bool:
+    if len(entries) != 7:
+        return False
+    for e in entries:
+        if not isinstance(e, dict):
+            return False
+        if not (1 <= int(e.get("slot", 0)) <= 7):
+            return False
+        name = (e.get("color_tag_name") or "").strip()
+        color = e.get("color_tag_color") or ""
+        if not name:
+            return False
+        if not HEX_RE.match(color):
+            return False
+    return True
+
+
+def ensure_default_color_tags() -> List[Dict[str, Any]]:
+    """足りない slot に初期7色を投入し、slot順で返す。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return []
+    try:
+        # 既存を取得
+        resp = (
+            supabase.table("color_tag")
+            .select("*")
+            .eq("members_id", members_id)
+            .order("slot")
+            .execute()
+        )
+        existing = resp.data or []
+        filled_slots = {int(item.get("slot")) for item in existing if item.get("slot")}
+        # 足りないslotだけ insert
+        missing_payload = [
+            dict(dc, members_id=members_id)
+            for dc in DEFAULT_COLOR_TAGS
+            if dc["slot"] not in filled_slots
+        ]
+        if missing_payload:
+            supabase.table("color_tag").upsert(
+                missing_payload, on_conflict="members_id,slot"
+            ).execute()
+            # 再取得
+            resp = (
+                supabase.table("color_tag")
+                .select("*")
+                .eq("members_id", members_id)
+                .order("slot")
+                .execute()
+            )
+            return resp.data or []
+        return existing
+    except Exception:
+        return []
+
+
+def save_color_tags(entries: List[Dict[str, Any]]) -> bool:
+    """7件まとめて保存（slot=1..7）。"""
+    if not _validate_color_tag_entries(entries):
+        return False
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return False
+    payload = []
+    for e in entries:
+        payload.append(
+            {
+                "members_id": members_id,
+                "slot": int(e["slot"]),
+                "color_tag_name": (e.get("color_tag_name") or "").strip(),
+                "color_tag_color": e.get("color_tag_color"),
+            }
+        )
+    try:
+        supabase.table("color_tag").upsert(
+            payload, on_conflict="members_id,slot"
+        ).execute()
+        return True
+    except Exception:
+        return False
+
+
+def get_color_tags_ordered() -> List[Dict[str, Any]]:
+    """slot順で取得。足りない場合は初期化してから返す。"""
+    ensured = ensure_default_color_tags()
+    # ensureで失敗した場合はそのまま返る（空or部分的）
+    return sorted(
+        ensured, key=lambda x: int(x.get("slot") or 0)
+    )
 
 
 def get_color_tags() -> List[Dict[str, Any]]:

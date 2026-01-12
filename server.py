@@ -235,6 +235,22 @@ def _is_public_path(path: str) -> bool:
     ) or path in {"/login", "/auth/login", "/auth/callback"}
 
 
+def _set_g_from_user(access_token: str, user) -> None:
+    """検証済みユーザー情報を flask.g に詰める（services 側が参照する）。"""
+    user_id = None
+    user_email = None
+    if isinstance(user, dict):
+        user_id = user.get("id") or user.get("user", {}).get("id")
+        user_email = user.get("email") or user.get("user", {}).get("email")
+    else:
+        user_id = getattr(user, "id", None)
+        user_email = getattr(user, "email", None)
+
+    g.user_id = user_id
+    g.user_email = user_email
+    g.access_token = access_token
+
+
 # Flask app
 flask_app = Flask(__name__)
 flask_app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -301,8 +317,24 @@ def _require_auth():
         )
         return resp
 
+    # public パスでも、cookie にトークンがあれば検証して g を埋める（未ログインはそのまま通す）
+    # Dash の内部エンドポイント（/_dash-*）が public 扱いでも、ユーザー別処理ができるようにする。
     if _is_public_path(request.path):
-        _dbg("require_auth_public", path=request.path)
+        access_token = request.cookies.get(AUTH_COOKIE)
+        if access_token:
+            user = _verify_token(access_token)
+            if user:
+                _set_g_from_user(access_token, user)
+                _dbg(
+                    "require_auth_public_authed",
+                    path=request.path,
+                    user_id=getattr(g, "user_id", None),
+                    user_email=_mask_email(getattr(g, "user_email", None)),
+                )
+            else:
+                _dbg("require_auth_public_invalid_token", path=request.path)
+        else:
+            _dbg("require_auth_public", path=request.path)
         return None
 
     access_token = request.cookies.get(AUTH_COOKIE)
@@ -318,18 +350,7 @@ def _require_auth():
         return resp
 
     # 認証済み: g にセット（services 側で利用）
-    user_id = None
-    user_email = None
-    if isinstance(user, dict):
-        user_id = user.get("id") or user.get("user", {}).get("id")
-        user_email = user.get("email") or user.get("user", {}).get("email")
-    else:
-        user_id = getattr(user, "id", None)
-        user_email = getattr(user, "email", None)
-
-    g.user_id = user_id
-    g.user_email = user_email
-    g.access_token = access_token
+    _set_g_from_user(access_token, user)
     _dbg(
         "require_auth_ok",
         path=request.path,

@@ -199,7 +199,7 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(
                         id="theme-preview-name",
-                        className="text-white-50 small mb-1",
+                        className="text-body-secondary small mb-1",
                         children=f"選択中: {current_theme or CURRENT_THEME}",
                     ),
                     html.Div(id="theme-save-result", className="mt-2"),
@@ -214,9 +214,9 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(
                         [
-                            html.Button(
+                            dcc.Link(
                                 "カラータグ",
-                                n_clicks=0,
+                                href="/settings/color-tags",
                                 className="btn btn-outline-primary me-2 mb-2",
                             ),
                             html.Button(

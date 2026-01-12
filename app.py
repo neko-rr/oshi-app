@@ -60,12 +60,14 @@ def create_app(server=None) -> dash.Dash:
     )
     from features.review.controller import register_review_callbacks
     from components.theme_utils import register_theme_callbacks
+    from features.color_tag.controller import register_color_tag_callbacks
 
     register_barcode_callbacks(app)
     register_photo_callbacks(app)
     register_x_share_callbacks(app)
     register_review_callbacks(app)
     register_theme_callbacks(app)
+    register_color_tag_callbacks(app)
 
     # /register への直接アクセスを /register/select にリダイレクト
     @app.callback(

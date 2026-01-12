@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from typing import Iterable, Mapping
 import random
+from services.tag_service import ensure_default_color_tags
 
 Photo = Mapping[str, str]
 
@@ -146,9 +147,8 @@ def render_gallery(search: str = "") -> html.Div:
     real_photos_for_store = [
         p for p in products if isinstance(p, dict) and not p.get("_dummy")
     ]
-    photo_store_component = dcc.Store(
-        id="gallery-photo-data", data=real_photos_for_store
-    )
+    # ※ State依存を避けるため、詳細遷移でこのStoreは参照しない（残置は将来の拡張用）
+    photo_store_component = dcc.Store(id="gallery-photo-data", data=real_photos_for_store)
 
     # search の view パラメータから初期表示を決定
     qs = parse_qs(search.lstrip("?") if search else "")
@@ -160,16 +160,26 @@ def render_gallery(search: str = "") -> html.Div:
         className="header",
     )
 
-    # タグ検索（見かけだけ）
-    color_tag_palette = [
-        ("赤", "danger"),
-        ("青", "primary"),
-        ("緑", "success"),
-        ("黄", "warning"),
-        ("紫", "secondary"),
-        ("黒", "dark"),
-        ("白", "light"),
-    ]
+    # タグ検索（見かけだけ）: ユーザー設定のカラータグを使用
+    user_color_tags = ensure_default_color_tags()
+    if user_color_tags:
+        color_tag_palette = [
+            (
+                (item.get("color_tag_name") or f"色{item.get('slot')}"),
+                (item.get("color_tag_color") or "#6c757d"),
+            )
+            for item in user_color_tags
+        ]
+    else:
+        color_tag_palette = [
+            ("赤", "#dc3545"),
+            ("青", "#0d6efd"),
+            ("緑", "#198754"),
+            ("黄", "#ffc107"),
+            ("紫", "#6f42c1"),
+            ("黒", "#212529"),
+            ("白", "#f8f9fa"),
+        ]
 
     tag_search = html.Div(
         [
@@ -190,10 +200,8 @@ def render_gallery(search: str = "") -> html.Div:
                 [
                     dbc.Badge(
                         name,
-                        color=color,
-                        className=(
-                            "me-2 mb-2" + (" text-dark" if color == "light" else "")
-                        ),
+                        className="me-2 mb-2",
+                        style={"backgroundColor": color, "color": "#000000"},
                     )
                     for name, color in color_tag_palette
                 ],
@@ -404,7 +412,7 @@ def render_gallery(search: str = "") -> html.Div:
                             className="flex-grow-1 text-start",
                         ),
                     ],
-                    id={"type": "gallery-thumb", "index": _photo_unique_id(photo, f"photo-{i}")},
+                    id={"type": "gallery-thumb", "index": photo.get("registration_product_id")},
                     className="list-group-item list-group-item-action d-flex align-items-center gap-3",
                     n_clicks=0,
                 )
@@ -445,11 +453,10 @@ def _toggle_gallery_view(mode: str):
     Output("_pages_location", "pathname", allow_duplicate=True),
     Output("_pages_location", "search", allow_duplicate=True),
     Input({"type": "gallery-thumb", "index": ALL}, "n_clicks"),
-    State("gallery-photo-data", "data"),
     State("gallery-view-mode", "value"),
     prevent_initial_call="initial_duplicate",
 )
-def _navigate_to_detail(clicks, stored_photos, view_mode):
+def _navigate_to_detail(clicks, view_mode):
     ctx = callback_context
     if not ctx.triggered:
         raise PreventUpdate
@@ -458,20 +465,11 @@ def _navigate_to_detail(clicks, stored_photos, view_mode):
     if not isinstance(triggered, dict):
         raise PreventUpdate
 
-    target_index = str(triggered.get("index"))
-    if not stored_photos:
+    pid = triggered.get("index")
+    if not pid:
         raise PreventUpdate
 
-    for photo in stored_photos:
-        unique = str(
-            _photo_unique_id(photo, photo.get("registration_product_id") or "")
-        )
-        if unique == target_index:
-            pid = photo.get("registration_product_id") or unique
-            # 詳細ページへ遷移
-            return "/gallery/detail", f"?registration_product_id={pid}&view={view_mode or 'thumb'}"
-
-    raise PreventUpdate
+    return "/gallery/detail", f"?registration_product_id={pid}&view={view_mode or 'thumb'}"
 
 
 register_page(
