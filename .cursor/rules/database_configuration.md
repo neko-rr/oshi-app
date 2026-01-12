@@ -89,10 +89,17 @@
 | 属性           | カテゴリータグ使用フラグ | category_tag_use_flag     | 整数     |             |
 | 属性           | 収納場所使用フラグ       | receipt_location_use_flag | 整数     |             |
 
+| 役割           | 名称日本語 | メソッド名        | データ型 | キー設定          |
+| -------------- | ---------- | ----------------- | -------- | ----------------- |
+| エンティティ名 | テーマ設定 | theme_settings    | 文字列   |                   |
+| 属性           | 会員 ID    | members_id        | UUID     | Primary Key(複合) |
+| 属性           | 会員種別名 | members_type_name | 文字列   | Primary Key(複合) |
+| 属性           | テーマ     | theme             | 文字列   |                   |
+
 | 役割           | 名称日本語        | メソッド名         | データ型       | キー設定    |
 | -------------- | ----------------- | ------------------ | -------------- | ----------- |
 | エンティティ名 | 会員情報          | member_information | 文字列         |             |
-| 属性           | 会員 ID           | members_id         | 整数           | Primary Key |
+| 属性           | 会員 ID           | members_id         | UUID           | Primary Key |
 | 属性           | 会員種別名        | members_type_name  | 文字列         | Foreign Key |
 | 属性           | ユーザ名          | user_name          | 文字列         |             |
 | 属性           | メールアドレス    | email_address      | メールアドレス |             |
@@ -113,6 +120,7 @@
 | -------------- | ------------------ | ----------------------------- | -------- | ----------- |
 | エンティティ名 | 写真               | photo                         | 文字列   |             |
 | 属性           | 写真 ID            | photo_id                      | 整数     | Primary Key |
+| 属性           | 会員 ID            | members_id                    | UUID     | Foreign Key |
 | 属性           | 写真のテーマ色     | photo_theme_color             | 整数     | Foreign Key |
 | 属性           | 正面フラグ         | front_flag                    | 整数     |             |
 | 属性           | 写真サムネイル     | photo_thumbnail               | 画像     |             |
@@ -128,7 +136,7 @@
 | -------------- | ------------- | --------------- | -------- | ----------- |
 | エンティティ名 | カラータグ    | color_tag       | 文字列   |             |
 | 属性           | カラータグ ID | color_tag_id    | 整数     | Primary Key |
-| 属性           | 会員 ID       | members_id      | 整数     | Foreign Key |
+| 属性           | 会員 ID       | members_id      | UUID     | Foreign Key |
 | 属性           | カラータグ色  | color_tag_color | RGB      |             |
 | 属性           | カラータグ名  | color_tag_name  | 文字列   |             |
 
@@ -136,7 +144,7 @@
 | -------------- | ------------------------ | --------------------- | -------- | ----------- |
 | エンティティ名 | カテゴリータグ           | category_tag          | 文字列   |             |
 | 属性           | カテゴリータグ ID        | category_tag_id       | 整数     | Primary Key |
-| 属性           | 会員 ID                  | members_id            | 整数     | Foreign Key |
+| 属性           | 会員 ID                  | members_id            | UUID     | Foreign Key |
 | 属性           | カテゴリータグ色         | category_tag_color    | RGB      |             |
 | 属性           | カテゴリータグ名         | category_tag_name     | 文字列   |             |
 | 属性           | カテゴリータグアイコン   | category_tag_icon     | 文字列   |             |
@@ -146,6 +154,7 @@
 | -------------- | ------------------------------ | -------------------------------- | -------- | ----------- |
 | エンティティ名 | 登録製品情報                   | registration_product_information | 文字列   |             |
 | 属性           | 登録製品 ID                    | registration_product_id          | 整数     | Primary Key |
+| 属性           | 会員 ID                        | members_id                       | UUID     | Foreign Key |
 | 属性           | 写真 ID                        | photo_id                         | 整数     | Foreign Key |
 | 属性           | 作品シリーズ ID                | works_series_id                  | 整数     | Foreign Key |
 | 属性           | 作品 ID                        | works_id                         | 整数     | Foreign Key |
