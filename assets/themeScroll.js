@@ -33,6 +33,26 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       }
       return currentStyle || {};
     },
+
+    // localStorage(theme-store) に保存された theme から bootswatch CSS を即時適用する。
+    // - data: {"theme": "sandstone"} のような形を想定
+    // - 何も無い場合は no_update で既存CSSを維持
+    applyThemeHref: function (data) {
+      try {
+        if (!data || !data.theme) {
+          return window.dash_clientside.no_update;
+        }
+        const theme = String(data.theme);
+        const href =
+          "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/" +
+          theme +
+          "/bootstrap.min.css";
+        return href;
+      } catch (e) {
+        console.warn("applyThemeHref error", e);
+        return window.dash_clientside.no_update;
+      }
+    },
   },
 });
 

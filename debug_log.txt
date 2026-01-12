@@ -21,3 +21,4 @@ DEBUG: front_photo data: {'content': None, 'filename': None, 'content_type': Non
 DEBUG: front_photo content exists: False
 DEBUG: Successfully saved product - Name: うん, Photo ID: None
 DEBUG: Returning success message
+DEBUG: n_clicks is falsy, raising PreventUpdate

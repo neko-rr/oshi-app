@@ -111,6 +111,7 @@ def create_app(server=None) -> dash.Dash:
                 href=get_bootswatch_css(load_theme()),
                 id="bootswatch-theme",
             ),
+            dcc.Store(id="theme-store", storage_type="local"),
             html.Div(
                 dash.page_container, className="page-container"
             ),  # ページ内容を中央寄せ＋最大幅でラップ

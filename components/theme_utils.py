@@ -130,18 +130,22 @@ def register_theme_callbacks(app):
         callback_context,
         ALL,
         ClientsideFunction,
+        dcc,
+        no_update,
     )
     from dash.exceptions import PreventUpdate
 
     @app.callback(
         Output("theme-save-result", "children", allow_duplicate=True),
+        Output("bootswatch-theme", "href", allow_duplicate=True),
+        Output("theme-store", "data", allow_duplicate=True),
         Input("save-theme-button", "n_clicks"),
         State("theme-preview-store", "data"),
         prevent_initial_call="initial_duplicate",
     )
     def save_theme_callback(n_clicks, selected_theme):
         if not n_clicks or not selected_theme:
-            return ""
+            return "", no_update, no_update
 
         try:
             save_theme(selected_theme)
@@ -151,6 +155,7 @@ def register_theme_callbacks(app):
                     className="alert alert-success",
                 ),
                 get_bootswatch_css(selected_theme),
+                {"theme": selected_theme},
             )
         except Exception as e:
             return (
@@ -158,6 +163,7 @@ def register_theme_callbacks(app):
                     f"テーマの保存に失敗しました: {str(e)}",
                     className="alert alert-danger",
                 ),
+                no_update,
                 no_update,
             )
 
@@ -208,6 +214,17 @@ def register_theme_callbacks(app):
         Input({"type": "theme-card", "theme": ALL}, "n_clicks"),
         State("theme-card-container", "id"),
         prevent_initial_call=True,
+    )
+
+    # --- Client-side: theme-store -> bootswatch link を即時反映 ---
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace="themeScroll",  # assets/themeScroll.js にまとめる方針で流用
+            function_name="applyThemeHref",
+        ),
+        Output("bootswatch-theme", "href", allow_duplicate=True),
+        Input("theme-store", "data"),
+        prevent_initial_call=False,
     )
 
     app.clientside_callback(

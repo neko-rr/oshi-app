@@ -61,7 +61,7 @@ def _build_navigation():
     return html.Nav(
         html.Div(
             [
-                html.A(
+                dcc.Link(
                     [
                         html.I(className=f"bi {item['icon']}"),
                         html.Div(item["label"], className="nav-label"),
