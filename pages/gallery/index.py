@@ -127,95 +127,119 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
             )
         ]
     )
-    grid = html.Div(
-        [
-            html.Div(
-                [
-                    (
-                        html.Button(
-                            html.Div(
-                                [
-                                    (
-                                        html.Img(
-                                            src=_photo_thumb_url(photo),
-                                            style={
-                                                "width": "100%",
-                                                "height": "150px",
-                                                "objectFit": "cover",
-                                            },
-                                        )
-                                        if _photo_thumb_url(photo)
-                                        else html.Div(
-                                            [
-                                                html.I(
-                                                    className="bi bi-image",
-                                                    style={"fontSize": "28px"},
-                                                )
-                                            ],
-                                            className="d-flex align-items-center justify-content-center photo-placeholder",
-                                        )
-                                    ),
-                                    html.Div(
-                                        [
-                                            html.Div(
-                                                photo.get("product_name")
-                                                or "名称未設定",
-                                                className="fw-semibold",
-                                            ),
-                                            html.Div(
-                                                photo.get("title")
-                                                or photo.get("character_name")
-                                                or photo.get("works_series_name")
-                                                or "説明なし",
-                                                className="text-muted small",
-                                            ),
-                                        ],
-                                        className="mt-2 text-start",
-                                    ),
-                                ],
-                                className="photo-card",
-                            ),
-                            id={
-                                "type": "gallery-thumb",
-                                "index": photo.get("registration_product_id"),
-                            },
-                            className="photo-card-btn",
-                        )
-                        if not photo.get("_dummy")
-                        else html.Div(
-                            html.Div(
-                                [
-                                    html.Div(
-                                        [
-                                            html.I(
-                                                className="bi bi-image",
-                                                style={"fontSize": "28px"},
-                                            )
-                                        ],
-                                        className="d-flex align-items-center justify-content-center photo-placeholder",
-                                    ),
-                                    html.Div(
-                                        [
-                                            html.Div(
-                                                "サンプル枠",
-                                                className="fw-bold text-dark mb-1",
-                                            ),
-                                            html.Div(
-                                                "追加の写真が表示されます",
-                                                className="text-muted small",
-                                            ),
-                                        ],
-                                        className="photo-info",
-                                    ),
-                                ],
-                                className="photo-card",
-                            )
-                        )
+    grid_items = []
+    for photo in products:
+        thumb_url = _photo_thumb_url(photo)
+        content = html.Div(
+            [
+                (
+                    html.Img(
+                        src=thumb_url,
+                        style={
+                            "width": "100%",
+                            "height": "150px",
+                            "objectFit": "cover",
+                            "borderTopLeftRadius": "10px",
+                            "borderTopRightRadius": "10px",
+                        },
                     )
-                    for photo in products
-                ]
+                    if thumb_url
+                    else html.Div(
+                        [
+                            html.I(
+                                className="bi bi-image",
+                                style={"fontSize": "28px"},
+                            )
+                        ],
+                        className="d-flex align-items-center justify-content-center photo-placeholder",
+                        style={
+                            "height": "150px",
+                            "borderTopLeftRadius": "10px",
+                            "borderTopRightRadius": "10px",
+                            "background": "#f8f9fa",
+                        },
+                    )
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            photo.get("product_name") or "名称未設定",
+                            className="fw-semibold text-dark",
+                        ),
+                        html.Div(
+                            photo.get("title")
+                            or photo.get("character_name")
+                            or photo.get("works_series_name")
+                            or "説明なし",
+                            className="text-muted small",
+                        ),
+                    ],
+                    className="p-2",
+                    style={
+                        "height": "64px",
+                        "overflow": "hidden",
+                    },
+                ),
+            ],
+            className="h-100"
+        )
+
+        card = (
+            html.Button(
+                content,
+                id={"type": "gallery-thumb", "index": photo.get("registration_product_id")},
+                className="photo-card-btn text-start p-0 border-0",
+                n_clicks=0,
+                style={
+                    "borderRadius": "10px",
+                    "overflow": "hidden",
+                    "boxShadow": "0 2px 6px rgba(0,0,0,0.08)",
+                    "background": "var(--bs-card-bg)",
+                    "height": "214px",
+                    "width": "100%",
+                },
             )
-        ],
+            if not photo.get("_dummy")
+            else html.Div(
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.I(
+                                    className="bi bi-image",
+                                    style={"fontSize": "28px"},
+                                )
+                            ],
+                            className="d-flex align-items-center justify-content-center photo-placeholder",
+                            style={
+                                "height": "150px",
+                                "background": "#f8f9fa",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.Div("サンプル枠", className="fw-bold text-dark mb-1"),
+                                html.Div("追加の写真が表示されます", className="text-muted small"),
+                            ],
+                            className="p-2",
+                        ),
+                    ],
+                    className="h-100",
+                ),
+                style={
+                    "borderRadius": "10px",
+                    "overflow": "hidden",
+                    "boxShadow": "0 2px 6px rgba(0,0,0,0.08)",
+                    "background": "var(--bs-card-bg)",
+                    "height": "214px",
+                    "width": "100%",
+                },
+            )
+        )
+        grid_items.append(card)
+
+    grid = html.Div(
+        grid_items,
         className="photo-grid",
         id="gallery-grid-wrapper",
         style={} if view_mode == "thumb" else {"display": "none"},
@@ -501,10 +525,12 @@ def _render_filtered_content(products, selected_slots, text, view_mode):
     Output("_pages_location", "pathname", allow_duplicate=True),
     Output("_pages_location", "search", allow_duplicate=True),
     Input({"type": "gallery-thumb", "index": ALL}, "n_clicks"),
-    State("gallery-view-mode", "value"),
+    State("_pages_location", "search"),
     prevent_initial_call="initial_duplicate",
 )
-def _navigate_to_detail(clicks, view_mode):
+def _navigate_to_detail(clicks, current_search):
+    from urllib.parse import parse_qs
+
     ctx = callback_context
     if not ctx.triggered:
         raise PreventUpdate
@@ -516,6 +542,9 @@ def _navigate_to_detail(clicks, view_mode):
     pid = triggered.get("index")
     if not pid:
         raise PreventUpdate
+
+    qs = parse_qs((current_search or "").lstrip("?"))
+    view_mode = qs.get("view", ["thumb"])[0] or "thumb"
 
     return (
         "/gallery/detail",

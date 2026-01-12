@@ -151,8 +151,20 @@ def create_signed_url_for_object(
         if resp.status_code >= 400:
             print(f"DEBUG: create_signed_url failed: {resp.status_code} {resp.text}")
             return None
-        data = resp.json()
-        return data.get("signedURL") or data.get("signedUrl") or data.get("signed_url")
+        data = resp.json() or {}
+        signed = data.get("signedURL") or data.get("signedUrl") or data.get("signed_url")
+        if signed and signed.startswith("http"):
+            return signed
+        if signed:
+            # relative -> make absolute
+            # Supabaseの返却が "/object/sign/..." の場合があるため "/storage/v1" を補完する
+            if signed.startswith("/object/"):
+                signed = f"/storage/v1{signed}"
+            elif not signed.startswith("/storage/"):
+                # 念のため、想定外の相対パスは storage/v1 配下に寄せる
+                signed = f"/storage/v1{signed if signed.startswith('/') else '/' + signed}"
+            return f"{SUPABASE_URL}{signed}"
+        return None
     except Exception as exc:
         print(f"DEBUG: create_signed_url exception: {exc}")
         return None
