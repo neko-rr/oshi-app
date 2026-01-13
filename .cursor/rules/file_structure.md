@@ -44,9 +44,20 @@ Apply Mode: Always Apply
 
 - 他に必要なファイルがあれば、残してください
 - 不要なファイルやフォルダは、開発者に確認後に消去してください
-- フレームワークの Dash 公式のページ機能とコールバックを参照して、エラーが出ないようにファイル分けしてください[https://dash.plotly.com/urls?from_column=20423&from=20423](https://dash.plotly.com/urls?from_column=20423&from=20423)
+- フレームワークの Dash 公式のページ機能とコールバックを参照して、エラーが出ないようにファイル分けしてください
+  - [https://dash.plotly.com/urls?from_column=20423&from=20423](https://dash.plotly.com/urls?from_column=20423&from=20423)
+  - [https://dash.plotly.com/advanced-callbacks](https://dash.plotly.com/advanced-callbacks)
+- Dash Pages の制約（コールバックが“存在しない ID”を参照できない） と、Supabase Auth/Storage の仕様（Private+signed URL） が差分を生んでいる。注意して、判断するように。
 - UI とロジックは、ファイルを機能別に 1 機能ずつ分けてください
 - 将来的にフロントエンド：React(Next.js) + バックエンド：Python にできるようなファイル構成にしてください
+
+# Storage の設定
+
+Storage は Private bucket + signed URL、DB には public URL ではなく object path を保存する仕様になった  
+理由
+
+- Private にすると「URL を直接貼るだけ」では表示できません。
+- そのため photo_service.py に「object path → signed URL」変換処理が入り、アプリ側の責務が増えました。
 
 # サイトマップ
 
@@ -60,6 +71,8 @@ Apply Mode: Always Apply
   - 定義: pages/dashboard.py
 - /settings（設定）
   - 定義: pages/settings.py
+  - /settings（設定：カラータグの設定）
+  - 定義: pages/gallery/settings_color_tags.py
 
 ## サイトマップの登録分岐詳細＆複雑なページ遷移詳細
 

@@ -1,8 +1,9 @@
-from dash import html, dcc, register_page
+from dash import html, dcc
 from services.tag_service import DEFAULT_COLOR_TAGS, ensure_default_color_tags
 
 
 def render_color_tags_settings():
+    """カラータグ設定ページのUIを生成する。"""
     # ページ表示時にユーザー別の7スロットを作成/取得する（g.user_id が必要）
     tags = ensure_default_color_tags() or []
 
@@ -112,11 +113,3 @@ def render_color_tags_settings():
         ],
         className="page-container",
     )
-
-
-register_page(
-    __name__,
-    path="/settings/color-tags",
-    title="カラータグ設定 - おしごとアプリ",
-    layout=render_color_tags_settings,
-)

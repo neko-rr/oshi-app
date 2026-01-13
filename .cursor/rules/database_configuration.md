@@ -129,16 +129,28 @@
 | 属性           | 写真編集済フラグ   | photo_edited_flag             | 整数     |             |
 | 属性           | 写真登録日         | photo_registration_date       | 日付     |             |
 | 属性           | 写真編集日         | photo_edit_date               | 日付     |             |
-| 属性           | 写真サムネイル URL | photo_thumbnail_url           | URL      |             |
-| 属性           | 写真高解像度 URL   | photo_high_resolution_url     | URL      |             |
+| 属性           | 写真サムネイル URL | photo_thumbnail_url           | text     |             |
+| 属性           | 写真高解像度 URL   | photo_high_resolution_url     | text     |             |
+
+※現行仕様（重要）
+
+- `photo_thumbnail_url` / `photo_high_resolution_url` は、**公開 URL ではなく Storage の object path**（例: `{members_id}/{uuid}.jpg`）を保存しています。
+- 画面表示時はアプリが **signed URL** を発行して `img src` に設定します（`photos` bucket は Private 運用）。
 
 | 役割           | 名称日本語    | メソッド名      | データ型 | キー設定    |
 | -------------- | ------------- | --------------- | -------- | ----------- |
 | エンティティ名 | カラータグ    | color_tag       | 文字列   |             |
 | 属性           | カラータグ ID | color_tag_id    | 整数     | Primary Key |
 | 属性           | 会員 ID       | members_id      | UUID     | Foreign Key |
-| 属性           | カラータグ色  | color_tag_color | RGB      |             |
+| 属性           | カラータグ色  | color_tag_color | text     |             |
 | 属性           | カラータグ名  | color_tag_name  | 文字列   |             |
+| 属性           | スロット      | slot            | 整数     |             |
+
+※現行仕様（重要）
+
+- `slot` は **1..7 固定**（ユーザーは最大 7 個まで）。
+- `(members_id, slot)` は **一意**（ユーザーごとにスロットが重複しない）。
+- `color_tag_color` は **HEX 形式 `#RRGGBB`** を想定（DB 制約あり）。
 
 | 役割           | 名称日本語               | メソッド名            | データ型 | キー設定    |
 | -------------- | ------------------------ | --------------------- | -------- | ----------- |
@@ -199,6 +211,33 @@
 | 属性           | 販売希望フラグ                 | sales_desired_flag               | 整数     |             |
 | 属性           | 欲しい物フラグ                 | want_object_flag                 | 整数     |             |
 | 属性           | おまけ付きフラグ               | flag_with_freebie                | 整数     |             |
+
+※現行仕様（重要）
+
+- 製品に付けるカラータグは、`color_tag_id`（単一）ではなく **slot の多対多** を正とします。
+  - 付与は `registration_product_color_tag` テーブルで管理し、製品に最大 7 スロットまで付与できます。
+  - （`color_tag_id` 列は残っていますが、現行のアプリ実装では主に使用しません）
+
+| 役割           | 名称日本語         | メソッド名                     | データ型 | キー設定          |
+| -------------- | ------------------ | ------------------------------ | -------- | ----------------- |
+| エンティティ名 | 登録製品カラータグ | registration_product_color_tag | 文字列   |                   |
+| 属性           | 会員 ID            | members_id                     | UUID     | Primary Key(複合) |
+| 属性           | 登録製品 ID        | registration_product_id        | 整数     | Primary Key(複合) |
+| 属性           | スロット           | slot                           | 整数     | Primary Key(複合) |
+
+※現行仕様（重要）
+
+- `slot` は 1..7。
+- 外部キー: `(members_id, slot) -> color_tag(members_id, slot)`
+- 製品絞り込みは「複数 slot OR」＋「テキスト AND」で実装。
+
+## Storage（写真バケット）※DB 外の運用設定
+
+- Bucket 名: `photos`
+- 公開設定: **Private**
+- 保存パス: `{members_id}/{uuid}.jpg`（`members_id` = Supabase Auth の `auth.users.id`）
+- アクセス: `storage.objects` のポリシーで **自分の UID 配下のみ** 読み書き可能
+- 画面表示: signed URL を発行して表示
 
 | 役割           | 名称日本語  | メソッド名       | データ型 | キー設定    |
 | -------------- | ----------- | ---------------- | -------- | ----------- |
