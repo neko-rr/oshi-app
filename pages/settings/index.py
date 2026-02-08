@@ -329,9 +329,10 @@ register_page(
     title="設定 - おしごとアプリ",
 )
 
-try:
-    layout = render_settings()
-except Exception as e:
-    layout = html.Div(
-        f"Settings page error: {str(e)}", style={"color": "red", "padding": "20px"}
-    )
+def layout():
+    try:
+        return render_settings()
+    except Exception as e:
+        return html.Div(
+            f"Settings page error: {str(e)}", style={"color": "red", "padding": "20px"}
+        )

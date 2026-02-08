@@ -9,6 +9,7 @@ from services.supabase_client import get_supabase_client
 def render_home() -> html.Div:
     supabase = get_supabase_client()
     stats = get_product_stats(supabase)
+    total_registrations = stats.get("total") or 0
     total_photos = stats.get("total_photos") or stats.get("total") or 0
     unique_barcodes = stats.get("unique_barcodes") or stats.get("unique") or 0
 
@@ -126,6 +127,16 @@ def render_home() -> html.Div:
                             html.Div(
                                 [
                                     html.Div(
+                                        str(total_registrations),
+                                        className="stat-number",
+                                    ),
+                                    html.Div("全登録数", className="stat-label"),
+                                ],
+                                className="stat-box",
+                            ),
+                            html.Div(
+                                [
+                                    html.Div(
                                         str(total_photos), className="stat-number"
                                     ),
                                     html.Div("登録済み写真", className="stat-label"),
@@ -167,9 +178,10 @@ register_page(
     title="ホーム - おしごとアプリ",
 )
 
-try:
-    layout = render_home()
-except Exception as e:
-    layout = html.Div(
-        f"Home page error: {str(e)}", style={"color": "red", "padding": "20px"}
-    )
+def layout():
+    try:
+        return render_home()
+    except Exception as e:
+        return html.Div(
+            f"Home page error: {str(e)}", style={"color": "red", "padding": "20px"}
+        )

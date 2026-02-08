@@ -70,9 +70,9 @@ Storage は Private bucket + signed URL、DB には public URL ではなく obje
 - /dashboard（ダッシュボード）
   - 定義: pages/dashboard.py
 - /settings（設定）
-  - 定義: pages/settings.py
+  - 定義: pages\settings\index.py
   - /settings（設定：カラータグの設定）
-  - 定義: pages/gallery/settings_color_tags.py
+  - 定義: pages\settings\color_tags.py
 
 ## サイトマップの登録分岐詳細＆複雑なページ遷移詳細
 
