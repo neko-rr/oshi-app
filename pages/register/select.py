@@ -100,6 +100,7 @@ layout = render_select_page()
 def _init_flow_state(flow: str) -> dict:
     state = empty_registration_state()
     state["meta"]["flow"] = flow
+    state["meta"]["flow_source"] = "select-quick" if flow == "goods_quick" else "select-full"
     state["meta"]["last_save_message"] = None
     state["meta"]["last_save_status"] = None
     return state

@@ -88,3 +88,39 @@ n_clicks: None
 product_name: 'None'
 store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags']
 
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:07:24.326322
+n_clicks: None
+product_name: 'None'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:08:19.828375
+n_clicks: 1
+product_name: '挙動戻った'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:20:56.595145
+n_clicks: None
+product_name: 'None'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:22:51.233971
+n_clicks: 1
+product_name: 'テスト'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:31:00.779968
+n_clicks: None
+product_name: 'None'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-02-10 03:31:37.491798
+n_clicks: 1
+product_name: 'IOのみ成功'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+

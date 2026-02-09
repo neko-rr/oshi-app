@@ -285,6 +285,13 @@ def register_review_callbacks(app):
                 print(
                     f"DEBUG: describe_image result status: {description_result.get('status')}"
                 )
+                selected_text = (
+                    description_result.get("text")
+                    or description_result.get("description")
+                    or ""
+                )
+                desc_len = len(selected_text)
+                print(f"DEBUG: describe_image description_len: {desc_len}")
             except Exception as io_error:
                 print(
                     f"DEBUG: describe_image raised exception inside process_tags: {io_error}"
@@ -305,8 +312,10 @@ def register_review_callbacks(app):
 
             if description_result.get("status") == "success":
                 print("DEBUG: Description generation successful")
-                state["front_photo"]["description"] = description_result.get(
-                    "description"
+                state["front_photo"]["description"] = (
+                    description_result.get("text")
+                    or description_result.get("description")
+                    or None
                 )
                 state["front_photo"]["model_used"] = description_result.get(
                     "model_used"
@@ -315,6 +324,10 @@ def register_review_callbacks(app):
                     "structured_data"
                 )
                 state["front_photo"]["description_status"] = "done"
+                print(
+                    "DEBUG: front_photo.description_status=done, stored_description_len="
+                    f"{len(state['front_photo'].get('description') or '')}"
+                )
             else:
                 print(f"DEBUG: Description generation failed: {description_result}")
                 state["front_photo"]["description"] = None

@@ -7,6 +7,8 @@ def empty_registration_state() -> Dict[str, Any]:
         "meta": {
             # 現在のフロー: goods_full / goods_quick / book（今は goods_full を既定に）
             "flow": "goods_full",
+            # flow を決めた起点（select-full / select-quick）。未設定なら full 扱い。
+            "flow_source": "select-full",
             # 直近の保存結果（バナー表示用）
             "last_save_message": None,
             "last_save_status": None,
@@ -60,6 +62,7 @@ def ensure_state(data: Dict[str, Any]) -> Dict[str, Any]:
     state["meta"].update(
         {
             "flow": meta.get("flow", state["meta"]["flow"]),
+            "flow_source": meta.get("flow_source", state["meta"]["flow_source"]),
             "last_save_message": meta.get("last_save_message"),
             "last_save_status": meta.get("last_save_status"),
         }
@@ -131,6 +134,7 @@ def serialise_state(state: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "meta": {
             "flow": state["meta"].get("flow"),
+            "flow_source": state["meta"].get("flow_source"),
             "last_save_message": state["meta"].get("last_save_message"),
             "last_save_status": state["meta"].get("last_save_status"),
         },

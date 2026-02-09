@@ -249,6 +249,8 @@ docker push your-registry/oshi-app:latest
 
 ---
 
-## ライセンス
+# license
 
-MIT License
+© 2026 Kazeneko.  
+All Rights Reserved.  
+本ポートフォリオの内容（コード、文章、画像、設計資料等）の無断利用・転載・改変を禁止します。

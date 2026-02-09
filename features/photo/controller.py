@@ -47,6 +47,8 @@ def register_photo_callbacks(app):
         trigger_id = triggered[0]["prop_id"].split(".")[0]
         state = ensure_state(store_data)
         flow = state.get("meta", {}).get("flow") or "goods_full"
+        flow_source = state.get("meta", {}).get("flow_source") or "select-full"
+        is_quick = flow == "goods_quick" and flow_source == "select-quick"
         message = no_update
         nav_path = no_update
 
@@ -83,7 +85,7 @@ def register_photo_callbacks(app):
             message = ""
             print("DEBUG handle_front_photo: photo skipped")
 
-            if flow == "goods_full":
+            if not is_quick:
                 nav_path = "/register/review"
             else:
                 # goods_quick: 写真なしでスキップ
@@ -95,6 +97,7 @@ def register_photo_callbacks(app):
                     if status == "success":
                         new_state = empty_registration_state()
                         new_state["meta"]["flow"] = "goods_quick"
+                        new_state["meta"]["flow_source"] = "select-quick"
                         new_state["meta"]["last_save_message"] = result.get("message")
                         new_state["meta"]["last_save_status"] = status
                         message = html.Div(result.get("message"), className="alert alert-success")
@@ -111,6 +114,7 @@ def register_photo_callbacks(app):
                     # 両方なし → 登録せず barcode へ戻して注意喚起
                     new_state = empty_registration_state()
                     new_state["meta"]["flow"] = "goods_quick"
+                    new_state["meta"]["flow_source"] = "select-quick"
                     new_state["meta"]["last_save_message"] = "バーコードまたは正面写真のどちらかが必要です。"
                     new_state["meta"]["last_save_status"] = "business_error"
                     nav_path = "/register/barcode"
@@ -249,7 +253,7 @@ def register_photo_callbacks(app):
                     gc.collect()
 
             # goods_full と goods_quick で処理を分岐
-            if flow == "goods_full":
+            if not is_quick:
                 # 画像アップロード時にタグ生成フローを開始（非同期処理に移行）
                 print(
                     f"DEBUG: Tag generation marked as loading - lookup items: {len(state['lookup'].get('items', []))}, photo uploaded: True"
@@ -312,6 +316,7 @@ def register_photo_callbacks(app):
                 if status == "success":
                     new_state = empty_registration_state()
                     new_state["meta"]["flow"] = "goods_quick"
+                    new_state["meta"]["flow_source"] = "select-quick"
                     new_state["meta"]["last_save_message"] = result.get("message")
                     new_state["meta"]["last_save_status"] = status
                     message = html.Div(result.get("message"), className="alert alert-success")

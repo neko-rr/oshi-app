@@ -289,9 +289,15 @@ def _update_tags(state: Dict[str, Any]) -> Dict[str, Any]:
     """Update tags based on lookup data and image description."""
     items = state["lookup"].get("items") or []
     description = state["front_photo"].get("description")
+    description_status = state["front_photo"].get("description_status")
+    description_len = len(description or "")
 
     print(
         f"DEBUG: _update_tags called - items: {len(items)}, description: {bool(description)}"
+    )
+    print(
+        "DEBUG: _update_tags description_status="
+        f"{description_status}, description_len={description_len}"
     )
 
     # 4つのパターンを適切に処理
