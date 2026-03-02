@@ -1,4 +1,4 @@
-# 開発者向けメモ（最新仕様・起動必須）
+# Cursorから開発者へのメモ（最新仕様・起動必須）
 
 ## 概要
 
@@ -21,11 +21,14 @@
   python server.py
   ```
 - ログ付き強制起動（同じく `server.py` を実行）:
+
   ```powershell
   .\.venv\Scripts\Activate.ps1
   powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1
   ```
+
   - ログ確認: `Get-Content app_run.log -Tail 50`
+
 - ブラウザ: **必ず `http://127.0.0.1:8050` に統一**（`localhost` と混在させない）。
   - 以後、リンクを踏む/ブックマークも含めて **127.0.0.1 側だけ** を使ってください。
   - 既にループしている場合は、`127.0.0.1` と `localhost` の両方の Cookie を削除してから再アクセスしてください。
