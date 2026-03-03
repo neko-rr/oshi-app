@@ -33,6 +33,7 @@ todos:
     status: completed
     dependencies:
       - add-register-select-page
+isProject: false
 ---
 
 # 登録フロー分岐ページ追加（クイック追加対応）
@@ -62,21 +63,21 @@ todos:
 - `features/photo/controller.py` をモード分岐し、
 - `goods_full`: 既存どおり `/register/review` へ
 - `goods_quick`: 写真取得後に保存処理を実行し、成功メッセージを保持したうえで `/register/barcode` へ戻す
-    - 失敗時は業務エラー/システムエラーを分けて表示（写真未取得は業務エラーで画面に表示、Supabase/IOは例外ログ＋エラーメッセージ）
+  - 失敗時は業務エラー/システムエラーを分けて表示（写真未取得は業務エラーで画面に表示、Supabase/IOは例外ログ＋エラーメッセージ）
 - **UI/ロジック分離ルール**: `services/` は **Dashの `html` などUI依存を返さない**（純データを返す）。UI表示（成功/失敗メッセージ・バナー）は `features/*/controller.py` が `html.Div` 等を生成して返す。
 
 ## 実装ステップ（段階的）
 
 ### Step 1: ルーティング追加（分岐ページ）
 
-- 新規ページを追加: [`pages/register/select.py`](pages/register/select.py)
+- 新規ページを追加: `[pages/register/select.py](pages/register/select.py)`
 - 3ボタンUI（クイック/写真・タグ付け/書籍）
 - 書籍は「準備中」アラートのみ
-- [`app.py`](app.py) の `/register` リダイレクト先を `/register/select` に変更
+- `[app.py](app.py)` の `/register` リダイレクト先を `/register/select` に変更
 
 ### Step 2: 登録モードを store に保持
 
-- [`components/state_utils.py`](components/state_utils.py)
+- `[components/state_utils.py](components/state_utils.py)`
 - `empty_registration_state()` に `meta` を追加
 - `ensure_state()` と `serialise_state()` で `meta` を欠損しても補完する
 
@@ -86,24 +87,24 @@ todos:
 
 ### Step 4: クイック追加の保存処理を追加
 
-- [`services/registration_service.py`](services/registration_service.py)
-- `save_quick_registration(store_data) -> Dict[str, Any] `のような関数を追加（戻り値は `status/message/photo_id/...` 等の純データ）
+- `[services/registration_service.py](services/registration_service.py)`
+- `save_quick_registration(store_data) -> Dict[str, Any]` のような関数を追加（戻り値は `status/message/photo_id/...` 等の純データ）
 - `product_name` は自動仮名（例: `未設定_YYYYMMDD_HHMMSS`）
 - 写真は `front_photo.original_tmp_path` or `front_photo.content` からアップロードし、`registration_product_information` に登録
 - タグは「未登録扱い」＝今回の保存ではタグテーブル更新は行わない（現状のDB設計に合わせて、既存の product insert のみ）
 
 ### Step 5: photo コールバックをモード分岐
 
-- [`features/photo/controller.py`](features/photo/controller.py)
+- `[features/photo/controller.py](features/photo/controller.py)`
 - `meta.flow == goods_quick` の場合:
-    - 写真未取得のスキップは **業務エラー** として弾く（「写真を撮影してください」）
-    - 写真取得後に `save_quick_registration()` を呼ぶ
-    - 成功時: `registration-store` を初期化（ただし `meta.flow=goods_quick` 維持）し、成功メッセージを次画面で出せるよう `meta.last_save_message` 等に入れて `/register/barcode` へ遷移
+  - 写真未取得のスキップは **業務エラー** として弾く（「写真を撮影してください」）
+  - 写真取得後に `save_quick_registration()` を呼ぶ
+  - 成功時: `registration-store` を初期化（ただし `meta.flow=goods_quick` 維持）し、成功メッセージを次画面で出せるよう `meta.last_save_message` 等に入れて `/register/barcode` へ遷移
 
 ### Step 6: 成功表示（バーコード画面）
 
-- [`pages/register/barcode.py`](pages/register/barcode.py) に成功表示用の `html.Div(id="register-success-banner")` を追加
-- [`features/barcode/controller.py`](features/barcode/controller.py) に「ページ到達時に success banner を表示して1回で消す」軽いコールバックを追加
+- `[pages/register/barcode.py](pages/register/barcode.py)` に成功表示用の `html.Div(id="register-success-banner")` を追加
+- `[features/barcode/controller.py](features/barcode/controller.py)` に「ページ到達時に success banner を表示して1回で消す」軽いコールバックを追加
 
 ### Step 7: 仕様ドキュメント更新
 
@@ -111,4 +112,5 @@ todos:
 
 ## 影響ファイル
 
-- 追加: [`pages/register/select.py`](pages/register/select.py)
+- 追加: `[pages/register/select.py](pages/register/select.py)`
+
