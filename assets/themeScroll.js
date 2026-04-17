@@ -37,12 +37,22 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
     // localStorage(theme-store) に保存された theme から bootswatch CSS を即時適用する。
     // - data: {"theme": "sandstone"} のような形を想定
     // - 何も無い場合は no_update で既存CSSを維持
+    // components/theme_utils.BOOTSWATCH_THEMES と一致（改ざん時の任意 CSS 読込を防ぐ）
     applyThemeHref: function (data) {
       try {
         if (!data || !data.theme) {
           return window.dash_clientside.no_update;
         }
         const theme = String(data.theme);
+        const allowed = new Set([
+          "cerulean", "cosmo", "cyborg", "darkly", "flatly", "journal", "litera",
+          "lumen", "lux", "materia", "minty", "morph", "pulse", "quartz", "sandstone",
+          "simplex", "sketchy", "slate", "solar", "spacelab", "superhero", "united",
+          "vapor", "yeti", "zephyr",
+        ]);
+        if (!allowed.has(theme)) {
+          return window.dash_clientside.no_update;
+        }
         const href =
           "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/" +
           theme +

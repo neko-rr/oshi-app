@@ -124,3 +124,9 @@ n_clicks: 1
 product_name: 'IOのみ成功'
 store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
 
+=== SAVE REGISTRATION DEBUG ===
+Called at: 2026-04-18 03:58:32.166643
+n_clicks: None
+product_name: 'None'
+store_data keys: ['meta', 'barcode', 'front_photo', 'lookup', 'tags', 'color_tags']
+

@@ -2,6 +2,7 @@ from .barcode_service import decode_from_base64
 from .photo_service import (
     delete_all_products,
     get_all_products,
+    get_products_page,
     get_product_stats,
     insert_product_record,
     insert_photo_record,
@@ -20,6 +21,7 @@ __all__ = [
     "decode_from_base64",
     "delete_all_products",
     "get_all_products",
+    "get_products_page",
     "get_product_stats",
     "insert_product_record",
     "insert_photo_record",

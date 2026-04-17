@@ -80,7 +80,7 @@ def render_barcode_section() -> html.Div:
                         multiple=False,
                     ),
                 ],
-                className="card-custom",
+                className="card-main-primary",
             ),
             html.Div(
                 [
@@ -103,7 +103,7 @@ def render_barcode_section() -> html.Div:
                         multiple=False,
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [
@@ -134,7 +134,7 @@ def render_barcode_section() -> html.Div:
                         className="btn btn-link",
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [

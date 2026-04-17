@@ -123,7 +123,7 @@ def render_review_section() -> html.Div:
                         className="row",
                     ),
                 ],
-                className="card bg-light p-3 mb-4",
+                className="card-main-secondary mb-4",
             ),
 
             # 製品フラグとシリーズ情報
@@ -296,7 +296,7 @@ def render_review_section() -> html.Div:
                         className="row",
                     ),
                 ],
-                className="card bg-light p-3 mb-4",
+                className="card-main-secondary mb-4",
             ),
 
             # カラータグ選択（複数）
@@ -311,7 +311,26 @@ def render_review_section() -> html.Div:
                         className="d-flex flex-wrap gap-3",
                     ),
                 ],
-                className="card bg-light p-3 mb-4",
+                className="card-main-secondary mb-4",
+            ),
+
+            # 登録内容まとめ（フォーム入力は State にし、明示更新で POST を抑える）
+            html.Div(
+                [
+                    html.H4("登録内容のまとめ", className="card-title"),
+                    html.P(
+                        "フォームを編集したあと「まとめを更新」でここに反映されます。",
+                        className="text-muted small",
+                    ),
+                    html.Button(
+                        "まとめを更新",
+                        id="review-summary-refresh",
+                        className="btn btn-outline-secondary btn-sm mb-2",
+                        n_clicks=0,
+                    ),
+                    html.Div(id="review-summary"),
+                ],
+                className="card-main-secondary mb-4",
             ),
 
             # メモ
@@ -325,7 +344,7 @@ def render_review_section() -> html.Div:
                         style={"minHeight": "120px"},
                     ),
                 ],
-                className="card bg-primary text-white p-3 mb-4",
+                className="card-main-primary mb-4",
             ),
 
             # その他タグ（編集不可）
@@ -339,7 +358,7 @@ def render_review_section() -> html.Div:
                         style={"pointerEvents": "none", "opacity": "0.6"},  # 編集不可
                     ),
                 ],
-                className="card bg-info text-white p-3 mb-4",
+                className="card-main-info mb-4",
             ),
 
             # 保存ボタン
@@ -360,7 +379,7 @@ def render_review_section() -> html.Div:
                 id="io-intelligence-interval",
                 interval=2000,  # 2秒ごとにチェック
                 n_intervals=0,
-                disabled=False,
+                disabled=True,
             ),
 
             # STEP4自動反映用のインターバル（app.pyで定義）

@@ -7,6 +7,7 @@ from dash.exceptions import PreventUpdate
 from components.state_utils import ensure_state, serialise_state, empty_registration_state
 from services.photo_service import upload_to_storage
 from services.supabase_client import get_supabase_client
+from services.debug_log import dash_debug_print
 from services.registration_service import (
     save_quick_registration_with_photo,
     save_quick_registration_barcode_only,
@@ -59,7 +60,7 @@ def register_photo_callbacks(app):
                     if os.path.exists(tmp_path):
                         os.remove(tmp_path)
                 except Exception as cleanup_error:
-                    print(
+                    dash_debug_print(
                         f"DEBUG: Failed to remove temp file '{tmp_path}': {cleanup_error}"
                     )
             state["front_photo"]["original_tmp_path"] = None
@@ -83,7 +84,7 @@ def register_photo_callbacks(app):
                 }
             )
             message = ""
-            print("DEBUG handle_front_photo: photo skipped")
+            dash_debug_print("DEBUG handle_front_photo: photo skipped")
 
             if not is_quick:
                 nav_path = "/register/review"
@@ -144,12 +145,12 @@ def register_photo_callbacks(app):
                     "status": "captured",
                 }
             )
-            print(
+            dash_debug_print(
                 f"DEBUG handle_front_photo: photo captured, new status={state['front_photo']['status']}"
             )
 
-            print("DEBUG: Preparing vision payload for asynchronous processing...")
-            print(f"DEBUG: Image contents length: {len(contents) if contents else 0}")
+            dash_debug_print("DEBUG: Preparing vision payload for asynchronous processing...")
+            dash_debug_print(f"DEBUG: Image contents length: {len(contents) if contents else 0}")
 
             api_contents = contents
             vision_raw = None
@@ -190,7 +191,7 @@ def register_photo_callbacks(app):
                     except Exception as preview_error:
                         preview_bytes = None
                         display_data_url = contents
-                        print(
+                        dash_debug_print(
                             f"DEBUG: Failed to generate preview image: {preview_error}"
                         )
                     finally:
@@ -210,7 +211,7 @@ def register_photo_callbacks(app):
                         reduced_bytes_for_vision = vision_buffer.getvalue()
                         vision_image.close()
                     except Exception as reduce_error:
-                        print(
+                        dash_debug_print(
                             f"DEBUG: Failed to reduce image for vision payload: {reduce_error}"
                         )
                     finally:
@@ -226,7 +227,7 @@ def register_photo_callbacks(app):
                             tmp_file.write(original_bytes)
                             temp_file_path = tmp_file.name
                     except Exception as tmp_error:
-                        print(
+                        dash_debug_print(
                             f"DEBUG: Failed to persist original photo to temp file: {tmp_error}"
                         )
                     state["front_photo"]["original_tmp_path"] = temp_file_path
@@ -235,7 +236,7 @@ def register_photo_callbacks(app):
                         "utf-8"
                     )
                     api_contents = f"data:image/jpeg;base64,{vision_raw}"
-                    print(
+                    dash_debug_print(
                         f"DEBUG: Vision payload prepared (len={len(api_contents)} bytes, reduced resolution)"
                     )
 
@@ -244,7 +245,7 @@ def register_photo_callbacks(app):
                     del reduced_bytes_for_vision
                     gc.collect()
                 except Exception as resize_error:
-                    print(f"DEBUG: Vision payload preparation failed: {resize_error}")
+                    dash_debug_print(f"DEBUG: Vision payload preparation failed: {resize_error}")
                     api_contents = contents
                     vision_raw = None
                 finally:
@@ -255,7 +256,7 @@ def register_photo_callbacks(app):
             # goods_full と goods_quick で処理を分岐
             if not is_quick:
                 # 画像アップロード時にタグ生成フローを開始（非同期処理に移行）
-                print(
+                dash_debug_print(
                     f"DEBUG: Tag generation marked as loading - lookup items: {len(state['lookup'].get('items', []))}, photo uploaded: True"
                 )
                 state["front_photo"]["description"] = None
@@ -299,11 +300,11 @@ def register_photo_callbacks(app):
 
                 cards = [preview_card]
                 message = html.Div(cards)
-                print(
+                dash_debug_print(
                     f"DEBUG handle_front_photo: photo processing started, status={state['front_photo']['status']}"
                 )
 
-                print("DEBUG handle_front_photo: photo uploaded successfully")
+                dash_debug_print("DEBUG handle_front_photo: photo uploaded successfully")
                 nav_path = "/register/review"
             else:
                 # goods_quick: ここで即保存（タグ生成はスキップ）
@@ -335,7 +336,7 @@ def register_photo_callbacks(app):
                 nav_path = no_update
                 return result_state, message, nav_path
 
-        print(f"DEBUG handle_front_photo: returning nav_path={nav_path}")
+        dash_debug_print(f"DEBUG handle_front_photo: returning nav_path={nav_path}")
         return serialise_state(state), message, nav_path
 
 

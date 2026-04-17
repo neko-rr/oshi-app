@@ -1,7 +1,9 @@
 import uuid
 import os
+import time
+import threading
 import requests
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Tuple
 
 from supabase import Client
 
@@ -12,6 +14,31 @@ except Exception:  # pragma: no cover
     has_app_context = lambda: False  # type: ignore
 
 from services.supabase_client import SUPABASE_URL, PUBLISHABLE_KEY
+from services.debug_log import dash_debug_print
+
+# 署名 URL のプロセス内キャッシュ（A2: members_id + object_path、短 TTL）
+_SIGN_CACHE_TTL_SEC = 90.0
+_sign_cache_lock = threading.Lock()
+_signed_url_cache: Dict[Tuple[str, str], Tuple[str, float]] = {}
+
+# ギャラリー一覧用 select（* より転送量を抑える）
+_GALLERY_PRODUCT_SELECT = """
+    registration_product_id,
+    product_name,
+    product_group_name,
+    works_series_name,
+    title,
+    character_name,
+    memo,
+    barcode_number,
+    photo_id,
+    photo(
+        photo_thumbnail_url,
+        photo_high_resolution_url,
+        front_flag,
+        photo_theme_color
+    )
+"""
 
 
 def _current_members_id() -> Optional[str]:
@@ -90,9 +117,9 @@ def list_storage_buckets(supabase: Client) -> None:
     """List all storage buckets for debugging"""
     try:
         buckets = supabase.storage.list_buckets()
-        print(f"DEBUG: Available buckets: {[b['name'] for b in buckets]}")
+        dash_debug_print(f"DEBUG: Available buckets: {[b['name'] for b in buckets]}")
     except Exception as e:
-        print(f"DEBUG: Failed to list buckets: {e}")
+        dash_debug_print(f"DEBUG: Failed to list buckets: {e}")
 
 
 def upload_to_storage(
@@ -117,11 +144,38 @@ def upload_to_storage(
             file_bytes,
             file_options={"content-type": content_type or f"image/{file_ext}"},
         )
-        print(f"DEBUG: Upload successful, object_path={object_path}")
+        dash_debug_print(f"DEBUG: Upload successful, object_path={object_path}")
         return object_path
     except Exception as exc:
-        print(f"DEBUG: Upload failed: {exc}")
+        dash_debug_print(f"DEBUG: Upload failed: {exc}")
         raise
+
+
+def _sign_cache_key(members_id: Optional[str], object_path: str) -> Optional[Tuple[str, str]]:
+    if not members_id or not object_path:
+        return None
+    return (str(members_id), str(object_path).lstrip("/"))
+
+
+def _sign_cache_get(key: Tuple[str, str]) -> Optional[str]:
+    now = time.monotonic()
+    with _sign_cache_lock:
+        entry = _signed_url_cache.get(key)
+        if not entry:
+            return None
+        url, exp = entry
+        if exp < now:
+            del _signed_url_cache[key]
+            return None
+        return url
+
+
+def _sign_cache_set(key: Tuple[str, str], url: str) -> None:
+    exp = time.monotonic() + _SIGN_CACHE_TTL_SEC
+    with _sign_cache_lock:
+        if len(_signed_url_cache) > 4096:
+            _signed_url_cache.clear()
+        _signed_url_cache[key] = (url, exp)
 
 
 def create_signed_url_for_object(
@@ -139,6 +193,12 @@ def create_signed_url_for_object(
     if not access_token:
         return None
 
+    ck = _sign_cache_key(_current_members_id(), object_path)
+    if ck:
+        cached = _sign_cache_get(ck)
+        if cached:
+            return cached
+
     url = f"{SUPABASE_URL}/storage/v1/object/sign/photos/{object_path.lstrip('/')}"
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -149,11 +209,17 @@ def create_signed_url_for_object(
     try:
         resp = requests.post(url, json=payload, headers=headers, timeout=10)
         if resp.status_code >= 400:
-            print(f"DEBUG: create_signed_url failed: {resp.status_code} {resp.text}")
+            # 署名 URL 全文はログに出さない（レスポンス本文は短く切る）
+            body = (resp.text or "")[:240]
+            dash_debug_print(
+                f"DEBUG: create_signed_url failed: status={resp.status_code} body={body!r}"
+            )
             return None
         data = resp.json() or {}
         signed = data.get("signedURL") or data.get("signedUrl") or data.get("signed_url")
         if signed and signed.startswith("http"):
+            if ck:
+                _sign_cache_set(ck, signed)
             return signed
         if signed:
             # relative -> make absolute
@@ -163,10 +229,13 @@ def create_signed_url_for_object(
             elif not signed.startswith("/storage/"):
                 # 念のため、想定外の相対パスは storage/v1 配下に寄せる
                 signed = f"/storage/v1{signed if signed.startswith('/') else '/' + signed}"
-            return f"{SUPABASE_URL}{signed}"
+            out = f"{SUPABASE_URL}{signed}"
+            if ck:
+                _sign_cache_set(ck, out)
+            return out
         return None
     except Exception as exc:
-        print(f"DEBUG: create_signed_url exception: {exc}")
+        dash_debug_print(f"DEBUG: create_signed_url exception: {exc}")
         return None
 
 
@@ -281,24 +350,27 @@ def delete_all_products(supabase: Client) -> None:
         raise RuntimeError(f"製品削除に失敗しました: {response.error}")
 
 
-def get_all_products(supabase: Client):
-    """Get all products from registration_product_information table with photo data"""
+def get_products_page(
+    supabase: Client,
+    *,
+    limit: int = 48,
+    offset: int = 0,
+) -> List[Dict[str, Any]]:
+    """
+    ギャラリー用: 1 ページ分のみ取得し、その行にだけ署名 URL を付与する（A1）。
+    """
     members_id = _current_members_id()
-    if not members_id:
+    if not members_id or supabase is None:
         return []
+    if limit <= 0:
+        return []
+    end = offset + limit - 1
     response = (
         supabase.table("registration_product_information")
-        .select("""
-            *,
-            photo(
-                photo_thumbnail_url,
-                photo_high_resolution_url,
-                front_flag,
-                photo_theme_color
-            )
-        """)
+        .select(_GALLERY_PRODUCT_SELECT)
         .eq("members_id", members_id)
         .order("creation_date", desc=True)
+        .range(offset, end)
         .execute()
     )
     if getattr(response, "error", None):
@@ -307,8 +379,59 @@ def get_all_products(supabase: Client):
     return _with_signed_photo_urls(supabase, data)
 
 
+def get_all_products(supabase: Client):
+    """
+    全件取得（互換・デモ用）。件数が多いと署名コストが高いため、UI は get_products_page を推奨。
+    """
+    return get_products_page(supabase, limit=10_000, offset=0)
+
+
+def _get_product_stats_fallback(supabase: Client, members_id: str) -> Dict[str, Any]:
+    """RPC 未適用 DB 向けの軽量フォールバック（件数は head、ユニークは barcode のみ列で取得）。"""
+    total_resp = (
+        supabase.table("registration_product_information")
+        .select("registration_product_id", count="exact", head=True)
+        .eq("members_id", members_id)
+        .execute()
+    )
+    total = int(getattr(total_resp, "count", None) or 0)
+
+    photos_resp = (
+        supabase.table("registration_product_information")
+        .select("registration_product_id", count="exact", head=True)
+        .eq("members_id", members_id)
+        .not_.is_("photo_id", "null")
+        .execute()
+    )
+    total_photos = int(getattr(photos_resp, "count", None) or 0)
+
+    bc_resp = (
+        supabase.table("registration_product_information")
+        .select("barcode_number")
+        .eq("members_id", members_id)
+        .execute()
+    )
+    bc_rows = bc_resp.data if hasattr(bc_resp, "data") else []
+    unique_barcodes = len(
+        {
+            str(r.get("barcode_number")).strip()
+            for r in bc_rows or []
+            if isinstance(r, dict)
+            and r.get("barcode_number") is not None
+            and str(r.get("barcode_number")).strip() != ""
+        }
+    )
+
+    return {
+        "total": total,
+        "unique": unique_barcodes,
+        "total_photos": total_photos,
+        "unique_barcodes": unique_barcodes,
+    }
+
+
 def get_product_stats(supabase: Client):
-    """Get product statistics from registration_product_information table"""
+    """registration_product_information の集計（可能なら DB 側 RPC で全行取得を避ける）。"""
     members_id = _current_members_id()
     if supabase is None or not members_id:
         return {
@@ -318,48 +441,31 @@ def get_product_stats(supabase: Client):
             "unique_barcodes": 0,
         }
 
-    # registration_product_information の総件数
-    total_response = (
-        supabase.table("registration_product_information")
-        .select("photo_id,barcode_number")
-        .eq("members_id", members_id)
-        .execute()
-    )
-    total_rows = total_response.data if hasattr(total_response, "data") else []
+    try:
+        rpc = supabase.rpc("app_registration_product_stats").execute()
+        rows = rpc.data if hasattr(rpc, "data") else None
+        if isinstance(rows, dict):
+            rows = [rows]
+        if rows and isinstance(rows, list) and isinstance(rows[0], dict):
+            row = rows[0]
+            ub = int(row.get("unique_barcodes") or 0)
+            return {
+                "total": int(row.get("total") or 0),
+                "unique": ub,
+                "total_photos": int(row.get("total_photos") or 0),
+                "unique_barcodes": ub,
+            }
+    except Exception:
+        pass
 
-    # 写真付き登録件数 (photo_id が NULL でないもの)
-    total_photos = len(
-        [
-            row
-            for row in total_rows
-            if row is not None and row.get("photo_id") not in (None, "")
-        ]
-    )
-
-    # ユニークバーコード（空文字/None除外）
-    unique_barcodes = len(
-        {
-            row.get("barcode_number")
-            for row in total_rows
-            if row is not None and row.get("barcode_number")
-        }
-    )
-
-    # 互換性維持のため従来キーも併記
-    return {
-        "total": len(total_rows),
-        "unique": unique_barcodes,
-        "total_photos": total_photos,
-        "unique_barcodes": unique_barcodes,
-    }
+    return _get_product_stats_fallback(supabase, str(members_id))
 
 
 def get_random_product_with_photo(
     supabase: Client, sample_size: int = 50
 ) -> Optional[Dict[str, Any]]:
     """
-    registration_product_information から photo を含む行を最大 sample_size 件取得し、
-    写真URLを持つものからランダムに1件返す。
+    候補は最大 sample_size 件を未署名で取得し、ランダムに 1 件選んでから署名する（ホーム負荷軽減）。
     """
     if supabase is None:
         return None
@@ -372,12 +478,14 @@ def get_random_product_with_photo(
         supabase.table("registration_product_information")
         .select(
             """
-            *,
+            registration_product_id,
+            product_name,
+            barcode_number,
             photo(
                 photo_thumbnail_url,
                 photo_high_resolution_url
             )
-        """
+            """
         )
         .eq("members_id", members_id)
         .order("creation_date", desc=True)
@@ -385,8 +493,7 @@ def get_random_product_with_photo(
         .execute()
     )
     rows = response.data if hasattr(response, "data") else []
-    rows = _with_signed_photo_urls(supabase, rows)
-    candidates = []
+    candidates: List[Dict[str, Any]] = []
     for row in rows or []:
         if not isinstance(row, dict):
             continue
@@ -408,4 +515,8 @@ def get_random_product_with_photo(
 
     import random
 
-    return random.choice(candidates)
+    chosen = random.choice(candidates)
+    signed_list = _with_signed_photo_urls(supabase, [chosen])
+    if signed_list and isinstance(signed_list[0], dict):
+        return signed_list[0]
+    return chosen

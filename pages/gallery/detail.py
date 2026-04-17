@@ -31,7 +31,7 @@ def _render_error(message: str) -> html.Div:
                 className="btn btn-outline-primary btn-sm mt-3",
             ),
         ],
-        className="card p-4 mb-4",
+        className="card-main-danger mb-4",
     )
 
 
@@ -141,7 +141,7 @@ def _render_detail_card(record: dict, back_view: str, supabase) -> html.Div:
                 className="row g-4 align-items-start",
             ),
         ],
-        className="card p-4 mb-4",
+        className="card-main-secondary mb-4",
     )
 
 
@@ -185,9 +185,16 @@ def render_detail_page(search: str) -> html.Div:
 @callback(
     Output("gallery-detail-root", "children"),
     Input("_pages_location", "search"),
+    State("_pages_location", "pathname"),
 )
-def _on_query_change(search):
+def _on_query_change(search, pathname):
+    # 詳細ページ以外・クエリ未確定では描画しない（空クエリの無駄往復と DB 試行を抑止）
+    if pathname != "/gallery/detail":
+        raise PreventUpdate
     if search is None:
+        raise PreventUpdate
+    pid, _ = _read_query(search)
+    if not pid:
         raise PreventUpdate
     return render_detail_page(search)
 

@@ -28,7 +28,7 @@
   - テーマ：[IO intelligence×AIで創る社会課題解決プロダクト](https://osaka-ai-hackathon.connpass.com/event/366856/)
 - **目的**: グッズ登録を「撮影・スキャン中心」にし、入力負担を下げつつ、登録データを分析可能な形で蓄積する。
 - **データの流れ**: バーコード → 楽天 API 照合（正規化済み商品情報）、写真 → Vision（画像説明・構造化）→ タグ抽出 → Supabase（DB + Storage）に保存。欠損時もフォールバックで登録を継続できる設計。
-- **データ設計**: DB は `owner_id`（= `auth.uid()`）で行レベル分離（RLS）。Storage は Private バケットで object path を保存し、表示時のみ signed URL を発行。時系列・タグ・価格・作品情報などを将来のダッシュボード・分析に利用しやすいスキーマ。
+- **データ設計**: DB は `members_id`（= `auth.uid()`）で行レベル分離（RLS）。Storage は Private バケットで object path を保存し、表示時のみ signed URL を発行。時系列・タグ・価格・作品情報などを将来のダッシュボード・分析に利用しやすいスキーマ。
 - **認証・運用**: Supabase Auth（Google OAuth、app_state + PKCE）、セッションは HttpOnly Cookie。Docker で Render にデプロイ可能。
 
 ---
@@ -137,7 +137,7 @@
 
 ## 3. データ設計（分析の土台）
 
-- **主要エンティティ**: `photo`（サムネ・高解像の object path）、`registration_product_information`（製品情報・バーコード・価格・タグ・日付など）、`color_tag` / `category_tag`（ユーザー定義タグ）、`theme_settings`（テーマ永続化）。いずれも `owner_id`（= `auth.uid()`）でユーザー分離。
+- **主要エンティティ**: `photo`（サムネ・高解像の object path）、`registration_product_information`（製品情報・バーコード・価格・タグ・日付など）、`color_tag` / `category_tag`（ユーザー定義タグ）、`theme_settings`（テーマ永続化）。いずれも `members_id`（= `auth.uid()`）でユーザー分離。
   - 【現状】ユーザー別のタグは、複数種類考えているが、デモ状態のままの物多数
 - **保存方針**: 画像は Storage の **object path**（例: `{members_id}/{uuid}.jpg`）のみ DB に保存。公開 URL は保存せず、表示時に **signed URL** を発行（[services/photo_service.py](services/photo_service.py) の `create_signed_url_for_object`）。
 - **RLS**: [supabase/sql/owner_rls_setup.sql](supabase/sql/owner_rls_setup.sql) で `registration_product_information`, `photo`, `theme_settings`, `color_tag`, `category_tag` に RLS を有効化し、自分の行のみ select/insert/update/delete。
@@ -149,7 +149,7 @@
 ## 4. セキュリティ・マルチテナント
 
 - **認証**: Supabase Auth。Google OAuth は app_state を Cookie に持ち、PKCE で code 交換。セッションは HttpOnly Cookie に保存。`localhost` と `127.0.0.1` を混在させない（Cookie 不整合の原因）。
-- **DB**: 全テーブルに `owner_id` を付与し、RLS で `owner_id = auth.uid()` の行のみアクセス可能。
+- **DB**: 全テーブルに `members_id` を付与し、RLS で `members_id = auth.uid()` の行のみアクセス可能。
 - **Storage**: `photos` バケットは Private。アップロードは `{members_id}/{uuid}.ext`。取得・表示は signed URL のみ。
 
 ---

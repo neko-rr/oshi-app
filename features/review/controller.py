@@ -1,12 +1,13 @@
 import os
 import base64
 from typing import Any, Dict, List, Optional
-from dash import html, Input, Output, State
+from dash import html, Input, Output, State, callback_context
 from PIL import Image
 import io
 
 from components.state_utils import ensure_state
 from services.io_intelligence import describe_image
+from services.debug_log import dash_debug_print
 
 
 def _render_tags_card(tag_result: Dict[str, Any]) -> html.Div:
@@ -54,13 +55,24 @@ def _render_tags_card(tag_result: Dict[str, Any]) -> html.Div:
 
 def register_review_callbacks(app):
     @app.callback(
-        Output("color-tag-select", "value"),
+        [
+            Output("color-tag-select", "value"),
+            Output("io-intelligence-interval", "disabled"),
+            Output("save-button", "disabled"),
+        ],
         Input("registration-store", "data"),
         prevent_initial_call=False,
     )
-    def _sync_color_tag_select(store_data):
+    def _review_store_lightweight_ui(store_data):
+        """store 由来の軽量 UI 同期を1往復にまとめる（セキュリティ: 重い処理は入れない）。"""
         state = ensure_state(store_data)
-        return state.get("color_tags", {}).get("selected_slots", []) or []
+        color_val = state.get("color_tags", {}).get("selected_slots", []) or []
+        tags_status = state.get("tags", {}).get("status")
+        interval_disabled = tags_status != "loading"
+        barcode_ready = state["barcode"]["status"] in {"captured", "manual", "skipped"}
+        photo_ready = state["front_photo"]["status"] in {"captured", "skipped"}
+        save_disabled = not (barcode_ready or photo_ready)
+        return color_val, interval_disabled, save_disabled
 
     @app.callback(
         Output("registration-store", "data", allow_duplicate=True),
@@ -83,27 +95,35 @@ def register_review_callbacks(app):
     @app.callback(
         Output("review-summary", "children"),
         [
-            Input("product-name-input", "value"),
-            Input("product-shape-input", "value"),
-            Input("works-series-name-input", "value"),
-            Input("works-name-input", "value"),
-            Input("character-name-input", "value"),
-            Input("purchase-price-input", "value"),
-            Input("note-editor", "value"),
-            Input("other-tags-checklist", "value"),
+            Input("review-summary-refresh", "n_clicks"),
             Input("registration-store", "data"),
+        ],
+        [
+            State("product-name-input", "value"),
+            State("product-size-width-input", "value"),
+            State("product-size-depth-input", "value"),
+            State("product-size-height-input", "value"),
+            State("works-series-name-input", "value"),
+            State("works-name-input", "value"),
+            State("character-name-input", "value"),
+            State("purchase-price-input", "value"),
+            State("note-editor", "value"),
+            State("other-tags-checklist", "value"),
         ],
     )
     def render_review_summary(
+        _n_refresh,
+        store_data,
         product_name,
-        product_shape,
+        size_w,
+        size_d,
+        size_h,
         works_series_name,
         works_name,
         character_name,
         purchase_price,
         note_text,
         other_tags,
-        store_data,
     ):
         from components.ui_components import _render_lookup_card
 
@@ -119,7 +139,11 @@ def register_review_callbacks(app):
 
         # フォームからの情報を使用
         display_product_name = product_name or "未入力"
-        display_product_shape = product_shape or "未入力"
+        shape_parts = []
+        for label, val in (("横", size_w), ("奥", size_d), ("高", size_h)):
+            if val not in (None, ""):
+                shape_parts.append(f"{label}{val}mm")
+        display_product_shape = ", ".join(shape_parts) if shape_parts else "未入力"
         display_works_series = works_series_name or "未入力"
         display_works = works_name or "未入力"
         display_character = character_name or "未入力"
@@ -175,10 +199,10 @@ def register_review_callbacks(app):
     )
     def update_photo_thumbnail(store_data):
         """レビュー画面で写真サムネールを表示"""
-        print("DEBUG: update_photo_thumbnail called")
+        dash_debug_print("DEBUG: update_photo_thumbnail called")
 
         if not store_data:
-            print("DEBUG: No store data")
+            dash_debug_print("DEBUG: No store data")
             return ""
 
         state = ensure_state(store_data)
@@ -187,7 +211,7 @@ def register_review_callbacks(app):
         if front_photo.get("content"):
             # Base64エンコードされた画像データを直接使用
             content = front_photo["content"]
-            print(f"DEBUG: Photo content found, length: {len(content)}")
+            dash_debug_print(f"DEBUG: Photo content found, length: {len(content)}")
 
             try:
                 # Base64データをデコードして画像を処理
@@ -204,12 +228,12 @@ def register_review_callbacks(app):
 
                 # PILで画像を開く
                 image = Image.open(io.BytesIO(image_data))
-                print(f"DEBUG: Original image size: {image.size}, mode: {image.mode}")
+                dash_debug_print(f"DEBUG: Original image size: {image.size}, mode: {image.mode}")
 
                 # サムネール用にリサイズ（最大200x200に収まるように）
                 max_size = (200, 200)
                 image.thumbnail(max_size, Image.LANCZOS)
-                print(f"DEBUG: Resized image size: {image.size}")
+                dash_debug_print(f"DEBUG: Resized image size: {image.size}")
 
                 # RGBモードに変換（JPEG保存のため）
                 if image.mode != "RGB":
@@ -223,11 +247,11 @@ def register_review_callbacks(app):
                 )
                 resized_content = f"data:image/jpeg;base64,{resized_base64}"
 
-                print(f"DEBUG: Resized data URL length: {len(resized_content)}")
+                dash_debug_print(f"DEBUG: Resized data URL length: {len(resized_content)}")
 
                 # 最終チェック：500KB以内に収まるか
                 if len(resized_content) > 512 * 1024:  # 512KB
-                    print(
+                    dash_debug_print(
                         f"DEBUG: Resized image still too large ({len(resized_content)} bytes), skipping display"
                     )
                     return ""
@@ -235,32 +259,36 @@ def register_review_callbacks(app):
                 return resized_content
 
             except Exception as e:
-                print(f"DEBUG: Image processing error: {e}")
+                dash_debug_print(f"DEBUG: Image processing error: {e}")
                 # エラーが発生した場合は元のコンテンツを返す（フォールバック）
                 # ただしサイズチェックは行う
                 if len(content) > 512 * 1024:  # 512KB
-                    print(
+                    dash_debug_print(
                         f"DEBUG: Original image too large ({len(content)} bytes), skipping display"
                     )
                     return ""
                 return content
         else:
-            print("DEBUG: No photo content")
+            dash_debug_print("DEBUG: No photo content")
             return ""
 
     @app.callback(
         Output("registration-store", "data", allow_duplicate=True),
-        Input("registration-store", "data"),
+        [
+            Input("io-intelligence-interval", "n_intervals"),
+            Input("registration-store", "data"),
+        ],
         prevent_initial_call="initial_duplicate",
     )
-    def process_tags(store_data):
-        print(f"DEBUG: process_tags called")
+    def process_tags(_n_intervals, store_data):
+        dash_debug_print("DEBUG: process_tags called")
         state = ensure_state(store_data)
         tags_status = state["tags"].get("status")
-        print(f"DEBUG: tags status: {tags_status}")
+        dash_debug_print(f"DEBUG: tags status: {tags_status}")
 
+        # store の更新は頻繁なため、タグ処理が不要なときは即座に止める
         if tags_status != "loading":
-            print("DEBUG: process_tags skipping - status is not loading")
+            dash_debug_print("DEBUG: process_tags skipping - status is not loading")
             from dash.exceptions import PreventUpdate
 
             raise PreventUpdate
@@ -268,10 +296,21 @@ def register_review_callbacks(app):
         front_photo = state.get("front_photo", {})
         photo_status = front_photo.get("status")
         description_status = front_photo.get("description_status", "idle")
+        tags_state = state.setdefault("tags", {})
+        processing_lock = bool(tags_state.get("processing_lock"))
+
+        # 同一loadingサイクルでの重複処理を抑制
+        if processing_lock and description_status == "processing":
+            dash_debug_print("DEBUG: process_tags skipped due to processing_lock")
+            from dash.exceptions import PreventUpdate
+
+            raise PreventUpdate
+
+        tags_state["processing_lock"] = True
 
         # 1. 必要であれば画像説明を生成
         if photo_status == "captured" and description_status == "pending":
-            print("DEBUG: process_tags generating image description asynchronously")
+            dash_debug_print("DEBUG: process_tags generating image description asynchronously")
             state["front_photo"]["description_status"] = "processing"
             vision_source = front_photo.get("vision_source") or front_photo.get(
                 "content"
@@ -282,7 +321,7 @@ def register_review_callbacks(app):
                 description_result = describe_image(
                     vision_source, raw_base64=vision_raw
                 )
-                print(
+                dash_debug_print(
                     f"DEBUG: describe_image result status: {description_result.get('status')}"
                 )
                 selected_text = (
@@ -291,14 +330,14 @@ def register_review_callbacks(app):
                     or ""
                 )
                 desc_len = len(selected_text)
-                print(f"DEBUG: describe_image description_len: {desc_len}")
+                dash_debug_print(f"DEBUG: describe_image description_len: {desc_len}")
             except Exception as io_error:
-                print(
+                dash_debug_print(
                     f"DEBUG: describe_image raised exception inside process_tags: {io_error}"
                 )
                 import traceback
 
-                print(f"DEBUG: Full traceback: {traceback.format_exc()}")
+                dash_debug_print(f"DEBUG: Full traceback: {traceback.format_exc()}")
 
                 state["front_photo"]["description"] = None
                 state["front_photo"]["model_used"] = None
@@ -306,12 +345,13 @@ def register_review_callbacks(app):
                 state["front_photo"]["description_status"] = "error"
                 state["tags"]["status"] = "error"
                 state["tags"]["message"] = f"画像説明生成エラー: {str(io_error)}"
+                state["tags"]["processing_lock"] = False
                 from services.state_utils import serialise_state
 
                 return serialise_state(state)
 
             if description_result.get("status") == "success":
-                print("DEBUG: Description generation successful")
+                dash_debug_print("DEBUG: Description generation successful")
                 state["front_photo"]["description"] = (
                     description_result.get("text")
                     or description_result.get("description")
@@ -324,12 +364,12 @@ def register_review_callbacks(app):
                     "structured_data"
                 )
                 state["front_photo"]["description_status"] = "done"
-                print(
+                dash_debug_print(
                     "DEBUG: front_photo.description_status=done, stored_description_len="
                     f"{len(state['front_photo'].get('description') or '')}"
                 )
             else:
-                print(f"DEBUG: Description generation failed: {description_result}")
+                dash_debug_print(f"DEBUG: Description generation failed: {description_result}")
                 state["front_photo"]["description"] = None
                 state["front_photo"]["model_used"] = None
                 state["front_photo"]["structured_data"] = None
@@ -338,22 +378,14 @@ def register_review_callbacks(app):
         # 2. タグ生成を更新
         from services.tag_service import _update_tags
 
-        print("DEBUG: Calling _update_tags from process_tags")
+        dash_debug_print("DEBUG: Calling _update_tags from process_tags")
         _update_tags(state)
+        final_status = state.get("tags", {}).get("status")
+        if final_status != "loading":
+            state["tags"]["processing_lock"] = False
         result = ensure_state(state)
-        print("DEBUG: process_tags completed")
+        dash_debug_print("DEBUG: process_tags completed")
         return result
-
-    @app.callback(
-        Output("save-button", "disabled"), Input("registration-store", "data")
-    )
-    def toggle_save_button(data):
-        state = ensure_state(data)
-        barcode_ready = state["barcode"]["status"] in {"captured", "manual", "skipped"}
-        photo_ready = state["front_photo"]["status"] in {"captured", "skipped"}
-
-        disabled = not (barcode_ready or photo_ready)
-        return disabled
 
     @app.callback(
         [
@@ -476,8 +508,8 @@ def register_review_callbacks(app):
     )
     def display_api_results(store_data, pathname):
         """レビュー画面で楽天APIとIO Intelligenceの結果を表示"""
-        print(f"DEBUG: display_api_results called")
-        print(
+        dash_debug_print("DEBUG: display_api_results called")
+        dash_debug_print(
             f"DEBUG: store_data keys: {list(store_data.keys()) if store_data else 'None'}"
         )
 
@@ -507,7 +539,7 @@ def register_review_callbacks(app):
     def trigger_auto_fill_on_page_change(pathname):
         """ページ遷移時に自動反映をトリガー"""
         if pathname == "/register/review":
-            print("DEBUG: Triggering auto-fill for review page")
+            dash_debug_print("DEBUG: Triggering auto-fill for review page")
             return "trigger"  # トリガー
         return ""
 
@@ -528,17 +560,17 @@ def register_review_callbacks(app):
     )
     def auto_fill_form_from_tags(trigger, store_data, pathname):
         """STEP4でページ遷移後にタグから自動でフォームを埋める"""
-        print(
+        dash_debug_print(
             f"DEBUG: auto_fill_form_from_tags called (trigger: {trigger}, pathname: {pathname})"
         )
 
         # STEP4のページのみ処理
         if pathname != "/register/review" or not trigger:
-            print("DEBUG: Not on register page or no trigger, skipping")
+            dash_debug_print("DEBUG: Not on register page or no trigger, skipping")
             return [""] * 7
 
         if not store_data:
-            print("DEBUG: No store data")
+            dash_debug_print("DEBUG: No store data")
             return [""] * 7
 
         state = ensure_state(store_data)
@@ -546,22 +578,22 @@ def register_review_callbacks(app):
         # 写真データがあるか確認
         front_photo = state.get("front_photo", {})
         if not front_photo.get("content"):
-            print("DEBUG: No photo content, skipping auto-fill")
+            dash_debug_print("DEBUG: No photo content, skipping auto-fill")
             return [""] * 7
 
         # IO Intelligenceタグがあるか確認
         tags_data = state.get("tags", {})
         if not tags_data.get("tags") or not isinstance(tags_data["tags"], list):
-            print("DEBUG: No IO Intelligence tags")
+            dash_debug_print("DEBUG: No IO Intelligence tags")
             return [""] * 7
 
         # すでに自動反映済みかチェック
         if state.get("auto_filled", False):
-            print("DEBUG: Already auto-filled")
+            dash_debug_print("DEBUG: Already auto-filled")
             return [""] * 7
 
         tags = tags_data["tags"][:10]  # 最大10個のタグを使用
-        print(f"DEBUG: Processing {len(tags)} tags: {tags}")
+        dash_debug_print(f"DEBUG: Processing {len(tags)} tags: {tags}")
 
         # デフォルト値
         product_group_name = ""
@@ -654,7 +686,7 @@ def register_review_callbacks(app):
         if memo_tags:
             memo = f"特徴: {', '.join(memo_tags)}"
 
-        print(
+        dash_debug_print(
             f"DEBUG: Auto-filled - product_group: '{product_group_name}', works_series: '{works_series_name}', works: '{works_name}', character: '{character_name}', memo: '{memo}', other_tags: {[t.get('value') for t in other_tags]}"
         )
 

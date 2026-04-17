@@ -199,6 +199,9 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-top: 20px;
+  /* 画面外タイルのレイアウト負荷を抑える（非対応ブラウザでは無視される） */
+  content-visibility: auto;
+  contain-intrinsic-size: 240px 800px;
 }
 
 .photo-card {

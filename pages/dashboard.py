@@ -105,13 +105,20 @@ def render_dashboard() -> html.Div:
                 value=False,
                 className="mb-2",
             ),
+            html.Button(
+                "グラフを表示（Plotly を読み込みます）",
+                id="dashboard-show-chart",
+                className="btn btn-outline-primary btn-sm mb-2",
+                n_clicks=0,
+            ),
             dcc.Store(id="dashboard-storage-chart-data", data=storage_chart_data),
-            dcc.Graph(
-                id="dashboard-storage-chart",
-                figure=create_storage_location_chart_from_data(storage_chart_data, False),
-                config={"displayModeBar": False, "responsive": True, "autosizable": True},
-                className="border rounded w-100",
-                style={"height": "320px"},
+            html.Div(
+                html.P(
+                    "ボタンを押すとグラフが表示されます（未表示時は Plotly を読み込みません）。",
+                    className="text-muted small mb-0",
+                ),
+                id="dashboard-graph-slot",
+                className="w-100",
             ),
         ],
         className="card p-4 mb-4",
@@ -121,12 +128,28 @@ def render_dashboard() -> html.Div:
 
 
 @callback(
-    Output("dashboard-storage-chart", "figure"),
+    Output("dashboard-graph-slot", "children"),
+    Input("dashboard-show-chart", "n_clicks"),
     Input("dashboard-surplus-toggle", "value"),
     State("dashboard-storage-chart-data", "data"),
+    prevent_initial_call=True,
 )
-def _update_dashboard_storage_chart(show_surplus: bool, data: dict):
-    return create_storage_location_chart_from_data(data, bool(show_surplus))
+def _dashboard_chart_slot(n_clicks, show_surplus, data: dict):
+    """Plotly は「表示」クリック後にのみマウント。スイッチ変更で再描画する。"""
+    if not n_clicks:
+        return html.P(
+            "ボタンを押すとグラフが表示されます（未表示時は Plotly を読み込みません）。",
+            className="text-muted small mb-0",
+        )
+    data = data or {}
+    fig = create_storage_location_chart_from_data(data, bool(show_surplus))
+    return dcc.Graph(
+        id="dashboard-storage-chart",
+        figure=fig,
+        config={"displayModeBar": False, "responsive": True, "autosizable": True},
+        className="border rounded w-100",
+        style={"height": "320px"},
+    )
 
 
 register_page(
@@ -141,5 +164,3 @@ except Exception as e:
     layout = html.Div(
         f"Dashboard page error: {str(e)}", style={"color": "red", "padding": "20px"}
     )
-
-

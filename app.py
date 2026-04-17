@@ -7,6 +7,7 @@ from components.theme_utils import load_theme, get_bootswatch_css
 from components.layout import _build_navigation
 from components.state_utils import empty_registration_state
 from services.supabase_client import get_supabase_client
+from services.debug_log import dash_debug_print
 
 # Load environment variables EARLY so services read correct .env (models, flags)
 try:
@@ -16,11 +17,9 @@ try:
     project_root = os.path.dirname(os.path.abspath(__file__))
     dotenv_path = os.path.join(project_root, ".env")
     load_dotenv(dotenv_path=dotenv_path, override=False)
-    print("DEBUG: Early .env loaded before services imports")
+    dash_debug_print("DEBUG: Early .env loaded before services imports")
 except Exception as _early_env_err:
-    print(f"DEBUG: Early .env load skipped: {_early_env_err}")
-
-supabase = get_supabase_client()
+    dash_debug_print(f"DEBUG: Early .env load skipped: {_early_env_err}")
 
 
 # UIレンダリング関数は components/ui_components.py に移動
@@ -69,29 +68,19 @@ def create_app(server=None) -> dash.Dash:
     register_theme_callbacks(app)
     register_color_tag_callbacks(app)
 
-    # /register への直接アクセスを /register/select にリダイレクト
-    @app.callback(
-        Output("_pages_location", "pathname", allow_duplicate=True),
-        Input("_pages_location", "pathname"),
-    )
-    def _redirect_register(pathname):
-        if pathname == "/register":
-            return "/register/select"
-        if pathname in {"/register/barcode", "/register/select"}:
-            raise PreventUpdate
-        raise PreventUpdate
-
-    # /register/barcode に外部から入ったときだけ registration-store を初期化
+    # /register/barcode に外部から入ったときだけ registration-store を初期化し、
+    # ページ遷移ごとにテーマ href を同期（pathname 入力は1本化して POST を削減）
     @app.callback(
         [
             Output("nav-history-store", "data"),
             Output("registration-store", "data", allow_duplicate=True),
+            Output("bootswatch-theme", "href", allow_duplicate=True),
         ],
         Input("_pages_location", "pathname"),
         State("nav-history-store", "data"),
         prevent_initial_call=False,
     )
-    def _reset_store_on_register(pathname, history):
+    def _sync_nav_store_and_theme(pathname, history):
         prev_path = None
         if isinstance(history, dict):
             prev_path = history.get("prev")
@@ -100,10 +89,13 @@ def create_app(server=None) -> dash.Dash:
             not prev_path or not str(prev_path).startswith("/register")
         )
 
-        if reset_needed:
-            return {"prev": pathname}, deepcopy(empty_registration_state())
+        theme = load_theme()
+        href = get_bootswatch_css(theme)
 
-        return {"prev": pathname}, no_update
+        if reset_needed:
+            return {"prev": pathname}, deepcopy(empty_registration_state()), href
+
+        return {"prev": pathname}, no_update, href
 
     # レイアウト設定（page_container を中央寄せ＆最大幅でラップ）
     app.layout = html.Div(
@@ -126,15 +118,19 @@ def create_app(server=None) -> dash.Dash:
         ]
     )
 
-    # ページ遷移/初回ロードごとに最新テーマを同期（全ページで反映）
-    @app.callback(
-        Output("bootswatch-theme", "href", allow_duplicate=True),
+    # /register のみ /register/select へ（サーバー往復なし・固定パス）
+    app.clientside_callback(
+        """
+        function(pathname) {
+            if (pathname === "/register") {
+                return "/register/select";
+            }
+            return window.dash_clientside.no_update;
+        }
+        """,
+        Output("_pages_location", "pathname", allow_duplicate=True),
         Input("_pages_location", "pathname"),
-        prevent_initial_call=False,
     )
-    def sync_theme_on_navigation(_pathname):
-        theme = load_theme()
-        return get_bootswatch_css(theme)
 
     return app
 

@@ -68,7 +68,7 @@ def render_settings() -> html.Div:
                         """
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [
@@ -104,7 +104,7 @@ def render_settings() -> html.Div:
                         className="mt-3 d-inline-flex align-items-center gap-2",
                     ),
                 ],
-                className="card-custom",
+                className="card-main-info",
             ),
             html.Div(
                 [
@@ -204,7 +204,7 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(id="theme-save-result", className="mt-2"),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [
@@ -232,7 +232,7 @@ def render_settings() -> html.Div:
                         ]
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [
@@ -284,7 +284,7 @@ def render_settings() -> html.Div:
                         ],
                     ),
                 ],
-                className="card-custom",
+                className="card-main-info",
             ),
             html.Div(
                 [
@@ -300,7 +300,7 @@ def render_settings() -> html.Div:
                     ),
                     html.Div(id="delete-result", className="mt-3"),
                 ],
-                className="card-custom",
+                className="card-main-danger",
             ),
             html.Div(
                 [
@@ -317,7 +317,7 @@ def render_settings() -> html.Div:
                         className="card-text mb-0",
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
         ]
     )
