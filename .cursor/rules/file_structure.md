@@ -73,6 +73,8 @@ Storage は Private bucket + signed URL、DB には public URL ではなく obje
   - 定義: pages\settings\index.py
   - /settings（設定：カラータグの設定）
   - 定義: pages\settings\color_tags.py
+  - /settings/receipt-location-tags（設定：収納場所タグ）
+  - 定義: pages\settings\receipt_location_tags.py
 
 ## サイトマップの登録分岐詳細＆複雑なページ遷移詳細
 

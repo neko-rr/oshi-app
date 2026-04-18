@@ -31,6 +31,45 @@ DEFAULT_COLOR_TAGS: List[Dict[str, Any]] = [
 
 HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
+# Bootstrap Icons クラス名（収納場所アイコン用・自由入力のホワイトリスト）
+BOOTSTRAP_ICON_RE = re.compile(r"^bi-[a-z0-9-]{1,64}$")
+
+RECEIPT_LOCATION_NAME_MAX_LEN = 200
+
+# プリセット収納場所の slot 範囲（この範囲の行を削除したら再作成しない）
+PRESET_RECEIPT_LOCATION_SLOT_MIN = 1
+PRESET_RECEIPT_LOCATION_SLOT_MAX = 6
+
+# プリセット6件（slot 1..6）。不足分のみ insert し、既存行は上書きしない。
+DEFAULT_RECEIPT_LOCATIONS: List[Dict[str, Any]] = [
+    {"slot": 1, "receipt_location_name": "タンス", "receipt_location_icon": "bi-archive"},
+    {"slot": 2, "receipt_location_name": "書棚", "receipt_location_icon": "bi-bookshelf"},
+    {"slot": 3, "receipt_location_name": "段ボール", "receipt_location_icon": "bi-box"},
+    {"slot": 4, "receipt_location_name": "フォルダ", "receipt_location_icon": "bi-folder"},
+    {"slot": 5, "receipt_location_name": "クリアファイル", "receipt_location_icon": "bi-file-earmark"},
+    {"slot": 6, "receipt_location_name": "ディスプレイ", "receipt_location_icon": "bi-tv"},
+]
+
+
+def normalize_receipt_location_icon(raw: Optional[str]) -> Optional[str]:
+    """有効な Bootstrap Icons クラス名ならそのまま返す。無効なら None。"""
+    s = (raw or "").strip()
+    if not s:
+        return None
+    if not BOOTSTRAP_ICON_RE.match(s):
+        return None
+    return s
+
+
+def normalize_receipt_location_name(raw: Optional[str]) -> Optional[str]:
+    """収納場所名を検証。空・超過なら None。"""
+    name = (raw or "").strip()
+    if not name:
+        return None
+    if len(name) > RECEIPT_LOCATION_NAME_MAX_LEN:
+        return None
+    return name
+
 
 def _validate_color_tag_entries(entries: List[Dict[str, Any]]) -> bool:
     if len(entries) != 7:
@@ -164,17 +203,264 @@ def get_category_tags() -> List[Dict[str, Any]]:
         return []
 
 
-def get_receipt_location_tags() -> List[Dict[str, Any]]:
-    """Get all receipt location tags."""
+def _get_dismissed_preset_slots() -> set[int]:
+    """ユーザーが削除したプリセット slot（1..6）。テーブル未作成時は空扱い。"""
     supabase = get_supabase_client()
-    if not supabase:
-        return []
-
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return set()
     try:
-        response = supabase.table("receipt_location").select("*").execute()
-        return response.data if response.data else []
+        resp = (
+            supabase.table("receipt_location_preset_slot_dismissed")
+            .select("slot")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        out: set[int] = set()
+        for row in resp.data or []:
+            s = row.get("slot")
+            if s is None:
+                continue
+            try:
+                out.add(int(s))
+            except (TypeError, ValueError):
+                continue
+        return out
+    except Exception:
+        return set()
+
+
+def ensure_default_receipt_locations() -> List[Dict[str, Any]]:
+    """slot 1..6 の欠けのみ insert。ユーザーが削除済みの slot は再作成しない。既存行は上書きしない。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return []
+    try:
+        resp = (
+            supabase.table("receipt_location")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        existing = resp.data or []
+        filled_slots: set[int] = set()
+        for item in existing:
+            s = item.get("slot")
+            if s is None:
+                continue
+            try:
+                filled_slots.add(int(s))
+            except (TypeError, ValueError):
+                continue
+        dismissed = _get_dismissed_preset_slots()
+        missing = [
+            {
+                "members_id": members_id,
+                "slot": int(dc["slot"]),
+                "display_order": int(dc["slot"]) * 10,
+                "receipt_location_name": dc["receipt_location_name"],
+                "receipt_location_icon": dc["receipt_location_icon"],
+                "receipt_location_use_flag": 1,
+            }
+            for dc in DEFAULT_RECEIPT_LOCATIONS
+            if int(dc["slot"]) not in filled_slots
+            and int(dc["slot"]) not in dismissed
+        ]
+        if missing:
+            supabase.table("receipt_location").insert(missing).execute()
+            resp = (
+                supabase.table("receipt_location")
+                .select("*")
+                .eq("members_id", members_id)
+                .execute()
+            )
+            return resp.data or []
+        return existing
     except Exception:
         return []
+
+
+def get_receipt_location_tags_ordered() -> List[Dict[str, Any]]:
+    """display_order 昇順（同値は receipt_location_id）。"""
+    ensured = ensure_default_receipt_locations()
+    return sorted(
+        ensured,
+        key=lambda x: (
+            int(x.get("display_order") or 0),
+            int(x.get("receipt_location_id") or 0),
+        ),
+    )
+
+
+def _max_display_order_for_member() -> int:
+    """現在ユーザーの receipt_location の最大 display_order。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return 0
+    try:
+        resp = (
+            supabase.table("receipt_location")
+            .select("display_order")
+            .eq("members_id", members_id)
+            .order("display_order", desc=True)
+            .limit(1)
+            .execute()
+        )
+        rows = resp.data or []
+        if not rows:
+            return 0
+        return int(rows[0].get("display_order") or 0)
+    except Exception:
+        return 0
+
+
+def delete_receipt_location_tag(receipt_location_id: int) -> bool:
+    """収納場所タグを削除（本人行のみ）。参照商品の receipt_location_id は SET NULL。
+    slot 1..6 のプリセット行を消した場合は記録し、以後 ensure で同 slot を再作成しない。
+    """
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return False
+    try:
+        rid = int(receipt_location_id)
+    except (TypeError, ValueError):
+        return False
+    try:
+        sel = (
+            supabase.table("receipt_location")
+            .select("slot")
+            .eq("receipt_location_id", rid)
+            .eq("members_id", members_id)
+            .limit(1)
+            .execute()
+        )
+        row = (sel.data or [None])[0]
+        if row is not None:
+            s = row.get("slot")
+            if s is not None:
+                try:
+                    slot = int(s)
+                except (TypeError, ValueError):
+                    slot = None
+                if (
+                    slot is not None
+                    and PRESET_RECEIPT_LOCATION_SLOT_MIN
+                    <= slot
+                    <= PRESET_RECEIPT_LOCATION_SLOT_MAX
+                ):
+                    try:
+                        supabase.table("receipt_location_preset_slot_dismissed").upsert(
+                            [{"members_id": members_id, "slot": slot}],
+                            on_conflict="members_id,slot",
+                        ).execute()
+                    except Exception:
+                        # マイグレーション未適用時は削除のみ続行（従来どおり欠けが埋まる可能性あり）
+                        pass
+        supabase.table("receipt_location").delete().eq(
+            "receipt_location_id", rid
+        ).eq("members_id", members_id).execute()
+        return True
+    except Exception:
+        return False
+
+
+def _receipt_row_id(row: Dict[str, Any]) -> Optional[int]:
+    """receipt_location_id を整数化（JSON 経由の float 等も吸収）。"""
+    v = row.get("receipt_location_id")
+    if v is None:
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        try:
+            return int(float(v))
+        except (TypeError, ValueError):
+            return None
+
+
+def move_receipt_location_tag(receipt_location_id: int, direction: str) -> bool:
+    """隣行と display_order を入れ替える（up / down）。
+    display_order が重複している場合は先に 10 刻みで正規化してから入れ替える。
+    """
+    if direction not in ("up", "down"):
+        return False
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return False
+    try:
+        target_id = int(receipt_location_id)
+    except (TypeError, ValueError):
+        return False
+
+    def _fetch_sorted() -> List[Dict[str, Any]]:
+        resp = (
+            supabase.table("receipt_location")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        return sorted(
+            resp.data or [],
+            key=lambda x: (
+                int(x.get("display_order") or 0),
+                _receipt_row_id(x) or 0,
+            ),
+        )
+
+    try:
+        rows = _fetch_sorted()
+        if not rows:
+            return False
+
+        orders = [int(x.get("display_order") or 0) for x in rows]
+        if len(set(orders)) < len(rows):
+            for i, r in enumerate(rows):
+                rid = _receipt_row_id(r)
+                if rid is None:
+                    return False
+                supabase.table("receipt_location").update(
+                    {"display_order": (i + 1) * 10}
+                ).eq("receipt_location_id", rid).eq("members_id", members_id).execute()
+            rows = _fetch_sorted()
+
+        idx = next(
+            (
+                i
+                for i, r in enumerate(rows)
+                if _receipt_row_id(r) == target_id
+            ),
+            None,
+        )
+        if idx is None:
+            return False
+        j = idx - 1 if direction == "up" else idx + 1
+        if j < 0 or j >= len(rows):
+            return False
+        a, b = rows[idx], rows[j]
+        id_a = _receipt_row_id(a)
+        id_b = _receipt_row_id(b)
+        if id_a is None or id_b is None:
+            return False
+        oa = int(a.get("display_order") or 0)
+        ob = int(b.get("display_order") or 0)
+        supabase.table("receipt_location").update({"display_order": ob}).eq(
+            "receipt_location_id", id_a
+        ).eq("members_id", members_id).execute()
+        supabase.table("receipt_location").update({"display_order": oa}).eq(
+            "receipt_location_id", id_b
+        ).eq("members_id", members_id).execute()
+        return True
+    except Exception:
+        return False
+
+
+def get_receipt_location_tags() -> List[Dict[str, Any]]:
+    """現在ユーザーの収納場所タグ（プリセット順＋追加行）。"""
+    return get_receipt_location_tags_ordered()
 
 
 def update_color_tag(color_tag_id: int, name: str, color: str) -> bool:
@@ -214,15 +500,21 @@ def update_category_tag(category_tag_id: int, name: str, color: str, icon: str) 
 
 
 def update_receipt_location_tag(receipt_location_id: int, name: str, icon: str) -> bool:
-    """Update a receipt location tag."""
+    """収納場所タグを更新（本人行のみ）。"""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
-
+    n = normalize_receipt_location_name(name)
+    ic = normalize_receipt_location_icon(icon)
+    if n is None or ic is None:
+        return False
     try:
         supabase.table("receipt_location").update(
-            {"receipt_location_name": name, "receipt_location_icon": icon}
-        ).eq("receipt_location_id", receipt_location_id).execute()
+            {"receipt_location_name": n, "receipt_location_icon": ic}
+        ).eq("receipt_location_id", receipt_location_id).eq(
+            "members_id", members_id
+        ).execute()
         return True
     except Exception:
         return False
@@ -267,16 +559,24 @@ def create_category_tag(name: str, color: str, icon: str) -> bool:
 
 
 def create_receipt_location_tag(name: str, icon: str) -> bool:
-    """Create a new receipt location tag."""
+    """追加行として収納場所タグを作成（slot は NULL、件数上限なし）。"""
     supabase = get_supabase_client()
-    if not supabase:
+    members_id = _current_members_id()
+    if not supabase or not members_id:
         return False
-
+    n = normalize_receipt_location_name(name)
+    ic = normalize_receipt_location_icon(icon)
+    if n is None or ic is None:
+        return False
     try:
+        next_order = _max_display_order_for_member() + 10
         supabase.table("receipt_location").insert(
             {
-                "receipt_location_name": name,
-                "receipt_location_icon": icon,
+                "members_id": members_id,
+                "slot": None,
+                "display_order": next_order,
+                "receipt_location_name": n,
+                "receipt_location_icon": ic,
                 "receipt_location_use_flag": 1,
             }
         ).execute()

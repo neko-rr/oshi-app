@@ -60,12 +60,16 @@ def create_app(server=None) -> dash.Dash:
     from features.review.controller import register_review_callbacks
     from components.theme_utils import register_theme_callbacks
     from features.color_tag.controller import register_color_tag_callbacks
+    from features.receipt_location_tag.controller import (
+        register_receipt_location_tag_callbacks,
+    )
 
     register_barcode_callbacks(app)
     register_photo_callbacks(app)
     register_x_share_callbacks(app)
     register_review_callbacks(app)
     register_color_tag_callbacks(app)
+    register_receipt_location_tag_callbacks(app)
 
     # pathname 系は theme の clientside より先に登録し、theme-store → href の順で正本を揃えやすくする
     # /register/barcode に外部から入ったときだけ registration-store を初期化し、
@@ -117,6 +121,9 @@ def create_app(server=None) -> dash.Dash:
             dcc.Store(id="theme-store"),
             # 設定のプレビュー用（常設: clientside で bootswatch href と同期するため Dash 4 の重複 Output を避ける）
             dcc.Store(id="theme-preview-store", data=None),
+            # Dash 4: theme コールバックの Output 先。設定トップの表示は pages/settings の span に clientside で反映
+            html.Div(id="theme-preview-name", style={"display": "none"}, children=""),
+            dcc.Store(id="theme-label-clientside-tick", data=0),
             html.Div(
                 [
                     dash.page_container,

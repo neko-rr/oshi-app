@@ -109,6 +109,7 @@
   - `db.*.ok=False` かつ `permission denied` → RLS/ポリシーの可能性大
   - `db.*.ok=True` で `rows=0` → 権限は通るがデータ無し
   - `storage.photos_list.ok=False` → Storage ポリシー/バケット/キーを確認
+- 収納場所プリセット削除の永続化: `supabase/migrations/20260419140000_receipt_location_preset_slot_dismissed.sql` を Supabase に適用すること。未適用だと削除記録が失敗し、次回アクセスで欠けたプリセット slot が再作成される場合がある。
 
 ## Render / Docker
 
