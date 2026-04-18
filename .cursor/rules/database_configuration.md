@@ -69,6 +69,9 @@
 | 役割           | 名称日本語                 | メソッド名                       | データ型 | キー設定    |
 | -------------- | -------------------------- | -------------------------------- | -------- | ----------- |
 | エンティティ名 | 収納場所                   | receipt_location                 | 文字列   |             |
+| 属性           | 会員 ID                    | members_id                       | UUID     | Foreign Key |
+| 属性           | プリセットスロット         | slot                             | 整数     | 1..6 または NULL（追加行） |
+| 属性           | 表示順                     | display_order                    | 整数     | 並び替え用（同一会員内で昇順表示） |
 | 属性           | 収納場所 ID                | receipt_location_id              | 整数     | Primary Key |
 | 属性           | 収納場所名                 | receipt_location_name            | 文字列   |             |
 | 属性           | 収納場所サイズ横           | receipt_location_size_horizontal | 整数     |             |
@@ -81,6 +84,15 @@
 | 属性           | 収納場所アイコン           | receipt_location_icon            | 文字列   |             |
 | 属性           | 収納場所使用フラグ         | receipt_location_use_flag        | 整数     |             |
 
+| 役割           | 名称日本語                         | メソッド名                              | データ型 | キー設定          |
+| -------------- | ---------------------------------- | --------------------------------------- | -------- | ----------------- |
+| エンティティ名 | 収納場所プリセット削除済みスロット | receipt_location_preset_slot_dismissed | 文字列   |                   |
+| 属性           | 会員 ID                            | members_id                              | UUID     | Primary Key(複合) |
+| 属性           | プリセットスロット                 | slot                                    | 整数     | Primary Key(複合) 1..6 |
+| 属性           | 削除記録日時                       | dismissed_at                            | 時刻     |                   |
+
+（備考）`receipt_location` の slot 1..6 行をユーザーが削除したときに行を追加し、`tag_service.ensure_default_receipt_locations` が該当 slot のプリセットを再 insert しないようにする。
+
 | 役割           | 名称日本語               | メソッド名                | データ型 | キー設定    |
 | -------------- | ------------------------ | ------------------------- | -------- | ----------- |
 | エンティティ名 | アイコンタグ             | icon_tag                  | 文字列   |             |
@@ -88,6 +100,8 @@
 | 属性           | アイコン名               | icon_name                 | 文字列   |             |
 | 属性           | カテゴリータグ使用フラグ | category_tag_use_flag     | 整数     |             |
 | 属性           | 収納場所使用フラグ       | receipt_location_use_flag | 整数     |             |
+
+（UI 備考）収納場所タグ設定画面のアイコン一覧は、`receipt_location_use_flag = 1` の行を `icon_name` 昇順で表示する（`services/icon_service.py` の `get_receipt_location_icons_sorted`）。
 
 | 役割           | 名称日本語 | メソッド名        | データ型 | キー設定          |
 | -------------- | ---------- | ----------------- | -------- | ----------------- |

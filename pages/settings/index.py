@@ -198,7 +198,7 @@ def render_settings() -> html.Div:
                         className="mb-2",
                     ),
                     html.Div(
-                        id="theme-preview-name",
+                        id="settings-theme-preview-label",
                         className="text-body-secondary small mb-1",
                         children="現在のテーマを読み込み中…",
                     ),
@@ -224,9 +224,9 @@ def render_settings() -> html.Div:
                                 n_clicks=0,
                                 className="btn btn-outline-primary me-2 mb-2",
                             ),
-                            html.Button(
+                            dcc.Link(
                                 "収納場所タグ",
-                                n_clicks=0,
+                                href="/settings/receipt-location-tags",
                                 className="btn btn-outline-primary mb-2",
                             ),
                         ]

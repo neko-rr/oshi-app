@@ -40,6 +40,15 @@ def get_receipt_location_icons() -> List[Dict[str, Any]]:
         return []
 
 
+def get_receipt_location_icons_sorted() -> List[Dict[str, Any]]:
+    """収納場所用 icon_tag を表示用に icon_name 順で並べる。"""
+    rows = get_receipt_location_icons()
+    return sorted(
+        rows,
+        key=lambda x: ((x.get("icon_name") or ""), (x.get("icon") or "")),
+    )
+
+
 def get_all_icons() -> List[Dict[str, Any]]:
     """Get all icons."""
     supabase = get_supabase_client()

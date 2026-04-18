@@ -295,3 +295,18 @@ def register_theme_callbacks(app):
         State("theme-card-container", "style"),
         prevent_initial_call=True,
     )
+
+    # theme-preview-name は app ルートの非表示要素のみ。設定トップの見出しは常設 span に同期（サブページでは DOM が無い）
+    app.clientside_callback(
+        """
+        function(children) {
+            const el = document.getElementById("settings-theme-preview-label");
+            if (el && children != null && String(children).trim() !== "") {
+                el.textContent = children;
+            }
+            return Date.now();
+        }
+        """,
+        Output("theme-label-clientside-tick", "data"),
+        Input("theme-preview-name", "children"),
+    )
