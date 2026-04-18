@@ -2,6 +2,7 @@ import os
 import base64
 from typing import Any, Dict, List, Optional
 from dash import html, Input, Output, State, callback_context
+from dash.exceptions import PreventUpdate
 from PIL import Image
 import io
 

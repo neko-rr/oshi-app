@@ -14,6 +14,7 @@
   .\.venv\Scripts\Activate.ps1
   pip install -r requirements.txt
   ```
+- テスト（ルートで実行）: `python -m pytest tests/ -q`。手順の詳細は [.cursor/skills/post-change-verify/SKILL.md](.cursor/skills/post-change-verify/SKILL.md)。
 - `.env` に **PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY / APP_BASE_URL / SECRET_KEY / COOKIE_SECURE / COOKIE_SAMESITE** を設定（フォールバック無し、`SUPABASE_ANON_KEY` は使用しない）。
 - 通常起動（Flask+Dash 入口は `server.py`）:
   ```powershell
@@ -27,11 +28,16 @@
   powershell -ExecutionPolicy Bypass -File .\start_with_logs.ps1
   ```
 
-  - ログ確認: `Get-Content app_run.log -Tail 50`
+  - ログ確認: `Get-Content logs/app_run.log -Tail 50`（登録デバッグは `logs/debug_log.txt` 等）
 
 - ブラウザ: **必ず `http://127.0.0.1:8050` に統一**（`localhost` と混在させない）。
   - 以後、リンクを踏む/ブックマークも含めて **127.0.0.1 側だけ** を使ってください。
   - 既にループしている場合は、`127.0.0.1` と `localhost` の両方の Cookie を削除してから再アクセスしてください。
+- **Cursor 内のシンプルブラウザ**（エディタ内で URL を開く。レイアウト確認向け）:
+  1. コマンドパレットを開く（Windows/Linux: `Ctrl+Shift+P`、Mac: `Cmd+Shift+P`）。
+  2. `Simple Browser: Show` と入力して実行（UI が日本語の場合は「シンプル ブラウザ」などで検索）。
+  3. 表示された入力欄に `http://127.0.0.1:8050` を入れて Enter（先に `python server.py` 等でサーバーを起動しておく）。
+  - Google OAuth や別タブへのリダイレクトは **外部ブラウザの方が確実**なため、ログイン動作確認は従来どおり Chrome 等を推奨する。
 - 認証確認フロー: `http://127.0.0.1:8050/login` を開く → ボタンで Google ログイン → `/auth/callback?code=...&app_state=...` に戻り、Cookie がセットされトップへ遷移することを確認。
   - app_state / PKCE / redirect_to は当ドメインの Cookie に保存し、/auth/callback で照合 → 交換 → 即削除。Supabase 側の state には依存しない。
   - `bad_oauth_state` が出る場合は、Supabase が state 検証に失敗して Site URL にエラーを返した可能性があるため、app_state 方式にそろえた上で単一タブで再試行する。

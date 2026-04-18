@@ -36,7 +36,17 @@ body {
   min-height: 100vh;
 }
 
+/* 固定下部ナビでもメイン領域が潰れないよう、ルートを縦フレックスにする */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 .page-container {
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 5.5rem);
   padding: 20px 15px calc(100px + var(--app-safe-bottom)) 15px;
   max-width: 600px;
   margin: 0 auto;
@@ -428,6 +438,12 @@ body {
 .theme-card {
   border: 1px solid var(--bs-border-color);
   box-shadow: var(--bs-box-shadow-sm);
+}
+
+/* 設定のテーマ一覧: 選択中は枠で判別（Bootstrap の .active 色面は使わない） */
+.theme-card.active {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bs-primary) 35%, transparent);
 }
 
 .theme-swatch-grid {

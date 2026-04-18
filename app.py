@@ -65,9 +65,9 @@ def create_app(server=None) -> dash.Dash:
     register_photo_callbacks(app)
     register_x_share_callbacks(app)
     register_review_callbacks(app)
-    register_theme_callbacks(app)
     register_color_tag_callbacks(app)
 
+    # pathname 系は theme の clientside より先に登録し、theme-store → href の順で正本を揃えやすくする
     # /register/barcode に外部から入ったときだけ registration-store を初期化し、
     # ページ遷移ごとにテーマ href を同期（pathname 入力は1本化して POST を削減）
     @app.callback(
@@ -75,6 +75,8 @@ def create_app(server=None) -> dash.Dash:
             Output("nav-history-store", "data"),
             Output("registration-store", "data", allow_duplicate=True),
             Output("bootswatch-theme", "href", allow_duplicate=True),
+            # localStorage の theme-store を load_theme() に揃え、clientside の href 上書きと正本を一致させる
+            Output("theme-store", "data", allow_duplicate=True),
         ],
         Input("_pages_location", "pathname"),
         State("nav-history-store", "data"),
@@ -91,32 +93,72 @@ def create_app(server=None) -> dash.Dash:
 
         theme = load_theme()
         href = get_bootswatch_css(theme)
+        theme_data = {"theme": theme}
 
         if reset_needed:
-            return {"prev": pathname}, deepcopy(empty_registration_state()), href
+            return {"prev": pathname}, deepcopy(empty_registration_state()), href, theme_data
 
-        return {"prev": pathname}, no_update, href
+        return {"prev": pathname}, no_update, href, theme_data
+
+    register_theme_callbacks(app)
+
+    # レビュー実体（コールバック対象 id を常に app.layout に含める。Dash 4 では validation_layout が無効）
+    from pages.register.review import render_review_page as _render_register_review_page
 
     # レイアウト設定（page_container を中央寄せ＆最大幅でラップ）
-    app.layout = html.Div(
+    main_layout = html.Div(
         [
             html.Link(
                 rel="stylesheet",
                 href=get_bootswatch_css(load_theme()),
                 id="bootswatch-theme",
             ),
-            dcc.Store(id="theme-store", storage_type="local"),
+            # localStorage 復元が _sync_nav のサーバー確定より後に走ると href が一瞬正しくても古いテーマに戻るため永続化しない
+            dcc.Store(id="theme-store"),
+            # 設定のプレビュー用（常設: clientside で bootswatch href と同期するため Dash 4 の重複 Output を避ける）
+            dcc.Store(id="theme-preview-store", data=None),
             html.Div(
-                dash.page_container, className="page-container"
-            ),  # ページ内容を中央寄せ＋最大幅でラップ
+                [
+                    dash.page_container,
+                    html.Div(
+                        id="register-review-static-mount",
+                        style={"display": "none"},
+                        children=_render_register_review_page(),
+                    ),
+                ],
+                className="page-container",
+            ),
             _build_navigation(),  # 共通ナビ
             dcc.Store(
                 id="registration-store", data=deepcopy(empty_registration_state())
             ),
             dcc.Store(id="nav-history-store", data={"prev": None}),
             html.Div(id="auto-fill-trigger", style={"display": "none"}),
-        ]
+            # レビュー専用レイアウト外でも register_review_callbacks が参照するためルートに常設する
+            # Dash 4 の dcc.Interval は style を受け付けないため、非表示は外側の Div に付ける
+            html.Div(
+                dcc.Interval(
+                    id="io-intelligence-interval",
+                    interval=2000,
+                    n_intervals=0,
+                    disabled=True,
+                ),
+                style={"display": "none"},
+            ),
+        ],
+        className="app-root",
     )
+    app.layout = main_layout
+
+    @app.callback(
+        Output("register-review-static-mount", "style"),
+        Input("_pages_location", "pathname"),
+        prevent_initial_call=False,
+    )
+    def _toggle_register_review_static_mount(pathname):
+        if pathname == "/register/review":
+            return {"display": "block"}
+        return {"display": "none"}
 
     # /register のみ /register/select へ（サーバー往復なし・固定パス）
     app.clientside_callback(

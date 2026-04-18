@@ -374,13 +374,7 @@ def render_review_section() -> html.Div:
                 className="text-center",
             ),
 
-            # IOインテリジェンス処理状態確認用のインターバル
-            dcc.Interval(
-                id="io-intelligence-interval",
-                interval=2000,  # 2秒ごとにチェック
-                n_intervals=0,
-                disabled=True,
-            ),
+            # io-intelligence-interval は app.py ルートレイアウトに常設（全ページでコールバック登録可能にする）
 
             # STEP4自動反映用のインターバル（app.pyで定義）
             # auto_fill_interval は app.py で定義済み

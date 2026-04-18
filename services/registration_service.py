@@ -6,6 +6,7 @@ from dash import html
 from dash.exceptions import PreventUpdate
 
 from components.state_utils import ensure_state, serialise_state
+from services.app_paths import ensure_log_dir, log_file_path
 from services.photo_service import insert_photo_record, upload_to_storage
 from services.supabase_client import get_supabase_client
 from services.product_color_tag_service import set_product_color_tags
@@ -53,6 +54,8 @@ def save_registration(
     except Exception as e:
         return html.Div(f"ログイン情報が取得できません: {str(e)}", className="alert alert-danger")
 
+    ensure_log_dir()
+
     # デバッグ情報を専用ファイルに書き込み
     debug_info = f"""=== SAVE REGISTRATION DEBUG ===
 Called at: {__import__("datetime").datetime.now()}
@@ -63,7 +66,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
 
     # 専用ログファイルに書き込み（最も確実）
     try:
-        with open("save_registration_debug.txt", "a", encoding="utf-8") as f:
+        with open(log_file_path("save_registration_debug.txt"), "a", encoding="utf-8") as f:
             f.write(debug_info + "\n")
             f.flush()
     except Exception as e:
@@ -74,7 +77,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
 
     if not n_clicks:
         try:
-            with open("debug_log.txt", "a", encoding="utf-8") as f:
+            with open(log_file_path("debug_log.txt"), "a", encoding="utf-8") as f:
                 f.write(f"DEBUG: n_clicks is falsy, raising PreventUpdate\n")
         except Exception as debug_error:
             print(f"DEBUG WRITE ERROR: {debug_error}")
@@ -98,7 +101,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
             f"front_photo content exists: {bool(state.get('front_photo', {}).get('content'))}"
         )
 
-        with open("debug_log.txt", "a", encoding="utf-8") as f:
+        with open(log_file_path("debug_log.txt"), "a", encoding="utf-8") as f:
             f.write(f"DEBUG: front_photo data: {state.get('front_photo', 'NO_DATA')}\n")
             f.write(
                 f"DEBUG: front_photo content exists: {bool(state.get('front_photo', {}).get('content'))}\n"
@@ -207,7 +210,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
                 slots=slots,
             )
 
-        with open("debug_log.txt", "a", encoding="utf-8") as f:
+        with open(log_file_path("debug_log.txt"), "a", encoding="utf-8") as f:
             f.write(
                 f"DEBUG: Successfully saved product - Name: {product_name}, Photo ID: {photo_id}\n"
             )
@@ -215,7 +218,7 @@ store_data keys: {list(store_data.keys()) if store_data else "None"}
         return html.Div("製品情報を保存しました！", className="alert alert-success")
 
     except Exception as e:
-        with open("debug_log.txt", "a", encoding="utf-8") as f:
+        with open(log_file_path("debug_log.txt"), "a", encoding="utf-8") as f:
             f.write(f"ERROR: Failed to save product: {e}\n")
         return html.Div(
             f"保存中にエラーが発生しました: {str(e)}", className="alert alert-danger"
