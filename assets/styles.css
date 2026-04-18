@@ -333,19 +333,31 @@ body {
   padding-bottom: var(--app-safe-bottom);
 }
 
+/* バーコード手入力: form-control は付かず input-custom がラッパーに付く（Dash は内側を .dash-input-element にする） */
 .input-custom {
   border-radius: 15px;
-  padding: 12px 15px;
+  padding: 0; /* 縦余白は内側 input に任せ、ラッパーと二重にしない */
   width: 100%;
   margin-top: 10px;
-  font-size: 16px; /* iOSフォーカス時の自動ズーム対策 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 2.75rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   border: var(--app-surface-border);
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
 
-.input-custom:focus {
+.page-container .dash-input-container.input-custom input.dash-input-element {
+  font-size: 16px; /* iOSフォーカス時の自動ズーム対策 */
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  min-height: 2.75rem;
+}
+
+.input-custom:focus-within {
   outline: none;
   border-color: var(--bs-primary);
 }
@@ -354,6 +366,87 @@ body {
   outline: none;
   border-color: var(--app-focus-ring-color);
   box-shadow: var(--app-focus-ring);
+}
+
+/* フォームコントロール：日本語・テーマ差で上下欠けしないよう縦メトリクスを確保（DESIGN.md 3.1） */
+/* ネイティブ（dbc 等）で input 自体に form-control が付く場合 */
+.page-container input.form-control:not(.form-control-color),
+.page-container textarea.form-control {
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.page-container select.form-control:not([multiple]) {
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  min-height: 2.75rem;
+}
+
+/*
+ * Dash dcc.Input / Textarea: className の form-control・input-custom はラッパー div に付与され、
+ * 実要素は .dash-input-element（高さが潰れると 8px 程度になることがある）
+ */
+.page-container .dash-input-container.dash-input {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  min-height: 2.75rem;
+  /* Bootstrap .form-control の padding がラッパーに乗り、内側 .dash-input-element の高さが数 px になるのを防ぐ */
+  padding: 0;
+}
+
+.page-container .dash-input-container.dash-input input.dash-input-element {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 2.75rem;
+  height: auto;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  color: var(--bs-body-color);
+  outline: none;
+  overflow: visible;
+}
+
+.page-container .dash-input-container.dash-input textarea.dash-input-element {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 2.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  color: var(--bs-body-color);
+  outline: none;
+  resize: vertical;
+  overflow: auto;
+}
+
+/* オートフィル時に背景だけ上書きされて字が薄くなるのを抑える */
+.page-container input.form-control:not(.form-control-color):-webkit-autofill,
+.page-container input.form-control:not(.form-control-color):-webkit-autofill:hover,
+.page-container input.form-control:not(.form-control-color):-webkit-autofill:focus,
+.page-container .dash-input-container input.dash-input-element:-webkit-autofill,
+.page-container .dash-input-container input.dash-input-element:-webkit-autofill:hover,
+.page-container .dash-input-container input.dash-input-element:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--bs-body-color);
+  box-shadow: 0 0 0 1000px var(--bs-body-bg) inset;
+  caret-color: var(--bs-body-color);
 }
 
 .input-custom:disabled {

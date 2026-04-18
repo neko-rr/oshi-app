@@ -112,7 +112,7 @@ def build_receipt_location_row_blocks(
                             html.Div(
                                 id={"type": "rl-icon-preview", "rid": rid_key},
                                 children=_preview_icon(icon_val),
-                                className="flex-shrink-0 d-flex align-items-center",
+                                className="flex-shrink-0 d-flex align-items-center align-self-center",
                                 style={"minWidth": "2.5rem"},
                             ),
                             dbc.Input(
@@ -124,7 +124,7 @@ def build_receipt_location_row_blocks(
                                 debounce=False,
                             ),
                         ],
-                        className="d-flex align-items-center gap-3 mb-2",
+                        className="d-flex align-items-stretch gap-3 mb-2",
                     ),
                     html.Details(
                         [
