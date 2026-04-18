@@ -60,6 +60,11 @@
 - タグ抽出: 楽天候補と画像説明から検索用タグを生成（禁止語フィルタ・フォールバックあり）（[services/tag_extraction.py](services/tag_extraction.py)）。
 - Supabase 連携: 認証（Google OAuth）、DB（RLS でユーザー単位に分離）、Storage（Private バケット、表示時 signed URL）。未設定時は UI のみ動作し、保存・ギャラリー・テーマ永続化は無効。
 - 写真一覧（登録済みカード）、設定（テーマ切替・登録件数・全データ削除）。
+- **タグ設定（ユーザー別・RLS）**（`/settings` から各画面へ）
+  - **カラータグ**（`/settings/color-tags`）: 7 スロット固定。名称・色を保存。
+  - **収納場所タグ**（`/settings/receipt-location-tags`）: プリセット 6 件（slot 1..6）＋任意追加。名称・アイコン（`icon_tag` マスタ）・並び替え・削除。削除したプリセット slot は再出現しない（専用テーブルで記録）。
+  - **カテゴリータグ**（`/settings/category-tags`）: グッズの種類・用途用。プリセット 6 件＋任意追加。名称・色・アイコン・並び替え・削除（収納場所と同型の `slot` / `display_order` / プリセット削除記録）。
+  - **登録フローとの連携**: カラータグは登録ストアから利用可能。`category_tag_id` を登録保存画面で選ぶ UI は未接続（設定でマスタのみ整備可能）。
 - バーコード検出: pyzbar + Pillow。ブラウザカメラは getUserMedia。
 
 ### 予定（仕様ベース）
@@ -72,7 +77,8 @@
 - シリーズ物やガチャのコンプリート管理・特典管理
   - シリーズとしてギャラリーで管理できるようする
   - キャンペーンのように購入前から、予定として管理する
-- 現実の収納場所の管理
+- 現実の収納場所の管理（拡張）
+  - 設定でユーザー別の収納場所タグは編集可能。ギャラリー検索や所在の可視化など、アプリ全体への組み込みは今後
   - ディスプレイや収納ケース、デジタル・アナログ等、様々な場所に収納されている情報を管理
   - 例：電子書籍と実際の本での重複所持防止
 - 重複したグッズの交換やメルカリ等への販売管理
@@ -137,19 +143,19 @@
 
 ## 3. データ設計（分析の土台）
 
-- **主要エンティティ**: `photo`（サムネ・高解像の object path）、`registration_product_information`（製品情報・バーコード・価格・タグ・日付など）、`color_tag` / `category_tag`（ユーザー定義タグ）、`theme_settings`（テーマ永続化）。いずれも `members_id`（= `auth.uid()`）でユーザー分離。
-  - 【現状】ユーザー別のタグは、複数種類考えているが、デモ状態のままの物多数
+- **主要エンティティ**: `photo`（サムネ・高解像の object path）、`registration_product_information`（製品情報・バーコード・価格・タグ・日付など）、`color_tag` / `category_tag` / `receipt_location`（ユーザー別タグ・収納場所）、`icon_tag`（Bootstrap Icons クラス名のマスタ。カテゴリ／収納場所のピッカー用）、`theme_settings`（テーマ永続化）。いずれもユーザー境界は `members_id`（= `auth.uid()`）と RLS を前提。
+  - **タグ系の現状**: カラー・カテゴリ・収納場所は設定画面から CRUD 可能（[services/tag_service.py](services/tag_service.py)、[services/icon_service.py](services/icon_service.py)）。スキーマの正本は [.cursor/rules/database_configuration.md](.cursor/rules/database_configuration.md)。カテゴリ／収納場所は `display_order`、プリセット用 `slot`（1..6）、ユーザーがプリセット行を消した slot の再作成抑止用の補助テーブル（`*_preset_slot_dismissed`）などを [supabase/migrations/](supabase/migrations/) で管理。
 - **保存方針**: 画像は Storage の **object path**（例: `{members_id}/{uuid}.jpg`）のみ DB に保存。公開 URL は保存せず、表示時に **signed URL** を発行（[services/photo_service.py](services/photo_service.py) の `create_signed_url_for_object`）。
-- **RLS**: [supabase/sql/owner_rls_setup.sql](supabase/sql/owner_rls_setup.sql) で `registration_product_information`, `photo`, `theme_settings`, `color_tag`, `category_tag` に RLS を有効化し、自分の行のみ select/insert/update/delete。
+- **RLS**: 方針の一例・セットアップ用 SQL は [supabase/sql/owner_rls_setup.sql](supabase/sql/owner_rls_setup.sql)。本番相当のポリシーは [supabase/migrations/](supabase/migrations/) を適用した状態を正とする（`registration_product_information`, `photo`, `theme_settings`, `color_tag`, `category_tag`, `receipt_location` など、`auth.uid() = members_id` 系）。
 - **分析への繋がり**: 作成日時・タグ・価格・作品/キャラ情報・バーコードなどを構造化して保存しているため、後の集計・可視化・ダッシュボード実装にそのまま利用可能。
-  - 【現状】項目としては、作成しているが、自動で抽出して表示までは、未実装
+  - 【現状】ダッシュボード画面はデモ中心。タグの自動抽出は登録フローに組み込み済みだが、集計 UI への反映は未実装
 
 ---
 
 ## 4. セキュリティ・マルチテナント
 
 - **認証**: Supabase Auth。Google OAuth は app_state を Cookie に持ち、PKCE で code 交換。セッションは HttpOnly Cookie に保存。`localhost` と `127.0.0.1` を混在させない（Cookie 不整合の原因）。
-- **DB**: 全テーブルに `members_id` を付与し、RLS で `members_id = auth.uid()` の行のみアクセス可能。
+- **DB**: ユーザー由来の業務データは `members_id` を付与し、RLS で `members_id = auth.uid()` の行のみアクセス可能（グローバルマスタの `icon_tag` 等は対象外）。
 - **Storage**: `photos` バケットは Private。アップロードは `{members_id}/{uuid}.ext`。取得・表示は signed URL のみ。
 
 ---
@@ -284,19 +290,26 @@ docker-compose up -d
 ```
 ├── app.py                 # Dash 定義（Flask サーバは server.py で作成）
 ├── server.py              # エントリ（Flask + Dash）
-├── components/            # レイアウト・ナビ・各ページの UI
-├── features/              # 登録フロー等のコールバックロジック
+├── pages/                 # Dash Pages（URL ごとの layout・register_page）
+│   └── settings/          # 設定（index, color_tags, receipt_location_tags, category_tags 等）
+├── components/            # レイアウト・ナビ・横断 UI
+├── features/              # 機能別コールバック（barcode, photo, review, color_tag, receipt_location_tag, category_tag 等）
 ├── services/              # Supabase、楽天 API、Vision、タグ抽出、写真 CRUD
 │   ├── supabase_client.py
 │   ├── barcode_lookup.py  # 楽天 API 照合
 │   ├── io_intelligence.py # Vision 説明・構造化
 │   ├── tag_extraction.py  # タグ抽出
+│   ├── tag_service.py     # カラー／カテゴリ／収納場所タグの DB 操作
+│   ├── icon_service.py    # icon_tag 由来のアイコン一覧
 │   └── photo_service.py   # Storage アップロード・signed URL・DB CRUD
 ├── assets/                # styles.css, camera.js
 ├── supabase/              # マイグレーション・RLS 用 SQL
 ├── cursor.md              # Cursorから開発者へのメモ（起動・認証・環境変数・不具合）
+├── AGENTS.md              # AI/開発時の境界・正本ドキュメントへの導線
 └── requirements.txt
 ```
+
+- URL・ページ対応の一覧は [.cursor/rules/file_structure.md](.cursor/rules/file_structure.md) を参照。
 
 ---
 

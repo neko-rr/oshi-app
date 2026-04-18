@@ -219,9 +219,9 @@ def render_settings() -> html.Div:
                                 href="/settings/color-tags",
                                 className="btn btn-outline-primary me-2 mb-2",
                             ),
-                            html.Button(
+                            dcc.Link(
                                 "カテゴリータグ",
-                                n_clicks=0,
+                                href="/settings/category-tags",
                                 className="btn btn-outline-primary me-2 mb-2",
                             ),
                             dcc.Link(
