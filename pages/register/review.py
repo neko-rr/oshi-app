@@ -44,8 +44,10 @@ register_page(
     title="確認・登録 - おしごとアプリ",
 )
 
+# Dash 4: コールバック対象コンポーネントは常に app.layout 側に存在する必要がある。
+# 実体は app.py の register-review-static-mount に render_review_page() を載せ、ここはルート用の空プレースホルダのみ。
 try:
-    layout = render_review_page()
+    layout = html.Div(className="register-review-route-spacer")
 except Exception as e:
     layout = html.Div(
         f"Review page error: {str(e)}", style={"color": "red", "padding": "20px"}

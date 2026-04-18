@@ -1,6 +1,11 @@
-logs
+# アプリ・スクリプトが書き込むログ一式（ルートに散らさない）
+/logs/
 *.log
 *log.txt
+# 旧レイアウトでルートに残ったファイル（移行後も誤コミット防止）
+/app_run.log
+/debug_log.txt
+/save_registration_debug.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

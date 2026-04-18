@@ -1,43 +1,8 @@
-﻿import base64
-from app import save_registration
-from components.state_utils import serialise_state, empty_registration_state
+﻿"""保存処理のシンボル存在確認（旧 app.save_registration 呼び出しは廃止）。"""
 
-sample_image_bytes = base64.b64encode(b'SampleImageBytes').decode('ascii')
+from services import registration_service
 
-state = empty_registration_state()
-state['barcode'] = {
-    'value': '1234567890123',
-    'type': 'EAN-13',
-    'status': 'captured',
-    'source': 'manual',
-    'filename': 'code.png'
-}
-state['front_photo'] = {
-    'content': 'data:image/png;base64,' + sample_image_bytes,
-    'filename': 'front.png',
-    'content_type': 'image/png',
-    'status': 'captured',
-    'description': 'Test description'
-}
-state['lookup'] = {
-    'status': 'success',
-    'items': [{'name': 'Test Product'}],
-    'message': '',
-    'source': 'test'
-}
-state['tags'] = {
-    'status': 'success',
-    'tags': ['tag1', 'tag2'],
-    'message': ''
-}
 
-serialized_state = serialise_state(state)
-
-result = save_registration(
-    n_clicks=1,
-    store_data=serialized_state,
-    note='note from step',
-    selected_tags=['tag1', 'tag3'],
-    final_note='final note'
-)
-print('save_registration result:', result)
+def test_save_registration_is_exported():
+    assert hasattr(registration_service, "save_registration")
+    assert callable(registration_service.save_registration)

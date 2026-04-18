@@ -1,6 +1,7 @@
 # Available Bootswatch themes
 from typing import Optional
 
+from components.theme_palette import BOOTSWATCH_SWATCH
 from services.theme_service import (
     DEFAULT_THEME,
     DEFAULT_MEMBERS_TYPE_NAME,
@@ -44,6 +45,27 @@ BOOTSWATCH_THEMES = [
     "zephyr",
 ]
 
+# 設定画面のカード生成順（BOOTSWATCH_SWATCH.keys）と Dash ALL の出力適用順を揃える
+_THEME_CARD_LAYOUT_ORDER = {
+    name: idx for idx, name in enumerate(BOOTSWATCH_SWATCH.keys())
+}
+
+
+def _sorted_theme_card_ids(ids):
+    """ALL の id 列挙順がレイアウトとずれても、className リストをカード並びに一致させる。"""
+    if not ids:
+        return []
+
+    def sort_key(cid):
+        if isinstance(cid, dict) and cid.get("type") == "theme-card":
+            t = cid.get("theme")
+            if isinstance(t, str):
+                return _THEME_CARD_LAYOUT_ORDER.get(t, 10_000)
+        return 10_000
+
+    return sorted(ids, key=sort_key)
+
+
 # Load/save theme (ローカルフォールバック用)
 THEME_FILE = "theme.txt"
 
@@ -84,13 +106,17 @@ def _infer_members_id(members_id: Optional[str]) -> Optional[str]:
 def load_theme(
     members_id: Optional[str] = None, members_type_name: Optional[str] = None
 ) -> str:
-    """Supabase 優先でテーマ取得。未設定/失敗時はローカル→デフォルト minty。"""
+    """Supabase 優先でテーマ取得。未ログイン時のみ theme.txt にフォールバック。"""
     mid = _infer_members_id(members_id)
     mtype = members_type_name or DEFAULT_MEMBERS_TYPE_NAME
     if mid:
-        theme = get_theme(mid, mtype)
-        if theme:
-            return theme
+        raw = get_theme(mid, mtype)
+        if raw:
+            t = str(raw).strip()
+            if t in BOOTSWATCH_THEMES:
+                return t
+        # ログイン済みなのに DB から有効名が取れない場合、theme.txt に落とすと未ログイン時の値と混線する
+        return DEFAULT_THEME
     return _load_theme_from_file()
 
 
@@ -190,8 +216,37 @@ def register_theme_callbacks(app):
         css = get_bootswatch_css(selected)
         return selected, css, f"選択中: {selected}"
 
+    # 設定ページ表示時は theme-store を信用しない（未ログイン時や古い値が残り DB とずれるため）。
+    # bootswatch-theme.href は app._sync_nav 等と pathname を共有すると Dash 4 で重複登録になるため、
+    # ここでは Store/ラベル/カードのみ更新し、href は themeScroll.applyBootswatchFromStores（clientside）に任せる。
     @app.callback(
-        Output({"type": "theme-card", "theme": ALL}, "className"),
+        Output("theme-preview-store", "data", allow_duplicate=True),
+        Output("theme-preview-name", "children", allow_duplicate=True),
+        Output({"type": "theme-card", "theme": ALL}, "className", allow_duplicate=True),
+        Input("_pages_location", "pathname"),
+        State({"type": "theme-card", "theme": ALL}, "id"),
+        prevent_initial_call=False,
+    )
+    def sync_settings_theme_preview_from_pathname(pathname, ids):
+        if pathname != "/settings":
+            raise PreventUpdate
+        theme = load_theme()
+        if theme not in BOOTSWATCH_THEMES:
+            theme = DEFAULT_THEME
+        label = f"選択中: {theme}"
+        base = "card theme-card"
+        if not ids:
+            return theme, label, no_update
+        class_names = []
+        for cid in _sorted_theme_card_ids(ids):
+            if isinstance(cid, dict) and cid.get("theme") == theme:
+                class_names.append(f"{base} active")
+            else:
+                class_names.append(base)
+        return theme, label, class_names
+
+    @app.callback(
+        Output({"type": "theme-card", "theme": ALL}, "className", allow_duplicate=True),
         Input("theme-preview-store", "data"),
         State({"type": "theme-card", "theme": ALL}, "id"),
     )
@@ -199,8 +254,10 @@ def register_theme_callbacks(app):
         base = "card theme-card"
         if not ids:
             raise PreventUpdate
+        if isinstance(selected, dict):
+            selected = selected.get("theme")
         result = []
-        for cid in ids:
+        for cid in _sorted_theme_card_ids(ids):
             if isinstance(cid, dict) and cid.get("theme") == selected:
                 result.append(f"{base} active")
             else:
@@ -216,15 +273,19 @@ def register_theme_callbacks(app):
         prevent_initial_call=True,
     )
 
-    # --- Client-side: theme-store -> bootswatch link を即時反映 ---
+    # --- Client-side: theme-store / 設定プレビュー / pathname から bootswatch link を反映（サーバーと pathname 重複を避ける） ---
     app.clientside_callback(
         ClientsideFunction(
-            namespace="themeScroll",  # assets/themeScroll.js にまとめる方針で流用
-            function_name="applyThemeHref",
+            namespace="themeScroll",
+            function_name="applyBootswatchFromStores",
         ),
         Output("bootswatch-theme", "href", allow_duplicate=True),
-        Input("theme-store", "data"),
-        prevent_initial_call=False,
+        [
+            Input("theme-store", "data"),
+            Input("theme-preview-store", "data"),
+            Input("_pages_location", "pathname"),
+        ],
+        prevent_initial_call=True,
     )
 
     app.clientside_callback(

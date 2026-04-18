@@ -45,19 +45,9 @@ ENV PATH=/home/app/.local/bin:$PATH \
 
 EXPOSE 8050
 
-# ヘルスチェック
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/login || exit 1
+# ヘルスチェック（Render は PORT を可変で注入するため $PORT に合わせる）
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f "http://127.0.0.1:${PORT}/login" || exit 1
 
-# Render 想定の起動コマンド (Gunicorn + gthread)
-CMD gunicorn server:app \
-    --bind 0.0.0.0:$PORT \
-    --workers 1 \
-    --threads 2 \
-    --worker-class gthread \
-    --worker-tmp-dir /dev/shm \
-    --max-requests 500 \
-    --max-requests-jitter 25 \
-    --log-level info \
-    --access-logfile - \
-    --error-logfile -
+# Render 想定: exec で PID1=gunicorn とし SIGTERM を正しく処理。Dash の長めリクエスト向けに timeout を延長。
+CMD ["sh", "-c", "exec gunicorn server:app --bind 0.0.0.0:${PORT} --workers 1 --threads 2 --worker-class gthread --worker-tmp-dir /dev/shm --timeout 120 --graceful-timeout 30 --max-requests 500 --max-requests-jitter 25 --log-level info --access-logfile - --error-logfile -"]

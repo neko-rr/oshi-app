@@ -1,3 +1,6 @@
+# Cursor / ローカル（イメージ肥大と不要ファイル混入防止）
+.cursor/
+
 # Version control
 .git
 .gitignore
@@ -19,6 +22,7 @@ venv/
 Thumbs.db
 
 # Local artifacts and logs
+logs/
 app_run.log
 debug_log.txt
 save_registration_debug.txt
@@ -90,8 +94,6 @@ Thumbs.db
 
 # Project specific
 demo_database.db
-debug_log.txt
-save_registration_debug.txt
 *.db
 *.sqlite
 *.sqlite3

@@ -1,5 +1,4 @@
 from dash import html, dcc, register_page
-from components.theme_utils import load_theme, CURRENT_THEME
 from components.theme_palette import BOOTSWATCH_SWATCH
 from services.photo_service import get_product_stats
 from services.supabase_client import get_supabase_client
@@ -7,7 +6,8 @@ import dash_bootstrap_components as dbc
 
 
 def render_settings() -> html.Div:
-    current_theme = load_theme()
+    # テーマの正本は app.py の _sync_nav（theme-store）＋ theme_utils のコールバック。
+    # レイアウト生成時点では g / Cookie が未確定なことがあり load_theme() が DB とずれるため、ここでは初期化しない。
     supabase = get_supabase_client()
     if supabase is None:
         total_photos = 0
@@ -116,7 +116,6 @@ def render_settings() -> html.Div:
                         "カードを選ぶとすぐプレビューと適用が切り替わります。保存ボタンで永続化します。",
                         className="card-text mb-3",
                     ),
-                    dcc.Store(id="theme-preview-store", data=current_theme or CURRENT_THEME),
                     html.Div(
                         [
                             html.Div(
@@ -186,6 +185,7 @@ def render_settings() -> html.Div:
                             for theme in BOOTSWATCH_SWATCH.keys()
                         ],
                         className="d-flex flex-row flex-nowrap gap-3 mb-3",
+                        id="theme-card-container",
                         style={"overflowX": "auto"},
                     ),
                     html.Div(
@@ -200,7 +200,7 @@ def render_settings() -> html.Div:
                     html.Div(
                         id="theme-preview-name",
                         className="text-body-secondary small mb-1",
-                        children=f"選択中: {current_theme or CURRENT_THEME}",
+                        children="現在のテーマを読み込み中…",
                     ),
                     html.Div(id="theme-save-result", className="mt-2"),
                 ],

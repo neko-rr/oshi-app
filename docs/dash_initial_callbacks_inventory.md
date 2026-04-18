@@ -18,7 +18,7 @@
 | `save_theme_callback` | initial_duplicate | 重複許容 | 軽 | クリック時 |
 | `update_preview_from_card` | いいえ | True | 軽 | |
 | `mark_active_card` | 設定ページのみ | 未指定 | 軽 | |
-| clientside `applyThemeHref` | はい（クライアント） | False | 軽 | `themeScroll.js` で許可リスト検証 |
+| clientside `applyBootswatchFromStores` | はい（クライアント） | True | 軽 | `theme-store` / `theme-preview-store` / pathname、`themeScroll.js` で許可リスト検証 |
 
 ## ギャラリー（`pages/gallery/index.py`）
 

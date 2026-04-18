@@ -1,7 +1,7 @@
 # Strongly-logged startup for the Dash app (Windows PowerShell)
 # - Kills any running python
 # - Ensures unbuffered UTF-8 logging
-# - Writes console output to app_run.log while also showing it on screen
+# - Writes console output to logs/app_run.log while also showing it on screen
 
 try {
   # Move to the script directory (project root)
@@ -26,7 +26,7 @@ try {
   # Stop any existing python processes quietly
   Get-Process -Name python -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
-  # Stop any previous logger shells that are still running this script (they may hold app_run.log)
+  # Stop any previous logger shells that are still running this script (they may hold logs/app_run.log)
   try {
     $myPid = $PID
     $prev = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
@@ -47,12 +47,16 @@ try {
     $pythonExe = "python"
   }
 
+  $logDir = Join-Path $PSScriptRoot "logs"
+  $logFile = Join-Path $logDir "app_run.log"
+  New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+
   # Fresh log header (handle possible transient file locks)
   $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
   for ($i = 0; $i -lt 5; $i++) {
     try {
-      if (Test-Path "app_run.log") { Remove-Item -Force "app_run.log" -ErrorAction Stop }
-      "==== Restart at $ts (start_with_logs.ps1) ====\n" | Out-File -FilePath app_run.log -Encoding utf8
+      if (Test-Path $logFile) { Remove-Item -Force $logFile -ErrorAction Stop }
+      "==== Restart at $ts (start_with_logs.ps1) ====\n" | Out-File -FilePath $logFile -Encoding utf8
       break
     } catch {
       Start-Sleep -Milliseconds 250
@@ -60,7 +64,7 @@ try {
   }
 
   # Start the app (Flask+Dash entrypoint) with live tee logging
-  & $pythonExe -u server.py 2>&1 | Tee-Object -FilePath app_run.log -Append
+  & $pythonExe -u server.py 2>&1 | Tee-Object -FilePath $logFile -Append
 }
 catch {
   Write-Error $_
