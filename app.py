@@ -63,6 +63,7 @@ def create_app(server=None) -> dash.Dash:
     from features.receipt_location_tag.controller import (
         register_receipt_location_tag_callbacks,
     )
+    from features.category_tag.controller import register_category_tag_callbacks
 
     register_barcode_callbacks(app)
     register_photo_callbacks(app)
@@ -70,6 +71,7 @@ def create_app(server=None) -> dash.Dash:
     register_review_callbacks(app)
     register_color_tag_callbacks(app)
     register_receipt_location_tag_callbacks(app)
+    register_category_tag_callbacks(app)
 
     # pathname 系は theme の clientside より先に登録し、theme-store → href の順で正本を揃えやすくする
     # /register/barcode に外部から入ったときだけ registration-store を初期化し、

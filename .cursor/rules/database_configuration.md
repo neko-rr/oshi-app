@@ -93,6 +93,15 @@
 
 （備考）`receipt_location` の slot 1..6 行をユーザーが削除したときに行を追加し、`tag_service.ensure_default_receipt_locations` が該当 slot のプリセットを再 insert しないようにする。
 
+| 役割           | 名称日本語                             | メソッド名                               | データ型 | キー設定          |
+| -------------- | -------------------------------------- | ---------------------------------------- | -------- | ----------------- |
+| エンティティ名 | カテゴリプリセット削除済みスロット     | category_tag_preset_slot_dismissed       | 文字列   |                   |
+| 属性           | 会員 ID                                | members_id                               | UUID     | Primary Key(複合) |
+| 属性           | プリセットスロット                     | slot                                     | 整数     | Primary Key(複合) 1..6 |
+| 属性           | 削除記録日時                           | dismissed_at                             | 時刻     |                   |
+
+（備考）`category_tag` の slot 1..6 行をユーザーが削除したときに行を追加し、`tag_service.ensure_default_category_tags` が該当 slot のプリセットを再 insert しないようにする。
+
 | 役割           | 名称日本語               | メソッド名                | データ型 | キー設定    |
 | -------------- | ------------------------ | ------------------------- | -------- | ----------- |
 | エンティティ名 | アイコンタグ             | icon_tag                  | 文字列   |             |
@@ -102,6 +111,8 @@
 | 属性           | 収納場所使用フラグ       | receipt_location_use_flag | 整数     |             |
 
 （UI 備考）収納場所タグ設定画面のアイコン一覧は、`receipt_location_use_flag = 1` の行を `icon_name` 昇順で表示する（`services/icon_service.py` の `get_receipt_location_icons_sorted`）。
+
+（UI 備考）カテゴリータグ設定画面のアイコン一覧は、`category_tag_use_flag = 1` の行を `icon_name` 昇順で表示する（`services/icon_service.py` の `get_category_icons_sorted`）。
 
 | 役割           | 名称日本語 | メソッド名        | データ型 | キー設定          |
 | -------------- | ---------- | ----------------- | -------- | ----------------- |
@@ -175,6 +186,14 @@
 | 属性           | カテゴリータグ名         | category_tag_name     | 文字列   |             |
 | 属性           | カテゴリータグアイコン   | category_tag_icon     | 文字列   |             |
 | 属性           | カテゴリータグ使用フラグ | category_tag_use_flag | 整数     |             |
+| 属性           | プリセットスロット       | slot                  | 整数     | 1..6 または NULL（追加行） |
+| 属性           | 表示順                   | display_order         | 整数     | 一覧の並び  |
+
+※現行仕様（重要）
+
+- プリセットは **slot 1..6**（欠けのみ `ensure_default_category_tags` で補完）。**7件目以降**は `slot IS NULL` の追加行（件数上限なし）。
+- 同一ユーザーで **`slot` が NULL でない行の slot は一意**（部分ユニークインデックス）。
+- `category_tag_color` は **HEX 形式 `#RRGGBB`** を想定（アプリ側で検証）。
 
 | 役割           | 名称日本語                     | メソッド名                       | データ型 | キー設定    |
 | -------------- | ------------------------------ | -------------------------------- | -------- | ----------- |

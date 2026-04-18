@@ -35,10 +35,15 @@ HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 BOOTSTRAP_ICON_RE = re.compile(r"^bi-[a-z0-9-]{1,64}$")
 
 RECEIPT_LOCATION_NAME_MAX_LEN = 200
+CATEGORY_TAG_NAME_MAX_LEN = 200
 
 # プリセット収納場所の slot 範囲（この範囲の行を削除したら再作成しない）
 PRESET_RECEIPT_LOCATION_SLOT_MIN = 1
 PRESET_RECEIPT_LOCATION_SLOT_MAX = 6
+
+# プリセットカテゴリの slot 範囲（収納場所と同様 1..6）
+PRESET_CATEGORY_SLOT_MIN = 1
+PRESET_CATEGORY_SLOT_MAX = 6
 
 # プリセット6件（slot 1..6）。不足分のみ insert し、既存行は上書きしない。
 DEFAULT_RECEIPT_LOCATIONS: List[Dict[str, Any]] = [
@@ -48,6 +53,16 @@ DEFAULT_RECEIPT_LOCATIONS: List[Dict[str, Any]] = [
     {"slot": 4, "receipt_location_name": "フォルダ", "receipt_location_icon": "bi-folder"},
     {"slot": 5, "receipt_location_name": "クリアファイル", "receipt_location_icon": "bi-file-earmark"},
     {"slot": 6, "receipt_location_name": "ディスプレイ", "receipt_location_icon": "bi-tv"},
+]
+
+# プリセット6件（slot 1..6）。不足分のみ insert。既存行は上書きしない。
+DEFAULT_CATEGORY_TAGS: List[Dict[str, Any]] = [
+    {"slot": 1, "category_tag_name": "本", "category_tag_color": "#0d6efd", "category_tag_icon": "bi-book"},
+    {"slot": 2, "category_tag_name": "キーホルダー", "category_tag_color": "#fd7e14", "category_tag_icon": "bi-key"},
+    {"slot": 3, "category_tag_name": "家庭用", "category_tag_color": "#198754", "category_tag_icon": "bi-house-door"},
+    {"slot": 4, "category_tag_name": "仕事用", "category_tag_color": "#6f42c1", "category_tag_icon": "bi-briefcase"},
+    {"slot": 5, "category_tag_name": "缶バッジ", "category_tag_color": "#20c997", "category_tag_icon": "bi-circle"},
+    {"slot": 6, "category_tag_name": "フィギュア", "category_tag_color": "#dc3545", "category_tag_icon": "bi-robot"},
 ]
 
 
@@ -69,6 +84,31 @@ def normalize_receipt_location_name(raw: Optional[str]) -> Optional[str]:
     if len(name) > RECEIPT_LOCATION_NAME_MAX_LEN:
         return None
     return name
+
+
+def normalize_category_icon(raw: Optional[str]) -> Optional[str]:
+    """カテゴリアイコンは収納場所と同じ bi-* 形式。"""
+    return normalize_receipt_location_icon(raw)
+
+
+def normalize_category_name(raw: Optional[str]) -> Optional[str]:
+    """カテゴリ名を検証。空・超過なら None。"""
+    name = (raw or "").strip()
+    if not name:
+        return None
+    if len(name) > CATEGORY_TAG_NAME_MAX_LEN:
+        return None
+    return name
+
+
+def normalize_category_color(raw: Optional[str]) -> Optional[str]:
+    """#RRGGBB のみ有効。"""
+    c = (raw or "").strip()
+    if not c:
+        return None
+    if not HEX_RE.match(c):
+        return None
+    return c
 
 
 def _validate_color_tag_entries(entries: List[Dict[str, Any]]) -> bool:
@@ -184,25 +224,6 @@ def get_color_tags() -> List[Dict[str, Any]]:
         return []
 
 
-def get_category_tags() -> List[Dict[str, Any]]:
-    """Get all category tags."""
-    supabase = get_supabase_client()
-    members_id = _current_members_id()
-    if not supabase or not members_id:
-        return []
-
-    try:
-        response = (
-            supabase.table("category_tag")
-            .select("*")
-            .eq("members_id", members_id)
-            .execute()
-        )
-        return response.data if response.data else []
-    except Exception:
-        return []
-
-
 def _get_dismissed_preset_slots() -> set[int]:
     """ユーザーが削除したプリセット slot（1..6）。テーブル未作成時は空扱い。"""
     supabase = get_supabase_client()
@@ -212,6 +233,33 @@ def _get_dismissed_preset_slots() -> set[int]:
     try:
         resp = (
             supabase.table("receipt_location_preset_slot_dismissed")
+            .select("slot")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        out: set[int] = set()
+        for row in resp.data or []:
+            s = row.get("slot")
+            if s is None:
+                continue
+            try:
+                out.add(int(s))
+            except (TypeError, ValueError):
+                continue
+        return out
+    except Exception:
+        return set()
+
+
+def _get_dismissed_category_preset_slots() -> set[int]:
+    """ユーザーが削除したカテゴリプリセット slot（1..6）。テーブル未作成時は空扱い。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return set()
+    try:
+        resp = (
+            supabase.table("category_tag_preset_slot_dismissed")
             .select("slot")
             .eq("members_id", members_id)
             .execute()
@@ -291,6 +339,75 @@ def get_receipt_location_tags_ordered() -> List[Dict[str, Any]]:
             int(x.get("receipt_location_id") or 0),
         ),
     )
+
+
+def ensure_default_category_tags() -> List[Dict[str, Any]]:
+    """slot 1..6 の欠けのみ insert。ユーザーが削除済みの slot は再作成しない。既存行は上書きしない。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return []
+    try:
+        resp = (
+            supabase.table("category_tag")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        existing = resp.data or []
+        filled_slots: set[int] = set()
+        for item in existing:
+            s = item.get("slot")
+            if s is None:
+                continue
+            try:
+                filled_slots.add(int(s))
+            except (TypeError, ValueError):
+                continue
+        dismissed = _get_dismissed_category_preset_slots()
+        missing = [
+            {
+                "members_id": members_id,
+                "slot": int(dc["slot"]),
+                "display_order": int(dc["slot"]) * 10,
+                "category_tag_name": dc["category_tag_name"],
+                "category_tag_color": dc["category_tag_color"],
+                "category_tag_icon": dc["category_tag_icon"],
+                "category_tag_use_flag": 1,
+            }
+            for dc in DEFAULT_CATEGORY_TAGS
+            if int(dc["slot"]) not in filled_slots
+            and int(dc["slot"]) not in dismissed
+        ]
+        if missing:
+            supabase.table("category_tag").insert(missing).execute()
+            resp = (
+                supabase.table("category_tag")
+                .select("*")
+                .eq("members_id", members_id)
+                .execute()
+            )
+            return resp.data or []
+        return existing
+    except Exception:
+        return []
+
+
+def get_category_tags_ordered() -> List[Dict[str, Any]]:
+    """display_order 昇順（同値は category_tag_id）。"""
+    ensured = ensure_default_category_tags()
+    return sorted(
+        ensured,
+        key=lambda x: (
+            int(x.get("display_order") or 0),
+            int(x.get("category_tag_id") or 0),
+        ),
+    )
+
+
+def get_category_tags() -> List[Dict[str, Any]]:
+    """現在ユーザーのカテゴリタグ（プリセット＋追加行、表示順）。"""
+    return get_category_tags_ordered()
 
 
 def _max_display_order_for_member() -> int:
@@ -463,6 +580,164 @@ def get_receipt_location_tags() -> List[Dict[str, Any]]:
     return get_receipt_location_tags_ordered()
 
 
+def _max_display_order_for_category_member() -> int:
+    """現在ユーザーの category_tag の最大 display_order。"""
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return 0
+    try:
+        resp = (
+            supabase.table("category_tag")
+            .select("display_order")
+            .eq("members_id", members_id)
+            .order("display_order", desc=True)
+            .limit(1)
+            .execute()
+        )
+        rows = resp.data or []
+        if not rows:
+            return 0
+        return int(rows[0].get("display_order") or 0)
+    except Exception:
+        return 0
+
+
+def _category_row_id(row: Dict[str, Any]) -> Optional[int]:
+    """category_tag_id を整数化（JSON 経由の float 等も吸収）。"""
+    v = row.get("category_tag_id")
+    if v is None:
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        try:
+            return int(float(v))
+        except (TypeError, ValueError):
+            return None
+
+
+def delete_category_tag(category_tag_id: int) -> bool:
+    """カテゴリタグを削除（本人行のみ）。参照商品の category_tag_id は SET NULL。
+    slot 1..6 のプリセット行を消した場合は記録し、以後 ensure で同 slot を再作成しない。
+    """
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return False
+    try:
+        cid = int(category_tag_id)
+    except (TypeError, ValueError):
+        return False
+    try:
+        sel = (
+            supabase.table("category_tag")
+            .select("slot")
+            .eq("category_tag_id", cid)
+            .eq("members_id", members_id)
+            .limit(1)
+            .execute()
+        )
+        row = (sel.data or [None])[0]
+        if row is not None:
+            s = row.get("slot")
+            if s is not None:
+                try:
+                    slot = int(s)
+                except (TypeError, ValueError):
+                    slot = None
+                if (
+                    slot is not None
+                    and PRESET_CATEGORY_SLOT_MIN <= slot <= PRESET_CATEGORY_SLOT_MAX
+                ):
+                    try:
+                        supabase.table(
+                            "category_tag_preset_slot_dismissed"
+                        ).upsert(
+                            [{"members_id": members_id, "slot": slot}],
+                            on_conflict="members_id,slot",
+                        ).execute()
+                    except Exception:
+                        pass
+        supabase.table("category_tag").delete().eq(
+            "category_tag_id", cid
+        ).eq("members_id", members_id).execute()
+        return True
+    except Exception:
+        return False
+
+
+def move_category_tag(category_tag_id: int, direction: str) -> bool:
+    """隣行と display_order を入れ替える（up / down）。"""
+    if direction not in ("up", "down"):
+        return False
+    supabase = get_supabase_client()
+    members_id = _current_members_id()
+    if not supabase or not members_id:
+        return False
+    try:
+        target_id = int(category_tag_id)
+    except (TypeError, ValueError):
+        return False
+
+    def _fetch_sorted() -> List[Dict[str, Any]]:
+        resp = (
+            supabase.table("category_tag")
+            .select("*")
+            .eq("members_id", members_id)
+            .execute()
+        )
+        return sorted(
+            resp.data or [],
+            key=lambda x: (
+                int(x.get("display_order") or 0),
+                _category_row_id(x) or 0,
+            ),
+        )
+
+    try:
+        rows = _fetch_sorted()
+        if not rows:
+            return False
+
+        orders = [int(x.get("display_order") or 0) for x in rows]
+        if len(set(orders)) < len(rows):
+            for i, r in enumerate(rows):
+                rid = _category_row_id(r)
+                if rid is None:
+                    return False
+                supabase.table("category_tag").update(
+                    {"display_order": (i + 1) * 10}
+                ).eq("category_tag_id", rid).eq("members_id", members_id).execute()
+            rows = _fetch_sorted()
+
+        idx = next(
+            (i for i, r in enumerate(rows) if _category_row_id(r) == target_id),
+            None,
+        )
+        if idx is None:
+            return False
+        j = idx - 1 if direction == "up" else idx + 1
+        if j < 0 or j >= len(rows):
+            return False
+        a, b = rows[idx], rows[j]
+        id_a = _category_row_id(a)
+        id_b = _category_row_id(b)
+        if id_a is None or id_b is None:
+            return False
+        oa = int(a.get("display_order") or 0)
+        ob = int(b.get("display_order") or 0)
+        supabase.table("category_tag").update({"display_order": ob}).eq(
+            "category_tag_id", id_a
+        ).eq("members_id", members_id).execute()
+        supabase.table("category_tag").update({"display_order": oa}).eq(
+            "category_tag_id", id_b
+        ).eq("members_id", members_id).execute()
+        return True
+    except Exception:
+        return False
+
+
 def update_color_tag(color_tag_id: int, name: str, color: str) -> bool:
     """Update a color tag."""
     supabase = get_supabase_client()
@@ -480,18 +755,22 @@ def update_color_tag(color_tag_id: int, name: str, color: str) -> bool:
 
 
 def update_category_tag(category_tag_id: int, name: str, color: str, icon: str) -> bool:
-    """Update a category tag."""
+    """カテゴリタグを更新（本人行のみ）。名称・色・アイコンを検証する。"""
     supabase = get_supabase_client()
     members_id = _current_members_id()
     if not supabase or not members_id:
         return False
-
+    n = normalize_category_name(name)
+    col = normalize_category_color(color)
+    ic = normalize_category_icon(icon)
+    if n is None or col is None or ic is None:
+        return False
     try:
         supabase.table("category_tag").update(
             {
-                "category_tag_name": name,
-                "category_tag_color": color,
-                "category_tag_icon": icon,
+                "category_tag_name": n,
+                "category_tag_color": col,
+                "category_tag_icon": ic,
             }
         ).eq("category_tag_id", category_tag_id).eq("members_id", members_id).execute()
         return True
@@ -537,19 +816,26 @@ def create_color_tag(name: str, color: str) -> bool:
 
 
 def create_category_tag(name: str, color: str, icon: str) -> bool:
-    """Create a new category tag."""
+    """追加行としてカテゴリタグを作成（slot は NULL、件数上限なし）。"""
     supabase = get_supabase_client()
     members_id = _current_members_id()
     if not supabase or not members_id:
         return False
-
+    n = normalize_category_name(name)
+    col = normalize_category_color(color)
+    ic = normalize_category_icon(icon)
+    if n is None or col is None or ic is None:
+        return False
     try:
+        next_order = _max_display_order_for_category_member() + 10
         supabase.table("category_tag").insert(
             {
                 "members_id": members_id,
-                "category_tag_name": name,
-                "category_tag_color": color,
-                "category_tag_icon": icon,
+                "slot": None,
+                "display_order": next_order,
+                "category_tag_name": n,
+                "category_tag_color": col,
+                "category_tag_icon": ic,
                 "category_tag_use_flag": 1,
             }
         ).execute()

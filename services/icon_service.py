@@ -22,6 +22,15 @@ def get_category_icons() -> List[Dict[str, Any]]:
         return []
 
 
+def get_category_icons_sorted() -> List[Dict[str, Any]]:
+    """カテゴリ用 icon_tag を表示用に icon_name 順で並べる。"""
+    rows = get_category_icons()
+    return sorted(
+        rows,
+        key=lambda x: ((x.get("icon_name") or ""), (x.get("icon") or "")),
+    )
+
+
 def get_receipt_location_icons() -> List[Dict[str, Any]]:
     """Get icons available for receipt location tags."""
     supabase = get_supabase_client()
