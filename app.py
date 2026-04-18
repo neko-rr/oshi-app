@@ -64,6 +64,7 @@ def create_app(server=None) -> dash.Dash:
         register_receipt_location_tag_callbacks,
     )
     from features.category_tag.controller import register_category_tag_callbacks
+    from features.gallery.controller import register_gallery_callbacks
 
     register_barcode_callbacks(app)
     register_photo_callbacks(app)
@@ -72,6 +73,7 @@ def create_app(server=None) -> dash.Dash:
     register_color_tag_callbacks(app)
     register_receipt_location_tag_callbacks(app)
     register_category_tag_callbacks(app)
+    register_gallery_callbacks(app)
 
     # pathname 系は theme の clientside より先に登録し、theme-store → href の順で正本を揃えやすくする
     # /register/barcode に外部から入ったときだけ registration-store を初期化し、
@@ -142,6 +144,21 @@ def create_app(server=None) -> dash.Dash:
                 id="registration-store", data=deepcopy(empty_registration_state())
             ),
             dcc.Store(id="nav-history-store", data={"prev": None}),
+            # ギャラリー: pathname コールバックが /gallery 以外でも評価されるため Store はルートに常設する
+            dcc.Store(
+                id="gallery-products-store",
+                data={
+                    "status": "loading",
+                    "items": [],
+                    "offset": 0,
+                    "hasMore": False,
+                    "v": 1,
+                },
+                storage_type="session",
+            ),
+            dcc.Store(id="gallery-color-filter", data=[]),
+            # ギャラリー詳細でタグ保存後、一覧の session キャッシュを無効化する
+            dcc.Store(id="gallery-tags-dirty", data=None),
             html.Div(id="auto-fill-trigger", style={"display": "none"}),
             # レビュー専用レイアウト外でも register_review_callbacks が参照するためルートに常設する
             # Dash 4 の dcc.Interval は style を受け付けないため、非表示は外側の Div に付ける

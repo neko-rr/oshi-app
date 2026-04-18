@@ -1,6 +1,6 @@
 from dash import html
 from dash import dcc
-from dash import callback, Output, Input, State, callback_context, register_page
+from dash import callback, Output, Input, State, callback_context, register_page, no_update
 from dash.dependencies import ALL
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
@@ -95,22 +95,138 @@ def _attach_color_slots(
     """製品リストに color_slots を付与する。"""
     if not products:
         return products
-    ids = [
-        p.get("registration_product_id")
-        for p in products
-        if isinstance(p, dict) and p.get("registration_product_id")
-    ]
+    ids: List[int] = []
+    for p in products:
+        if not isinstance(p, dict):
+            continue
+        raw = p.get("registration_product_id")
+        if raw is None or raw == "":
+            continue
+        try:
+            ids.append(int(raw))
+        except (TypeError, ValueError):
+            continue
     slots_map = get_product_color_tag_slots(supabase, None, ids)
     for p in products:
-        pid = p.get("registration_product_id")
-        p["color_slots"] = slots_map.get(pid, [])
+        if not isinstance(p, dict):
+            continue
+        raw = p.get("registration_product_id")
+        try:
+            pid_int = int(raw) if raw is not None and raw != "" else None
+        except (TypeError, ValueError):
+            pid_int = None
+        p["color_slots"] = slots_map.get(pid_int, []) if pid_int is not None else []
     return products
+
+
+def _slot_to_color_map() -> Dict[int, str]:
+    tags = ensure_default_color_tags() or []
+    out: Dict[int, str] = {}
+    for t in tags:
+        s = t.get("slot")
+        if s is None:
+            continue
+        try:
+            out[int(s)] = str(t.get("color_tag_color") or "#6c757d")
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def _embed_dict(row: Dict[str, Any], key: str):
+    v = row.get(key)
+    if isinstance(v, list):
+        if not v:
+            return None
+        first = v[0]
+        return first if isinstance(first, dict) else None
+    if isinstance(v, dict):
+        return v
+    return None
+
+
+def _render_product_tag_chips(photo: Dict[str, Any]) -> html.Div:
+    """一覧カード用のタグチップ（カラー・カテゴリ・収納）。"""
+    sm = _slot_to_color_map()
+    pieces: List[Any] = []
+    for s in photo.get("color_slots") or []:
+        try:
+            si = int(s)
+        except (TypeError, ValueError):
+            continue
+        bg = sm.get(si, "#adb5bd")
+        pieces.append(
+            html.Span(
+                "",
+                title=f"色スロット{si}",
+                style={
+                    "display": "inline-block",
+                    "width": "10px",
+                    "height": "10px",
+                    "borderRadius": "2px",
+                    "background": bg,
+                    "border": "1px solid rgba(0,0,0,0.12)",
+                },
+            )
+        )
+    ct = _embed_dict(photo, "category_tag")
+    if ct and ct.get("category_tag_name"):
+        ic = (ct.get("category_tag_icon") or "bi-tag").strip()
+        if not ic.startswith("bi-"):
+            ic = f"bi-{ic}" if ic else "bi-tag"
+        pieces.append(
+            html.Span(
+                [html.I(className=ic, style={"fontSize": "0.75rem"})],
+                className="badge rounded-pill bg-light text-dark border",
+                style={"padding": "2px 6px"},
+                title=str(ct.get("category_tag_name") or ""),
+            )
+        )
+    rl = _embed_dict(photo, "receipt_location")
+    if rl and rl.get("receipt_location_name"):
+        ic = (rl.get("receipt_location_icon") or "bi-box-seam").strip()
+        if not ic.startswith("bi-"):
+            ic = f"bi-{ic}" if ic else "bi-box-seam"
+        pieces.append(
+            html.Span(
+                [html.I(className=ic, style={"fontSize": "0.75rem"})],
+                className="badge rounded-pill bg-light text-dark border",
+                style={"padding": "2px 6px"},
+                title=str(rl.get("receipt_location_name") or ""),
+            )
+        )
+    if not pieces:
+        return html.Div()
+    return html.Div(pieces, className="d-flex flex-wrap gap-1 align-items-center mt-1")
+
+
+def _normalize_gallery_color_filter_slots(raw) -> List[int]:
+    """Store 由来の値を 1..7 の整数リストに正規化（bool の True→1 等を除外）。"""
+    out: List[int] = []
+    if raw is None:
+        return out
+    if isinstance(raw, bool):
+        return out
+    if isinstance(raw, int):
+        return [raw] if 1 <= raw <= 7 else out
+    if not isinstance(raw, (list, tuple)):
+        return out
+    for x in raw:
+        if isinstance(x, bool):
+            continue
+        try:
+            i = int(x)
+        except (TypeError, ValueError):
+            continue
+        if 1 <= i <= 7 and i not in out:
+            out.append(i)
+    return sorted(out)
 
 
 def _filter_products(products: List[Dict[str, Any]], text: str, slots: List[int]):
     """テキストとカラータグでフィルタ。slotsはOR、テキストはAND適用。"""
     text = (text or "").strip().lower()
-    slots_set = set(int(s) for s in slots or [])
+    slots_set = set(_normalize_gallery_color_filter_slots(slots or []))
 
     def match_text(p: Dict[str, Any]) -> bool:
         if not text:
@@ -209,26 +325,27 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
                         },
                     )
                 ),
-                html.Div(
-                    [
                         html.Div(
-                            photo.get("product_name") or "名称未設定",
-                            className="fw-semibold text-dark",
+                            [
+                                html.Div(
+                                    photo.get("product_name") or "名称未設定",
+                                    className="fw-semibold text-dark",
+                                ),
+                                html.Div(
+                                    photo.get("title")
+                                    or photo.get("character_name")
+                                    or photo.get("works_series_name")
+                                    or "説明なし",
+                                    className="text-muted small",
+                                ),
+                                _render_product_tag_chips(photo),
+                            ],
+                            className="p-2",
+                            style={
+                                "minHeight": "72px",
+                                "overflow": "hidden",
+                            },
                         ),
-                        html.Div(
-                            photo.get("title")
-                            or photo.get("character_name")
-                            or photo.get("works_series_name")
-                            or "説明なし",
-                            className="text-muted small",
-                        ),
-                    ],
-                    className="p-2",
-                    style={
-                        "height": "64px",
-                        "overflow": "hidden",
-                    },
-                ),
             ],
             className="h-100"
         )
@@ -244,7 +361,8 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
                     "overflow": "hidden",
                     "boxShadow": "0 2px 6px rgba(0,0,0,0.08)",
                     "background": "var(--bs-card-bg)",
-                    "height": "214px",
+                    "minHeight": "228px",
+                    "height": "auto",
                     "width": "100%",
                 },
             )
@@ -338,6 +456,7 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
                                                 photo.get("memo") or "",
                                                 className="text-muted small",
                                             ),
+                                            _render_product_tag_chips(photo),
                                         ],
                                         className="flex-grow-1 text-start",
                                     ),
@@ -366,13 +485,7 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
 def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
     from urllib.parse import parse_qs
 
-    # 商品データはコールバックでページ取得（初回は空→すぐ補充）。session で再訪時の無駄取得を抑える（計画 C）
-    photo_store_component = dcc.Store(
-        id="gallery-products-store",
-        data=_gallery_store_loading(),
-        storage_type="session",
-    )
-    color_filter_store = dcc.Store(id="gallery-color-filter", data=[])
+    # gallery-products-store / gallery-color-filter は app.layout ルートに常設（詳細・他ページでもコールバック可）
 
     qs = parse_qs(search.lstrip("?") if search else "")
     initial_view = view or qs.get("view", ["thumb"])[0] or "thumb"
@@ -461,8 +574,6 @@ def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
 
     dashboard_content = html.Div(
         [
-            photo_store_component,
-            color_filter_store,
             tag_search,
             view_toggle,
             html.Div(
@@ -499,7 +610,7 @@ def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
     prevent_initial_call=False,
 )
 def _update_swatch_styles(selected_slots, styles):
-    selected_set = set(int(s) for s in (selected_slots or []))
+    selected_set = set(_normalize_gallery_color_filter_slots(selected_slots))
     user_color_tags = ensure_default_color_tags() or []
     slot_to_color = {
         int(item.get("slot")): (item.get("color_tag_color") or "#6c757d")
@@ -557,12 +668,31 @@ def _toggle_color_filter(n_clicks, selected):
     slot = trig.get("slot")
     if slot is None:
         raise PreventUpdate
-    current = set(int(s) for s in (selected or []))
-    if int(slot) in current:
-        current.remove(int(slot))
+    try:
+        slot_i = int(slot)
+    except (TypeError, ValueError):
+        raise PreventUpdate
+    if not (1 <= slot_i <= 7):
+        raise PreventUpdate
+
+    # ALL の再マウント等で n_clicks=0 のまま発火すると slot 1 だけ選ばれる誤動作になるため、対象ボタンの実クリックのみ処理する
+    seq = n_clicks if isinstance(n_clicks, (list, tuple)) else (() if n_clicks is None else (n_clicks,))
+    idx = slot_i - 1
+    if idx < 0 or idx >= len(seq):
+        raise PreventUpdate
+    try:
+        clicks_here = int(seq[idx] or 0)
+    except (TypeError, ValueError):
+        raise PreventUpdate
+    if clicks_here < 1:
+        raise PreventUpdate
+
+    current = set(_normalize_gallery_color_filter_slots(selected))
+    if slot_i in current:
+        current.remove(slot_i)
     else:
         if len(current) < 7:
-            current.add(int(slot))
+            current.add(slot_i)
     return sorted(current)
 
 
@@ -589,12 +719,15 @@ def _gallery_pack(items, has_more: bool) -> dict:
 
 @callback(
     Output("gallery-products-store", "data", allow_duplicate=True),
+    Output("gallery-tags-dirty", "data", allow_duplicate=True),
+    Output("gallery-color-filter", "data", allow_duplicate=True),
     Input("_pages_location", "pathname"),
     State("nav-history-store", "data"),
     State("gallery-products-store", "data"),
+    State("gallery-tags-dirty", "data"),
     prevent_initial_call="initial_duplicate",
 )
-def _gallery_on_pathname(pathname, nav_hist, cur):
+def _gallery_on_pathname(pathname, nav_hist, cur, dirty):
     """他画面から /gallery へ来たときの初回・再訪。登録フローからは常に再取得（C2）。"""
     from services.photo_service import get_products_page
     from services.supabase_client import get_supabase_client
@@ -605,17 +738,21 @@ def _gallery_on_pathname(pathname, nav_hist, cur):
     page_size = 48
     supabase = get_supabase_client()
     if supabase is None:
-        return _gallery_pack([], False)
+        return _gallery_pack([], False), no_update, []
 
     prev_path = (nav_hist or {}).get("prev") if isinstance(nav_hist, dict) else None
     from_register = isinstance(prev_path, str) and prev_path.startswith("/register")
+    need_refresh = isinstance(dirty, dict) and bool(dirty.get("refresh"))
     # loading プレースホルダは truthy のため、ready のときだけキャッシュを使う
-    if _gallery_store_ready_for_cache(cur) and not from_register:
+    if _gallery_store_ready_for_cache(cur) and not from_register and not need_refresh:
         raise PreventUpdate
 
     batch = get_products_page(supabase, limit=page_size, offset=0)
     batch = _attach_color_slots(supabase, batch)
-    return _gallery_pack(batch, len(batch) >= page_size)
+    pack = _gallery_pack(batch, len(batch) >= page_size)
+    dirty_out = None if need_refresh else no_update
+    # 一覧をサーバーから取り直したタイミングでは色フィルターをクリア（誤選択・タグ保存後の不整合を防ぐ）
+    return pack, dirty_out, []
 
 
 @callback(
@@ -672,12 +809,15 @@ def _gallery_on_pager(n_more, n_refresh, cur, pathname):
     ],
     Input("gallery-products-store", "data"),
     Input("gallery-color-filter", "data"),
-    Input("gallery-search-input", "value"),
-    Input("gallery-view-mode", "value"),
+    State("gallery-search-input", "value", allow_optional=True),
+    State("gallery-view-mode", "value", allow_optional=True),
+    State("_pages_location", "pathname"),
     prevent_initial_call=False,
 )
-def _gallery_products_to_ui(store_data, selected_slots, text, view_mode):
+def _gallery_products_to_ui(store_data, selected_slots, text, view_mode, pathname):
     """同一トリガーで「さらに表示」無効化とグリッド描画をまとめ、往復を削減する。"""
+    if pathname != "/gallery":
+        raise PreventUpdate
     view_mode = view_mode or "thumb"
     if _gallery_products_loading(store_data):
         return True, _render_gallery_loading()
@@ -688,7 +828,8 @@ def _gallery_products_to_ui(store_data, selected_slots, text, view_mode):
         load_more_disabled = not bool(store_data.get("hasMore"))
 
     products = _gallery_items_from_store(store_data)
-    filtered = _filter_products(products, text, selected_slots)
+    slots_clean = _normalize_gallery_color_filter_slots(selected_slots)
+    filtered = _filter_products(products, text, slots_clean)
     return load_more_disabled, _render_cards(filtered, view_mode)
 
 

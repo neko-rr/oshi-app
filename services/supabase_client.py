@@ -21,7 +21,19 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOTENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 load_dotenv(dotenv_path=DOTENV_PATH, override=False)
 
-SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL") or ""
+def _normalize_supabase_project_url(raw: str) -> str:
+    """
+    PUBLIC_SUPABASE_URL が誤って /rest/v1 まで含む場合にプロジェクトルートへ寄せる。
+    create_client と手動 REST 呼び出しで同じ基底になるようにする。
+    """
+    u = (raw or "").strip().rstrip("/")
+    suffix = "/rest/v1"
+    if len(u) >= len(suffix) and u.lower().endswith(suffix.lower()):
+        return u[: -len(suffix)].rstrip("/")
+    return u
+
+
+SUPABASE_URL = _normalize_supabase_project_url(os.getenv("PUBLIC_SUPABASE_URL") or "")
 # publishable key は PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY のみを使用（フォールバック無し）
 PUBLISHABLE_KEY = os.getenv("PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY") or ""
 SECRET_KEY = os.getenv("SUPABASE_SECRET_DEFAULT_KEY")

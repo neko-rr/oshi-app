@@ -32,6 +32,19 @@ _GALLERY_PRODUCT_SELECT = """
     memo,
     barcode_number,
     photo_id,
+    category_tag_id,
+    receipt_location_id,
+    category_tag(
+        category_tag_name,
+        category_tag_color,
+        category_tag_icon,
+        category_tag_use_flag
+    ),
+    receipt_location(
+        receipt_location_name,
+        receipt_location_icon,
+        receipt_location_use_flag
+    ),
     photo(
         photo_thumbnail_url,
         photo_high_resolution_url,
