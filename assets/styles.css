@@ -1,3 +1,34 @@
+/* DESIGN.md 準拠トークン（登録画面優先） */
+:root {
+  --app-surface-border: 1px solid var(--bs-border-color);
+  --app-shadow-1: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --app-shadow-2: 0 6px 16px rgba(0, 0, 0, 0.14);
+  --app-focus-ring-color: var(--bs-primary);
+  --app-focus-ring-width: 2px;
+  --app-focus-ring-alpha: 0.35;
+  --app-focus-ring: 0 0 0 var(--app-focus-ring-width)
+    rgba(var(--bs-primary-rgb, 13, 110, 253), var(--app-focus-ring-alpha));
+  --app-interactive-hover-bg: var(--bs-secondary-bg, var(--bs-body-bg));
+  --app-interactive-active-scale: 0.98;
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-card-primary-bg: var(--bs-primary);
+  --app-card-primary-text: var(--bs-light, #fff);
+  --app-card-primary-border: color-mix(in srgb, var(--bs-primary) 85%, #000 15%);
+  --app-card-secondary-bg: var(--bs-secondary);
+  /* Bootstrap の card bg-secondary（text-white なし）に合わせ、薄い面上は本文色 */
+  --app-card-secondary-text: var(--bs-body-color, #212529);
+  --app-card-secondary-border: color-mix(in srgb, var(--bs-secondary) 85%, #000 15%);
+  --app-card-info-bg: var(--bs-info);
+  --app-card-info-text: var(--bs-light, #fff);
+  --app-card-success-bg: var(--bs-success);
+  --app-card-success-text: var(--bs-light, #fff);
+  --app-card-warning-bg: var(--bs-warning);
+  /* Bootstrap の text-white bg-warning に合わせる。可読性が足りないテーマは DESIGN.md の例外に従い濃色へ */
+  --app-card-warning-text: var(--bs-light, #fff);
+  --app-card-danger-bg: var(--bs-danger);
+  --app-card-danger-text: var(--bs-light, #fff);
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -6,7 +37,7 @@ body {
 }
 
 .page-container {
-  padding: 20px 15px 100px 15px;
+  padding: 20px 15px calc(100px + var(--app-safe-bottom)) 15px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -46,8 +77,106 @@ body {
   color: var(--bs-body-color);
   border-radius: var(--bs-border-radius-lg, 1rem);
   padding: 25px;
-  box-shadow: var(--bs-box-shadow-sm);
+  border: var(--app-surface-border);
+  box-shadow: var(--app-shadow-1);
   margin-bottom: 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-custom:hover {
+  box-shadow: var(--app-shadow-2);
+}
+
+.card-custom:active {
+  transform: scale(var(--app-interactive-active-scale));
+}
+
+.card-main-primary,
+.card-main-secondary,
+.card-main-info,
+.card-main-success,
+.card-main-warning,
+.card-main-danger {
+  border-radius: var(--bs-border-radius-lg, 1rem);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: var(--app-surface-border);
+  box-shadow: var(--app-shadow-1);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-main-primary:hover,
+.card-main-secondary:hover,
+.card-main-info:hover,
+.card-main-success:hover,
+.card-main-warning:hover,
+.card-main-danger:hover {
+  box-shadow: var(--app-shadow-2);
+}
+
+.card-main-primary:active,
+.card-main-secondary:active,
+.card-main-info:active,
+.card-main-success:active,
+.card-main-warning:active,
+.card-main-danger:active {
+  transform: scale(var(--app-interactive-active-scale));
+}
+
+.card-main-primary {
+  background: var(--app-card-primary-bg);
+  color: var(--app-card-primary-text);
+  border-color: var(--app-card-primary-border);
+}
+
+.card-main-secondary {
+  background: var(--app-card-secondary-bg);
+  color: var(--app-card-secondary-text);
+  border-color: var(--app-card-secondary-border);
+}
+
+.card-main-info {
+  background: var(--app-card-info-bg);
+  color: var(--app-card-info-text);
+}
+
+.card-main-success {
+  background: var(--app-card-success-bg);
+  color: var(--app-card-success-text);
+}
+
+.card-main-warning {
+  background: var(--app-card-warning-bg);
+  color: var(--app-card-warning-text);
+}
+
+.card-main-danger {
+  background: var(--app-card-danger-bg);
+  color: var(--app-card-danger-text);
+}
+
+.card-main-primary .text-muted,
+.card-main-info .text-muted,
+.card-main-success .text-muted,
+.card-main-danger .text-muted {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+.card-main-secondary .text-muted {
+  color: var(--bs-secondary-color, rgba(33, 37, 41, 0.65)) !important;
+}
+
+.card-main-warning .text-muted {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+.card-main-primary .card-title,
+.card-main-secondary .card-title,
+.card-main-info .card-title,
+.card-main-success .card-title,
+.card-main-warning .card-title,
+.card-main-danger .card-title {
+  margin-bottom: 0.75rem;
 }
 
 .upload-area {
@@ -57,11 +186,11 @@ body {
   text-align: center;
   background: var(--bs-light-bg-subtle, var(--bs-body-bg));
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .upload-area:hover {
-  background: var(--bs-secondary-bg, var(--bs-body-bg));
+  background: var(--app-interactive-hover-bg);
   border-color: var(--bs-border-color);
 }
 
@@ -70,20 +199,28 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-top: 20px;
+  /* 画面外タイルのレイアウト負荷を抑える（非対応ブラウザでは無視される） */
+  content-visibility: auto;
+  contain-intrinsic-size: 240px 800px;
 }
 
 .photo-card {
   background: var(--bs-card-bg);
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: var(--bs-box-shadow-sm);
+  border: var(--app-surface-border);
+  box-shadow: var(--app-shadow-1);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .photo-card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--bs-box-shadow-lg);
+  box-shadow: var(--app-shadow-2);
+}
+
+.photo-card:active {
+  transform: scale(var(--app-interactive-active-scale));
 }
 
 .photo-card img {
@@ -131,7 +268,7 @@ body {
   border-radius: 15px;
   padding: 24px 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -141,6 +278,11 @@ body {
 
 .camera-button:hover {
   border-color: var(--bs-primary);
+  background: var(--app-interactive-hover-bg);
+}
+
+.camera-button:active {
+  transform: scale(var(--app-interactive-active-scale));
 }
 
 .camera-icon {
@@ -178,6 +320,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 15px;
+  padding-bottom: var(--app-safe-bottom);
 }
 
 .input-custom {
@@ -186,8 +329,8 @@ body {
   width: 100%;
   margin-top: 10px;
   font-size: 16px; /* iOSフォーカス時の自動ズーム対策 */
-  transition: all 0.3s ease;
-  border: 1px solid var(--bs-border-color);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  border: var(--app-surface-border);
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
@@ -195,7 +338,31 @@ body {
 .input-custom:focus {
   outline: none;
   border-color: var(--bs-primary);
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.input-custom:focus-visible {
+  outline: none;
+  border-color: var(--app-focus-ring-color);
+  box-shadow: var(--app-focus-ring);
+}
+
+.input-custom:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 登録画面向けフォーカスリング（影響範囲を page-container 配下に限定） */
+.page-container button:focus-visible,
+.page-container .btn:focus-visible,
+.camera-button:focus-visible,
+.upload-area:focus-visible {
+  outline: none;
+  box-shadow: var(--app-focus-ring);
+}
+
+.page-container button:active,
+.page-container .btn:active {
+  transform: scale(var(--app-interactive-active-scale));
 }
 
 .stats-container {
@@ -289,6 +456,65 @@ body {
   font-size: 2rem;
   text-align: center;
   animation: spin 2s linear infinite;
+}
+
+/* 再試行UI（登録画面向け） */
+.retry-panel {
+  background: var(--bs-card-bg);
+  color: var(--bs-body-color);
+  border: var(--app-surface-border);
+  box-shadow: var(--app-shadow-1);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.retry-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.retry-message {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.retry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-retry,
+.btn-fallback {
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: var(--app-surface-border);
+}
+
+.btn-retry {
+  background: var(--bs-primary);
+  color: var(--bs-primary-contrast, #fff);
+  border-color: var(--bs-primary);
+  font-weight: 700;
+}
+
+.btn-retry:hover {
+  filter: brightness(0.95);
+}
+
+.btn-fallback {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.btn-fallback:hover {
+  background: var(--app-interactive-hover-bg);
 }
 
 @keyframes spin {

@@ -37,3 +37,4 @@ DEBUG: front_photo data: {'content': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQA
 DEBUG: front_photo content exists: True
 DEBUG: Successfully saved product - Name: IOのみ成功, Photo ID: 5
 DEBUG: Returning success message
+DEBUG: n_clicks is falsy, raising PreventUpdate

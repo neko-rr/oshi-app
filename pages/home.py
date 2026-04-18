@@ -30,7 +30,7 @@ def render_home() -> html.Div:
                         className="btn btn-primary btn-sm mt-2",
                     ),
                 ],
-                className="card p-3",
+                className="card-main-secondary",
             )
 
         photo = random_product.get("photo") or {}
@@ -92,7 +92,7 @@ def render_home() -> html.Div:
                     className="text-muted small ps-3 pb-3",
                 ),
             ],
-            className="card",
+            className="card-main-secondary",
         )
 
     return html.Div(
@@ -118,7 +118,7 @@ def render_home() -> html.Div:
                         className="card-text",
                     ),
                 ],
-                className="card bg-primary text-white mb-3",
+                className="card-main-primary",
             ),
             html.Div(
                 [
@@ -158,7 +158,7 @@ def render_home() -> html.Div:
                         className="d-flex justify-content-around gap-3 mb-4",
                     ),
                 ],
-                className="card bg-light p-3",
+                className="card-main-secondary",
             ),
             # ランダム1件の写真表示
             html.Div(
@@ -166,7 +166,7 @@ def render_home() -> html.Div:
                     html.H4("登録済みの写真からランダムに1枚", className="card-title"),
                     _random_photo_card(),
                 ],
-                className="card bg-light p-3 mb-3",
+                className="card-main-secondary",
             ),
         ]
     )

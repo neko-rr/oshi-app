@@ -78,7 +78,7 @@ def render_front_photo_section() -> html.Div:
                         multiple=False,
                     ),
                 ],
-                className="card-custom",
+                className="card-main-primary",
             ),
             html.Div(
                 [
@@ -99,7 +99,7 @@ def render_front_photo_section() -> html.Div:
                         multiple=False,
                     ),
                 ],
-                className="card-custom",
+                className="card-main-secondary",
             ),
             html.Div(
                 [

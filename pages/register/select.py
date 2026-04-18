@@ -17,7 +17,7 @@ def _card(title: str, description: str, button_id: str, color: str, disabled: bo
     return html.Div(
         [
             html.Div(title, className="card-title fw-semibold mb-2"),
-            html.P(description, className="card-text text-muted"),
+            html.P(description, className="card-text text-white-75"),
             html.Button(
                 "このフローを開始する",
                 id=button_id,
@@ -26,7 +26,7 @@ def _card(title: str, description: str, button_id: str, color: str, disabled: bo
                 disabled=disabled,
             ),
         ],
-        className="card-custom h-100",
+        className="card-main-secondary h-100",
     )
 
 

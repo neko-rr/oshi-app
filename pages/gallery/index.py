@@ -11,6 +11,39 @@ from services.product_color_tag_service import get_product_color_tag_slots
 Photo = Mapping[str, str]
 
 
+def _gallery_store_loading() -> dict:
+    """初回・再取得前。pathname コールバック完了まで空リストと区別する。"""
+    return {
+        "status": "loading",
+        "items": [],
+        "offset": 0,
+        "hasMore": False,
+        "v": 1,
+    }
+
+
+def _gallery_store_ready_for_cache(store_data) -> bool:
+    """session に「取得済み」が載っているとき True（pathname で再フェッチを省略）。"""
+    if store_data is None:
+        return False
+    if isinstance(store_data, list):
+        return True
+    if not isinstance(store_data, dict):
+        return False
+    if store_data.get("status") == "loading":
+        return False
+    return True
+
+
+def _gallery_products_loading(store_data) -> bool:
+    """UI はローディング。None は旧セッション互換。"""
+    if store_data is None:
+        return True
+    if isinstance(store_data, dict) and store_data.get("status") == "loading":
+        return True
+    return False
+
+
 def _photo_unique_id(photo: Photo, fallback: str) -> str:
     return (
         photo.get("registration_product_id")
@@ -101,6 +134,22 @@ def _filter_products(products: List[Dict[str, Any]], text: str, slots: List[int]
     return [p for p in products if match_text(p) and match_slots(p)]
 
 
+def _render_gallery_loading():
+    """取得完了までのプレースホルダ（空件メッセージと混同させない）。"""
+    return html.Div(
+        [
+            html.Div(
+                role="status",
+                className="spinner-border text-primary mb-3",
+                children=html.Span("読み込み中", className="visually-hidden"),
+            ),
+            html.Div("写真一覧を読み込んでいます…", className="text-muted"),
+        ],
+        className="card-main-secondary mb-4 p-4 text-center",
+        style={"minHeight": "12rem"},
+    )
+
+
 def _render_cards(products: List[Dict[str, Any]], view_mode: str):
     if not products:
         return html.Div(
@@ -116,7 +165,7 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
                     className="btn btn-primary mt-3",
                 ),
             ],
-            className="card p-4 mb-4",
+            className="card-main-secondary mb-4",
         )
 
     summary = html.Div(
@@ -315,20 +364,13 @@ def _render_cards(products: List[Dict[str, Any]], view_mode: str):
 
 
 def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
-    from services.photo_service import get_all_products
-    from services.supabase_client import get_supabase_client
     from urllib.parse import parse_qs
 
-    supabase = get_supabase_client()
-    if supabase is None:
-        products = []
-    else:
-        products = get_all_products(supabase) or []
-        products = _attach_color_slots(supabase, products)
-
-    real_photos_for_store = [p for p in products if isinstance(p, dict)]
+    # 商品データはコールバックでページ取得（初回は空→すぐ補充）。session で再訪時の無駄取得を抑える（計画 C）
     photo_store_component = dcc.Store(
-        id="gallery-products-store", data=real_photos_for_store
+        id="gallery-products-store",
+        data=_gallery_store_loading(),
+        storage_type="session",
     )
     color_filter_store = dcc.Store(id="gallery-color-filter", data=[])
 
@@ -398,7 +440,7 @@ def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
                 className="mt-2",
             ),
         ],
-        className="card text-white bg-secondary mb-3",
+        className="card-main-secondary mb-3",
     )
 
     view_toggle = html.Div(
@@ -414,7 +456,7 @@ def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
                 className="mb-3",
             )
         ],
-        className="card p-3 mb-3",
+        className="card-main-info mb-3",
     )
 
     dashboard_content = html.Div(
@@ -423,6 +465,24 @@ def render_gallery(search: str = "", view: str = "thumb", **kwargs) -> html.Div:
             color_filter_store,
             tag_search,
             view_toggle,
+            html.Div(
+                [
+                    html.Button(
+                        "最新を取得",
+                        id="gallery-refresh-list",
+                        className="btn btn-outline-secondary btn-sm me-2",
+                        n_clicks=0,
+                    ),
+                    html.Button(
+                        "さらに表示",
+                        id="gallery-load-more",
+                        className="btn btn-outline-primary btn-sm",
+                        n_clicks=0,
+                        disabled=True,
+                    ),
+                ],
+                className="d-flex justify-content-end mb-2",
+            ),
             html.Div(id="gallery-content"),
         ]
     )
@@ -506,19 +566,130 @@ def _toggle_color_filter(n_clicks, selected):
     return sorted(current)
 
 
+def _gallery_items_from_store(store_data):
+    """session Store の dict / 旧 list 双方を許容する。"""
+    if store_data is None:
+        return []
+    if isinstance(store_data, dict):
+        return [p for p in (store_data.get("items") or []) if isinstance(p, dict)]
+    if isinstance(store_data, list):
+        return [p for p in store_data if isinstance(p, dict)]
+    return []
+
+
+def _gallery_pack(items, has_more: bool) -> dict:
+    return {
+        "status": "ready",
+        "items": items,
+        "offset": len(items),
+        "hasMore": has_more,
+        "v": 1,
+    }
+
+
 @callback(
-    Output("gallery-content", "children"),
+    Output("gallery-products-store", "data", allow_duplicate=True),
+    Input("_pages_location", "pathname"),
+    State("nav-history-store", "data"),
+    State("gallery-products-store", "data"),
+    prevent_initial_call="initial_duplicate",
+)
+def _gallery_on_pathname(pathname, nav_hist, cur):
+    """他画面から /gallery へ来たときの初回・再訪。登録フローからは常に再取得（C2）。"""
+    from services.photo_service import get_products_page
+    from services.supabase_client import get_supabase_client
+
+    if pathname != "/gallery":
+        raise PreventUpdate
+
+    page_size = 48
+    supabase = get_supabase_client()
+    if supabase is None:
+        return _gallery_pack([], False)
+
+    prev_path = (nav_hist or {}).get("prev") if isinstance(nav_hist, dict) else None
+    from_register = isinstance(prev_path, str) and prev_path.startswith("/register")
+    # loading プレースホルダは truthy のため、ready のときだけキャッシュを使う
+    if _gallery_store_ready_for_cache(cur) and not from_register:
+        raise PreventUpdate
+
+    batch = get_products_page(supabase, limit=page_size, offset=0)
+    batch = _attach_color_slots(supabase, batch)
+    return _gallery_pack(batch, len(batch) >= page_size)
+
+
+@callback(
+    Output("gallery-products-store", "data", allow_duplicate=True),
+    Input("gallery-load-more", "n_clicks"),
+    Input("gallery-refresh-list", "n_clicks"),
+    State("gallery-products-store", "data"),
+    State("_pages_location", "pathname"),
+    prevent_initial_call="initial_duplicate",
+)
+def _gallery_on_pager(n_more, n_refresh, cur, pathname):
+    """ページングと手動更新（ボタン）。"""
+    from dash.exceptions import PreventUpdate as PU
+    from services.photo_service import get_products_page
+    from services.supabase_client import get_supabase_client
+
+    if pathname != "/gallery":
+        raise PU
+
+    ctx = callback_context
+    if not ctx.triggered:
+        raise PU
+    prop_id = str(ctx.triggered[0].get("prop_id") or "")
+    page_size = 48
+    supabase = get_supabase_client()
+    if supabase is None:
+        return _gallery_pack([], False)
+
+    if "gallery-refresh-list" in prop_id:
+        if not n_refresh:
+            raise PU
+        batch = get_products_page(supabase, limit=page_size, offset=0)
+        batch = _attach_color_slots(supabase, batch)
+        return _gallery_pack(batch, len(batch) >= page_size)
+
+    if "gallery-load-more" in prop_id:
+        if not n_more:
+            raise PU
+
+        prev_items = _gallery_items_from_store(cur)
+        offset = len(prev_items)
+        more = get_products_page(supabase, limit=page_size, offset=offset)
+        more = _attach_color_slots(supabase, more)
+        merged = prev_items + list(more)
+        return _gallery_pack(merged, len(more) >= page_size)
+
+    raise PU
+
+
+@callback(
+    [
+        Output("gallery-load-more", "disabled"),
+        Output("gallery-content", "children"),
+    ],
     Input("gallery-products-store", "data"),
     Input("gallery-color-filter", "data"),
     Input("gallery-search-input", "value"),
     Input("gallery-view-mode", "value"),
     prevent_initial_call=False,
 )
-def _render_filtered_content(products, selected_slots, text, view_mode):
+def _gallery_products_to_ui(store_data, selected_slots, text, view_mode):
+    """同一トリガーで「さらに表示」無効化とグリッド描画をまとめ、往復を削減する。"""
     view_mode = view_mode or "thumb"
-    products = products or []
+    if _gallery_products_loading(store_data):
+        return True, _render_gallery_loading()
+
+    if not store_data or not isinstance(store_data, dict):
+        load_more_disabled = True
+    else:
+        load_more_disabled = not bool(store_data.get("hasMore"))
+
+    products = _gallery_items_from_store(store_data)
     filtered = _filter_products(products, text, selected_slots)
-    return _render_cards(filtered, view_mode)
+    return load_more_disabled, _render_cards(filtered, view_mode)
 
 
 @callback(
@@ -538,9 +709,30 @@ def _navigate_to_detail(clicks, current_search):
     triggered = ctx.triggered_id
     if not isinstance(triggered, dict):
         raise PreventUpdate
+    if triggered.get("type") != "gallery-thumb":
+        raise PreventUpdate
 
     pid = triggered.get("index")
     if not pid:
+        raise PreventUpdate
+
+    # Dash 3 + ALL では triggered の value が「全サムネの n_clicks 配列」のことがあり単一 int にならない。
+    # 再マウントだけの発火ではすべて 0。いずれか >= 1 のときだけ実クリックとみなす。
+    if isinstance(clicks, (list, tuple)):
+        seq = clicks
+    elif clicks is None:
+        seq = ()
+    else:
+        seq = (clicks,)
+    has_real_click = False
+    for x in seq:
+        try:
+            if int(x or 0) >= 1:
+                has_real_click = True
+                break
+        except (TypeError, ValueError):
+            continue
+    if not has_real_click:
         raise PreventUpdate
 
     qs = parse_qs((current_search or "").lstrip("?"))
