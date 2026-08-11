@@ -1,51 +1,47 @@
 ---
 name: post-change-verify
 description: >-
-  コード変更後に Python の構文チェックと pytest をリポジトリルートで実行する。
-  services / features / pages 等のアプリコードを触った直後に適用する。
+  コード変更後に monorepo の API pytest と Web typecheck を実行する。
+  apps/web・apps/api・packages を触った直後に適用する。
 ---
 
-# 変更後検証（post-change-verify）
+# 変更後検証（v2）
 
-## いつ使うか
+## 実行場所
 
-- `services/`、`features/`、`pages/`、`components/`、`app.py`、`server.py` を変更したあと。
-- 依存追加や import 変更があったあと。
+モノレポルート（`pnpm-workspace.yaml` がある階層）
 
-## 実行場所（必須）
+## 実行順
 
-- **作業ディレクトリ**: リポジトリのルート（`requirements.txt` と `tests/` がある階層）。
-- Windows PowerShell の例: `cd` で各自のクローン先のルートへ移動（例: `cd C:\Users\<user>\Desktop\oshi-app`）。
+### API を触った場合
 
-## 実行順（この順で行う）
+```powershell
+$env:PYTHONPATH = "apps/api"
+python -m compileall -q apps/api/app
+python -m pytest apps/api/tests tests -q
+```
 
-1. **仮想環境**（未作成なら `python -m venv .venv`）:
-   - `.\.venv\Scripts\Activate.ps1`
-2. **依存の同期**（pytest を含む）:
-   - `pip install -r requirements.txt`
-3. **構文チェック**（インポート時の構文エラー検出）:
-   - `python -m compileall -q services features pages components app.py server.py`
-4. **テスト**:
-   - `python -m pytest tests/ -q`
+### Web / shared を触った場合
 
-失敗したら、エラーメッセージとファイル名・行番号を起点に修正する。エージェントに依頼する場合は上記ログを貼る。
+```powershell
+pnpm -C packages/shared build
+pnpm -C apps/web lint
+pnpm -C apps/web exec tsc --noEmit
+```
 
-## スキップしてよい場合
+### 両方
 
-- ドキュメントのみ（`*.md`、`.cursor/plans/` のみ等）で Python を一切触らない変更。
-- 画像・アセットのみの差し替えでコード変更がない場合。
+API → Web の順。
 
-## 秘密情報・ログ
+## スキップ
 
-- 失敗調査時も **環境変数の値・JWT・Cookie・Supabase キー・署名 URL 全文**をログやチャットに貼らない。
-- テストやデバッグ出力にストアの base64 等を出さない（[security.md](../rules/security.md)）。
+- md / plans のみ
+- アセットのみ
 
 ## TDD
 
-機能追加・バグ修正では先に失敗するテストを書く（[tdd.md](../rules/tdd.md) / skill `tdd-workflow`）。
-実装だけの完了扱いにしない。
+振る舞い変更は先にテスト（`tdd.md` / `tdd-workflow`）。
 
-## 注意（テスト結果の解釈）
+## 秘密
 
-- `pytest` が緑でも、既存の一部テストは assert が弱く **常に成功に見える**箇所がある。回帰の最終判断は仕様に沿った手動確認とセットとする。
-- `tests/test_insert.py` と `tests/test_table.py` は **モジュール単位でスキップ**されており、統合環境での手動実行用の枠である。
+JWT・キー・署名 URL をログに貼らない。
