@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends
 from app.deps.auth import AuthenticatedUser, get_current_user
 from app.services.product_service import list_products_for_member
 
+router = APIRouter(prefix="/products", tags=["products"])
+
 
 @router.get("")
 def list_products(
