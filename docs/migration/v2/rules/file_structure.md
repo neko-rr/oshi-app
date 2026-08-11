@@ -63,3 +63,5 @@ Dockerfile
 - `.env` を Git に含めない。`.env.example` のみ。
 - `service_role` キーを `NEXT_PUBLIC_*` に置かない。
 - 旧 Dash 構成（`app.py` / `pages/` / `features/*/controller.py`）は v2 では使わない。
+- **命名**: 新規ファイルは [naming.md](../../../../.cursor/rules/naming.md) と [glossary.md](../glossary.md) に従う。
+  skill: [new-file-naming](../skills/new-file-naming/SKILL.md)

@@ -7,6 +7,11 @@ Apply Mode: Always Apply
 Git / チャット / ログ に **API キー・トークン・個人情報・実 .env** が載らないようにする。
 バックアップ用 private リポジトリでも **実秘密は入れない**（漏えい時の被害をゼロに近づける）。
 
+## 参照（詳細正本）
+
+- 認証実装: `.cursor/rules/auth.md`（旧 Flask OAuth 手順は **正本ではない**）
+- 禁止一覧: 本ファイル（security.md）
+
 ## 絶対禁止（コミット・PR・Issue・チャット貼付）
 
 - `.env` および `.env.local` 等の実ファイル（**`.env.example` のみ可**。値は空またはダミー）

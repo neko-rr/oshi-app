@@ -56,3 +56,8 @@ pnpm -C apps/web exec tsc --noEmit
 ## 注意
 
 - 緑でも結合不足の可能性はある。ログイン → 保護ページ → `/me` の手動確認を縦スライス時はセットにする
+
+## TDD
+
+機能追加・バグ修正では **先に失敗するテスト** を書く（[.cursor/rules/tdd.md](../../rules/tdd.md) / skill `tdd-workflow`）。
+実装だけの完了扱いにしない。

@@ -1,18 +1,25 @@
 #!/bin/sh
-# コミット直前に秘密情報を検査する（Git for Windows の sh から起動）
+# コミット直前: 秘密情報 + 命名規則
 set -e
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 1
 
-if command -v python >/dev/null 2>&1; then
-  exec python scripts/secret_guard.py check-staged
-fi
-if command -v python3 >/dev/null 2>&1; then
-  exec python3 scripts/secret_guard.py check-staged
-fi
-if command -v py >/dev/null 2>&1; then
-  exec py -3 scripts/secret_guard.py check-staged
-fi
+run_py() {
+  if command -v python >/dev/null 2>&1; then
+    python "$@"
+    return $?
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    python3 "$@"
+    return $?
+  fi
+  if command -v py >/dev/null 2>&1; then
+    py -3 "$@"
+    return $?
+  fi
+  echo "pre-commit: python が見つかりません" >&2
+  return 1
+}
 
-echo "secret_guard: python が見つかりません" >&2
-exit 1
+run_py scripts/secret_guard.py check-staged
+run_py scripts/naming_check.py check-staged

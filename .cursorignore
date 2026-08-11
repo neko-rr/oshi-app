@@ -1,0 +1,26 @@
+﻿# Cursor インデックス・コンテキストから除外（チャットへの秘匿漏れ低減）
+# Git の .gitignore とは別系統。両方で秘匿する。
+
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+*.pem
+*.key
+id_rsa
+id_ed25519
+credentials.json
+service-account*.json
+application_default_credentials.json
+
+secrets/
+.private/
+supabase/.temp/
+
+# 巨大・無関係
+node_modules/
+.venv/
+venv/
+.next/
+__pycache__/

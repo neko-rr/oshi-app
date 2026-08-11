@@ -22,7 +22,9 @@
 4. **認証は自前 JWT サーバーを作らない**。発行は Supabase Auth のみ。
 5. **Flask + Cookie でアプリ全体を守る Dash 時代の方式は使わない**（詳細は `auth.md`）。
 6. コメント・運用ドキュメントは日本語。
-7. Git 利用時は `git config core.hooksPath .githooks` をリポジトリローカルで有効化し、`scripts/secret_guard.py` をスキップしない。
+7. Git 利用時は `git config core.hooksPath .githooks` をリポジトリローカルで有効化し、`scripts/secret_guard.py` と `scripts/naming_check.py` をスキップしない。
+8. **新規ファイルの命名**は `.cursor/rules/naming.md` と `docs/migration/v2/glossary.md` に従う（skill: `new-file-naming`）。
+9. **TDD**: 振る舞い変更は失敗するテストを先に書く（`.cursor/rules/tdd.md` / skill `tdd-workflow`）。
 
 ## 層境界
 
@@ -35,15 +37,23 @@ supabase/    → マイグレーション・RLS の正本
 
 ## 参照（詳細正本）
 
-- 配置: `.cursor/rules/file_structure.md`
+- 配置: `.cursor/rules/file_structure.md`（v2 は `docs/migration/v2/rules/file_structure.md`）
+- 命名: `.cursor/rules/naming.md`
+- 用語: `docs/migration/v2/glossary.md`
+- 優先順位: `.cursor/rules/architecture.md`
+- TDD: `.cursor/rules/tdd.md`
 - 認証: `.cursor/rules/auth.md`
-- API: `.cursor/rules/api_contract.md`
+- API: `.cursor/rules/api_contract.md`（または v2 ドラフト）
 - セキュリティ: `.cursor/rules/security.md`
 - DB: `.cursor/rules/database_configuration.md`（既存移植）
 - 製品仕様: `.cursor/rules/spec.md`（既存移植）
 - 変更後検証: `.cursor/skills/post-change-verify/SKILL.md`
+- 新規命名: `.cursor/skills/new-file-naming/SKILL.md`
+- TDD skill: `.cursor/skills/tdd-workflow/SKILL.md`
+- エディタプロファイル: `docs/migration/v2/cursor-profile-web-oshi.md`
 
 ## 品質
 
 - 業務エラー（入力・権限）→ クライアント向けメッセージ + 適切な HTTP ステータス
 - システムエラー → ログして上位へ。内部例外メッセージをそのままユーザーに出さない
+- 機能追加は **Red → Green → Refactor**。テスト無しの実装完了扱いはしない

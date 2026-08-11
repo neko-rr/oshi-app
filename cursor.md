@@ -15,7 +15,9 @@
 
 - 計画: `.cursor/plans/next-fastapi-phase0-monorepo.md`
 - 新リポ用ドラフト: `docs/migration/v2/`（AGENTS / rules / skill）
-- 現行 Dash 用 `.cursor/rules/*`（修正禁止の記述あり）は当面維持。v2 ではドラフトをコピーして差し替え。
+- **認証の正本**: `.cursor/rules/auth.md`（= `docs/migration/v2/rules/auth.md` と同系）
+- **旧 OAuth（Flask+Dash）**: `docs/archive/oauth-dash-flask.md`（DEPRECATED）。`.cursor/rules/OAuth.md` は削除済み
+- 現行 Dash 用 `file_structure.md` / `spec.md` / `database_configuration.md` は当面維持。v2 では配置 rule を差し替え
 
 ### 次アクション（要承認: Phase 1）
 
@@ -45,4 +47,40 @@
 ### 未実施
 
 - リモート（GitHub private）の作成・push はユーザー承認後。
-- 初期コミットは、stage 内容を確認してから（`.env` が含まれないこと）。
+
+## 2026-08-12: OAuth.md の棚卸し（仕様移行）
+
+- **正本**: `.cursor/rules/auth.md`（Next + FastAPI + Supabase Auth）
+- **アーカイブ**: `docs/archive/oauth-dash-flask.md`（旧 Flask PKCE。冒頭 DEPRECATED）
+- **削除**: `.cursor/rules/OAuth.md`（rules に旧仕様を残さない）
+- Google Provider / Supabase callback URI など共通知識は新 `auth.md` に取り込み
+- **skills への降格はしない**（仕様≠手順）
+
+## 2026-08-12: 命名規則ハーネス
+
+| 層 | パス | 役割 |
+|----|------|------|
+| rule | `.cursor/rules/naming.md` | 字形・置き場・禁止・JSON snake_case |
+| 用語集 | `docs/migration/v2/glossary.md` | 旧なりゆき → 正（product/photo 等） |
+| skill | `.cursor/skills/new-file-naming/` | 新規作成時チェックリスト |
+| CLI | `scripts/naming_check.py` | 禁止名を pre-commit でも検査 |
+| 入口 | `docs/migration/v2/AGENTS.md` + `.cursor/rules/architecture.md` | 旧 rules との優先順位 |
+
+方針: **新規コードは 100% 遵守**。旧 Dash / 既存 DB 物理名は一括リネームしない。  
+（`file_structure.md` は修正禁止の Dash 正本のため触らず、`architecture.md` で v2 優先を宣言。）
+
+## 2026-08-12: TDD + Web プロファイル
+
+### TDD
+
+- rule: `.cursor/rules/tdd.md`
+- skill: `.cursor/skills/tdd-workflow/`
+- `pytest.ini` + `tests/test_tdd_harness.py`
+- `.vscode/settings.json` / `launch.json` で pytest を有効化
+
+### Cursor プロファイル **Web-Oshi**
+
+- **一覧に出ない問題**: 起動中の `storage.json` 直接編集は無効。  
+  **正しい手順**: `docs/migration/v2/cursor-profile-web-oshi.md`  
+  - Import: `.vscode/profiles/Web-Oshi.code-profile`  
+  - または Cursor 終了後に `python scripts/register_web_oshi_profile.py`

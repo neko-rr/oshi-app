@@ -40,7 +40,7 @@ isProject: false
 
 ### NO: Dash 時代の Flask 認証をそのまま持ち込まない
 
-現行 oshi（[OAuth.md](../rules/OAuth.md)）は **Flask が PKCE 交換 + HttpOnly Cookie で Dash 入口を守る**形。これは「SSR できない Python UI を 1 プロセスで守る」ための形。
+現行 oshi の **旧** 手順は [docs/archive/oauth-dash-flask.md](../../docs/archive/oauth-dash-flask.md)（旧 `.cursor/rules/OAuth.md`）。Flask が PKCE 交換 + HttpOnly Cookie で Dash 入口を守る形。これは「SSR できない Python UI を 1 プロセスで守る」ための形で、**v2 では使わない**。
 
 FastAPI + Next では分業する:
 
@@ -226,6 +226,6 @@ Flask 時代の `.../auth/callback` は v2 では使わない（残しても害�
 | 現行（Dash） | v2 |
 |--------------|-----|
 | `file_structure.md`（修正禁止・Dash） | v2 用ドラフトで置き換え対象 |
-| `OAuth.md`（Flask PKCE） | `auth.md`（Supabase SSR + Bearer）に役割移管 |
+| `OAuth.md`（Flask PKCE） | **削除** → 履歴は `docs/archive/oauth-dash-flask.md`。正本は `auth.md`（Supabase SSR + Bearer） |
 | `database_configuration.md` / `spec.md` | 用語・機能要件は継続。ファイルは新リポへコピー後にパス修正 |
 | `post-change-verify`（Python Dash） | Next + FastAPI 用に差し替え |

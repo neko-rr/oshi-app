@@ -21,7 +21,7 @@ git config --local --get core.hooksPath
 
 | ファイル | タイミング | 内容 |
 |----------|------------|------|
-| `pre-commit` | commit 直前 | `scripts/secret_guard.py check-staged` |
+| `pre-commit` | commit 直前 | `secret_guard` → `naming_check` |
 
 `--no-verify` / `-n` は Cursor hook 側でも拒否する。
 
@@ -29,5 +29,6 @@ git config --local --get core.hooksPath
 
 ```powershell
 python scripts/secret_guard.py check-staged
-python scripts/secret_guard.py check-paths path\to\file
+python scripts/naming_check.py check-staged
+python scripts/naming_check.py check-paths path\to\file
 ```

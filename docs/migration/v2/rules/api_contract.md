@@ -43,10 +43,7 @@ Apply Mode: Always Apply（新リポジトリで使用）
 
 ## 命名
 
-- パスは複数形のリソース名を基本（例: `/products`）
+- パス: **複数形**のリソース名（例: `/products`）。`getXxx` 風は使わない
+- JSON フィールド: **snake_case**（`members_id`）。詳細は naming.md
 - `members_id` をクエリで「なりすまし可能」に渡さない。常にトークン由来
-
-## Web / モバイル共通
-
-- 同じ JSON 契約を使う
-- クライアント固有フィールドはつけない。必要なら `X-Client: web|mobile` は任意（認可には使わない）
+- クライアント固有フィールドは付けない。必要なら `X-Client: web|mobile` は任意（認可には使わない）
