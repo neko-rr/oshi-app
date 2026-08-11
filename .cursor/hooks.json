@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python scripts/secret_guard.py hook",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python scripts/secret_guard.py hook",
+        "matcher": "Write|StrReplace",
+        "failClosed": true
+      }
+    ]
+  }
+}

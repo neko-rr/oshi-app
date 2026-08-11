@@ -1,0 +1,95 @@
+# アプリ・スクリプトが書き込むログ一式（ルートに散らさない）
+/logs/
+*.log
+*log.txt
+# 旧レイアウトでルートに残ったファイル（移行後も誤コミット防止）
+/app_run.log
+/debug_log.txt
+/save_registration_debug.txt
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 依存・ビルド成果物
+node_modules/
+dist/
+dist-ssr/
+build/
+.next/
+.turbo/
+out/
+coverage/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
+
+# ========== 秘密情報・個人情報（最重要） ==========
+# 環境変数（テンプレート .env.example のみ許可）
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# 証明書・鍵
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*.keystore
+
+# クラウド認証・ローカル資格情報
+credentials.json
+**/credentials.json
+service-account*.json
+**/service-account*.json
+*-firebase-adminsdk-*.json
+.aws/
+.gcloud/
+application_default_credentials.json
+
+# Supabase CLI 一時・ローカル
+supabase/.temp/
+**/supabase/.temp/
+
+# バックアップ・ダンプ（個人データ混入の恐れ）
+*.dump
+*.sql.gz
+*.sqlite
+*.sqlite3
+db.sqlite3
+
+# ローカル専用のメモ（誤ってトークンを書いた場合の保険）
+secrets/
+**/secrets/
+.private/
+**/.private/
+
+# エディタ／エージェントのローカル状態（機微が混ざることがある）
+.cursor/hooks.local/
+.cursor/*.local.*
