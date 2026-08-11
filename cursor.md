@@ -78,9 +78,27 @@
 - `pytest.ini` + `tests/test_tdd_harness.py`
 - `.vscode/settings.json` / `launch.json` で pytest を有効化
 
-### Cursor プロファイル **Web-Oshi**
+## 2026-08-12 夜間: monorepo 骨格実装
 
-- **一覧に出ない問題**: 起動中の `storage.json` 直接編集は無効。  
-  **正しい手順**: `docs/migration/v2/cursor-profile-web-oshi.md`  
-  - Import: `.vscode/profiles/Web-Oshi.code-profile`  
-  - または Cursor 終了後に `python scripts/register_web_oshi_profile.py`
+### 完了
+
+- pnpm monorepo: `apps/web`, `apps/api`, `apps/mobile`, `packages/shared`
+- FastAPI: `/health`, `/me`（Bearer）, `/products` プレースホルダ + pytest
+- Next.js: 認証ルート、`/me` 縦スライス、@supabase/ssr
+- AGENTS.md / README / .env.example
+- TDD tests green（API）
+
+### 起きてからユーザー作業
+
+1. Supabase Dashboard: Redirect URLs（Next `/auth/confirm`）
+2. `apps/web/.env.local` と `apps/api/.env` に実キー（Git 不可）
+3. Render に `apps/api` Dockerfile デプロイ
+4. Google OAuth が必要なら Provider 設定（auth.md）
+
+### ローカル確認
+
+```powershell
+pnpm dev:api
+pnpm dev:web
+curl http://127.0.0.1:8000/health
+```

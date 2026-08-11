@@ -31,10 +31,11 @@ __pycache__/
 .venv/
 venv/
 env/
+*.tsbuildinfo
+packages/*/dist/
 
 # IDE / OS
-.vscode/*
-!.vscode/extensions.json
+# .vscode は extensions / profiles / launch を共有するため追跡する
 .idea/
 .DS_Store
 Thumbs.db
@@ -46,13 +47,11 @@ Thumbs.db
 *.local
 
 # ========== 秘密情報・個人情報（最重要） ==========
-# 環境変数（テンプレート .env.example のみ許可）
 .env
 .env.*
 !.env.example
 !**/.env.example
 
-# 証明書・鍵
 *.pem
 *.key
 *.p12
@@ -63,7 +62,6 @@ id_ed25519
 id_ed25519.*
 *.keystore
 
-# クラウド認証・ローカル資格情報
 credentials.json
 **/credentials.json
 service-account*.json
@@ -73,23 +71,19 @@ service-account*.json
 .gcloud/
 application_default_credentials.json
 
-# Supabase CLI 一時・ローカル
 supabase/.temp/
 **/supabase/.temp/
 
-# バックアップ・ダンプ（個人データ混入の恐れ）
 *.dump
 *.sql.gz
 *.sqlite
 *.sqlite3
 db.sqlite3
 
-# ローカル専用のメモ（誤ってトークンを書いた場合の保険）
 secrets/
 **/secrets/
 .private/
 **/.private/
 
-# エディタ／エージェントのローカル状態（機微が混ざることがある）
 .cursor/hooks.local/
 .cursor/*.local.*

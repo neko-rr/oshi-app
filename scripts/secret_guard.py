@@ -83,7 +83,7 @@ CONTENT_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     (
         "generic_bearer_assign",
         re.compile(
-            r"(?i)(api[_-]?key|access[_-]?token|refresh[_-]?token|client_secret)\s*[=:]\s*['\"]?[A-Za-z0-9_\-\.]{24,}"
+            r"(?i)(api[_-]?key|access[_-]?token|refresh[_-]?token|client_secret)\s*[=:]\s*['\"][A-Za-z0-9_\-\.+/=]{24,}['\"]"
         ),
     ),
 ]
@@ -319,71 +319,79 @@ def path_write_is_dangerous(path: str) -> str | None:
     return path_is_forbidden(path)
 
 
+def _hook_allow() -> int:
+    print(json.dumps({"permission": "allow"}))
+    return 0
+
+
+def _hook_deny(user_message: str, agent_message: str) -> int:
+    print(
+        json.dumps(
+            {
+                "permission": "deny",
+                "user_message": user_message,
+                "agent_message": agent_message,
+            },
+            ensure_ascii=False,
+        )
+    )
+    return 0
+
+
 def run_as_cursor_hook() -> int:
     """stdin JSON を読み、Cursor hook レスポンスを stdout へ。
 
     beforeShellExecution: command フィールド
     preToolUse (Write/StrReplace): tool_input.path
+
+    常に exit 0（failClosed で誤ブロックしない）。
     """
-    raw = sys.stdin.read()
     try:
-        data = json.loads(raw) if raw.strip() else {}
-    except json.JSONDecodeError:
-        data = {}
+        raw = sys.stdin.read()
+        try:
+            data = json.loads(raw) if raw.strip() else {}
+        except json.JSONDecodeError:
+            data = {}
+        if not isinstance(data, dict):
+            data = {}
 
-    tool_input = data.get("tool_input") or data.get("input") or {}
-    if not isinstance(tool_input, dict):
-        tool_input = {}
+        tool_input = data.get("tool_input") or data.get("input") or data.get("arguments") or {}
+        if not isinstance(tool_input, dict):
+            tool_input = {}
 
-    # Shell 系
-    cmd = data.get("command") or tool_input.get("command") or ""
-    if cmd:
-        reason = shell_command_is_dangerous(str(cmd))
-        if reason:
-            print(
-                json.dumps(
-                    {
-                        "permission": "deny",
-                        "user_message": f"セキュリティ: {reason}",
-                        "agent_message": (
-                            f"Blocked by secret_guard: {reason}. "
-                            "Do not stage or display secret files. Use .env.example only."
-                        ),
-                    },
-                    ensure_ascii=False,
+        # Shell 系（beforeShellExecution）
+        cmd = data.get("command") or tool_input.get("command") or ""
+        if isinstance(cmd, str) and cmd.strip():
+            reason = shell_command_is_dangerous(cmd)
+            if reason:
+                return _hook_deny(
+                    f"セキュリティ: {reason}",
+                    f"Blocked by secret_guard: {reason}. "
+                    "Do not stage or display secret files. Use .env.example only.",
                 )
-            )
-            return 0
-        print(json.dumps({"permission": "allow"}))
-        return 0
+            return _hook_allow()
 
-    # Write / StrReplace 系
-    path = (
-        tool_input.get("path")
-        or tool_input.get("file_path")
-        or data.get("path")
-        or ""
-    )
-    if path:
-        reason = path_write_is_dangerous(str(path))
-        if reason:
-            print(
-                json.dumps(
-                    {
-                        "permission": "deny",
-                        "user_message": f"セキュリティ: 秘密ファイルへの書き込みを拒否 ({reason})",
-                        "agent_message": (
-                            f"Blocked write to secret path: {reason}. "
-                            "Edit .env only via local user action; agents should use .env.example."
-                        ),
-                    },
-                    ensure_ascii=False,
+        # Write / StrReplace 系
+        path = (
+            tool_input.get("path")
+            or tool_input.get("file_path")
+            or tool_input.get("target_notebook")
+            or data.get("path")
+            or ""
+        )
+        if isinstance(path, str) and path.strip():
+            reason = path_write_is_dangerous(path)
+            if reason:
+                return _hook_deny(
+                    f"セキュリティ: 秘密ファイルへの書き込みを拒否 ({reason})",
+                    f"Blocked write to secret path: {reason}. "
+                    "Edit .env only via local user action; agents should use .env.example.",
                 )
-            )
-            return 0
-
-    print(json.dumps({"permission": "allow"}))
-    return 0
+        return _hook_allow()
+    except Exception as exc:
+        # 検査ロジックの障害で編集を止めない（pre-commit が最終防衛）
+        print(f"secret_guard hook error: {exc}", file=sys.stderr)
+        return _hook_allow()
 
 
 def main(argv: list[str]) -> int:

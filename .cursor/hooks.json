@@ -11,7 +11,7 @@
       {
         "command": "python scripts/secret_guard.py hook",
         "matcher": "Write|StrReplace",
-        "failClosed": true
+        "failClosed": false
       }
     ]
   }

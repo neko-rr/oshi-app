@@ -1,0 +1,14 @@
+{
+  "name": "oshi-app",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev:web": "pnpm -C apps/web dev",
+    "dev:api": "pnpm -C apps/api dev",
+    "build:web": "pnpm -C apps/web build",
+    "build:shared": "pnpm -C packages/shared run build",
+    "lint:web": "pnpm -C apps/web lint",
+    "typecheck:web": "pnpm -C apps/web exec tsc --noEmit",
+    "test:api": "pnpm -C apps/api test"
+  }
+}
