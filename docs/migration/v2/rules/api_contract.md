@@ -1,6 +1,7 @@
+<!-- 更新: ARCHIVE寄り — 移行メモ。現行正本はルート AGENTS.md と .cursor/rules/*.mdc。凡例: docs/README.md -->
 # API 契約（FastAPI）
 
-Apply Mode: Always Apply（新リポジトリで使用）
+> **運用中の命令は `.cursor/rules/api_contract.mdc`。** このファイルは詳細メモ。Always Apply しない。
 
 ## 共通
 
@@ -34,12 +35,27 @@ Apply Mode: Always Apply（新リポジトリで使用）
 | 409 | 競合 |
 | 500 | システムエラー（内部詳細はログのみ） |
 
-## 初期エンドポイント（Phase 1）
+## エンドポイント（移管済み）
 
 | Method | Path | 認証 | 説明 |
 |--------|------|------|------|
 | GET | `/health` | 不要 | `{ "status": "ok" }` |
 | GET | `/me` | 必須 | `{ "members_id": "<uuid>", "email": "..." }` |
+| GET | `/products` | 必須 | 一覧（signed サムネ含む） |
+| POST | `/products` | 必須 | 製品登録 |
+| GET | `/products/{id}` | 必須 | 詳細（高解像度 signed URL 可） |
+| PATCH | `/products/{id}` | 必須 | 更新（タグ・スロット含む） |
+| DELETE | `/products/{id}` | 必須 | 削除 |
+| POST | `/photos` | 必須 | 正面写真アップロード |
+| GET/PUT | `/color-tags` | 必須 | カラータグ 7 スロット |
+| GET/POST/PATCH/DELETE | `/category-tags` | 必須 | カテゴリタグ |
+| GET/POST/PATCH/DELETE | `/receipt-locations` | 必須 | 収納場所 |
+| GET | `/stats/products` | 必須 | ホーム用集計 |
+| GET | `/dashboard/charts` | 必須 | ダッシュボード系列 |
+| POST | `/assist/*` | 必須 | Vision / tags / barcode（LIVE ゲート） |
+
+`ProductListItem` に `photo_thumbnail_path`（Storage object path）と `photo_thumbnail_url`（署名 URL・失敗時 null）を含む。
+アシストのソフトステータスは `docs/migration/v2/assist_external_apis.md` 参照。
 
 ## 命名
 

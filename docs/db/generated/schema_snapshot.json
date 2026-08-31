@@ -1,0 +1,2103 @@
+{
+  "tables": [
+    {
+      "table_name": "category_tag",
+      "comment": null,
+      "columns": [
+        {
+          "column": "category_tag_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('category_tag_category_tag_id_seq'::regclass)"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "category_tag_color",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "category_tag_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "category_tag_icon",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "category_tag_use_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "display_order",
+          "type": "integer",
+          "not_null": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "table_name": "category_tag_preset_slot_dismissed",
+      "comment": "slot 1..6 のプリセット行をユーザーが削除した記録。該当 slot は初期化で再 insert しない",
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "dismissed_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "character",
+      "comment": null,
+      "columns": [
+        {
+          "column": "character_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('character_character_id_seq'::regclass)"
+        },
+        {
+          "column": "work_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "works_series_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "theme_color",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "hair_color",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "eye_color",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "character_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "nickname",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "sex",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "person_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "animal_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "existing_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "foot_number",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "height",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "weight",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "birthday",
+          "type": "date",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "debut_date",
+          "type": "date",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "age",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "student_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "color",
+      "comment": null,
+      "columns": [
+        {
+          "column": "color_group_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('color_color_group_id_seq'::regclass)"
+        },
+        {
+          "column": "color_group_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "color_preference",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "color_tag",
+      "comment": null,
+      "columns": [
+        {
+          "column": "color_tag_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('color_tag_color_tag_id_seq'::regclass)"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "color_tag_color",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "color_tag_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        }
+      ]
+    },
+    {
+      "table_name": "copyright_company",
+      "comment": null,
+      "columns": [
+        {
+          "column": "copyright_company_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('copyright_company_copyright_company_id_seq'::regclass)"
+        },
+        {
+          "column": "copyright_company_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "currency_unit",
+      "comment": null,
+      "columns": [
+        {
+          "column": "currency_unit_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('currency_unit_currency_unit_id_seq'::regclass)"
+        },
+        {
+          "column": "currency_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "icon_tag",
+      "comment": null,
+      "columns": [
+        {
+          "column": "icon",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "icon_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "category_tag_use_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "storage_location_use_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "table_name": "member",
+      "comment": null,
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_type_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "user_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "email_address",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "x_id",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "instagram_id",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "line_id",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "identity_type",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "member_type",
+      "comment": null,
+      "columns": [
+        {
+          "column": "members_type_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "thumbnail_image_quality",
+          "type": "integer",
+          "not_null": false,
+          "default": "80"
+        },
+        {
+          "column": "registerable_number",
+          "type": "integer",
+          "not_null": false,
+          "default": "100"
+        },
+        {
+          "column": "high_resolution_registerable_number",
+          "type": "integer",
+          "not_null": false,
+          "default": "10"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "photo",
+      "comment": null,
+      "columns": [
+        {
+          "column": "photo_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('photo_photo_id_seq'::regclass)"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "photo_theme_color",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "front_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "photo_thumbnail",
+          "type": "bytea",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "photo_thumbnail_image_quality",
+          "type": "integer",
+          "not_null": false,
+          "default": "80"
+        },
+        {
+          "column": "photo_high_resolution_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "photo_edited_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "photo_registration_date",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "photo_edit_date",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "photo_thumbnail_url",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "photo_high_resolution_url",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "product_size",
+      "comment": null,
+      "columns": [
+        {
+          "column": "product_size_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('product_size_product_size_id_seq'::regclass)"
+        },
+        {
+          "column": "product_group_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_type",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "product_size_horizontal",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_depth",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_vertical",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "product_type",
+      "comment": null,
+      "columns": [
+        {
+          "column": "product_group_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('product_type_product_group_id_seq'::regclass)"
+        },
+        {
+          "column": "product_group_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "registered_product",
+      "comment": null,
+      "columns": [
+        {
+          "column": "registered_product_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('registered_product_registered_product_id_seq'::regclass)"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "photo_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "works_series_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "work_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "character_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "copyright_company_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_group_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_location_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_location_tag_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "color_tag_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "category_tag_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "campaign_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "currency_unit_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "works_series_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "title",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "character_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "copyright_company_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_type",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_horizontal",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_depth",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_size_vertical",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "barcode_number",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "barcode_type",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "list_price",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "purchase_price",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "registration_quantity",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "sales_desired_quantity",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_series_quantity",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "purchase_location",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "freebie_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "purchase_date",
+          "type": "date",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "creation_date",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_date",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "other_tag",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "memo",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_series_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "commercial_product_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "personal_product_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "digital_product_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "sales_desired_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "want_object_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "freebie_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "product_series_complete_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "0"
+        },
+        {
+          "column": "product_group_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        }
+      ]
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "comment": null,
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "registered_product_id",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        }
+      ]
+    },
+    {
+      "table_name": "storage_location",
+      "comment": null,
+      "columns": [
+        {
+          "column": "storage_location_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('storage_location_storage_location_id_seq'::regclass)"
+        },
+        {
+          "column": "storage_location_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "storage_location_size_horizontal",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_location_size_depth",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_location_size_vertical",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_count_per_1",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "storage_size_horizontal_per_1",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_size_depth_per_1",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_size_vertical_per_1",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "storage_location_icon",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "storage_location_use_flag",
+          "type": "integer",
+          "not_null": false,
+          "default": "1"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "display_order",
+          "type": "integer",
+          "not_null": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "table_name": "storage_location_preset_slot_dismissed",
+      "comment": "slot 1..6 のプリセット行をユーザーが削除した記録。該当 slot は初期化で再 insert しない",
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "slot",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "dismissed_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "theme_settings",
+      "comment": null,
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_type_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "theme",
+          "type": "text",
+          "not_null": true,
+          "default": "'minty'::text"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "work",
+      "comment": null,
+      "columns": [
+        {
+          "column": "work_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('work_work_id_seq'::regclass)"
+        },
+        {
+          "column": "title",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "works_series_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "copyright_company_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        }
+      ]
+    },
+    {
+      "table_name": "works_series",
+      "comment": null,
+      "columns": [
+        {
+          "column": "works_series_id",
+          "type": "integer",
+          "not_null": true,
+          "default": "nextval('works_series_works_series_id_seq'::regclass)"
+        },
+        {
+          "column": "works_series_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": "now()"
+        }
+      ]
+    }
+  ],
+  "indexes": [
+    {
+      "tablename": "category_tag",
+      "indexname": "category_tag_member_slot_uq",
+      "indexdef": "CREATE UNIQUE INDEX category_tag_member_slot_uq ON public.category_tag USING btree (members_id, slot) WHERE (slot IS NOT NULL)"
+    },
+    {
+      "tablename": "category_tag",
+      "indexname": "category_tag_pkey",
+      "indexdef": "CREATE UNIQUE INDEX category_tag_pkey ON public.category_tag USING btree (category_tag_id)"
+    },
+    {
+      "tablename": "category_tag",
+      "indexname": "idx_category_tag_member",
+      "indexdef": "CREATE INDEX idx_category_tag_member ON public.category_tag USING btree (members_id)"
+    },
+    {
+      "tablename": "category_tag",
+      "indexname": "idx_category_tag_member_display",
+      "indexdef": "CREATE INDEX idx_category_tag_member_display ON public.category_tag USING btree (members_id, display_order)"
+    },
+    {
+      "tablename": "category_tag_preset_slot_dismissed",
+      "indexname": "category_tag_preset_slot_dismissed_pkey",
+      "indexdef": "CREATE UNIQUE INDEX category_tag_preset_slot_dismissed_pkey ON public.category_tag_preset_slot_dismissed USING btree (members_id, slot)"
+    },
+    {
+      "tablename": "category_tag_preset_slot_dismissed",
+      "indexname": "idx_category_tag_preset_slot_dismissed_member",
+      "indexdef": "CREATE INDEX idx_category_tag_preset_slot_dismissed_member ON public.category_tag_preset_slot_dismissed USING btree (members_id)"
+    },
+    {
+      "tablename": "character",
+      "indexname": "character_pkey",
+      "indexdef": "CREATE UNIQUE INDEX character_pkey ON public.\"character\" USING btree (character_id)"
+    },
+    {
+      "tablename": "character",
+      "indexname": "idx_character_works",
+      "indexdef": "CREATE INDEX idx_character_works ON public.\"character\" USING btree (work_id)"
+    },
+    {
+      "tablename": "character",
+      "indexname": "idx_character_works_series",
+      "indexdef": "CREATE INDEX idx_character_works_series ON public.\"character\" USING btree (works_series_id)"
+    },
+    {
+      "tablename": "color",
+      "indexname": "color_color_group_name_key",
+      "indexdef": "CREATE UNIQUE INDEX color_color_group_name_key ON public.color USING btree (color_group_name)"
+    },
+    {
+      "tablename": "color",
+      "indexname": "color_pkey",
+      "indexdef": "CREATE UNIQUE INDEX color_pkey ON public.color USING btree (color_group_id)"
+    },
+    {
+      "tablename": "color_tag",
+      "indexname": "color_tag_member_slot_uq",
+      "indexdef": "CREATE UNIQUE INDEX color_tag_member_slot_uq ON public.color_tag USING btree (members_id, slot)"
+    },
+    {
+      "tablename": "color_tag",
+      "indexname": "color_tag_pkey",
+      "indexdef": "CREATE UNIQUE INDEX color_tag_pkey ON public.color_tag USING btree (color_tag_id)"
+    },
+    {
+      "tablename": "color_tag",
+      "indexname": "idx_color_tag_member",
+      "indexdef": "CREATE INDEX idx_color_tag_member ON public.color_tag USING btree (members_id)"
+    },
+    {
+      "tablename": "copyright_company",
+      "indexname": "copyright_company_copyright_company_name_key",
+      "indexdef": "CREATE UNIQUE INDEX copyright_company_copyright_company_name_key ON public.copyright_company USING btree (copyright_company_name)"
+    },
+    {
+      "tablename": "copyright_company",
+      "indexname": "copyright_company_pkey",
+      "indexdef": "CREATE UNIQUE INDEX copyright_company_pkey ON public.copyright_company USING btree (copyright_company_id)"
+    },
+    {
+      "tablename": "copyright_company",
+      "indexname": "idx_copyright_company_name",
+      "indexdef": "CREATE INDEX idx_copyright_company_name ON public.copyright_company USING btree (copyright_company_name)"
+    },
+    {
+      "tablename": "currency_unit",
+      "indexname": "currency_unit_currency_name_key",
+      "indexdef": "CREATE UNIQUE INDEX currency_unit_currency_name_key ON public.currency_unit USING btree (currency_name)"
+    },
+    {
+      "tablename": "currency_unit",
+      "indexname": "currency_unit_pkey",
+      "indexdef": "CREATE UNIQUE INDEX currency_unit_pkey ON public.currency_unit USING btree (currency_unit_id)"
+    },
+    {
+      "tablename": "icon_tag",
+      "indexname": "icon_tag_pkey",
+      "indexdef": "CREATE UNIQUE INDEX icon_tag_pkey ON public.icon_tag USING btree (icon)"
+    },
+    {
+      "tablename": "member",
+      "indexname": "member_email_address_key",
+      "indexdef": "CREATE UNIQUE INDEX member_email_address_key ON public.member USING btree (email_address)"
+    },
+    {
+      "tablename": "member",
+      "indexname": "member_pkey",
+      "indexdef": "CREATE UNIQUE INDEX member_pkey ON public.member USING btree (members_id)"
+    },
+    {
+      "tablename": "member_type",
+      "indexname": "member_type_pkey",
+      "indexdef": "CREATE UNIQUE INDEX member_type_pkey ON public.member_type USING btree (members_type_name)"
+    },
+    {
+      "tablename": "photo",
+      "indexname": "idx_photo_member",
+      "indexdef": "CREATE INDEX idx_photo_member ON public.photo USING btree (members_id)"
+    },
+    {
+      "tablename": "photo",
+      "indexname": "idx_photo_theme_color",
+      "indexdef": "CREATE INDEX idx_photo_theme_color ON public.photo USING btree (photo_theme_color)"
+    },
+    {
+      "tablename": "photo",
+      "indexname": "photo_pkey",
+      "indexdef": "CREATE UNIQUE INDEX photo_pkey ON public.photo USING btree (photo_id)"
+    },
+    {
+      "tablename": "product_size",
+      "indexname": "idx_product_size_group",
+      "indexdef": "CREATE INDEX idx_product_size_group ON public.product_size USING btree (product_group_id)"
+    },
+    {
+      "tablename": "product_size",
+      "indexname": "product_size_pkey",
+      "indexdef": "CREATE UNIQUE INDEX product_size_pkey ON public.product_size USING btree (product_size_id)"
+    },
+    {
+      "tablename": "product_type",
+      "indexname": "idx_product_type_name",
+      "indexdef": "CREATE INDEX idx_product_type_name ON public.product_type USING btree (product_group_name)"
+    },
+    {
+      "tablename": "product_type",
+      "indexname": "product_type_pkey",
+      "indexdef": "CREATE UNIQUE INDEX product_type_pkey ON public.product_type USING btree (product_group_id)"
+    },
+    {
+      "tablename": "product_type",
+      "indexname": "product_type_product_group_name_key",
+      "indexdef": "CREATE UNIQUE INDEX product_type_product_group_name_key ON public.product_type USING btree (product_group_name)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rp_storage_location",
+      "indexdef": "CREATE INDEX idx_rp_storage_location ON public.registered_product USING btree (storage_location_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_barcode",
+      "indexdef": "CREATE INDEX idx_rpi_barcode ON public.registered_product USING btree (barcode_number)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_category_tag",
+      "indexdef": "CREATE INDEX idx_rpi_category_tag ON public.registered_product USING btree (category_tag_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_character",
+      "indexdef": "CREATE INDEX idx_rpi_character ON public.registered_product USING btree (character_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_color_tag",
+      "indexdef": "CREATE INDEX idx_rpi_color_tag ON public.registered_product USING btree (color_tag_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_copyright",
+      "indexdef": "CREATE INDEX idx_rpi_copyright ON public.registered_product USING btree (copyright_company_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_creation_date",
+      "indexdef": "CREATE INDEX idx_rpi_creation_date ON public.registered_product USING btree (creation_date DESC)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_member",
+      "indexdef": "CREATE INDEX idx_rpi_member ON public.registered_product USING btree (members_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_photo",
+      "indexdef": "CREATE INDEX idx_rpi_photo ON public.registered_product USING btree (photo_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_product_group",
+      "indexdef": "CREATE INDEX idx_rpi_product_group ON public.registered_product USING btree (product_group_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_product_size",
+      "indexdef": "CREATE INDEX idx_rpi_product_size ON public.registered_product USING btree (product_size_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_updated_date",
+      "indexdef": "CREATE INDEX idx_rpi_updated_date ON public.registered_product USING btree (updated_date DESC)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_works",
+      "indexdef": "CREATE INDEX idx_rpi_works ON public.registered_product USING btree (work_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "idx_rpi_works_series",
+      "indexdef": "CREATE INDEX idx_rpi_works_series ON public.registered_product USING btree (works_series_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "registered_product_pkey",
+      "indexdef": "CREATE UNIQUE INDEX registered_product_pkey ON public.registered_product USING btree (registered_product_id)"
+    },
+    {
+      "tablename": "registered_product_color_tag",
+      "indexname": "idx_rpct_member_product",
+      "indexdef": "CREATE INDEX idx_rpct_member_product ON public.registered_product_color_tag USING btree (members_id, registered_product_id)"
+    },
+    {
+      "tablename": "registered_product_color_tag",
+      "indexname": "idx_rpct_member_slot",
+      "indexdef": "CREATE INDEX idx_rpct_member_slot ON public.registered_product_color_tag USING btree (members_id, slot)"
+    },
+    {
+      "tablename": "registered_product_color_tag",
+      "indexname": "registered_product_color_tag_pk",
+      "indexdef": "CREATE UNIQUE INDEX registered_product_color_tag_pk ON public.registered_product_color_tag USING btree (members_id, registered_product_id, slot)"
+    },
+    {
+      "tablename": "storage_location",
+      "indexname": "idx_storage_location_member",
+      "indexdef": "CREATE INDEX idx_storage_location_member ON public.storage_location USING btree (members_id)"
+    },
+    {
+      "tablename": "storage_location",
+      "indexname": "idx_storage_location_member_created",
+      "indexdef": "CREATE INDEX idx_storage_location_member_created ON public.storage_location USING btree (members_id, created_at)"
+    },
+    {
+      "tablename": "storage_location",
+      "indexname": "idx_storage_location_member_display",
+      "indexdef": "CREATE INDEX idx_storage_location_member_display ON public.storage_location USING btree (members_id, display_order)"
+    },
+    {
+      "tablename": "storage_location",
+      "indexname": "storage_location_member_slot_uq",
+      "indexdef": "CREATE UNIQUE INDEX storage_location_member_slot_uq ON public.storage_location USING btree (members_id, slot) WHERE (slot IS NOT NULL)"
+    },
+    {
+      "tablename": "storage_location",
+      "indexname": "storage_location_pkey",
+      "indexdef": "CREATE UNIQUE INDEX storage_location_pkey ON public.storage_location USING btree (storage_location_id)"
+    },
+    {
+      "tablename": "storage_location_preset_slot_dismissed",
+      "indexname": "idx_storage_location_preset_slot_dismissed_member",
+      "indexdef": "CREATE INDEX idx_storage_location_preset_slot_dismissed_member ON public.storage_location_preset_slot_dismissed USING btree (members_id)"
+    },
+    {
+      "tablename": "storage_location_preset_slot_dismissed",
+      "indexname": "storage_location_preset_slot_dismissed_pkey",
+      "indexdef": "CREATE UNIQUE INDEX storage_location_preset_slot_dismissed_pkey ON public.storage_location_preset_slot_dismissed USING btree (members_id, slot)"
+    },
+    {
+      "tablename": "theme_settings",
+      "indexname": "theme_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX theme_settings_pkey ON public.theme_settings USING btree (members_id, members_type_name)"
+    },
+    {
+      "tablename": "work",
+      "indexname": "idx_work_series",
+      "indexdef": "CREATE INDEX idx_work_series ON public.work USING btree (works_series_id)"
+    },
+    {
+      "tablename": "work",
+      "indexname": "idx_work_title",
+      "indexdef": "CREATE INDEX idx_work_title ON public.work USING btree (title)"
+    },
+    {
+      "tablename": "work",
+      "indexname": "work_pkey",
+      "indexdef": "CREATE UNIQUE INDEX work_pkey ON public.work USING btree (work_id)"
+    },
+    {
+      "tablename": "works_series",
+      "indexname": "idx_works_series_name",
+      "indexdef": "CREATE INDEX idx_works_series_name ON public.works_series USING btree (works_series_name)"
+    },
+    {
+      "tablename": "works_series",
+      "indexname": "works_series_pkey",
+      "indexdef": "CREATE UNIQUE INDEX works_series_pkey ON public.works_series USING btree (works_series_id)"
+    },
+    {
+      "tablename": "works_series",
+      "indexname": "works_series_works_series_name_key",
+      "indexdef": "CREATE UNIQUE INDEX works_series_works_series_name_key ON public.works_series USING btree (works_series_name)"
+    }
+  ],
+  "grants": [
+    {
+      "grantee": "authenticated",
+      "table_name": "category_tag",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "category_tag",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "category_tag_preset_slot_dismissed",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "character",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "color",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "color_tag",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "color_tag",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "copyright_company",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "currency_unit",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "icon_tag",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "member",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "member_type",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "photo",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "photo",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "product_size",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "product_type",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "registered_product",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "registered_product",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "registered_product_color_tag",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "registered_product_color_tag",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "storage_location",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "storage_location",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "storage_location_preset_slot_dismissed",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "theme_settings",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "work",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "works_series",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    }
+  ],
+  "policies": [
+    {
+      "table_name": "category_tag",
+      "polname": "category_tag_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "category_tag_preset_slot_dismissed",
+      "polname": "category_tag_preset_slot_dismissed_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "color_tag",
+      "polname": "color_tag_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "member",
+      "polname": "member_self_insert",
+      "polcmd": "a",
+      "using_expr": null,
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "member",
+      "polname": "member_self_select",
+      "polcmd": "r",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": null
+    },
+    {
+      "table_name": "member",
+      "polname": "member_self_update",
+      "polcmd": "w",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "photo",
+      "polname": "photo_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "registered_product",
+      "polname": "registered_product_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "polname": "rpct_delete",
+      "polcmd": "d",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": null
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "polname": "rpct_insert",
+      "polcmd": "a",
+      "using_expr": null,
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "polname": "rpct_select",
+      "polcmd": "r",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": null
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "polname": "rpct_update",
+      "polcmd": "w",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": null
+    },
+    {
+      "table_name": "storage_location",
+      "polname": "storage_location_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "storage_location_preset_slot_dismissed",
+      "polname": "storage_location_preset_slot_dismissed_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "theme_settings",
+      "polname": "theme_settings_self_all",
+      "polcmd": "*",
+      "using_expr": "(auth.uid() = members_id)",
+      "with_check": "(auth.uid() = members_id)"
+    }
+  ],
+  "fks": [
+    {
+      "table_name": "category_tag",
+      "constraint_name": "category_tag_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "category_tag_preset_slot_dismissed",
+      "constraint_name": "category_tag_preset_slot_dismissed_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_theme_color_fkey",
+      "column_name": "theme_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_hair_color_fkey",
+      "column_name": "hair_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (hair_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_eye_color_fkey",
+      "column_name": "eye_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (eye_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_works_id_fkey",
+      "column_name": "work_id",
+      "foreign_table": "work",
+      "foreign_column": "work_id",
+      "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "color_tag",
+      "constraint_name": "color_tag_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "member",
+      "constraint_name": "member_information_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "member",
+      "constraint_name": "member_information_members_type_name_fkey",
+      "column_name": "members_type_name",
+      "foreign_table": "member_type",
+      "foreign_column": "members_type_name",
+      "definition": "FOREIGN KEY (members_type_name) REFERENCES member_type(members_type_name) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "photo",
+      "constraint_name": "photo_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "photo",
+      "constraint_name": "photo_photo_theme_color_fkey",
+      "column_name": "photo_theme_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (photo_theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "product_size",
+      "constraint_name": "product_regulations_size_product_group_id_fkey",
+      "column_name": "product_group_id",
+      "foreign_table": "product_type",
+      "foreign_column": "product_group_id",
+      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_character_id_fkey",
+      "column_name": "character_id",
+      "foreign_table": "character",
+      "foreign_column": "character_id",
+      "definition": "FOREIGN KEY (character_id) REFERENCES \"character\"(character_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_photo_id_fkey",
+      "column_name": "photo_id",
+      "foreign_table": "photo",
+      "foreign_column": "photo_id",
+      "definition": "FOREIGN KEY (photo_id) REFERENCES photo(photo_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_works_id_fkey",
+      "column_name": "work_id",
+      "foreign_table": "work",
+      "foreign_column": "work_id",
+      "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_copyright_company_id_fkey",
+      "column_name": "copyright_company_id",
+      "foreign_table": "copyright_company",
+      "foreign_column": "copyright_company_id",
+      "definition": "FOREIGN KEY (copyright_company_id) REFERENCES copyright_company(copyright_company_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_product_group_id_fkey",
+      "column_name": "product_group_id",
+      "foreign_table": "product_type",
+      "foreign_column": "product_group_id",
+      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_product_size_id_fkey",
+      "column_name": "product_size_id",
+      "foreign_table": "product_size",
+      "foreign_column": "product_size_id",
+      "definition": "FOREIGN KEY (product_size_id) REFERENCES product_size(product_size_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_receipt_location_id_fkey",
+      "column_name": "storage_location_id",
+      "foreign_table": "storage_location",
+      "foreign_column": "storage_location_id",
+      "definition": "FOREIGN KEY (storage_location_id) REFERENCES storage_location(storage_location_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_color_tag_id_fkey",
+      "column_name": "color_tag_id",
+      "foreign_table": "color_tag",
+      "foreign_column": "color_tag_id",
+      "definition": "FOREIGN KEY (color_tag_id) REFERENCES color_tag(color_tag_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_category_tag_id_fkey",
+      "column_name": "category_tag_id",
+      "foreign_table": "category_tag",
+      "foreign_column": "category_tag_id",
+      "definition": "FOREIGN KEY (category_tag_id) REFERENCES category_tag(category_tag_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_currency_unit_id_fkey",
+      "column_name": "currency_unit_id",
+      "foreign_table": "currency_unit",
+      "foreign_column": "currency_unit_id",
+      "definition": "FOREIGN KEY (currency_unit_id) REFERENCES currency_unit(currency_unit_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "slot",
+      "foreign_table": "color_tag",
+      "foreign_column": "slot",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_registration_product_id_fkey",
+      "column_name": "registered_product_id",
+      "foreign_table": "registered_product",
+      "foreign_column": "registered_product_id",
+      "definition": "FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "members_id",
+      "foreign_table": "color_tag",
+      "foreign_column": "members_id",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "members_id",
+      "foreign_table": "color_tag",
+      "foreign_column": "slot",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "slot",
+      "foreign_table": "color_tag",
+      "foreign_column": "members_id",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "storage_location",
+      "constraint_name": "receipt_location_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "storage_location_preset_slot_dismissed",
+      "constraint_name": "receipt_location_preset_slot_dismissed_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "theme_settings",
+      "constraint_name": "theme_settings_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "work",
+      "constraint_name": "works_information_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
+    }
+  ],
+  "checks": [
+    {
+      "table_name": "category_tag",
+      "constraint_name": "category_tag_slot_range",
+      "definition": "CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))"
+    },
+    {
+      "table_name": "category_tag_preset_slot_dismissed",
+      "constraint_name": "category_tag_preset_slot_dismissed_slot_range",
+      "definition": "CHECK (((slot >= 1) AND (slot <= 6)))"
+    },
+    {
+      "table_name": "color_tag",
+      "constraint_name": "color_tag_color_hex_check",
+      "definition": "CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))"
+    },
+    {
+      "table_name": "color_tag",
+      "constraint_name": "color_tag_slot_range",
+      "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_slot_range",
+      "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
+    },
+    {
+      "table_name": "storage_location",
+      "constraint_name": "receipt_location_slot_range",
+      "definition": "CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))"
+    },
+    {
+      "table_name": "storage_location_preset_slot_dismissed",
+      "constraint_name": "receipt_location_preset_slot_dismissed_slot_range",
+      "definition": "CHECK (((slot >= 1) AND (slot <= 6)))"
+    }
+  ]
+}

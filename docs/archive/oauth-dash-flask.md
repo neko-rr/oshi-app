@@ -1,10 +1,11 @@
+<!-- 更新: ARCHIVE — 履歴のみ。新規設計の正にしない。凡例: docs/README.md -->
 # DEPRECATED — Dash / Flask 期の認証ドキュメント（正本ではない）
 
 > **ステータス**: 廃止（アーカイブ）  
 > **日付**: 2026-08-12  
 > **理由**: スタックを Next.js + FastAPI に移行するため。サーバ側 PKCE + Flask HttpOnly Cookie 入口保護は **v2 では採用しない**。  
-> **現在の認証の正本**: [docs/migration/v2/rules/auth.md](../migration/v2/rules/auth.md)（実装時は `.cursor/rules/auth.md`）  
-> **関連**: [security.md](../../.cursor/rules/security.md)
+> **現在の認証の正本**: [`.cursor/rules/auth.mdc`](../../.cursor/rules/auth.mdc)  
+> **関連**: [security.mdc](../../.cursor/rules/security.mdc)
 
 このファイルは **履歴・移行比較** 用。エージェントは実装の指示として読まないこと。  
 有用だった点（Google Provider の有効化、Supabase callback URL 等）は新 `auth.md` に取り込まれている。

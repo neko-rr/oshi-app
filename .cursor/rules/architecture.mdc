@@ -1,0 +1,30 @@
+---
+description: v2 の優先順位と用途マップ。どのルールを読むか迷ったときに従う。
+alwaysApply: true
+---
+
+# Architecture（優先順位）
+
+新しいコード・設定を変えるとき、次の順でルールを適用せよ。
+
+1. `security.mdc` — 秘密・公開境界
+2. `auth.mdc` — JWT / `members_id` / RLS
+3. `platform.mdc` — Web / API / Mobile の役割
+4. `naming.mdc` + `docs/migration/v2/glossary.md`
+5. `docs/migration/v2/rules/file_structure.md`（v2 配置）
+6. `api_contract.mdc`
+7. DB / SQL / `docs/db` を触るときは `database.mdc` + skill `db-schema-change`
+8. 製品の要否・フローは `spec.mdc` + `docs/product/` + skill `product-spec-sync`
+9. Web UI / トークン / 推し色は `design.mdc` + `docs/design/` + skill `design-change` / 本番採用は `design-adoption` / 要望は `design-feedback` / a11y は `design-a11y`
+10. `deploy.mdc` / `mobile.mdc`（該当時）
+
+## エージェントへの命令
+
+- 用途が曖昧なら、このマップでルールを開け。ツール名だけでルールを増やさない。
+- Dash 期の `reference/file_structure-dash.md` を **新規パス設計に使うな**。
+- Auth / セキュリティ / デプロイ変更の前に skill `official-docs-first` を実行せよ。
+- スキーマ変更の前に skill `db-schema-change`。正本は `supabase/migrations/` と `docs/db/`。
+- 機能の要否・登録フローは `docs/product/`。as-built は `generate_product_docs.py`（skill `product-spec-sync`）。Spec Kit は使うな。
+- UI・トークン・推し色は `docs/design/`。大きな見た目変更は skill **`design-lab`**（3案実装＋スコア）→ 人の本決定 → **`design-adoption`**（画面単位）。要望は **`design-feedback`**（pending 可）。a11y は **`design-a11y`**（公式 WebFetch）。旧 Dash DESIGN を正にするな。
+- 振る舞い変更は `tdd.mdc`。完了後は `post-change-verify`（＋該当時 `secure-change-checklist`）。
+- 公式 URL 索引 `docs/refs/official-links.md` は索引のみ。判断の正本にするな。

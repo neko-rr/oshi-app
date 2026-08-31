@@ -1,0 +1,341 @@
+{
+  "generated_at": "2026-08-30T13:12:29Z",
+  "openapi_source": "static router extract",
+  "web_routes": [
+    {
+      "path": "/auth/confirm",
+      "kind": "route",
+      "file": "apps/web/src/app/auth/confirm/route.ts"
+    },
+    {
+      "path": "/auth/error",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/error/page.tsx"
+    },
+    {
+      "path": "/auth/forgot-password",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/forgot-password/page.tsx"
+    },
+    {
+      "path": "/auth/login",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/login/page.tsx"
+    },
+    {
+      "path": "/auth/sign-up",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/sign-up/page.tsx"
+    },
+    {
+      "path": "/auth/sign-up-success",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/sign-up-success/page.tsx"
+    },
+    {
+      "path": "/auth/update-password",
+      "kind": "page",
+      "file": "apps/web/src/app/auth/update-password/page.tsx"
+    },
+    {
+      "path": "/dashboard",
+      "kind": "page",
+      "file": "apps/web/src/app/dashboard/page.tsx"
+    },
+    {
+      "path": "/dev/design-lab",
+      "kind": "page",
+      "file": "apps/web/src/app/dev/design-lab/page.tsx"
+    },
+    {
+      "path": "/gallery/[registered_product_id]",
+      "kind": "page",
+      "file": "apps/web/src/app/gallery/[registered_product_id]/page.tsx"
+    },
+    {
+      "path": "/gallery",
+      "kind": "page",
+      "file": "apps/web/src/app/gallery/page.tsx"
+    },
+    {
+      "path": "/me",
+      "kind": "page",
+      "file": "apps/web/src/app/me/page.tsx"
+    },
+    {
+      "path": "/",
+      "kind": "page",
+      "file": "apps/web/src/app/page.tsx"
+    },
+    {
+      "path": "/protected",
+      "kind": "page",
+      "file": "apps/web/src/app/protected/page.tsx"
+    },
+    {
+      "path": "/register",
+      "kind": "page",
+      "file": "apps/web/src/app/register/page.tsx"
+    },
+    {
+      "path": "/settings/category-tags",
+      "kind": "page",
+      "file": "apps/web/src/app/settings/category-tags/page.tsx"
+    },
+    {
+      "path": "/settings/color-tags",
+      "kind": "page",
+      "file": "apps/web/src/app/settings/color-tags/page.tsx"
+    },
+    {
+      "path": "/settings",
+      "kind": "page",
+      "file": "apps/web/src/app/settings/page.tsx"
+    },
+    {
+      "path": "/settings/storage-locations",
+      "kind": "page",
+      "file": "apps/web/src/app/settings/storage-locations/page.tsx"
+    }
+  ],
+  "api_routes": [
+    {
+      "method": "POST",
+      "path": "/assist/barcode/keyword",
+      "file": "apps/api/app/routers/assist.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/assist/barcode/lookup",
+      "file": "apps/api/app/routers/assist.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/assist/tags/extract",
+      "file": "apps/api/app/routers/assist.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/assist/vision/describe",
+      "file": "apps/api/app/routers/assist.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/category-tags",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/category-tags",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "DELETE",
+      "path": "/category-tags/{category_tag_id}",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PATCH",
+      "path": "/category-tags/{category_tag_id}",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/color-tags",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PUT",
+      "path": "/color-tags",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/charts",
+      "file": "apps/api/app/routers/stats.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "file": "apps/api/app/routers/health.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/me",
+      "file": "apps/api/app/routers/health.py",
+      "router_var": "router_me"
+    },
+    {
+      "method": "POST",
+      "path": "/photos",
+      "file": "apps/api/app/routers/photos.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/products",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/products",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "DELETE",
+      "path": "/products/{registered_product_id}",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/products/{registered_product_id}",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PATCH",
+      "path": "/products/{registered_product_id}",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/stats/products",
+      "file": "apps/api/app/routers/stats.py",
+      "router_var": "router"
+    },
+    {
+      "method": "GET",
+      "path": "/storage-locations",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/storage-locations",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "DELETE",
+      "path": "/storage-locations/{storage_location_id}",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PATCH",
+      "path": "/storage-locations/{storage_location_id}",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    }
+  ],
+  "shared_paths": [
+    {
+      "key": "health",
+      "path": "/health"
+    },
+    {
+      "key": "me",
+      "path": "/me"
+    },
+    {
+      "key": "products",
+      "path": "/products"
+    },
+    {
+      "key": "photos",
+      "path": "/photos"
+    },
+    {
+      "key": "colorTags",
+      "path": "/color-tags"
+    },
+    {
+      "key": "categoryTags",
+      "path": "/category-tags"
+    },
+    {
+      "key": "storageLocations",
+      "path": "/storage-locations"
+    },
+    {
+      "key": "statsProducts",
+      "path": "/stats/products"
+    },
+    {
+      "key": "dashboardCharts",
+      "path": "/dashboard/charts"
+    },
+    {
+      "key": "assistVisionDescribe",
+      "path": "/assist/vision/describe"
+    },
+    {
+      "key": "assistTagsExtract",
+      "path": "/assist/tags/extract"
+    },
+    {
+      "key": "assistBarcodeLookup",
+      "path": "/assist/barcode/lookup"
+    },
+    {
+      "key": "assistBarcodeKeyword",
+      "path": "/assist/barcode/keyword"
+    }
+  ],
+  "services": [
+    {
+      "name": "barcode_lookup_service",
+      "file": "apps/api/app/services/barcode_lookup_service.py"
+    },
+    {
+      "name": "dashboard_service",
+      "file": "apps/api/app/services/dashboard_service.py"
+    },
+    {
+      "name": "io_intelligence_service",
+      "file": "apps/api/app/services/io_intelligence_service.py"
+    },
+    {
+      "name": "photo_service",
+      "file": "apps/api/app/services/photo_service.py"
+    },
+    {
+      "name": "product_color_tag_service",
+      "file": "apps/api/app/services/product_color_tag_service.py"
+    },
+    {
+      "name": "product_service",
+      "file": "apps/api/app/services/product_service.py"
+    },
+    {
+      "name": "stats_service",
+      "file": "apps/api/app/services/stats_service.py"
+    },
+    {
+      "name": "tag_extraction_service",
+      "file": "apps/api/app/services/tag_extraction_service.py"
+    },
+    {
+      "name": "tag_service",
+      "file": "apps/api/app/services/tag_service.py"
+    }
+  ],
+  "gaps": [],
+  "feature_count": 27
+}

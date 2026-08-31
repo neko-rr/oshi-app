@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "updated_note": "Lab 案の本番採用状態。エージェントが承認後に更新。語彙は design-adoption skill。",
+  "screens": [
+    {
+      "path": "/gallery",
+      "lab_variant": null,
+      "status": "not_started",
+      "notes_ja": "Lab 比較後に画面単位で採用",
+      "updated_at": null
+    },
+    {
+      "path": "/register",
+      "lab_variant": null,
+      "status": "not_started",
+      "notes_ja": "",
+      "updated_at": null
+    },
+    {
+      "path": "/dashboard",
+      "lab_variant": null,
+      "status": "not_started",
+      "notes_ja": "",
+      "updated_at": null
+    },
+    {
+      "path": "/settings",
+      "lab_variant": null,
+      "status": "not_started",
+      "notes_ja": "推し色スウォッチ UI は別タスク",
+      "updated_at": null
+    },
+    {
+      "path": "/auth/login",
+      "lab_variant": null,
+      "status": "not_started",
+      "notes_ja": "",
+      "updated_at": null
+    }
+  ]
+}

@@ -1,6 +1,8 @@
+<!-- 更新: ARCHIVE寄り — 移行メモ。現行正本はルート AGENTS.md と .cursor/rules/*.mdc。凡例: docs/README.md -->
 # ファイル構成（Next.js + FastAPI monorepo）
 
-Apply Mode: Always Apply（新リポジトリで使用）
+> **運用中の命令は `.cursor/rules/architecture.mdc` / `platform.mdc` / `naming.mdc`。**  
+> このファイルは v2 配置の詳細メモ（Dash 構成ではない）。Always Apply しない。
 
 # ルート
 
@@ -63,5 +65,5 @@ Dockerfile
 - `.env` を Git に含めない。`.env.example` のみ。
 - `service_role` キーを `NEXT_PUBLIC_*` に置かない。
 - 旧 Dash 構成（`app.py` / `pages/` / `features/*/controller.py`）は v2 では使わない。
-- **命名**: 新規ファイルは [naming.md](../../../../.cursor/rules/naming.md) と [glossary.md](../glossary.md) に従う。
+- **命名**: 新規ファイルは [naming.mdc](../../../../.cursor/rules/naming.mdc) と [glossary.md](../glossary.md) に従う。
   skill: [new-file-naming](../skills/new-file-naming/SKILL.md)

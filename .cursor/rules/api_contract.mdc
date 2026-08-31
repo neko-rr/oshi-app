@@ -1,0 +1,19 @@
+---
+description: FastAPI の JSON・認証・エラー形。apps/api と shared を触るときに適用。
+globs: apps/api/**/*,packages/shared/**/*
+alwaysApply: false
+---
+
+# API Contract
+
+詳細の正本: `docs/migration/v2/rules/api_contract.md`
+
+## 守れ
+
+- JSON フィールドは **snake_case**
+- 保護 API は `Authorization: Bearer`（検証は `auth.mdc` = JWKS）
+- 公開は `/health` のみ（初期方針）
+- エラー: `{ "error": { "code", "message", "details?" } }`
+- `members_id` をクエリでなりすまし可能に渡すな（トークン由来のみ）
+
+パス・リソース名は複数形（例 `/products`）。`getXxx` 風のパスを作るな。

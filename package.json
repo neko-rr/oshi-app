@@ -9,6 +9,11 @@
     "build:shared": "pnpm -C packages/shared run build",
     "lint:web": "pnpm -C apps/web lint",
     "typecheck:web": "pnpm -C apps/web exec tsc --noEmit",
-    "test:api": "pnpm -C apps/api test"
+    "test:api": "pnpm -C apps/api test",
+    "sync:design-icons": "python scripts/sync_design_icons.py",
+    "check:design-icons": "python scripts/sync_design_icons.py --check",
+    "check:design": "python scripts/check_design_compliance.py",
+    "check:design-tokens": "python scripts/check_design_tokens.py",
+    "generate:design-docs": "python scripts/generate_design_docs.py"
   }
 }

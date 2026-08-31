@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "updated_note": "エージェントがデザインフィードバックを更新する。語彙は feedback/README.md。人は inbox.md に走り書き可。accepted は人の明示後のみ。",
+  "items": [
+    {
+      "id": "fb-001",
+      "status": "deferred",
+      "created_at": "2026-08-31",
+      "source": "user",
+      "area": "design-lab/safe-area",
+      "request_ja": "Design Lab のモバイルアプリ枠にセーフエリア（ノッチ）線を出す。上端・下端のガイドラインで、主UIがノッチ／ホームバーに埋まらないか確認できるようにする。",
+      "agent_note": "未実装。Expo／アプリ本番に近くなってから。今の Lab 枠は見本のため実寸とズレやすい。実装時は design-lab + design-mobile。親指ゾーンは別途実装済。",
+      "target_docs": [
+        "compare-workflow.md",
+        "a11y.md",
+        ".cursor/skills/design-lab/SKILL.md",
+        ".cursor/skills/design-mobile/SKILL.md"
+      ],
+      "lab_ref": null,
+      "when_ja": "apps/mobile（Expo）の画面実装が始まったあと"
+    }
+  ]
+}

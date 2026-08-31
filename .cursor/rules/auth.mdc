@@ -1,0 +1,32 @@
+---
+description: Supabase Auth。Web は Cookie、API/Mobile は Bearer。API は JWKS 検証。members_id=sub。
+alwaysApply: true
+---
+
+# Auth
+
+## 契約
+
+- 認証の **発行は Supabase Auth のみ**。Flask PKCE / 自前 OAuth プロトコルを新規実装するな。
+- Web: `@supabase/ssr` + Cookie + middleware（`getClaims` 等）。
+- API / Mobile: `Authorization: Bearer <access_token>`。
+- API 検証は **JWKS（非対称）**。`SUPABASE_JWT_SECRET`（HS256）を新規の正にするな。
+- `members_id` = JWT `sub`。行の最終防衛は **RLS**。
+- 通常の DB アクセスは **ユーザー JWT + publishable**。`service_role` はバッチ・管理のみ。
+
+## 環境
+
+- Web 公開: `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` のみ。
+- API: `SUPABASE_URL`（+ 任意 `SUPABASE_JWKS_URL`）。JWKS の `keys` が空なら Signing Keys 未移行。
+- supabase-py クライアントは **`SyncClientOptions`**（旧 `ClientOptions` 単体は 500 の原因）。
+
+## やってはいけない
+
+- JWT 検証用 secret をフロント／モバイルに埋める。
+- `user_metadata` だけで認可する。
+- Auth Redirect の正を Dash `8050` にする。
+
+## 変更前
+
+- skill `official-docs-first`（JWTs / Signing Keys / SSR）を実行せよ。
+- 公式: https://supabase.com/docs/guides/auth/jwts

@@ -1,0 +1,254 @@
+{
+  "generated_at": "2026-08-31T10:24:04Z",
+  "pages": [
+    {
+      "path": "/auth/error",
+      "file": "apps/web/src/app/auth/error/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/forgot-password",
+      "file": "apps/web/src/app/auth/forgot-password/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/login",
+      "file": "apps/web/src/app/auth/login/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/sign-up",
+      "file": "apps/web/src/app/auth/sign-up/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/sign-up-success",
+      "file": "apps/web/src/app/auth/sign-up-success/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/update-password",
+      "file": "apps/web/src/app/auth/update-password/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/dashboard",
+      "file": "apps/web/src/app/dashboard/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/dev/design-lab",
+      "file": "apps/web/src/app/dev/design-lab/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": true
+    },
+    {
+      "path": "/gallery/[registered_product_id]",
+      "file": "apps/web/src/app/gallery/[registered_product_id]/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/gallery",
+      "file": "apps/web/src/app/gallery/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/me",
+      "file": "apps/web/src/app/me/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/",
+      "file": "apps/web/src/app/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/protected",
+      "file": "apps/web/src/app/protected/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/register",
+      "file": "apps/web/src/app/register/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/category-tags",
+      "file": "apps/web/src/app/settings/category-tags/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/color-tags",
+      "file": "apps/web/src/app/settings/color-tags/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings",
+      "file": "apps/web/src/app/settings/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/storage-locations",
+      "file": "apps/web/src/app/settings/storage-locations/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    }
+  ],
+  "gaps": [
+    {
+      "id": "/auth/login",
+      "kind": "lab_not_fully_adopted",
+      "detail": "status=`not_started` lab_variant=None"
+    },
+    {
+      "id": "/dashboard",
+      "kind": "lab_not_fully_adopted",
+      "detail": "status=`not_started` lab_variant=None"
+    },
+    {
+      "id": "/gallery",
+      "kind": "lab_not_fully_adopted",
+      "detail": "status=`not_started` lab_variant=None"
+    },
+    {
+      "id": "/register",
+      "kind": "lab_not_fully_adopted",
+      "detail": "status=`not_started` lab_variant=None"
+    },
+    {
+      "id": "/settings",
+      "kind": "lab_not_fully_adopted",
+      "detail": "status=`not_started` lab_variant=None"
+    }
+  ],
+  "adoption": {
+    "version": 1,
+    "updated_note": "Lab 案の本番採用状態。エージェントが承認後に更新。語彙は design-adoption skill。",
+    "screens": [
+      {
+        "path": "/gallery",
+        "lab_variant": null,
+        "status": "not_started",
+        "notes_ja": "Lab 比較後に画面単位で採用",
+        "updated_at": null
+      },
+      {
+        "path": "/register",
+        "lab_variant": null,
+        "status": "not_started",
+        "notes_ja": "",
+        "updated_at": null
+      },
+      {
+        "path": "/dashboard",
+        "lab_variant": null,
+        "status": "not_started",
+        "notes_ja": "",
+        "updated_at": null
+      },
+      {
+        "path": "/settings",
+        "lab_variant": null,
+        "status": "not_started",
+        "notes_ja": "推し色スウォッチ UI は別タスク",
+        "updated_at": null
+      },
+      {
+        "path": "/auth/login",
+        "lab_variant": null,
+        "status": "not_started",
+        "notes_ja": "",
+        "updated_at": null
+      }
+    ]
+  },
+  "icons_catalog_count": 14
+}

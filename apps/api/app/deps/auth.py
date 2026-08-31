@@ -1,3 +1,5 @@
+"""FastAPI 認証依存。Supabase access token を JWKS で検証する。"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,10 +23,9 @@ class AuthenticatedUser:
 
 
 def verify_access_token(token: str) -> AuthenticatedUser:
-    """Supabase 発行 JWT を検証する。
+    """Supabase 発行 JWT を JWKS（RS256/ES256）で検証する。
 
-    開発・テストで SUPABASE_JWT_SECRET があれば HS256 で検証。
-    無ければ JWKS（SUPABASE_URL/auth/v1/.well-known/jwks.json）を試す。
+    Legacy JWT Secret（HS256）は使わない（auth.mdc / 公式非推奨）。
     """
     if not token or not token.strip():
         raise HTTPException(
@@ -33,38 +34,26 @@ def verify_access_token(token: str) -> AuthenticatedUser:
         )
 
     settings = get_settings()
-    secret = settings.supabase_jwt_secret
+    jwks_url = settings.resolved_jwks_url
+    if not jwks_url:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={
+                "code": "UNAUTHORIZED",
+                "message": "JWKS URL が未設定です（SUPABASE_URL または SUPABASE_JWKS_URL）",
+            },
+        )
+
     try:
-        if secret:
-            payload = jwt.decode(
-                token,
-                secret,
-                algorithms=["HS256"],
-                audience="authenticated",
-                options={"require": ["sub", "exp"]},
-            )
-        else:
-            if not settings.supabase_url:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail={
-                        "code": "UNAUTHORIZED",
-                        "message": "JWT 検証設定が未完了です（起きた後に SUPABASE_* を設定）",
-                    },
-                )
-            jwks_url = (
-                settings.supabase_url.rstrip("/")
-                + "/auth/v1/.well-known/jwks.json"
-            )
-            jwks_client = PyJWKClient(jwks_url)
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
-            payload = jwt.decode(
-                token,
-                signing_key.key,
-                algorithms=["RS256", "ES256"],
-                audience="authenticated",
-                options={"require": ["sub", "exp"]},
-            )
+        jwks_client = PyJWKClient(jwks_url)
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        payload = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256", "ES256"],
+            audience="authenticated",
+            options={"require": ["sub", "exp"]},
+        )
     except HTTPException:
         raise
     except Exception:
@@ -86,12 +75,19 @@ def verify_access_token(token: str) -> AuthenticatedUser:
     )
 
 
-def get_current_user(
+def get_access_token(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
-) -> AuthenticatedUser:
+) -> str:
+    """Bearer アクセストークン（未提示は 401）。"""
     if creds is None or not creds.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "UNAUTHORIZED", "message": "認証が必要です"},
         )
-    return verify_access_token(creds.credentials)
+    return creds.credentials
+
+
+def get_current_user(
+    token: str = Depends(get_access_token),
+) -> AuthenticatedUser:
+    return verify_access_token(token)

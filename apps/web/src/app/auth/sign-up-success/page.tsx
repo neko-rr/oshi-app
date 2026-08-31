@@ -1,15 +1,30 @@
-import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
-export default function SignUpSuccessPage() {
+export default function Page() {
   return (
-    <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-4 px-4">
-      <h1 className="text-2xl font-semibold">確認メールを送信しました</h1>
-      <p className="text-sm text-black/70">
-        Supabase のメール確認設定に従ってリンクを開いてください。
-      </p>
-      <Link href="/auth/login" className="underline">
-        ログインへ
-      </Link>
-    </main>
-  );
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
+              <CardDescription>Check your email to confirm</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                You&apos;ve successfully signed up. Please check your email to confirm your account
+                before signing in.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
 }

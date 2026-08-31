@@ -1,0 +1,29 @@
+---
+description: 将来の Expo モバイル。同一 Supabase/API・Bearer・SecureStore。apps/mobile を触るとき。
+globs: apps/mobile/**/*
+alwaysApply: false
+---
+
+# Mobile（Expo）
+
+## 守れ
+
+- 同一 Supabase・同一 FastAPI。API は Web と同じ Bearer。
+- セッションは SecureStore 等。Cookie / Next middleware に依存するな。
+- バンドルに secret / service_role / JWT 秘密を入れるな。
+- **デザインは Web と同契約**: セマンティック・トークン名（`meta/tokens.json`）、推し色（`oshi-accents.md`）、アイコン（`meta/icons.json` → `src/lib/icons.ts`）。
+
+## 着手前
+
+- skill `official-docs-first`
+- skill **`design-mobile`**（トークン・推し色・lucide-react-native 同期）
+- https://docs.expo.dev/
+- https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
+
+## アイコン
+
+- 正本: `docs/design/meta/icons.json`
+- 生成: `python scripts/sync_design_icons.py` → `apps/mobile/src/lib/icons.ts`
+- Expo 着手時に `lucide-react-native` を依存追加せよ（生成ファイルだけでは動かない）
+
+詳細方針は `auth.mdc` / `platform.mdc` / `security.mdc` / `design.mdc`。

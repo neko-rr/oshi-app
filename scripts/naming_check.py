@@ -119,13 +119,22 @@ def check_one(path: str) -> list[str]:
     # apps/web の TSX
     if "/apps/web/" in f"/{n}" or n.startswith("apps/web/"):
         if name.endswith(".tsx") and name not in NEXT_FIXED:
+            # shadcn / Auth UI 系は components/ 配下で kebab-case を許容
+            under_components = "/components/" in f"/{n}" or n.startswith(
+                "apps/web/src/components/"
+            )
             if name.startswith("use"):
                 pass  # useXxx.tsx は稀
+            elif under_components and re.match(
+                r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.tsx$", name
+            ):
+                pass
             elif not re.match(r"^[A-Z][A-Za-z0-9]*\.tsx$", name):
                 # hooks の use-xxx は .ts が多い
                 if not (name.startswith("use") and name[0].islower()):
                     issues.append(
-                        f"{n}: React コンポーネントは PascalCase.tsx（Next 固定名を除く）"
+                        f"{n}: React コンポーネントは PascalCase.tsx"
+                        "（components/ の kebab と Next 固定名を除く）"
                     )
         if name.endswith(".ts") and name.startswith("use"):
             if not re.match(r"^use[A-Z][A-Za-z0-9]*\.ts$", name) and not re.match(

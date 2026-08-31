@@ -1,0 +1,28 @@
+---
+description: 秘密情報・公開境界・個人情報。コミット/ログ/クライアントに秘密を出さない。
+alwaysApply: true
+---
+
+# Security
+
+## 必ず守れ
+
+- `.env` 実値、secret、service_role、JWT 秘密鍵、トークン、Cookie 全文、署名 URL 全文を **チャット・ログ・Git に出すな**。
+- **マシン絶対パス**（各 OS のユーザーホーム配下など）をリポジトリに書くな。相対パスのみ（`naming.mdc` / `secret_guard`）。
+- `NEXT_PUBLIC_*` とモバイルバンドルに入れてよいのは **Supabase URL + publishable + 公開 API URL** のみ。
+- 失敗ログの `Authorization` / Cookie はマスクせよ。
+- 誤って出したら **即キーをローテ**（値は記録するな）。
+
+## 公開境界
+
+| 場所 | 可 | 不可 |
+|------|----|------|
+| `apps/web` / `apps/mobile` | publishable, 公開 URL | secret, service_role, JWT secret |
+| `apps/api` | JWKS・サーバー env | レスポンス/ログへの秘密出力 |
+| Cloudflare | Web 配信 | Origin の secret を不用意に置く |
+| Render | API Dashboard env | リポジトリへの実値 |
+
+## 変更後
+
+- skill `secure-change-checklist` を実行せよ。
+- 詳細手順・ハーネスは従来どおり `.githooks` / `scripts/secret_guard.py`。

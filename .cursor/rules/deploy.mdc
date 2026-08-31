@@ -1,0 +1,23 @@
+---
+description: Render（API）と Cloudflare（Web）のデプロイ・env・CORS。デプロイや本番 URL を触るとき。
+alwaysApply: false
+---
+
+# Deploy（Render + Cloudflare）
+
+## 役割
+
+- **Render**: FastAPI。サーバー env は Dashboard のみ。
+- **Cloudflare**: Web / CDN。secret を置くな。
+- **Supabase**: Auth / DB / Storage。
+
+## 命令
+
+- 本番 CORS に開発用 localhost を残すな。
+- Web の `NEXT_PUBLIC_API_BASE_URL` は **HTTPS の API**。
+- Supabase Auth の Site URL / Redirect を本番 Web に合わせよ。
+- env の必須／禁止は **`docs/deploy/env-contract.md`**（実値は書くな）。
+- Cloudflare には `NEXT_PUBLIC_*` のみ。secret / service_role / DB URL を置くな。
+- 変更前: `official-docs-first`。変更後: `secure-change-checklist`。
+
+公式: https://render.com/docs / https://developers.cloudflare.com/pages/

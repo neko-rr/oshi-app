@@ -1,0 +1,22 @@
+---
+description: Web/API/Mobile の責務分担。UI に業務ロジックを置くな。
+alwaysApply: true
+---
+
+# Platform
+
+| 層 | やれ | やるな |
+|----|------|--------|
+| `apps/web` | UI、Cookie セッション、API 呼び出し | 業務の本体、secret |
+| `apps/api` | 認可後の業務、`services/`、外部アシスト | ログイン UI |
+| `apps/mobile` | SecureStore セッション、同一 Bearer API | Cookie 前提、secret |
+| `packages/shared` | パス定数・共有型（JSON は snake_case） | 秘密、環境依存ロジック |
+
+## 流れ（崩すな）
+
+1. Supabase Auth でログイン  
+2. access_token を FastAPI へ Bearer  
+3. JWKS 検証 → `members_id`  
+4. DB/Storage はユーザー JWT + RLS  
+
+公式確認が必要なら `official-docs-first`。詳細は `auth.mdc` / `security.mdc`。

@@ -15,18 +15,20 @@ description: >-
 
 ## 参照（必読）
 
-1. [naming.md](../../rules/naming.md)
+1. [naming.mdc](../../rules/naming.mdc)
 2. [glossary.md](../../../docs/migration/v2/glossary.md)
-3. [file_structure v2](../../../docs/migration/v2/rules/file_structure.md)
+3. 詳細表: [docs/migration/v2/rules/naming.md](../../../docs/migration/v2/rules/naming.md)
+4. [file_structure v2](../../../docs/migration/v2/rules/file_structure.md)
 
 ## チェックリスト（上から）
 
 1. **置き場**: `apps/web` / `apps/api` / `packages/shared` / `supabase` のどれか。
 2. **ファイル名**: Python は `snake_case`、React は `PascalCase.tsx`、ルート segment は kebab。`controller.py` 禁止。
-3. **用語**: glossary。製品=`product`、画像=`photo`、テナント=`members_id`。
-4. **API**: 複数形リソース、JSON は snake_case。
-5. **env**: Web は `NEXT_PUBLIC_*`。secret を公開しない。
-6. **DB**: 物理名を勝手に変えない。
+3. **パス表記**: マシン絶対パス禁止。リポジトリ相対のみ（`secret_guard` が拒否）。
+4. **用語**: glossary。製品=`product`、画像=`photo`、テナント=`members_id`。
+5. **API**: 複数形リソース、JSON は snake_case。
+6. **env**: Web は `NEXT_PUBLIC_*`。secret を公開しない。
+7. **DB**: 物理名は `docs/db/naming.md` / `schema-catalog.md`。勝手に変えない。変えるときは skill `db-schema-change`。
 
 ## 自動化
 

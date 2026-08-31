@@ -1,0 +1,26 @@
+---
+description: 製品要件・顧客価値・実装要否。docs/product を正本にする。機能の要否判断時。
+alwaysApply: false
+---
+
+# Spec（製品要件）
+
+正本: `docs/product/`（入口 `docs/product/README.md`）。  
+手/自動の見分け: `docs/README.md`。
+
+## 読め
+
+- 顧客価値: `docs/product/value.md`
+- ロードマップ: `docs/product/roadmap.md`
+- 登録フロー: `docs/product/flows/register.md`
+- 受け入れ条件: `docs/product/acceptance/`
+- ステータス語彙: `docs/product/meta/status_vocabulary.md`
+- **いまの事実**: `docs/product/generated/`（手編集するな。OpenAPI は `openapi.asbuilt.json`）
+
+## 命令
+
+- 機能の要否は `roadmap` + `meta/feature_status.json` で判断せよ。語彙は `status_vocabulary.md`。
+- `deferred` / 未承認の大規模追加をするな。`gaps.md` の `unexpected_*` を無視するな。
+- 画面・API・サービスを足したら skill **`product-spec-sync`** で `python scripts/generate_product_docs.py` を実行せよ。
+- UI は Next.js（`apps/web`）。業務は `apps/api` services（`platform.mdc`）。
+- Spec Kit を導入・参照するな。旧 Dash の ARCHIVE を新規設計の正にするな。

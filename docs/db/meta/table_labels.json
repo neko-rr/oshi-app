@@ -1,0 +1,22 @@
+{
+  "works_series": { "ja": "作品シリーズ", "status": "schema_ready" },
+  "work": { "ja": "作品", "status": "schema_ready" },
+  "copyright_company": { "ja": "版権会社", "status": "schema_ready" },
+  "product_type": { "ja": "製品種別", "status": "schema_ready" },
+  "product_size": { "ja": "製品サイズ", "status": "schema_ready" },
+  "storage_location": { "ja": "収納場所", "status": "wired" },
+  "color": { "ja": "色", "status": "schema_ready" },
+  "character": { "ja": "キャラクター", "status": "schema_ready" },
+  "member_type": { "ja": "会員種別", "status": "schema_ready" },
+  "currency_unit": { "ja": "貨幣単位", "status": "schema_ready" },
+  "icon_tag": { "ja": "アイコンタグ", "status": "schema_ready" },
+  "member": { "ja": "会員", "status": "schema_ready" },
+  "photo": { "ja": "写真", "status": "wired" },
+  "color_tag": { "ja": "カラータグ", "status": "wired" },
+  "category_tag": { "ja": "カテゴリータグ", "status": "wired" },
+  "registered_product": { "ja": "登録製品", "status": "wired" },
+  "theme_settings": { "ja": "テーマ設定", "status": "schema_ready" },
+  "registered_product_color_tag": { "ja": "登録製品カラータグ", "status": "wired" },
+  "storage_location_preset_slot_dismissed": { "ja": "収納場所プリセット削除済", "status": "schema_ready" },
+  "category_tag_preset_slot_dismissed": { "ja": "カテゴリプリセット削除済", "status": "schema_ready" }
+}

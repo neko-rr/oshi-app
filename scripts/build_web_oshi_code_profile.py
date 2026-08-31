@@ -34,6 +34,7 @@ EXTENSIONS = [
     "codezombiech.gitignore",
     "vscode-icons-team.vscode-icons",
     "yzhang.markdown-all-in-one",
+    "bierner.markdown-mermaid",
     "ms-ceintl.vscode-language-pack-ja",
     "ms-azuretools.vscode-docker",
     "ms-azuretools.vscode-containers",

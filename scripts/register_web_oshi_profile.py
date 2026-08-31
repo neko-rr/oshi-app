@@ -22,8 +22,6 @@ from pathlib import Path
 PROFILE_NAME = "Web-Oshi"
 # Kaggle と同様の短い location（既存手動作成フォルダを再利用）
 LOCATION = "-fdd6b996"
-OSHI_URI = "file:///c%3A/Users/ryone/Desktop/oshi_app"
-OSHI_URI2 = "file:///c%3A/Users/ryone/Desktop/oshi-app"
 
 APPDATA = Path(os.environ["APPDATA"]) / "Cursor" / "User"
 STORAGE = APPDATA / "globalStorage" / "storage.json"
@@ -31,6 +29,16 @@ USER_STORAGE = APPDATA / "storage.json"
 PROF_DIR = APPDATA / "profiles" / LOCATION
 REPO = Path(__file__).resolve().parents[1]
 CODE_PROFILE = REPO / ".vscode" / "profiles" / "Web-Oshi.code-profile"
+
+
+def workspace_file_uris() -> list[str]:
+    """このリポジトリ（と隣の旧名フォルダがあればそれ）の file URI。マシン固有パスはソースに書かない。"""
+    uris = [REPO.resolve().as_uri()]
+    for name in ("oshi-app", "oshi_app"):
+        alt = (REPO.parent / name).resolve()
+        if alt.is_dir() and alt != REPO.resolve():
+            uris.append(alt.as_uri())
+    return uris
 
 
 def cursor_running() -> bool:
@@ -129,8 +137,8 @@ def register_in_storage() -> None:
 
     assoc = data.get("profileAssociations") or {"workspaces": {}, "emptyWindows": {}}
     ws = dict(assoc.get("workspaces") or {})
-    ws[OSHI_URI] = LOCATION
-    ws[OSHI_URI2] = LOCATION
+    for uri in workspace_file_uris():
+        ws[uri] = LOCATION
     assoc["workspaces"] = ws
     data["profileAssociations"] = assoc
     STORAGE.write_text(json.dumps(data, ensure_ascii=False, indent=4), encoding="utf-8")
@@ -139,14 +147,14 @@ def register_in_storage() -> None:
         ud = json.loads(USER_STORAGE.read_text(encoding="utf-8"))
         pa = ud.get("profileAssociations") or {"workspaces": {}, "emptyWindows": {}}
         pws = dict(pa.get("workspaces") or {})
-        pws[OSHI_URI] = LOCATION
-        pws[OSHI_URI2] = LOCATION
+        for uri in workspace_file_uris():
+            pws[uri] = LOCATION
         pa["workspaces"] = pws
         ud["profileAssociations"] = pa
         USER_STORAGE.write_text(json.dumps(ud, ensure_ascii=False, indent=4), encoding="utf-8")
 
     print("registered:", profiles)
-    print("oshi_app ->", LOCATION)
+    print("workspace ->", LOCATION)
 
 
 def main() -> int:

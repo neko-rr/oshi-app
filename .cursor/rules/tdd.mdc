@@ -1,0 +1,24 @@
+---
+description: 振る舞い変更は Red-Green-Refactor。テストなしの実装完了を禁止。
+alwaysApply: true
+---
+
+# TDD
+
+振る舞いを変える・バグを直す・API を足すときは:
+
+1. **先に**失敗するテストを書け（Red）
+2. 通る最小実装（Green）
+3. テスト緑のまま整理（Refactor）
+
+## 置き場
+
+- API: `apps/api/tests/` + pytest
+- 外部 HTTP（IO/楽天）: **必ず mock**（実キーをテストに書くな）
+
+## 例外（テスト不要と明示できるもの）
+
+- docs / rules / 文言のみ
+- 実行パスが増えない型だけの変更
+
+「実装だけ」で終わるな。検証は skill `tdd-workflow` → `post-change-verify`。

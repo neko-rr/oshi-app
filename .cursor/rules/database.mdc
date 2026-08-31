@@ -1,0 +1,33 @@
+---
+description: DB 物理名・RLS・GRANT・migration。スキーマや API の DB アクセス、docs/db を触るとき。
+globs: apps/api/**/*,supabase/**/*.sql,**/*.sql,docs/db/**
+alwaysApply: false
+---
+
+# Database
+
+## 正本（この順）
+
+1. `supabase/migrations/` — スキーマ変更 SQL
+2. ライブ DB — 適用結果
+3. `docs/db/generated/` — 表・列・日本語読み下し・ER・権限（**自動生成・手編集禁止**）
+4. `docs/db/meta/table_labels.json` — wired 状態（表の日本語は優先表示用）
+5. `docs/db/meta/term_glossary.json` — 英語トークン→日本語（列合成・**エージェント更新**）
+6. `docs/db/security.md` / `naming.md` / `wire-checklist.md`
+
+入口: `docs/db/README.md`。手順: skill **`db-schema-change`**。  
+手/自動の見分け: `docs/README.md`（`generated/` 手編集禁止）。  
+ユーザーへの表・列の説明は `docs/db/generated/schema_guide.md` を正にする。
+
+## 命令
+
+- スキーマ変更後は必ず `python scripts/generate_db_docs.py`（または `--snapshot`）で `generated/` を更新せよ。
+- `docs/db/generated/` を手編集するな。
+- 物理名の勝手な改名禁止（migration + コード同時更新）。
+- **anon に業務表を GRANT するな。** schema_ready は authenticated にも付けない。
+- wired 時だけ最小 GRANT + RLS（`members_id = auth.uid()`）。
+- 新規表は `docs/db/new-table-template.sql`。自動 GRANT に頼るな。
+- **日本語列名を手メンテするな。** 合成は `term_glossary` + 生成スクリプト。未知トークンは glossary に足して再生成。
+- `table_labels.json` の日本語・status は消すな（SQL/JSON に日本語識別子を使うな）。
+- 破壊的 SQL は `accidental-data-loss-prevention` + ユーザー確認。
+- 変更後: `get_advisors(security)` → `post-change-verify`。

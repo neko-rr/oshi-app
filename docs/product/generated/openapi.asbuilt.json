@@ -1,0 +1,258 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "oshi-app API (as-built)",
+    "version": "generated",
+    "description": "静的抽出または FastAPI openapi()。手編集禁止。"
+  },
+  "paths": {
+    "/assist/barcode/keyword": {
+      "post": {
+        "summary": "POST /assist/barcode/keyword",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/assist.py"
+      }
+    },
+    "/assist/barcode/lookup": {
+      "post": {
+        "summary": "POST /assist/barcode/lookup",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/assist.py"
+      }
+    },
+    "/assist/tags/extract": {
+      "post": {
+        "summary": "POST /assist/tags/extract",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/assist.py"
+      }
+    },
+    "/assist/vision/describe": {
+      "post": {
+        "summary": "POST /assist/vision/describe",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/assist.py"
+      }
+    },
+    "/category-tags": {
+      "get": {
+        "summary": "GET /category-tags",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      },
+      "post": {
+        "summary": "POST /category-tags",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      }
+    },
+    "/category-tags/{category_tag_id}": {
+      "delete": {
+        "summary": "DELETE /category-tags/{category_tag_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      },
+      "patch": {
+        "summary": "PATCH /category-tags/{category_tag_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      }
+    },
+    "/color-tags": {
+      "get": {
+        "summary": "GET /color-tags",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      },
+      "put": {
+        "summary": "PUT /color-tags",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      }
+    },
+    "/dashboard/charts": {
+      "get": {
+        "summary": "GET /dashboard/charts",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/stats.py"
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "GET /health",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/health.py"
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "GET /me",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/health.py"
+      }
+    },
+    "/photos": {
+      "post": {
+        "summary": "POST /photos",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/photos.py"
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "GET /products",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/products.py"
+      },
+      "post": {
+        "summary": "POST /products",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/products.py"
+      }
+    },
+    "/products/{registered_product_id}": {
+      "delete": {
+        "summary": "DELETE /products/{registered_product_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/products.py"
+      },
+      "get": {
+        "summary": "GET /products/{registered_product_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/products.py"
+      },
+      "patch": {
+        "summary": "PATCH /products/{registered_product_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/products.py"
+      }
+    },
+    "/stats/products": {
+      "get": {
+        "summary": "GET /stats/products",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/stats.py"
+      }
+    },
+    "/storage-locations": {
+      "get": {
+        "summary": "GET /storage-locations",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      },
+      "post": {
+        "summary": "POST /storage-locations",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      }
+    },
+    "/storage-locations/{storage_location_id}": {
+      "delete": {
+        "summary": "DELETE /storage-locations/{storage_location_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      },
+      "patch": {
+        "summary": "PATCH /storage-locations/{storage_location_id}",
+        "responses": {
+          "200": {
+            "description": "as-built (static extract)"
+          }
+        },
+        "x-source-file": "apps/api/app/routers/tags.py"
+      }
+    }
+  }
+}

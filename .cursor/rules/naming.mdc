@@ -1,0 +1,33 @@
+---
+description: ファイル名・識別子・JSON は snake_case。members_id。controller.py 禁止。
+alwaysApply: true
+---
+
+# Naming
+
+新規・変更コードでは次を守れ。詳細表は `docs/migration/v2/rules/naming.md` と `glossary.md`。
+
+## 必須
+
+- HTTP JSON / TS 型のワイヤキーは **`snake_case`**（`members_id`）。camel 変換レイヤを増やすな。
+- テナント列名は **`members_id`**（`owner_id` を新設するな）。
+- Python: モジュール/関数 `snake_case`、クラス `PascalCase`。
+- React コンポーネント: `PascalCase.tsx`。App Router segment: `kebab-case`。
+- コメント・ユーザー向け docs は **日本語**。識別子は英語。
+
+## 置き場
+
+- 業務: `apps/api/app/services/<domain>_service.py`
+- HTTP: `apps/api/app/routers/`（薄く）
+- Web UI: `apps/web/src/app/...` / `components/`
+- 共有定数: `packages/shared`
+
+## 禁止（新規）
+
+- `controller.py`（Dash）
+- 巨大な `photo_service` に全 CRUD
+- `foo_final2.py` / 日本語コードファイル名
+- **マシン絶対パス**（各 OS のユーザーホーム配下、`file:///` 付きホーム URI 等）。ドキュメント・コード・計画書すべて **リポジトリ相対** のみ。`secret_guard` がコミットを拒否する
+
+新しいパス・識別子を足す前に skill `new-file-naming` を使え。  
+DB 物理名の法則は `docs/db/naming.md`（一覧は `docs/db/schema-catalog.md`。日本語名は人間用）。

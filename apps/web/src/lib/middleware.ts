@@ -5,13 +5,14 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   // 未設定時は認証ゲートをスキップ（ローカル骨格用）
   if (!url || !key) {
     return supabaseResponse;
   }
 
+  // Fluid compute: リクエストごとに新規クライアント
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll() {
@@ -29,12 +30,14 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
+  // createServerClient と getClaims の間に他処理を置かない
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
   const path = request.nextUrl.pathname;
   const isPublic =
     path.startsWith("/auth") ||
+    path.startsWith("/dev") ||
     path === "/" ||
     path.startsWith("/_next") ||
     path === "/favicon.ico";

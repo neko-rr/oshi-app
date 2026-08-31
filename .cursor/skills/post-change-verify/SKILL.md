@@ -29,13 +29,52 @@ pnpm -C apps/web lint
 pnpm -C apps/web exec tsc --noEmit
 ```
 
+### デザイン docs / tokens（触った場合）
+
+```powershell
+python scripts/check_design_tokens.py
+python scripts/generate_design_docs.py
+```
+
+`docs/design/generated/gaps.md` を確認（Lab 未採用・hex 等）。
+
+### デザイン icons（meta を触った場合）
+
+`docs/design/meta/icons.json` を変えたら **必須**:
+
+```powershell
+python scripts/sync_design_icons.py
+python scripts/sync_design_icons.py --check
+```
+
+### デザイン compliance（web UI を触った場合）
+
+```powershell
+python scripts/check_design_compliance.py
+```
+
 ### 両方
 
 API → Web の順。
 
+### 製品 as-built（ルート変更時）
+
+次のいずれかを変えたら **必須**:
+
+- `apps/web/src/app/**/page.tsx` / `route.ts`
+- `apps/api/app/routers/**`
+- `apps/api/app/services/*_service.py`
+- `packages/shared/src/index.ts` の `API_PATHS`
+
+```powershell
+python scripts/generate_product_docs.py
+```
+
+`docs/product/generated/gaps.md` を確認（`missing_expected_*` / `unexpected_*`）。意図（value / roadmap / flows / acceptance）の更新が必要なら skill **`product-spec-sync`**。
+
 ## スキップ
 
-- md / plans のみ
+- md / plans のみ（ただし `docs/product/meta`・flows・acceptance を触ったら `product-spec-sync`）
 - アセットのみ
 
 ## TDD

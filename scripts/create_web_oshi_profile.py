@@ -36,6 +36,7 @@ WANT = [
     "codezombiech.gitignore",
     "vscode-icons-team.vscode-icons",
     "yzhang.markdown-all-in-one",
+    "bierner.markdown-mermaid",
     "ms-ceintl.vscode-language-pack-ja",
     "ms-azuretools.vscode-docker",
     "ms-azuretools.vscode-containers",
@@ -190,10 +191,14 @@ def main() -> None:
 
     assoc = data.get("profileAssociations") or {"workspaces": {}, "emptyWindows": {}}
     ws = assoc.setdefault("workspaces", {})
-    for k in (
-        "file:///c%3A/Users/ryone/Desktop/oshi_app",
-        "file:///c%3A/Users/ryone/Desktop/oshi-app",
-    ):
+    # マシン固有の絶対パスはソースに書かず、実行時のリポジトリ位置から作る
+    repo = Path(__file__).resolve().parents[1]
+    uris = [repo.resolve().as_uri()]
+    for name in ("oshi-app", "oshi_app"):
+        alt = (repo.parent / name).resolve()
+        if alt.is_dir() and alt != repo.resolve():
+            uris.append(alt.as_uri())
+    for k in uris:
         ws[k] = loc
     data["profileAssociations"] = assoc
     STORAGE.write_text(json.dumps(data, ensure_ascii=False, indent=4), encoding="utf-8")

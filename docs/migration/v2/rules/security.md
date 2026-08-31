@@ -1,8 +1,9 @@
-# セキュリティ方針（v2 ドラフト・新リポへコピー）
+<!-- 更新: ARCHIVE寄り — 移行メモ。現行正本はルート AGENTS.md と .cursor/rules/*.mdc。凡例: docs/README.md -->
+# セキュリティ方針（v2 詳細メモ）
 
-Apply Mode: Always Apply
+> **運用中の命令は `.cursor/rules/security.mdc`。** このファイルは詳細メモ。Always Apply しない。
 
-詳細の運用と禁止一覧はリポジトリルートの `.cursor/rules/security.md` を正本とする（本ファイルは monorepo 移行時の複製用）。
+詳細はリポジトリ `.cursor/rules/security.mdc` を正本とする。
 
 ## 要点
 

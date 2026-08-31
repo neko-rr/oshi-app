@@ -1,17 +1,5 @@
----
-name: tdd-workflow
-description: >-
-  機能追加・バグ修正・API 追加の実装を始める前に適用する。
-  Red-Green-Refactor で失敗するテストを先に書く。
----
+<!-- 更新: ARCHIVE寄り — 移行メモ。現行正本はルート AGENTS.md と .cursor/rules/*.mdc。凡例: docs/README.md -->
+# TDD ワークフロー（v2 docs 側コピー）
 
-# TDD ワークフロー（v2 ドラフト）
-
-詳細はリポジトリ `.cursor/skills/tdd-workflow/SKILL.md` と `.cursor/rules/tdd.md` を正とする。
-
-## 要約
-
-1. Red: 失敗テスト
-2. Green: 最小実装
-3. Refactor
-4. post-change-verify
+**正本**: リポジトリ `.cursor/skills/tdd-workflow/SKILL.md`  
+参照ルール: `.cursor/rules/tdd.mdc`

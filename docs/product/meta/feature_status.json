@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "updated_note": "エージェントが実装ステータスを更新する。語彙は status_vocabulary.md。人間は roadmap.md を読む。",
+  "features": [
+    {
+      "id": "responsive_web",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "スマホ対応 Web",
+      "evidence_paths": ["apps/web/src/app"],
+      "expected_web_paths": ["/"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "theme_colors",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "推し色テーマ",
+      "evidence_paths": [
+        "apps/web/src/components/ui/ThemePicker.tsx",
+        "apps/web/src/hooks/useTheme.ts"
+      ],
+      "expected_web_paths": ["/settings"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "barcode_capture",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "バーコード読取・入力",
+      "evidence_paths": ["apps/web/src/components/RegisterForm.tsx"],
+      "expected_web_paths": ["/register"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "product_lookup",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "製品情報照合",
+      "evidence_paths": [
+        "apps/api/app/routers/assist.py",
+        "apps/api/app/services/barcode_lookup_service.py"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": [
+        "/assist/barcode/lookup",
+        "/assist/barcode/keyword"
+      ]
+    },
+    {
+      "id": "photo_front",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "正面写真登録",
+      "evidence_paths": [
+        "apps/api/app/routers/photos.py",
+        "apps/api/app/services/photo_service.py"
+      ],
+      "expected_web_paths": ["/register"],
+      "expected_api_paths": ["/photos"]
+    },
+    {
+      "id": "vision_assist",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "画像 Vision アシスト",
+      "evidence_paths": [
+        "apps/api/app/services/io_intelligence_service.py"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": ["/assist/vision/describe"]
+    },
+    {
+      "id": "tag_assist",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "タグ自動抽出",
+      "evidence_paths": [
+        "apps/api/app/services/tag_extraction_service.py"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": ["/assist/tags/extract"]
+    },
+    {
+      "id": "register_flow",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "登録フロー",
+      "evidence_paths": [
+        "apps/web/src/app/register/page.tsx",
+        "docs/product/flows/register.md",
+        "docs/product/acceptance/register.md"
+      ],
+      "expected_web_paths": ["/register"],
+      "expected_api_paths": ["/products", "/photos"]
+    },
+    {
+      "id": "gallery",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー一覧",
+      "evidence_paths": [
+        "apps/web/src/app/gallery/page.tsx",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": ["/gallery"],
+      "expected_api_paths": ["/products"]
+    },
+    {
+      "id": "product_detail",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "製品詳細",
+      "evidence_paths": [
+        "apps/web/src/app/gallery/[registered_product_id]/page.tsx",
+        "apps/web/src/components/ProductDetailEditor.tsx",
+        "docs/product/acceptance/product_detail.md"
+      ],
+      "expected_web_paths": ["/gallery/[registered_product_id]"],
+      "expected_api_paths": ["/products/{registered_product_id}"]
+    },
+    {
+      "id": "storage_locations",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "収納場所",
+      "evidence_paths": [
+        "apps/web/src/app/settings/storage-locations/page.tsx",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": ["/settings/storage-locations"],
+      "expected_api_paths": ["/storage-locations"]
+    },
+    {
+      "id": "category_tags",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "カテゴリタグ",
+      "evidence_paths": [
+        "apps/web/src/app/settings/category-tags/page.tsx",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": ["/settings/category-tags"],
+      "expected_api_paths": ["/category-tags"]
+    },
+    {
+      "id": "color_tags",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "カラータグ",
+      "evidence_paths": [
+        "apps/web/src/app/settings/color-tags/page.tsx",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": ["/settings/color-tags"],
+      "expected_api_paths": ["/color-tags"]
+    },
+    {
+      "id": "search",
+      "phase": "must",
+      "status": "planned",
+      "title_ja": "検索",
+      "evidence_paths": [],
+      "expected_web_paths": ["/search"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "privacy_policy",
+      "phase": "must",
+      "status": "planned",
+      "title_ja": "プライバシーポリシー",
+      "evidence_paths": [],
+      "expected_web_paths": ["/privacy"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "dashboard",
+      "phase": "phase2",
+      "status": "partial",
+      "title_ja": "ダッシュボード",
+      "evidence_paths": [
+        "apps/web/src/app/dashboard/page.tsx",
+        "apps/api/app/services/dashboard_service.py",
+        "docs/product/acceptance/dashboard.md"
+      ],
+      "expected_web_paths": ["/dashboard"],
+      "expected_api_paths": ["/dashboard/charts"]
+    },
+    {
+      "id": "spending",
+      "phase": "phase2",
+      "status": "planned",
+      "title_ja": "支出集計",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
+      "id": "tag_analytics",
+      "phase": "phase2",
+      "status": "planned",
+      "title_ja": "タグ分析",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
+      "id": "oshi_days",
+      "phase": "phase2",
+      "status": "planned",
+      "title_ja": "推し何日目",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
+      "id": "duplicate_exchange",
+      "phase": "phase2",
+      "status": "planned",
+      "title_ja": "ダブり・交換OK",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
+      "id": "storage_capacity",
+      "phase": "phase2",
+      "status": "planned",
+      "title_ja": "収納枚数計算",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
+      "id": "oshi_room",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "推し部屋",
+      "evidence_paths": [],
+      "expected_web_paths": ["/oshi-room"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "sns_share",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "SNSシェア",
+      "evidence_paths": [],
+      "expected_web_paths": ["/share"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "legal_terms",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "規約・問い合わせ等",
+      "evidence_paths": [],
+      "expected_web_paths": ["/terms"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "account_delete",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "データ削除・退会",
+      "evidence_paths": [],
+      "expected_web_paths": ["/settings/delete-account"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "premium",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "プレミアム",
+      "evidence_paths": [],
+      "expected_web_paths": ["/premium"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "auth_session",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "認証セッション",
+      "evidence_paths": [
+        "apps/web/src/app/auth/login/page.tsx",
+        "docs/product/acceptance/auth.md"
+      ],
+      "expected_web_paths": ["/auth/login", "/auth/sign-up"],
+      "expected_api_paths": ["/me"]
+    }
+  ]
+}

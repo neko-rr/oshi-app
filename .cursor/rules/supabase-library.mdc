@@ -1,0 +1,13 @@
+---
+description: Supabase Library UI ブロックの採用方針。Realtime 等を勝手に追加しない。
+globs: apps/web/**/*
+alwaysApply: false
+---
+
+# Supabase Library
+
+- 公式: https://supabase.com/library
+- パスワード Auth UI 等、**要件にあるものだけ**使え。
+- Realtime Cursor / Chat を「便利そう」だけで追加するな。
+- `@supabase/server`（Node）を FastAPI の代わりにするな。
+- DB/Auth 作業は `.agents/skills/supabase` と postgres-best-practices を使え。

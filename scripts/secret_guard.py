@@ -55,6 +55,11 @@ FORBIDDEN_PATH_PARTS = (
 )
 
 # 実キーっぽい割当（.env.example の空値は除外）
+# 自己マッチ回避のため Users 等は結合で組み立てる
+_WIN_USERS = "Use" + "rs"
+_UNIX_USERS = "Use" + "rs"
+_HOME = "ho" + "me"
+
 CONTENT_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     (
         "private_key_block",
@@ -85,6 +90,19 @@ CONTENT_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
         re.compile(
             r"(?i)(api[_-]?key|access[_-]?token|refresh[_-]?token|client_secret)\s*[=:]\s*['\"][A-Za-z0-9_\-\.+/=]{24,}['\"]"
         ),
+    ),
+    # マシン固有の絶対パス（共同開発・GitHub 公開禁止）
+    (
+        "windows_user_abs_path",
+        re.compile(rf"(?i)[A-Z]:\\{_WIN_USERS}\\[^\s\\/\"']+"),
+    ),
+    (
+        "file_uri_windows_user",
+        re.compile(rf"(?i)file:///c%3A/{_WIN_USERS}/[^\s\"']+"),
+    ),
+    (
+        "unix_home_abs_path",
+        re.compile(rf"(?i)(?:^|[\s\"'`=(])/(?:{_UNIX_USERS}|{_HOME})/[A-Za-z0-9._-]+/"),
     ),
 ]
 
@@ -250,6 +268,10 @@ def check_staged() -> int:
             print(f"  - {b}", file=sys.stderr)
         print(
             "秘密情報は .env 等のローカルのみに置き、.env.example はキー名のみにしてください。",
+            file=sys.stderr,
+        )
+        print(
+            "マシン絶対パス（例: 各OSのユーザーホーム配下）はリポジトリ相対パスに直してください。",
             file=sys.stderr,
         )
         return 1

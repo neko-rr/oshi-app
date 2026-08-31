@@ -6,9 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.settings import get_settings
+from app.routers.assist import router as assist_router
 from app.routers.health import router as health_router
 from app.routers.health import router_me, unauthorized_payload
+from app.routers.photos import router as photos_router
 from app.routers.products import router as products_router
+from app.routers.stats import router as stats_router
+from app.routers.tags import router as tags_router
 
 
 def create_app() -> FastAPI:
@@ -24,6 +28,10 @@ def create_app() -> FastAPI:
     application.include_router(health_router)
     application.include_router(router_me)
     application.include_router(products_router)
+    application.include_router(photos_router)
+    application.include_router(assist_router)
+    application.include_router(tags_router)
+    application.include_router(stats_router)
 
     @application.exception_handler(HTTPException)
     async def http_exception_handler(

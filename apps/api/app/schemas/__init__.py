@@ -1,1 +1,1 @@
-# pydantic スキーマ
+# schemas パッケージ
