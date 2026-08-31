@@ -1,0 +1,64 @@
+# UI 変更 PR 向け: 公開画面のスクリーンショット（Artifacts）
+# フル E2E ではない。認証後画面は対象外。
+name: UI Screenshots
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+      - "docs/design/**"
+      - ".github/workflows/ui-screenshots.yml"
+
+concurrency:
+  group: ui-shots-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder
+  NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+  PLAYWRIGHT_SKIP_WEBSERVER: "1"
+
+jobs:
+  screenshots:
+    name: ui-screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build shared + web
+        run: |
+          pnpm build:shared
+          pnpm build:web
+      - name: Install Playwright Chromium
+        run: pnpm -C apps/web exec playwright install chromium --with-deps
+      - name: Start Next and capture
+        run: |
+          pnpm -C apps/web start &
+          for i in $(seq 1 60); do
+            if curl -sf "http://127.0.0.1:3000" >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          pnpm -C apps/web screenshots
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: |
+            apps/web/test-results/screenshots/**
+            apps/web/playwright-report/**
+          if-no-files-found: warn
+          retention-days: 14

@@ -16,6 +16,7 @@
     "check:design-tokens": "python scripts/check_design_tokens.py",
     "check:docs-drift": "python scripts/check_docs_drift.py",
     "check:api-contract": "python scripts/check_api_contract_sync.py",
+    "screenshots:web": "pnpm -C apps/web screenshots",
     "generate:design-docs": "python scripts/generate_design_docs.py"
   }
 }

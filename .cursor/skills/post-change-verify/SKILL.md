@@ -89,6 +89,7 @@ CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行�
 | `pnpm lint:web` / `typecheck:web` / `build:web` | `web-lint-typecheck-build` |
 | design tokens / icons `--check` / compliance | `design-quality` |
 | `check_docs_drift` | `docs-generated-drift` |
+| （UI PR）`pnpm screenshots:web` | `ui-screenshots`（Artifacts） |
 
 ## スキップ
 
