@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-30T13:12:29Z",
-  "openapi_source": "static router extract",
+  "generated_at": "2026-08-31T12:27:24Z",
+  "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
       "path": "/auth/confirm",

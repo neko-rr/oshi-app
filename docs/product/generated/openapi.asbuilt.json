@@ -1,257 +1,1744 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
-    "title": "oshi-app API (as-built)",
-    "version": "generated",
-    "description": "静的抽出または FastAPI openapi()。手編集禁止。"
+    "title": "oshi-app API",
+    "version": "0.1.0"
   },
   "paths": {
-    "/assist/barcode/keyword": {
-      "post": {
-        "summary": "POST /assist/barcode/keyword",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/assist.py"
-      }
-    },
-    "/assist/barcode/lookup": {
-      "post": {
-        "summary": "POST /assist/barcode/lookup",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/assist.py"
-      }
-    },
-    "/assist/tags/extract": {
-      "post": {
-        "summary": "POST /assist/tags/extract",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/assist.py"
-      }
-    },
-    "/assist/vision/describe": {
-      "post": {
-        "summary": "POST /assist/vision/describe",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/assist.py"
-      }
-    },
-    "/category-tags": {
-      "get": {
-        "summary": "GET /category-tags",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      },
-      "post": {
-        "summary": "POST /category-tags",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      }
-    },
-    "/category-tags/{category_tag_id}": {
-      "delete": {
-        "summary": "DELETE /category-tags/{category_tag_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      },
-      "patch": {
-        "summary": "PATCH /category-tags/{category_tag_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      }
-    },
-    "/color-tags": {
-      "get": {
-        "summary": "GET /color-tags",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      },
-      "put": {
-        "summary": "PUT /color-tags",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      }
-    },
-    "/dashboard/charts": {
-      "get": {
-        "summary": "GET /dashboard/charts",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/stats.py"
-      }
-    },
     "/health": {
       "get": {
-        "summary": "GET /health",
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
         "responses": {
           "200": {
-            "description": "as-built (static extract)"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
           }
-        },
-        "x-source-file": "apps/api/app/routers/health.py"
+        }
       }
     },
     "/me": {
       "get": {
-        "summary": "GET /me",
+        "tags": [
+          "me"
+        ],
+        "summary": "Me",
+        "operationId": "me_me_get",
         "responses": {
           "200": {
-            "description": "as-built (static extract)"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/health.py"
-      }
-    },
-    "/photos": {
-      "post": {
-        "summary": "POST /photos",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+        "security": [
+          {
+            "HTTPBearer": []
           }
-        },
-        "x-source-file": "apps/api/app/routers/photos.py"
+        ]
       }
     },
     "/products": {
       "get": {
-        "summary": "GET /products",
+        "tags": [
+          "products"
+        ],
+        "summary": "List Products",
+        "operationId": "list_products_products_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 48,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "as-built (static extract)"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Products Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "x-source-file": "apps/api/app/routers/products.py"
+        }
       },
       "post": {
-        "summary": "POST /products",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+        "tags": [
+          "products"
+        ],
+        "summary": "Create Product",
+        "operationId": "create_product_products_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/products.py"
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateProductResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/products/{registered_product_id}": {
-      "delete": {
-        "summary": "DELETE /products/{registered_product_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/products.py"
-      },
       "get": {
-        "summary": "GET /products/{registered_product_id}",
+        "tags": [
+          "products"
+        ],
+        "summary": "Get Product",
+        "operationId": "get_product_products__registered_product_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "registered_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Registered Product Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "as-built (static extract)"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Product Products  Registered Product Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "x-source-file": "apps/api/app/routers/products.py"
+        }
       },
       "patch": {
-        "summary": "PATCH /products/{registered_product_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+        "tags": [
+          "products"
+        ],
+        "summary": "Patch Product",
+        "operationId": "patch_product_products__registered_product_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "registered_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Registered Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchProductRequest"
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/products.py"
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Product Products  Registered Product Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Delete Product",
+        "operationId": "delete_product_products__registered_product_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "registered_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Registered Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Delete Product Products  Registered Product Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/stats/products": {
-      "get": {
-        "summary": "GET /stats/products",
+    "/photos": {
+      "post": {
+        "tags": [
+          "photos"
+        ],
+        "summary": "Upload Photo",
+        "description": "正面写真アップロード（IO Vision は呼ばない）。",
+        "operationId": "upload_photo_photos_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_photo_photos_post"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Upload Photo Photos Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/stats.py"
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/assist/vision/describe": {
+      "post": {
+        "tags": [
+          "assist"
+        ],
+        "summary": "Assist Describe Image",
+        "description": "Vision 説明（キー未設定・LIVE 無効時は soft status）。",
+        "operationId": "assist_describe_image_assist_vision_describe_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeImageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Assist Describe Image Assist Vision Describe Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/assist/tags/extract": {
+      "post": {
+        "tags": [
+          "assist"
+        ],
+        "summary": "Assist Extract Tags",
+        "description": "タグ抽出（同上）。",
+        "operationId": "assist_extract_tags_assist_tags_extract_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtractTagsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Assist Extract Tags Assist Tags Extract Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/assist/barcode/lookup": {
+      "post": {
+        "tags": [
+          "assist"
+        ],
+        "summary": "Assist Barcode Lookup",
+        "description": "楽天バーコード検索（同上）。",
+        "operationId": "assist_barcode_lookup_assist_barcode_lookup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BarcodeLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Assist Barcode Lookup Assist Barcode Lookup Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/assist/barcode/keyword": {
+      "post": {
+        "tags": [
+          "assist"
+        ],
+        "summary": "Assist Keyword Lookup",
+        "description": "楽天キーワード検索（同上）。",
+        "operationId": "assist_keyword_lookup_assist_barcode_keyword_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeywordLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Assist Keyword Lookup Assist Barcode Keyword Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/color-tags": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Color Tags",
+        "operationId": "get_color_tags_color_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Color Tags Color Tags Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Put Color Tags",
+        "operationId": "put_color_tags_color_tags_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColorTagsSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Color Tags Color Tags Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/category-tags": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Category Tags",
+        "operationId": "get_category_tags_category_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Category Tags Category Tags Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Post Category Tag",
+        "operationId": "post_category_tag_category_tags_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Category Tag Category Tags Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/category-tags/{category_tag_id}": {
+      "patch": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Patch Category Tag",
+        "operationId": "patch_category_tag_category_tags__category_tag_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_tag_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Category Tag Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Category Tag Category Tags  Category Tag Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Remove Category Tag",
+        "operationId": "remove_category_tag_category_tags__category_tag_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_tag_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Category Tag Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Category Tag Category Tags  Category Tag Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/storage-locations": {
       "get": {
-        "summary": "GET /storage-locations",
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Storage Locations",
+        "operationId": "get_storage_locations_storage_locations_get",
         "responses": {
           "200": {
-            "description": "as-built (static extract)"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Storage Locations Storage Locations Get"
+                }
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/tags.py"
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       },
       "post": {
-        "summary": "POST /storage-locations",
+        "tags": [
+          "tags"
+        ],
+        "summary": "Post Storage Location",
+        "operationId": "post_storage_location_storage_locations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageLocationCreate"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Storage Location Storage Locations Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/tags.py"
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/storage-locations/{storage_location_id}": {
-      "delete": {
-        "summary": "DELETE /storage-locations/{storage_location_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
-          }
-        },
-        "x-source-file": "apps/api/app/routers/tags.py"
-      },
       "patch": {
-        "summary": "PATCH /storage-locations/{storage_location_id}",
-        "responses": {
-          "200": {
-            "description": "as-built (static extract)"
+        "tags": [
+          "tags"
+        ],
+        "summary": "Patch Storage Location",
+        "operationId": "patch_storage_location_storage_locations__storage_location_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "storage_location_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Storage Location Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageLocationUpdate"
+              }
+            }
           }
         },
-        "x-source-file": "apps/api/app/routers/tags.py"
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Storage Location Storage Locations  Storage Location Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Remove Storage Location",
+        "operationId": "remove_storage_location_storage_locations__storage_location_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "storage_location_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Storage Location Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Storage Location Storage Locations  Storage Location Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/products": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Product Stats",
+        "operationId": "product_stats_stats_products_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Product Stats Stats Products Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/dashboard/charts": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Dashboard Charts",
+        "operationId": "dashboard_charts_dashboard_charts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "month",
+              "title": "Granularity"
+            }
+          },
+          {
+            "name": "daily_limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 366,
+              "minimum": 1,
+              "default": 90,
+              "title": "Daily Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Charts Dashboard Charts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BarcodeLookupRequest": {
+        "properties": {
+          "barcode": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Barcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "barcode"
+        ],
+        "title": "BarcodeLookupRequest"
+      },
+      "Body_upload_photo_photos_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_photo_photos_post"
+      },
+      "CategoryCreate": {
+        "properties": {
+          "category_tag_name": {
+            "type": "string",
+            "title": "Category Tag Name"
+          },
+          "category_tag_color": {
+            "type": "string",
+            "title": "Category Tag Color",
+            "default": "#6c757d"
+          },
+          "category_tag_icon": {
+            "type": "string",
+            "title": "Category Tag Icon",
+            "default": "bi-tag"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_tag_name"
+        ],
+        "title": "CategoryCreate"
+      },
+      "CategoryUpdate": {
+        "properties": {
+          "category_tag_name": {
+            "type": "string",
+            "title": "Category Tag Name"
+          },
+          "category_tag_color": {
+            "type": "string",
+            "title": "Category Tag Color"
+          },
+          "category_tag_icon": {
+            "type": "string",
+            "title": "Category Tag Icon",
+            "default": "bi-tag"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_tag_name",
+          "category_tag_color"
+        ],
+        "title": "CategoryUpdate"
+      },
+      "ColorTagEntry": {
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "maximum": 7.0,
+            "minimum": 1.0,
+            "title": "Slot"
+          },
+          "color_tag_name": {
+            "type": "string",
+            "title": "Color Tag Name"
+          },
+          "color_tag_color": {
+            "type": "string",
+            "title": "Color Tag Color"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot",
+          "color_tag_name",
+          "color_tag_color"
+        ],
+        "title": "ColorTagEntry"
+      },
+      "ColorTagsSaveRequest": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ColorTagEntry"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "title": "ColorTagsSaveRequest"
+      },
+      "CreateProductRequest": {
+        "properties": {
+          "product_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Product Name"
+          },
+          "photo_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Id"
+          },
+          "barcode_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Number"
+          },
+          "barcode_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Type"
+          },
+          "product_group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Group Name"
+          },
+          "works_series_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Works Series Name"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "character_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Character Name"
+          },
+          "purchase_price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Price"
+          },
+          "purchase_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Location"
+          },
+          "memo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memo"
+          },
+          "category_tag_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Tag Id"
+          },
+          "storage_location_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Location Id"
+          },
+          "color_tag_slots": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Tag Slots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_name"
+        ],
+        "title": "CreateProductRequest",
+        "description": "POST /products ボディ。"
+      },
+      "CreateProductResponse": {
+        "properties": {
+          "registered_product_id": {
+            "type": "integer",
+            "title": "Registered Product Id"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "photo_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "registered_product_id",
+          "product_name"
+        ],
+        "title": "CreateProductResponse"
+      },
+      "DescribeImageRequest": {
+        "properties": {
+          "image_source": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Image Source",
+            "description": "data URI または URL"
+          },
+          "raw_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Base64"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_source"
+        ],
+        "title": "DescribeImageRequest"
+      },
+      "ExtractTagsRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "product_candidates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Candidates"
+          },
+          "image_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Base64"
+          }
+        },
+        "type": "object",
+        "title": "ExtractTagsRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "KeywordLookupRequest": {
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Keyword"
+          }
+        },
+        "type": "object",
+        "required": [
+          "keyword"
+        ],
+        "title": "KeywordLookupRequest"
+      },
+      "MeResponse": {
+        "properties": {
+          "members_id": {
+            "type": "string",
+            "title": "Members Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "members_id"
+        ],
+        "title": "MeResponse"
+      },
+      "PatchProductRequest": {
+        "properties": {
+          "product_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Name"
+          },
+          "product_group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Group Name"
+          },
+          "works_series_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Works Series Name"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "character_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Character Name"
+          },
+          "purchase_price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Price"
+          },
+          "purchase_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Location"
+          },
+          "memo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memo"
+          },
+          "barcode_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Number"
+          },
+          "category_tag_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Tag Id"
+          },
+          "storage_location_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Location Id"
+          },
+          "clear_category_tag": {
+            "type": "boolean",
+            "title": "Clear Category Tag",
+            "default": false
+          },
+          "clear_storage_location": {
+            "type": "boolean",
+            "title": "Clear Storage Location",
+            "default": false
+          },
+          "color_tag_slots": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Tag Slots"
+          }
+        },
+        "type": "object",
+        "title": "PatchProductRequest",
+        "description": "PATCH /products/{id} — スカラーとタグ付け。"
+      },
+      "StorageLocationCreate": {
+        "properties": {
+          "storage_location_name": {
+            "type": "string",
+            "title": "Storage Location Name"
+          },
+          "storage_location_icon": {
+            "type": "string",
+            "title": "Storage Location Icon",
+            "default": "bi-geo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "storage_location_name"
+        ],
+        "title": "StorageLocationCreate"
+      },
+      "StorageLocationUpdate": {
+        "properties": {
+          "storage_location_name": {
+            "type": "string",
+            "title": "Storage Location Name"
+          },
+          "storage_location_icon": {
+            "type": "string",
+            "title": "Storage Location Icon",
+            "default": "bi-geo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "storage_location_name"
+        ],
+        "title": "StorageLocationUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
