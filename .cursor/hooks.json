@@ -13,6 +13,32 @@
         "matcher": "Write|StrReplace",
         "failClosed": false
       }
+    ],
+    "sessionStart": [
+      {
+        "command": "python scripts/agent_hooks.py sessionStart",
+        "failClosed": false
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python scripts/agent_hooks.py afterFileEdit",
+        "failClosed": false
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python scripts/agent_hooks.py postToolUse",
+        "matcher": "Write|StrReplace|Shell",
+        "failClosed": false
+      }
+    ],
+    "stop": [
+      {
+        "command": "python scripts/agent_hooks.py stop",
+        "loop_limit": 1,
+        "failClosed": false
+      }
     ]
   }
 }

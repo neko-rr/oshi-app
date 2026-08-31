@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -316,10 +317,24 @@ def shell_command_is_dangerous(cmd: str) -> str | None:
     if re.search(r"\bgit\s+add\s+.*(-f|--force).*\.env", lower) and ".env.example" not in lower:
         return "git add --force で .env を載せようとしています"
 
-    if re.search(r"\bgit\s+commit\b[^\n]*--no-verify", lower) or re.search(
-        r"\bgit\s+commit\b[^\n]*-n\b", lower
-    ):
-        return "pre-commit をスキップする commit は禁止です（秘密検査を回避するため）"
+    # pre-commit / hook 回避（README・.githooks の意図を強制）
+    if re.search(r"\bgit\b", lower):
+        try:
+            tokens = shlex.split(c, posix=False)
+        except ValueError:
+            tokens = lower.split()
+        tokens_l = [t.lower() for t in tokens]
+        if "--no-verify" in tokens_l:
+            return (
+                "git の --no-verify は禁止です"
+                "（secret_guard / naming_check を回避するため）"
+            )
+        # `git commit ... -n`（メッセージ内の -n は shlex でトークン分離される）
+        if "commit" in tokens_l and "-n" in tokens_l:
+            return (
+                "git commit -n/--no-verify は禁止です"
+                "（pre-commit をスキップしないでください）"
+            )
 
     # 環境変数値のエコー（簡易）
     if re.search(

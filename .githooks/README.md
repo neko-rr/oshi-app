@@ -23,7 +23,8 @@ git config --local --get core.hooksPath
 |----------|------------|------|
 | `pre-commit` | commit 直前 | `secret_guard` → `naming_check` |
 
-`--no-verify` / `-n` は Cursor hook 側でも拒否する。
+`--no-verify` / `-n` は Cursor hook（`scripts/secret_guard.py`）側でも拒否する。  
+品質リマインド（verify 促し・AGENTS 要約）は `.cursor/hooks.json` → `scripts/agent_hooks.py`（強制ではない）。
 
 ## 手動チェック
 
