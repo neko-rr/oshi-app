@@ -14,6 +14,7 @@
     "check:design-icons": "python scripts/sync_design_icons.py --check",
     "check:design": "python scripts/check_design_compliance.py",
     "check:design-tokens": "python scripts/check_design_tokens.py",
+    "check:docs-drift": "python scripts/check_docs_drift.py",
     "generate:design-docs": "python scripts/generate_design_docs.py"
   }
 }

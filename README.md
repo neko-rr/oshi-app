@@ -64,6 +64,9 @@ pnpm test:api
 
 ルートで素の `python -m pytest` を使うと venv 外になり失敗しやすい。**必ず `apps/api/.venv` 経由**。
 
+CI（GitHub Actions・公開リポ無料）: 秘密/命名・API compile+pytest・Web lint/tsc/`next build`・デザイン検査・生成 docs ドリフト。  
+ローカル相当: `pnpm check:design` / `pnpm check:design-icons` / `pnpm check:docs-drift`
+
 ## 認証（要約）
 
 - Web: `@supabase/ssr` + Cookie

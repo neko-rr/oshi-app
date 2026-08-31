@@ -51,11 +51,16 @@ python scripts/sync_design_icons.py --check
 
 ```powershell
 python scripts/check_design_compliance.py
+python scripts/sync_design_icons.py --check
 ```
 
 ### 両方
 
-API → Web の順。
+API → Web の順。ローカルで CI 相当の docs 検査:
+
+```powershell
+python scripts/check_docs_drift.py
+```
 
 ### 製品 as-built（ルート変更時）
 
@@ -71,6 +76,8 @@ python scripts/generate_product_docs.py
 ```
 
 `docs/product/generated/gaps.md` を確認（`missing_expected_*` / `unexpected_*`）。意図（value / roadmap / flows / acceptance）の更新が必要なら skill **`product-spec-sync`**。
+
+CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行する。
 
 ## スキップ
 
