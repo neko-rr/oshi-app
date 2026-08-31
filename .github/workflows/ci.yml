@@ -52,6 +52,8 @@ jobs:
         env:
           PYTHONPATH: apps/api
         run: python -m pytest -q
+      - name: API contract sync (shared ↔ routers)
+        run: python scripts/check_api_contract_sync.py
 
   web:
     name: web-lint-typecheck-build

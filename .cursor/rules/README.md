@@ -43,7 +43,7 @@ globs: apps/api/**/*  # alwaysApply false のとき任意
 | spec.mdc | 手動/description → **`docs/product/`** |
 | reference/* | ARCHIVE 寄り。**DB は `docs/db/`**。**製品は `docs/product/`**。**デザインは `docs/design/`** |
 
-Skills: `db-schema-change` / **`product-spec-sync`** / **`design-change`** / **`design-lab`** / **`design-adoption`** / **`design-feedback`** / **`design-a11y`** / **`design-mobile`**
+Skills: `db-schema-change` / **`deploy-change`** / **`product-spec-sync`** / **`api-contract-sync`** / **`design-change`** / **`design-lab`** / **`design-adoption`** / **`design-feedback`** / **`design-a11y`** / **`design-mobile`**
 
 文書の更新区分（手 / 自動 / エージェント）: `docs/README.md`  
 入口: リポジトリ直下 `AGENTS.md`

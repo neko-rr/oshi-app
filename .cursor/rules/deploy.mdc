@@ -18,6 +18,6 @@ alwaysApply: false
 - Supabase Auth の Site URL / Redirect を本番 Web に合わせよ。
 - env の必須／禁止は **`docs/deploy/env-contract.md`**（実値は書くな）。
 - Cloudflare には `NEXT_PUBLIC_*` のみ。secret / service_role / DB URL を置くな。
-- 変更前: `official-docs-first`。変更後: `secure-change-checklist`。
+- 変更前: skill **`official-docs-first`**。手順は skill **`deploy-change`**。変更後: `secure-change-checklist`。
 
 公式: https://render.com/docs / https://developers.cloudflare.com/pages/

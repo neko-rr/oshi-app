@@ -52,7 +52,9 @@
 |------|--------|
 | Auth・JWT・デプロイ・mobile 着手前 | `official-docs-first` |
 | **DB・migration・RLS・docs/db** | **`db-schema-change`** |
+| **Render / Cloudflare / 本番 env・CORS** | **`deploy-change`** |
 | **製品仕様・画面/API ルート・flows / acceptance** | **`product-spec-sync`** |
+| **shared API_PATHS ↔ FastAPI ルート** | **`api-contract-sync`** |
 | **Web UI・トークン・推し色・docs/design** | **`design-change`** |
 | **Design Lab・3案スコア・本決定前比較** | **`design-lab`** |
 | **Lab 案の本番画面単位採用** | **`design-adoption`** |
@@ -66,6 +68,22 @@
 | Supabase | `.agents/skills/supabase` |
 | Postgres/RLS | `.agents/skills/supabase-postgres-best-practices` |
 
+### Skill → Task / サブエージェント（委譲）
+
+カスタムサブエージェント定義は **増やさない**。重い・機械的な作業だけ Cursor の **Task**（`shell` / `explore` / `generalPurpose`）や組み込みレビューに委譲する。  
+**仕様・TDD・認可・採用判断は親エージェントが持つ。** 委譲先は合否と要点だけ返す（生ログ全文は貼らない）。security / bugbot の自作は禁止（組み込みを使う）。
+
+| Skill / 作業 | 委譲 | 備考 |
+|--------------|------|------|
+| `post-change-verify` | **可 → Task(shell)** | 長い検証ログを親から隔離 |
+| `design-a11y`（公式 WebFetch） | **可 → Task(generalPurpose / explore)** | 取得・要約のみ。採用判断は親 |
+| docs/db・product 横断調査 | **可 → Task(explore)** | 読み取り調査 |
+| PR 前のセキュリティ／差分レビュー | **可 → 組み込み `security-review` / `bugbot`** | 重複 skill を作るな |
+| `tdd-workflow` | **不可** | Red→実装の本体は親 |
+| `official-docs-first` | **判断は親** | Fetch だけ Task 可。結論は親 |
+| `secure-change-checklist` | **不可** | 親の diff・変更意図が必要 |
+| `new-file-naming` | **不可** | 1ファイル前の短い確認 |
+
 DB の人間向け入口: [docs/db/README.md](docs/db/README.md)  
 表・列の日本語説明（自動生成）: [docs/db/generated/schema_guide.md](docs/db/generated/schema_guide.md)  
 製品（顧客価値・ロードマップ・as-built）: [docs/product/README.md](docs/product/README.md)  
@@ -77,5 +95,6 @@ DB の人間向け入口: [docs/db/README.md](docs/db/README.md)
 - 業務エラー → ユーザー向けメッセージ + HTTP ステータス
 - システムエラー → ログして上位へ（秘密はマスク）
 - 変更後: `post-change-verify` +（該当時）`secure-change-checklist`
+- ローカル検証 ↔ CI の対応表: skill **`post-change-verify`**（「ローカル ↔ CI 対応」）
 - 人向け手順: [CONTRIBUTING.md](CONTRIBUTING.md) / [README.md](README.md) / [docs/WAKE_UP.md](docs/WAKE_UP.md)  
   env 契約（キー名のみ）: [docs/deploy/env-contract.md](docs/deploy/env-contract.md)

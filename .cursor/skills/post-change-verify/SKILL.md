@@ -79,6 +79,17 @@ python scripts/generate_product_docs.py
 
 CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行する。
 
+### ローカル ↔ CI 対応（迷ったらここ）
+
+| ローカル（skill / コマンド） | CI ジョブ |
+|------------------------------|-----------|
+| `secret_guard` / `naming_check` | `secret-and-naming` |
+| `compileall` + pytest / `pnpm test:api` | `api-compile-pytest` |
+| `check_api_contract_sync` / `pnpm check:api-contract` | 同上（API contract sync ステップ） |
+| `pnpm lint:web` / `typecheck:web` / `build:web` | `web-lint-typecheck-build` |
+| design tokens / icons `--check` / compliance | `design-quality` |
+| `check_docs_drift` | `docs-generated-drift` |
+
 ## スキップ
 
 - md / plans のみ（ただし `docs/product/meta`・flows・acceptance を触ったら `product-spec-sync`）
@@ -91,3 +102,7 @@ CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行�
 ## 秘密
 
 JWT・キー・署名 URL をログに貼らない。
+
+## 委譲
+
+長い検証は **Task(shell) に委譲可**（合否と要点だけ親へ。生ログ全文は貼るな）。表: `AGENTS.md`「Skill → Task / サブエージェント」。

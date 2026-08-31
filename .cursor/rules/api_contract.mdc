@@ -17,3 +17,5 @@ alwaysApply: false
 - `members_id` をクエリでなりすまし可能に渡すな（トークン由来のみ）
 
 パス・リソース名は複数形（例 `/products`）。`getXxx` 風のパスを作るな。
+
+`API_PATHS`（shared）とルータの同期: skill **`api-contract-sync`**（`python scripts/check_api_contract_sync.py`）。

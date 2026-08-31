@@ -60,3 +60,7 @@ description: >-
 - 索引: `docs/refs/official-links.md`  
 - 公式優先の兄弟: skill `official-docs-first`  
 - Lab: `design-lab` / 本番反映: `design-adoption`  
+
+## 委譲
+
+公式 WebFetch・要約は **Task(generalPurpose / explore) に委譲可**。コントラスト採用などの **判断は親**。表: `AGENTS.md`「Skill → Task / サブエージェント」。
