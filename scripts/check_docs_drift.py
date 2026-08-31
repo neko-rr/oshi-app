@@ -25,6 +25,12 @@ WATCH_DIRS = (
     ROOT / "docs" / "db" / "generated",
 )
 
+# FastAPI / Pydantic のマイナー差で揺れるため、構造チェック（inventory 等）に任せる
+SKIP_REL_PATHS = {
+    "docs/product/generated/openapi.asbuilt.json",
+    "docs/product/generated/api_openapi.md",
+}
+
 
 def normalize(text: str) -> str:
     lines = [ln for ln in text.splitlines() if not IGNORE_LINE_RE.search(ln)]
@@ -40,6 +46,8 @@ def snapshot_dir(path: Path) -> dict[str, str]:
         if not f.is_file():
             continue
         rel = str(f.relative_to(ROOT)).replace("\\", "/")
+        if rel in SKIP_REL_PATHS:
+            continue
         try:
             text = f.read_text(encoding="utf-8")
         except UnicodeDecodeError:

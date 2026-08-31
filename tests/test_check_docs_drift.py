@@ -27,3 +27,9 @@ def test_normalize_ignores_timestamps_and_auto_folder_banner() -> None:
     )
     b = mod.normalize("# title\nbody\n")
     assert a == b
+
+
+def test_snapshot_skips_volatile_openapi_dumps() -> None:
+    mod = _load()
+    assert "docs/product/generated/openapi.asbuilt.json" in mod.SKIP_REL_PATHS
+    assert "docs/product/generated/api_openapi.md" in mod.SKIP_REL_PATHS
