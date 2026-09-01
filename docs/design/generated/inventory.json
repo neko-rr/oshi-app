@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T14:19:32Z",
+  "generated_at": "2026-09-01T22:27:59Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -247,11 +247,6 @@
       "id": "/settings",
       "kind": "lab_not_fully_adopted",
       "detail": "status=`not_started` lab_variant=None"
-    },
-    {
-      "id": "apps/web/src/components/ui/ThemePicker.tsx",
-      "kind": "compliance_raw_button",
-      "detail": "L34: 生 <button> 禁止。@/components/ui/button を使え（Lab / ui は例外）。"
     }
   ],
   "adoption": {
@@ -302,5 +297,5 @@
       }
     ]
   },
-  "icons_catalog_count": 14
+  "icons_catalog_count": 105
 }

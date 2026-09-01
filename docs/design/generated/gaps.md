@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-09-01T14:19:32Z`
+生成時刻 (UTC): `2026-09-01T22:27:59Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -15,7 +15,6 @@
 | `/gallery` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/register` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/settings` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
-| `apps/web/src/components/ui/ThemePicker.tsx` | compliance_raw_button | L34: 生 <button> 禁止。@/components/ui/button を使え（Lab / ui は例外）。 |
 
 ## Lab 採用状況（meta）
 

@@ -1240,7 +1240,7 @@
           "category_tag_icon": {
             "type": "string",
             "title": "Category Tag Icon",
-            "default": "bi-tag"
+            "default": "tag"
           }
         },
         "type": "object",
@@ -1262,7 +1262,7 @@
           "category_tag_icon": {
             "type": "string",
             "title": "Category Tag Icon",
-            "default": "bi-tag"
+            "default": "tag"
           }
         },
         "type": "object",
@@ -1784,7 +1784,7 @@
           "storage_location_icon": {
             "type": "string",
             "title": "Storage Location Icon",
-            "default": "bi-geo"
+            "default": "map-pin"
           }
         },
         "type": "object",
@@ -1802,7 +1802,7 @@
           "storage_location_icon": {
             "type": "string",
             "title": "Storage Location Icon",
-            "default": "bi-geo"
+            "default": "map-pin"
           }
         },
         "type": "object",
