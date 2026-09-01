@@ -6,6 +6,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${port}`;
 /**
  * UI スクショ用（軽い）。認証後画面は含めない。
  * 起動は webServer または CI 側で next start 済み前提。
+ * PR 成功時は sticky コメントで Artifacts への案内を投稿する。
  */
 export default defineConfig({
   testDir: "./e2e",
