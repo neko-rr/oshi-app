@@ -6,7 +6,7 @@
 
 - [ ] ローカル: 該当する検証（例: `pnpm test:api` / `pnpm typecheck:web` / skill `post-change-verify`）
 - [ ] CI 緑を確認
-- [ ] （UI）Artifacts の **ui-screenshots** を目視（該当ジョブがあるとき）
+- [ ] （UI）PR コメント「UI スクリーンショット（自動）」または Artifacts **ui-screenshots** を目視
 
 ## Checklist
 

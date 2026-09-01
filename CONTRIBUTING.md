@@ -18,7 +18,7 @@
 1. `main` から作業ブランチ（例: `feature/register-flow`）
 2. 変更 → ローカルで skill `post-change-verify`（該当範囲）
 3. PR を作成（テンプレ: `.github/PULL_REQUEST_TEMPLATE.md`）
-4. **CI 緑**を待つ（必須想定）。UI 変更 PR は **UI Screenshots** の Artifacts（`ui-screenshots`）も目視
+4. **CI 緑**を待つ（必須想定）。UI 変更 PR は **UI Screenshots** 成功後、PR コメント「UI スクリーンショット（自動）」の手順で Artifacts を目視
 5. Auth・公開面の大きな変更は、任意で Cursor 組み込み `security-review` / `bugbot`
 6. マージは **squash** 推奨（`main` は ruleset `protect-main` で PR 必須・fast-forward 禁止）。強制 push や `--no-verify` は禁止（AGENTS.md）
 7. CI 必須チェックを UI で足す場合: GitHub → Settings → Rules → `protect-main` → Require status checks に `secret-and-naming` 等を追加（workflows ルールは API 都合で未設定。手動で足してよい）
