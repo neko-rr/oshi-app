@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "screenshots": "playwright test e2e/screenshots.spec.ts"
   },
   "dependencies": {
     "@oshi/shared": "workspace:*",
@@ -35,6 +36,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.7",
+    "@playwright/test": "^1.55.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

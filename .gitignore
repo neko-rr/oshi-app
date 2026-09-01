@@ -33,6 +33,9 @@ venv/
 env/
 *.tsbuildinfo
 packages/*/dist/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/blob-report/
 
 # IDE / OS
 # .vscode は extensions / profiles / launch を共有するため追跡する

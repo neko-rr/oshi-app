@@ -1,0 +1,130 @@
+# UI 変更 PR 向け: 公開画面のスクリーンショット（Artifacts + PR コメント）
+# フル E2E ではない。認証後画面は対象外。
+name: UI Screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+      - "docs/design/**"
+      - ".github/workflows/ui-screenshots.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ui-shots-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder
+  NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+  PLAYWRIGHT_SKIP_WEBSERVER: "1"
+
+jobs:
+  screenshots:
+    name: ui-screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build shared + web
+        run: |
+          pnpm build:shared
+          pnpm build:web
+      - name: Install Playwright Chromium
+        run: pnpm -C apps/web exec playwright install chromium --with-deps
+      - name: Start Next and capture
+        run: |
+          pnpm -C apps/web start &
+          for i in $(seq 1 60); do
+            if curl -sf "http://127.0.0.1:3000" >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          pnpm -C apps/web screenshots
+      - name: Upload screenshots
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: |
+            apps/web/test-results/screenshots/**
+            apps/web/playwright-report/**
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Comment screenshot index on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const marker = '<!-- ui-screenshots-bot -->';
+            const shotDir = 'apps/web/test-results/screenshots';
+            const files = fs.existsSync(shotDir)
+              ? fs.readdirSync(shotDir).filter((f) => f.endsWith('.png')).sort()
+              : [];
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            const rows = files.length
+              ? files.map((f) => `| ${f.replace(/\.png$/, '')} | \`${f}\` |`).join('\n')
+              : '| （PNG なし） | — |';
+            const body = `${marker}
+## UI スクリーンショット（自動）
+
+撮影に成功しました。画像は **zip でダウンロード**して確認します（GitHub は PR 上に PNG を直接埋め込めないため）。
+
+### ダウンロード手順（初学者向け）
+
+1. 下の **「この実行を開く」** をクリック
+2. ページの **Artifacts**（画面右や下部）→ **ui-screenshots** をクリック
+3. 落ちてきた zip を解凍し、PNG を開く
+
+**[この実行を開く（Artifacts あり）](${runUrl})**
+
+### 今回の一覧
+
+| 画面 | ファイル |
+|------|----------|
+${rows}
+
+再実行すると、このコメントは同じ位置で更新されます。
+`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
