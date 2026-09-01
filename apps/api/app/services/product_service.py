@@ -26,9 +26,18 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
             thumb = raw if isinstance(raw, str) and raw.strip() else None
 
     pid = row.get("photo_id")
+    raw_barcode = row.get("barcode_number")
+    if isinstance(raw_barcode, str):
+        barcode_number = raw_barcode.strip() or None
+    elif raw_barcode is None:
+        barcode_number = None
+    else:
+        barcode_number = str(raw_barcode)
+
     return {
         "registered_product_id": row.get("registered_product_id"),
         "product_name": row.get("product_name"),
+        "barcode_number": barcode_number,
         "photo_id": pid if isinstance(pid, int) else None,
         "photo_thumbnail_path": thumb,
         "photo_thumbnail_url": None,
@@ -45,12 +54,54 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def filter_products_by_query(
+    items: list[dict[str, Any]],
+    q: str | None,
+) -> list[dict[str, Any]]:
+    """製品名・カテゴリ・収納場所の部分一致（大小無視）。空クエリは無変更。"""
+    needle = (q or "").strip().casefold()
+    if not needle:
+        return items
+    matched: list[dict[str, Any]] = []
+    for item in items:
+        name = str(item.get("product_name") or "").casefold()
+        cat = item.get("category_tag")
+        cat_name = ""
+        if isinstance(cat, dict):
+            cat_name = str(cat.get("category_tag_name") or "").casefold()
+        storage = item.get("storage_location")
+        storage_name = ""
+        if isinstance(storage, dict):
+            storage_name = str(storage.get("storage_location_name") or "").casefold()
+        blob = f"{name} {cat_name} {storage_name}"
+        if needle in blob:
+            matched.append(item)
+    return matched
+
+
+def filter_products_by_barcode(
+    items: list[dict[str, Any]],
+    barcode: str | None,
+) -> list[dict[str, Any]]:
+    """barcode_number の完全一致。空なら無変更。購入済み判定の土台。"""
+    code = (barcode or "").strip()
+    if not code:
+        return items
+    return [
+        item
+        for item in items
+        if str(item.get("barcode_number") or "").strip() == code
+    ]
+
+
 def list_products_for_member(
     members_id: str,
     *,
     access_token: str,
     limit: int = 48,
     offset: int = 0,
+    q: str | None = None,
+    barcode: str | None = None,
     fetch_page: FetchPage | None = None,
     sign_object: SignObject | None = None,
 ) -> list[dict[str, Any]]:
@@ -58,11 +109,15 @@ def list_products_for_member(
 
     fetch_page 未指定時は Supabase（ユーザー JWT）へ問い合わせる。
     サムネイル path があれば signed URL を付与（失敗時は url=null、一覧自体は返す）。
+    q 指定時は取得後に名前・タグで絞り込み（ページ内フィルタ）。
+    barcode 指定時は番号完全一致（DB 側フィルタ＋防御的再フィルタ）。
     """
     if not members_id or not str(members_id).strip():
         raise ValueError("members_id が空です")
     if not access_token or not str(access_token).strip():
         raise ValueError("access_token が空です")
+
+    barcode_norm = (barcode or "").strip() or None
 
     fetcher = fetch_page
     if fetcher is None:
@@ -71,6 +126,15 @@ def list_products_for_member(
         fetcher = fetch_products_page
 
     try:
+        rows = fetcher(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            limit=limit,
+            offset=offset,
+            barcode_number=barcode_norm,
+        )
+    except TypeError:
+        # 古い fetch 差し替え用（barcode_number 未対応）
         rows = fetcher(
             members_id=str(members_id).strip(),
             access_token=str(access_token).strip(),
@@ -88,6 +152,8 @@ def list_products_for_member(
         return []
 
     items = [normalize_product_row(r) for r in rows if isinstance(r, dict)]
+    items = filter_products_by_barcode(items, barcode_norm)
+    items = filter_products_by_query(items, q)
 
     signer = sign_object
     if signer is None:

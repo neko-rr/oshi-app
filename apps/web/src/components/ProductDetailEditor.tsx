@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_PATHS } from "@oshi/shared";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
 
@@ -25,6 +26,13 @@ type StorageLocationItem = {
 
 type ProductDetail = {
   registered_product_id: number;
+  product_name: string | null;
+  product_group_name?: string | null;
+  character_name?: string | null;
+  purchase_price?: number | null;
+  purchase_location?: string | null;
+  barcode_number?: string | null;
+  memo?: string | null;
   category_tag_id: number | null;
   storage_location_id: number | null;
   color_tag_slots: number[];
@@ -45,6 +53,13 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
   const [storageLocations, setStorageLocations] = useState<StorageLocationItem[]>([]);
   const [colors, setColors] = useState<ColorTagItem[]>([]);
+  const [productName, setProductName] = useState("");
+  const [productGroupName, setProductGroupName] = useState("");
+  const [characterName, setCharacterName] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
+  const [purchaseLocation, setPurchaseLocation] = useState("");
+  const [barcodeNumber, setBarcodeNumber] = useState("");
+  const [memo, setMemo] = useState("");
   const [categoryTagId, setCategoryTagId] = useState<string>("");
   const [storageLocationId, setStorageLocationId] = useState<string>("");
   const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
@@ -97,6 +112,15 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
         setCategories(catJson.items ?? []);
         setStorageLocations(recJson.items ?? []);
         setColors(colJson.items ?? []);
+        setProductName(detail.product_name?.trim() ?? "");
+        setProductGroupName(detail.product_group_name?.trim() ?? "");
+        setCharacterName(detail.character_name?.trim() ?? "");
+        setPurchasePrice(
+          detail.purchase_price != null ? String(detail.purchase_price) : "",
+        );
+        setPurchaseLocation(detail.purchase_location?.trim() ?? "");
+        setBarcodeNumber(detail.barcode_number?.trim() ?? "");
+        setMemo(detail.memo ?? "");
         setCategoryTagId(
           detail.category_tag_id != null ? String(detail.category_tag_id) : "",
         );
@@ -130,12 +154,28 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
 
   async function onSave(e: FormEvent) {
     e.preventDefault();
+    const name = productName.trim();
+    if (!name) {
+      setError("製品名は必須です");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       const token = await getToken();
       if (!token) return;
+      const priceNum = purchasePrice.trim() ? Number(purchasePrice.trim()) : null;
       const body: Record<string, unknown> = {
+        product_name: name,
+        product_group_name: productGroupName.trim(),
+        character_name: characterName.trim(),
+        purchase_location: purchaseLocation.trim(),
+        barcode_number: barcodeNumber.trim(),
+        memo: memo.trim(),
+        purchase_price:
+          priceNum != null && Number.isFinite(priceNum)
+            ? Math.trunc(priceNum)
+            : null,
         color_tag_slots: Array.from(selectedSlots).sort((a, b) => a - b),
       };
       if (categoryTagId) {
@@ -204,7 +244,75 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
       onSubmit={onSave}
       className="flex max-w-lg flex-col gap-4 rounded-md border border-border p-4"
     >
-      <h2 className="text-lg font-medium">タグ・収納の編集</h2>
+      <h2 className="text-lg font-medium">製品情報の編集</h2>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_product_name">製品名（必須）</Label>
+        <Input
+          id="detail_product_name"
+          required
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_product_group_name">グループ名</Label>
+        <Input
+          id="detail_product_group_name"
+          value={productGroupName}
+          onChange={(e) => setProductGroupName(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_character_name">キャラクター名</Label>
+        <Input
+          id="detail_character_name"
+          value={characterName}
+          onChange={(e) => setCharacterName(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_purchase_price">購入価格</Label>
+        <Input
+          id="detail_purchase_price"
+          type="number"
+          inputMode="numeric"
+          value={purchasePrice}
+          onChange={(e) => setPurchasePrice(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_purchase_location">購入場所</Label>
+        <Input
+          id="detail_purchase_location"
+          value={purchaseLocation}
+          onChange={(e) => setPurchaseLocation(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_barcode_number">バーコード</Label>
+        <Input
+          id="detail_barcode_number"
+          value={barcodeNumber}
+          onChange={(e) => setBarcodeNumber(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="detail_memo">メモ</Label>
+        <Input
+          id="detail_memo"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
+      </div>
+
+      <h3 className="pt-2 text-base font-medium">タグ・収納</h3>
 
       <div className="grid gap-2">
         <Label htmlFor="category_tag_id">カテゴリータグ</Label>

@@ -7,6 +7,12 @@ import re
 from typing import Any
 
 from app.infra.supabase_user import create_user_client
+from app.services.lucide_icon_catalog import (
+    DEFAULT_CATEGORY_TAGS,
+    DEFAULT_STORAGE_LOCATIONS,
+    normalize_category_icon,
+    normalize_storage_icon,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,23 +26,7 @@ DEFAULT_COLOR_TAGS = [
     {"slot": 7, "color_tag_name": "白", "color_tag_color": "#f8f9fa"},
 ]
 
-DEFAULT_RECEIPT_LOCATIONS = [
-    {"slot": 1, "storage_location_name": "タンス", "storage_location_icon": "bi-archive"},
-    {"slot": 2, "storage_location_name": "棚", "storage_location_icon": "bi-bookshelf"},
-    {"slot": 3, "storage_location_name": "ケース", "storage_location_icon": "bi-box"},
-    {"slot": 4, "storage_location_name": "壁", "storage_location_icon": "bi-border"},
-    {"slot": 5, "storage_location_name": "机", "storage_location_icon": "bi-laptop"},
-    {"slot": 6, "storage_location_name": "その他", "storage_location_icon": "bi-three-dots"},
-]
-
-DEFAULT_CATEGORY_TAGS = [
-    {"slot": 1, "category_tag_name": "アクリル", "category_tag_color": "#0d6efd", "category_tag_icon": "bi-square"},
-    {"slot": 2, "category_tag_name": "缶バッジ", "category_tag_color": "#dc3545", "category_tag_icon": "bi-circle"},
-    {"slot": 3, "category_tag_name": "フィギュア", "category_tag_color": "#198754", "category_tag_icon": "bi-person"},
-    {"slot": 4, "category_tag_name": "紙類", "category_tag_color": "#ffc107", "category_tag_icon": "bi-file-earmark"},
-    {"slot": 5, "category_tag_name": "ぬいぐるみ", "category_tag_color": "#6f42c1", "category_tag_icon": "bi-heart"},
-    {"slot": 6, "category_tag_name": "その他", "category_tag_color": "#6c757d", "category_tag_icon": "bi-three-dots"},
-]
+DEFAULT_RECEIPT_LOCATIONS = DEFAULT_STORAGE_LOCATIONS
 
 HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
@@ -160,7 +150,7 @@ def create_category_tag(
         "members_id": members_id,
         "category_tag_name": name,
         "category_tag_color": color,
-        "category_tag_icon": (icon or "bi-tag").strip(),
+        "category_tag_icon": normalize_category_icon(icon),
         "display_order": max_order + 1,
         "category_tag_use_flag": 1,
     }
@@ -191,7 +181,7 @@ def update_category_tag(
         {
             "category_tag_name": name,
             "category_tag_color": color,
-            "category_tag_icon": (icon or "bi-tag").strip(),
+            "category_tag_icon": normalize_category_icon(icon),
         }
     ).eq("members_id", members_id).eq("category_tag_id", category_tag_id).execute()
 
@@ -268,7 +258,7 @@ def create_storage_location(
     payload = {
         "members_id": members_id,
         "storage_location_name": name,
-        "storage_location_icon": (icon or "bi-geo").strip(),
+        "storage_location_icon": normalize_storage_icon(icon),
         "display_order": max_order + 1,
         "storage_location_use_flag": 1,
     }
@@ -294,7 +284,7 @@ def update_storage_location(
     client.table("storage_location").update(
         {
             "storage_location_name": name,
-            "storage_location_icon": (icon or "bi-geo").strip(),
+            "storage_location_icon": normalize_storage_icon(icon),
         }
     ).eq("members_id", members_id).eq(
         "storage_location_id", storage_location_id

@@ -1,4 +1,46 @@
 :root {
+    /* 緑系既定（todo-app と同系）。data-theme=default もこれと揃える */
+    --background: oklch(0.97 0.001 106.424);
+    --foreground: oklch(0.216 0.006 56.043);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.216 0.006 56.043);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.216 0.006 56.043);
+    --primary: oklch(0.841 0.238 128.85);
+    --primary-foreground: oklch(0.216 0.006 56.043);
+    --secondary: oklch(0.553 0.013 58.071 / 0.075);
+    --secondary-foreground: oklch(0.216 0.006 56.043);
+    --muted: oklch(0.923 0.003 48.717);
+    --muted-foreground: oklch(0.216 0.006 56.043 / 0.7);
+    --accent: oklch(0.985 0.001 106.423);
+    --accent-foreground: oklch(0.216 0.006 56.043);
+    --destructive: oklch(0.808 0.114 19.571);
+    --destructive-foreground: oklch(0.577 0.245 27.325);
+    --border: oklch(0.709 0.01 56.259 / 0.4);
+    --input: oklch(0.216 0.006 56.043 / 0.15);
+    --ring: oklch(0.841 0.238 128.85);
+    --chart-1: oklch(0.768 0.233 130.85);
+    --chart-2: oklch(0.828 0.189 84.429);
+    --chart-3: oklch(0.627 0.265 303.9);
+    --chart-4: oklch(0.852 0.199 91.936);
+    --chart-5: oklch(0.685 0.169 237.323);
+    --sidebar: oklch(0.97 0.001 106.424);
+    --sidebar-foreground: oklch(0.216 0.006 56.043);
+    --sidebar-primary: oklch(0 0 0 / 0.85);
+    --sidebar-primary-foreground: oklch(1 0 0 / 0.85);
+    --sidebar-accent: oklch(0.553 0.013 58.071 / 0.1);
+    --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
+    --sidebar-border: oklch(0.216 0.006 56.043 / 0.125);
+    --sidebar-ring: oklch(0.648 0.2 131.684);
+    --radius: 0.625rem;
+    --font-sans: 'Google Sans Flex', sans-serif;
+    --font-serif: 'Lora', serif;
+    --primary-light: oklch(0.897 0.196 126.665);
+    --primary-dark: oklch(0.841 0.238 128.85);
+    --primary-ring: oklch(0.768 0.233 130.85);
+}
+/* default = 緑系。:root と同じトークン一式（todo-app 方式） */
+:root[data-theme="default"] {
     --background: oklch(0.97 0.001 106.424);
     --foreground: oklch(0.216 0.006 56.043);
     --card: oklch(1 0 0);

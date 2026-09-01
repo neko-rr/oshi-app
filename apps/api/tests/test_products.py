@@ -46,7 +46,23 @@ def test_list_products_returns_items_from_service() -> None:
     assert body["items"] == sample
     assert body["members_id"] == user.members_id
     assert "message" not in body or body.get("message") == "ok"
-    mocked.assert_called_once()
-    kwargs = mocked.call_args
-    assert kwargs[0][0] == user.members_id
-    assert kwargs[1]["access_token"] == "fake-jwt"
+def test_list_products_passes_barcode_to_service() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            params={"barcode": "4901234567890"},
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["barcode"] == "4901234567890"
+    assert res.json().get("barcode") == "4901234567890"

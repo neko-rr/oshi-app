@@ -2,7 +2,7 @@
 # デザイン（エージェント・人間の入口）
 
 **更新区分の凡例（全体）:** [docs/README.md](../README.md)  
-見た目・UI/UX・推し色の **正本はここ**（`docs/db` / `docs/product` と同列）。  
+見た目・UI/UX・テーマ色の **正本はここ**（`docs/db` / `docs/product` と同列）。  
 旧 Dash の DESIGN / Bootswatch 計画は **ARCHIVE**（`.cursor/plans/archive/`）。新規設計の正にしない。
 
 ## 一言で言うと
@@ -10,8 +10,8 @@
 | 何で作る | 内容 |
 |----------|------|
 | **UI/UX・動き** | ブランドの雰囲気・使いやすさ・推し活らしさ |
-| **推し色** | 顧客がスウォッチ等で簡単に選ぶアクセント色（多数可） |
-| **シェル** | 背景など骨格（少数。普段は触らなくてよい） |
+| **テーマ色** | 顧客が選ぶと `colors.css` のセマンティック変数 **一式**が切り替わる（[todo-app](https://github.com/neko-rr/todo-app) 方式）。既定は緑系 `default` |
+| **部品の色** | hex／色名の直書き禁止。`bg-primary` 等のみ |
 
 部品の土台は [shadcn/ui](https://ui.shadcn.com/)。実装トークンは `apps/web/src/styles/`。
 
@@ -23,8 +23,8 @@
 | [tokens.md](tokens.md) | 色・字・余白・角・影の考え方 | **手** |
 | [brand-palette.md](brand-palette.md) | ブランド既定色の種（初学者向け） | **手** |
 | [components.md](components.md) | 部品の使い方（shadcn） | **手** |
-| [themes.md](themes.md) | シェル（少数） | **手** |
-| [oshi-accents.md](oshi-accents.md) | 推し色（多数・簡単選択） | **手** |
+| [themes.md](themes.md) | テーマ（トークン一式・todo-app 方式） | **手** |
+| [oshi-accents.md](oshi-accents.md) | テーマ色／推し色（カラータグとの違い） | **手** |
 | [compare-workflow.md](compare-workflow.md) | 3案並列・端末切替の手順 | **手** |
 | [motion.md](motion.md) | 動き・フィードバック | **手** |
 | [a11y.md](a11y.md) | アクセシビリティ要約（最新は公式 WebFetch） | **手** |
@@ -47,11 +47,12 @@ as-built（自動）: [generated/gaps.md](generated/gaps.md) ← `pnpm generate:
 ## 読む順（あなた向け）
 
 1. [principles.md](principles.md) … 雰囲気を何で作るか  
-2. [oshi-accents.md](oshi-accents.md) … 推し色の選び方  
-3. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
-4. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
-5. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
-6. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
+2. [themes.md](themes.md) … テーマ＝トークン一式  
+3. [oshi-accents.md](oshi-accents.md) … カラータグとの違い  
+4. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
+5. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
+6. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
+7. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
 
 ## フィードバック（pending でよい）
 
@@ -63,14 +64,14 @@ as-built（自動）: [generated/gaps.md](generated/gaps.md) ← `pnpm generate:
 | 領域 | 正本 | メモ |
 |------|------|------|
 | 顧客価値・画面要否 | `docs/product/` | デザインの「好き嫌い」ではなく価値・DoD |
-| カラータグ（製品ラベル） | DB + 設定 UI | **推し色（アプリ見た目）とは別用途**。枠数はそのまま |
-| テーマ保存 API | `theme_settings` 等 | 実装時に `design-change` で整合 |
+| カラータグ（製品ラベル） | DB + 設定 UI | **テーマ色（アプリ見た目）とは別用途**。枠数はそのまま |
+| テーマ保存 API | `theme_settings` | `GET/PUT /theme-settings`。実装は `themes.md` |
 
 ## 実装の正（コード）
 
 | 層 | 場所 |
 |----|------|
-| 生トークン | `apps/web/src/styles/colors.css` |
+| 生トークン | `apps/web/src/styles/colors.css`（`data-theme` ごと一式） |
 | Tailwind 橋渡し | `apps/web/src/styles/tailwind-theme.css` |
 | 部品 | `apps/web/src/components/ui/*`（shadcn） |
 | 画面 | `apps/web/src/app/**` — トークン／部品のみ。hex 直書き禁止 |

@@ -36,8 +36,9 @@
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **必須** | 公開可 | 同上 | 同上 | **anon/publishable のみ**。service_role 禁止 |
 | `NEXT_PUBLIC_API_BASE_URL` | **必須** | 公開可 | 開発は `http://127.0.0.1:8000` | **HTTPS の Render URL** | 末尾スラッシュなし推奨 |
 | `NEXT_PUBLIC_BASE_URL` | 任意 | 公開可 | 任意 | 本番 Web のオリジン | リダイレクト組み立て用 |
+| `AUTH_GATE_BYPASS` | 任意（開発のみ） | **非公開** | `.env.local` のみ | **置くな** | `=1` かつ非本番のときだけ、Supabase 未設定でも**業務ルート**を通す。通常は未設定。`/dev`（Design Lab）は非本番なら未ログイン可（別途） |
 
-**CF に置いてはいけない例:** `SUPABASE_SECRET_KEY` / `SUPABASE_JWT_SECRET` / `DATABASE_URL` / `IO_*` / あらゆる `*_SECRET*`。
+**CF に置いてはいけない例:** `SUPABASE_SECRET_KEY` / `SUPABASE_JWT_SECRET` / `DATABASE_URL` / `IO_*` / `AUTH_GATE_BYPASS` / あらゆる `*_SECRET*`。
 
 ---
 

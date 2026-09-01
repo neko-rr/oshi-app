@@ -73,6 +73,9 @@ export default async function HomePage() {
           <Link href="/register">登録</Link>
         </Button>
         <Button asChild variant="secondary">
+          <Link href="/search">検索</Link>
+        </Button>
+        <Button asChild variant="secondary">
           <Link href="/dashboard">ダッシュボード</Link>
         </Button>
         <Button asChild variant="outline">

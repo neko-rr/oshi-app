@@ -4,10 +4,12 @@ import type { CSSProperties, ReactNode } from "react";
 import {
   LAB_OSHI_SWATCHES,
   type LabPlatformId,
+  type LabSceneId,
   type LabUiState,
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
 import { bestButtonForeground } from "@/components/design-lab/lab-contrast";
+import LabThemeSettingsMock from "@/components/design-lab/LabThemeSettingsMock";
 
 type LabMockSurfaceProps = {
   variant: LabVariantId;
@@ -16,6 +18,7 @@ type LabMockSurfaceProps = {
   uiState?: LabUiState;
   oshiIndex?: number;
   onOshiIndexChange?: (index: number) => void;
+  scene?: LabSceneId;
 };
 
 const MOCK_ITEMS = [
@@ -245,7 +248,16 @@ export default function LabMockSurface({
   uiState = "default",
   oshiIndex = 0,
   onOshiIndexChange,
+  scene = "home",
 }: LabMockSurfaceProps) {
+  if (scene === "theme-settings") {
+    return (
+      <div data-lab-variant={variant}>
+        <LabThemeSettingsMock variant={variant} uiState={uiState} />
+      </div>
+    );
+  }
+
   const setOshi = onOshiIndexChange ?? (() => undefined);
   const items =
     uiState === "default"

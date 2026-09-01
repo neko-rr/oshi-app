@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-08-29T17:58:35.977992+00:00
+-- generated_at_utc: 2026-09-01T12:44:57.799582+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS public.storage_location_preset_slot_dismissed (
 CREATE TABLE IF NOT EXISTS public.theme_settings (
   members_id uuid NOT NULL,
   members_type_name text NOT NULL,
-  theme text NOT NULL DEFAULT 'minty'::text,
+  theme text NOT NULL DEFAULT 'default'::text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );

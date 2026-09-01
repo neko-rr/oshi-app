@@ -1,7 +1,7 @@
 ---
 name: design-mobile
 description: >-
-  Expo / apps/mobile の見た目・トークン・推し色・アイコンを Web デザイン体制に揃えるとき。
+  Expo / apps/mobile の見た目・トークン・テーマ色・アイコンを Web デザイン体制に揃えるとき。
   モバイル着手前・UI 実装前に適用する。
 ---
 
@@ -10,7 +10,7 @@ description: >-
 ## いつ使うか
 
 - `apps/mobile` に画面・テーマ・アイコンを足す直前
-- Web の推し色／トークンをモバイルに持ち込む相談
+- Web のテーマ色／トークンをモバイルに持ち込む相談
 - `lucide-react-native` を入れるとき
 
 配置枠だけの README 更新だけなら不要。
@@ -19,7 +19,7 @@ description: >-
 
 1. skill **`official-docs-first`**（Expo / Supabase mobile）  
 2. `.cursor/rules/mobile.mdc` / `auth.mdc` / `security.mdc`  
-3. デザイン正本: `docs/design/README.md` + `meta/tokens.json` + `oshi-accents.md`  
+3. デザイン正本: `docs/design/README.md` + `meta/tokens.json` + `themes.md` + `oshi-accents.md`  
 4. a11y が絡むなら **`design-a11y`**（公式 WebFetch）
 
 ## 契約（Web と揃える）
@@ -30,16 +30,17 @@ description: >-
 |------|------|
 | 名前 | `docs/design/meta/tokens.json` の `required_semantic` と同じ意味 |
 | 検査 | `python scripts/check_design_tokens.py`（Web CSS）。モバイル実装時も **同名** を使う |
-| 値 | まだ Web `colors.css` が正。モバイルは Theme オブジェクト等へ写経 |
+| 値 | Web `colors.css` が正（`data-theme` ごと **一式**）。モバイルは Theme オブジェクト等へ写経 |
+| hex | 画面・部品に直書きしない |
 
-### 推し色
+### テーマ色
 
 | 項目 | 内容 |
 |------|------|
-| 用途 | アプリ見た目のアクセント（`--primary` / ring 相当） |
+| 用途 | アプリ見た目の **セマンティック色一式**（背景・文字・カード・primary 等）。`--primary` / ring だけではない |
 | カラータグ | **別**（製品ラベル。枠数変更禁止） |
-| API | 将来 `theme_settings` 等。キー案: `oshi_accent`（hex or token id）、`members_id`。実装前に `api_contract` + `product-spec-sync` |
-| UX | スウォッチ選択・多数可（`oshi-accents.md`） |
+| API | `theme_settings` / `GET/PUT /theme-settings`（テーマ ID）。`members_id` は JWT のみ |
+| UX | `/settings/theme` 相当。既定は緑系 `default`（`themes.md` / todo-app 方式） |
 
 ### アイコン
 
@@ -57,7 +58,7 @@ description: >-
 - [ ] secret / service_role をバンドルしていない  
 - [ ] トークン名が Web と食い違っていない  
 - [ ] アイコンは `apps/mobile/src/lib/icons.ts` から named import  
-- [ ] 推し色とカラータグを混ぜていない  
+- [ ] テーマ色とカラータグを混ぜていない  
 - [ ] 大きな見た目は Web Lab 方針を参照（モバイル専用4列比較は不要。必要なら Lab の mobile-app プレビュー）  
 - [ ] **セーフエリア**（ノッチ／ホームバー）を考慮する。Lab のセーフエリア線（fb-001）が未実装なら、実機／`safe-area-inset` で確認  
 
@@ -70,6 +71,7 @@ description: >-
 - Web と別のアイコンセットを増やす  
 - モバイルだけ全面ピンク等の決め打ち  
 - 本番 Web を触らずに「モバイルだけ別ブランド」を正にする  
+- 「primary/ring だけ」差し替えをモバイルの正にする  
 
 ## 関連
 

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 _PRODUCT_LIST_SELECT = """
 registered_product_id,
 product_name,
+barcode_number,
 photo_id,
 creation_date,
 category_tag_id,
@@ -62,19 +63,26 @@ def fetch_products_page(
     access_token: str,
     limit: int = 48,
     offset: int = 0,
+    barcode_number: str | None = None,
 ) -> list[dict[str, Any]]:
-    """registered_product を 1 ページ取得（RLS + eq members_id）。"""
+    """registered_product を 1 ページ取得（RLS + eq members_id）。
+
+    barcode_number 指定時は番号完全一致（購入済み判定用）。
+    """
     if limit <= 0:
         return []
     client = create_user_client(access_token)
     end = offset + limit - 1
-    response = (
+    query = (
         client.table("registered_product")
         .select(_PRODUCT_LIST_SELECT)
         .eq("members_id", members_id)
-        .order("creation_date", desc=True)
-        .range(offset, end)
-        .execute()
+    )
+    code = (barcode_number or "").strip()
+    if code:
+        query = query.eq("barcode_number", code)
+    response = (
+        query.order("creation_date", desc=True).range(offset, end).execute()
     )
     if getattr(response, "error", None):
         logger.exception("製品一覧の取得に失敗: %s", response.error)

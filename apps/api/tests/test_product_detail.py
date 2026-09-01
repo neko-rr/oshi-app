@@ -110,3 +110,25 @@ def test_get_products_id_200() -> None:
         )
     assert res.status_code == 200
     assert res.json()["product_name"] == "A"
+
+
+def test_patch_product_can_clear_purchase_price() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email=None,
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.patch_product_for_member",
+            return_value={"registered_product_id": 1, "purchase_price": None},
+        ) as mocked,
+    ):
+        res = client.patch(
+            "/products/1",
+            headers={"Authorization": "Bearer x"},
+            json={"purchase_price": None},
+        )
+    assert res.status_code == 200
+    assert "purchase_price" in mocked.call_args[1]["fields"]
+    assert mocked.call_args[1]["fields"]["purchase_price"] is None

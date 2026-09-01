@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-08-31T10:24:04Z`
+生成時刻 (UTC): `2026-09-01T14:19:32Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -15,6 +15,7 @@
 | `/gallery` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/register` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/settings` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
+| `apps/web/src/components/ui/ThemePicker.tsx` | compliance_raw_button | L34: 生 <button> 禁止。@/components/ui/button を使え（Lab / ui は例外）。 |
 
 ## Lab 採用状況（meta）
 
@@ -23,12 +24,13 @@
 | `/gallery` | `not_started` | None | Lab 比較後に画面単位で採用 |
 | `/register` | `not_started` | None |  |
 | `/dashboard` | `not_started` | None |  |
-| `/settings` | `not_started` | None | 推し色スウォッチ UI は別タスク |
+| `/settings` | `not_started` | None | ハブ本体。テーマは /settings/theme |
+| `/settings/theme` | `adopted` | 'b' | B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保 |
 | `/auth/login` | `not_started` | None |  |
 
 ## page.tsx 要約
 
-- 本番 page 数: 17
+- 本番 page 数: 21
 - `@/lib/icons` 使用: 0
 - lucide 直 import: 0
 - UI hex 疑い: 0

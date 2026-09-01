@@ -1,4 +1,4 @@
-import { RegisterForm } from "@/components/RegisterForm";
+import { RegisterWizard } from "@/components/register/RegisterWizard";
 
 export default function RegisterPage() {
   return (
@@ -6,10 +6,10 @@ export default function RegisterPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">製品登録</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          仮 UI（クイック登録相当）。バーコードカメラ・Vision タグは後続。
+          バーコード → 正面写真 → 確認の順で登録します。外部照合がなくても完了できます。
         </p>
       </div>
-      <RegisterForm />
+      <RegisterWizard />
     </div>
   );
 }

@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { API_PATHS } from "@oshi/shared";
+import {
+  API_PATHS,
+  LUCIDE_ICON_FALLBACK_STORAGE,
+  LUCIDE_STORAGE_PICKER,
+} from "@oshi/shared";
+import IconPickerGrid from "@/components/settings/IconPickerGrid";
+import { LucideIconBySlug } from "@/components/ui/LucideIconBySlug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +27,16 @@ function apiBase(): string {
   return base.replace(/\/$/, "");
 }
 
-export default function ReceiptLocationsSettingsPage() {
+export default function StorageLocationsSettingsPage() {
   const router = useRouter();
   const [items, setItems] = useState<StorageLocationItem[]>([]);
   const [name, setName] = useState("");
+  const [createIcon, setCreateIcon] = useState<string>(
+    LUCIDE_ICON_FALLBACK_STORAGE,
+  );
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editIcon, setEditIcon] = useState<string>(LUCIDE_ICON_FALLBACK_STORAGE);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,6 +76,17 @@ export default function ReceiptLocationsSettingsPage() {
     void load();
   }, [load]);
 
+  function startEdit(item: StorageLocationItem) {
+    setEditingId(item.storage_location_id);
+    setEditName(item.storage_location_name);
+    setEditIcon(item.storage_location_icon || LUCIDE_ICON_FALLBACK_STORAGE);
+    setError(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
@@ -80,15 +103,51 @@ export default function ReceiptLocationsSettingsPage() {
         },
         body: JSON.stringify({
           storage_location_name: name.trim(),
+          storage_location_icon: createIcon,
         }),
       });
       if (!res.ok) {
         throw new Error(`追加失敗: ${(await res.text()).slice(0, 160)}`);
       }
       setName("");
+      setCreateIcon(LUCIDE_ICON_FALLBACK_STORAGE);
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "追加に失敗しました");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onSaveEdit(e: FormEvent) {
+    e.preventDefault();
+    if (editingId == null || !editName.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await fetch(
+        `${apiBase()}${API_PATHS.storageLocations}/${editingId}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            storage_location_name: editName.trim(),
+            storage_location_icon: editIcon,
+          }),
+        },
+      );
+      if (!res.ok) {
+        throw new Error(`更新失敗: ${(await res.text()).slice(0, 160)}`);
+      }
+      setEditingId(null);
+      await load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "更新に失敗しました");
     } finally {
       setSaving(false);
     }
@@ -109,6 +168,7 @@ export default function ReceiptLocationsSettingsPage() {
       if (!res.ok) {
         throw new Error(`削除失敗: ${(await res.text()).slice(0, 160)}`);
       }
+      if (editingId === id) setEditingId(null);
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "削除に失敗しました");
@@ -120,13 +180,16 @@ export default function ReceiptLocationsSettingsPage() {
       <div>
         <Link
           href="/settings"
-          className="text-sm text-primary underline-offset-4 hover:underline"
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
         >
           ← 設定
         </Link>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">
           収納場所
         </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          収納場所ごとに Lucide アイコンを選べます。
+        </p>
       </div>
 
       {loading ? (
@@ -139,24 +202,89 @@ export default function ReceiptLocationsSettingsPage() {
             items.map((item) => (
               <li
                 key={item.storage_location_id}
-                className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
+                className="rounded-2xl border border-border bg-card px-3 py-2"
               >
-                <span className="text-sm">{item.storage_location_name}</span>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => void onDelete(item.storage_location_id)}
-                >
-                  削除
-                </Button>
+                {editingId === item.storage_location_id ? (
+                  <form onSubmit={onSaveEdit} className="flex flex-col gap-3">
+                    <div className="grid min-w-[10rem] gap-1">
+                      <Label
+                        htmlFor={`edit-name-${item.storage_location_id}`}
+                      >
+                        名前
+                      </Label>
+                      <Input
+                        id={`edit-name-${item.storage_location_id}`}
+                        required
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-1">
+                      <Label>アイコン</Label>
+                      <IconPickerGrid
+                        options={LUCIDE_STORAGE_PICKER}
+                        value={editIcon}
+                        onChange={setEditIcon}
+                        ariaLabel="収納場所のアイコン"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit" size="sm" disabled={saving}>
+                        {saving ? "保存中…" : "保存"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={cancelEdit}
+                      >
+                        キャンセル
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 text-sm">
+                      <span className="flex size-8 items-center justify-center rounded-xl border border-border bg-muted/50">
+                        <LucideIconBySlug
+                          slug={
+                            item.storage_location_icon ||
+                            LUCIDE_ICON_FALLBACK_STORAGE
+                          }
+                          className="size-4 text-foreground"
+                        />
+                      </span>
+                      <span>{item.storage_location_name}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => startEdit(item)}
+                      >
+                        編集
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() =>
+                          void onDelete(item.storage_location_id)
+                        }
+                      >
+                        削除
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))
           )}
         </ul>
       )}
 
-      <form onSubmit={onCreate} className="flex max-w-md flex-col gap-3">
+      <form onSubmit={onCreate} className="flex max-w-lg flex-col gap-3">
         <div className="grid gap-2">
           <Label htmlFor="storage_location_name">新しい収納場所名</Label>
           <Input
@@ -164,6 +292,15 @@ export default function ReceiptLocationsSettingsPage() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label>アイコン</Label>
+          <IconPickerGrid
+            options={LUCIDE_STORAGE_PICKER}
+            value={createIcon}
+            onChange={setCreateIcon}
+            ariaLabel="新規収納場所のアイコン"
           />
         </div>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

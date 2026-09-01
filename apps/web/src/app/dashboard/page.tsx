@@ -77,7 +77,7 @@ export default async function DashboardPage() {
             ダッシュボード
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            GET /dashboard/charts?granularity=month（仮 UI）
+            支出・タグ構成などの集計（Phase 2・簡易表示）
           </p>
         </div>
         <Link href="/" className="text-sm underline-offset-4 hover:underline">

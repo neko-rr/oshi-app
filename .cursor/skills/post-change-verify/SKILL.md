@@ -38,6 +38,15 @@ python scripts/generate_design_docs.py
 
 `docs/design/generated/gaps.md` を確認（Lab 未採用・hex 等）。
 
+### ライセンス NOTICE（依存を増やした・legal を触った場合）
+
+```powershell
+python scripts/generate_third_party_notices.py
+python scripts/generate_third_party_notices.py --check
+```
+
+公開ページ `/licenses` は `apps/web/src/data/generated/third_party_notices.json` を表示する（docs と同一生成物）。
+
 ### デザイン icons（meta を触った場合）
 
 `docs/design/meta/icons.json` を変えたら **必須**:
@@ -88,7 +97,8 @@ CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行�
 | `check_api_contract_sync` / `pnpm check:api-contract` | 同上（API contract sync ステップ） |
 | `pnpm lint:web` / `typecheck:web` / `build:web` | `web-lint-typecheck-build` |
 | design tokens / icons `--check` / compliance | `design-quality` |
-| `check_docs_drift` | `docs-generated-drift` |
+| `check_docs_drift`（含 third_party_notices） | `docs-generated-drift` |
+| `generate_third_party_notices` / `--check` | 同上（docs ジョブ内） |
 | （UI PR）`pnpm screenshots:web` | `ui-screenshots`（Artifacts） |
 
 ## スキップ

@@ -20,23 +20,23 @@ class ColorTagsSaveRequest(BaseModel):
 class CategoryCreate(BaseModel):
     category_tag_name: str
     category_tag_color: str = "#6c757d"
-    category_tag_icon: str = "bi-tag"
+    category_tag_icon: str = "tag"
 
 
 class CategoryUpdate(BaseModel):
     category_tag_name: str
     category_tag_color: str
-    category_tag_icon: str = "bi-tag"
+    category_tag_icon: str = "tag"
 
 
 class StorageLocationCreate(BaseModel):
     storage_location_name: str
-    storage_location_icon: str = "bi-geo"
+    storage_location_icon: str = "map-pin"
 
 
 class StorageLocationUpdate(BaseModel):
     storage_location_name: str
-    storage_location_icon: str = "bi-geo"
+    storage_location_icon: str = "map-pin"
 
 
 def _err(exc: Exception) -> HTTPException:

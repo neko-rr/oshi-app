@@ -1,11 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
+import {
+  DEFAULT_THEME_ID,
+  THEME_IDS,
+  THEME_OPTIONS,
+  findThemeOption,
+} from "@/lib/themes/catalog";
 
 export type ThemeId = string;
+export { DEFAULT_THEME_ID, THEME_OPTIONS };
+
 const LOCAL_KEY = "oshiapp:themeId";
 const SYNC_DEBOUNCE_MS = 800;
+
+const ALLOWED = new Set<string>(THEME_IDS);
 
 function apiBase(): string {
   return (
@@ -22,30 +33,36 @@ function tryCreateClient() {
   }
 }
 
-async function fetchServerThemeViaFastAPI(token?: string) {
+function sanitizeTheme(raw: unknown, fallback: ThemeId): ThemeId {
+  if (typeof raw === "string" && ALLOWED.has(raw)) return raw;
+  return fallback;
+}
+
+async function fetchThemeViaFastAPI(token: string): Promise<ThemeId | null> {
   try {
-    const res = await fetch(`${apiBase()}/user/theme`, {
+    const res = await fetch(`${apiBase()}${API_PATHS.themeSettings}`, {
       method: "GET",
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return null;
-    const json = await res.json();
-    return json?.theme ?? null;
+    const json = (await res.json()) as { theme?: string };
+    return sanitizeTheme(json?.theme, DEFAULT_THEME_ID);
   } catch {
     return null;
   }
 }
 
-async function putServerThemeViaFastAPI(theme: ThemeId, token?: string) {
+async function putThemeViaFastAPI(
+  theme: ThemeId,
+  token: string,
+): Promise<boolean> {
   try {
-    const res = await fetch(`${apiBase()}/user/theme`, {
+    const res = await fetch(`${apiBase()}${API_PATHS.themeSettings}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({ theme }),
     });
     return res.ok;
@@ -54,11 +71,12 @@ async function putServerThemeViaFastAPI(theme: ThemeId, token?: string) {
   }
 }
 
-export function useTheme(defaultTheme: ThemeId = "default") {
+export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
   const [themeId, setThemeId] = useState<ThemeId>(() => {
     try {
       if (typeof window === "undefined") return defaultTheme;
-      return (localStorage.getItem(LOCAL_KEY) as ThemeId) ?? defaultTheme;
+      const local = localStorage.getItem(LOCAL_KEY);
+      return sanitizeTheme(local, defaultTheme);
     } catch {
       return defaultTheme;
     }
@@ -69,20 +87,22 @@ export function useTheme(defaultTheme: ThemeId = "default") {
 
   const applyDataTheme = useCallback((t: ThemeId) => {
     if (typeof document === "undefined") return;
-    document.documentElement.setAttribute("data-theme", t);
+    document.documentElement.setAttribute(
+      "data-theme",
+      sanitizeTheme(t, DEFAULT_THEME_ID),
+    );
   }, []);
 
-  // ローカル保存と即時適用
   useEffect(() => {
+    const safe = sanitizeTheme(themeId, defaultTheme);
     try {
-      localStorage.setItem(LOCAL_KEY, themeId);
+      localStorage.setItem(LOCAL_KEY, safe);
     } catch {
       /* ignore */
     }
-    applyDataTheme(themeId);
-  }, [themeId, applyDataTheme]);
+    applyDataTheme(safe);
+  }, [themeId, applyDataTheme, defaultTheme]);
 
-  // サーバー同期（デバウンス）
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
@@ -93,19 +113,14 @@ export function useTheme(defaultTheme: ThemeId = "default") {
       setIsSyncing(true);
       try {
         const supabase = tryCreateClient();
-        if (supabase) {
-          try {
-            const { error } = await supabase.auth.updateUser({
-              data: { theme: themeId },
-            });
-            if (!error) return;
-          } catch {
-            /* FastAPI にフォールバック */
-          }
-          const session = await supabase.auth.getSession();
-          const token = session.data?.session?.access_token;
-          await putServerThemeViaFastAPI(themeId, token);
-        }
+        if (!supabase) return;
+        const session = await supabase.auth.getSession();
+        const token = session.data?.session?.access_token;
+        if (!token) return;
+        await putThemeViaFastAPI(
+          sanitizeTheme(themeId, defaultTheme),
+          token,
+        );
       } finally {
         setIsSyncing(false);
       }
@@ -113,44 +128,20 @@ export function useTheme(defaultTheme: ThemeId = "default") {
     return () => {
       if (debounceTimer.current) window.clearTimeout(debounceTimer.current);
     };
-  }, [themeId]);
+  }, [themeId, defaultTheme]);
 
-  // マウント時：サーバー値を優先（Supabase → FastAPI）
   useEffect(() => {
     let alive = true;
     void (async () => {
       try {
         const supabase = tryCreateClient();
         if (!supabase) return;
-
-        const { data: userData } = await supabase.auth.getUser();
-        const serverMetaTheme = userData?.user?.user_metadata?.theme as
-          | ThemeId
-          | undefined;
-        if (serverMetaTheme) {
-          if (alive) setThemeId(serverMetaTheme);
-          return;
-        }
-
         const session = await supabase.auth.getSession();
         const token = session.data?.session?.access_token;
-        const fastapiTheme = await fetchServerThemeViaFastAPI(token);
-        if (fastapiTheme && alive) {
-          setThemeId(fastapiTheme);
-          return;
-        }
-
-        const local = localStorage.getItem(LOCAL_KEY) as ThemeId | null;
-        if (local && local !== defaultTheme) {
-          const { error } = await supabase.auth
-            .updateUser({ data: { theme: local } })
-            .catch(() => ({ error: true as const }));
-          if (!error) return;
-          const session2 = await supabase.auth.getSession();
-          await putServerThemeViaFastAPI(
-            local,
-            session2.data?.session?.access_token,
-          );
+        if (!token) return;
+        const serverTheme = await fetchThemeViaFastAPI(token);
+        if (serverTheme && alive) {
+          setThemeId(serverTheme);
         }
       } catch {
         /* ignore */
@@ -159,9 +150,12 @@ export function useTheme(defaultTheme: ThemeId = "default") {
     return () => {
       alive = false;
     };
-  }, [defaultTheme]);
+  }, []);
 
-  const setTheme = useCallback((t: ThemeId) => setThemeId(t), []);
+  const setTheme = useCallback(
+    (t: ThemeId) => setThemeId(sanitizeTheme(t, defaultTheme)),
+    [defaultTheme],
+  );
   const resetToDefault = useCallback(() => {
     setThemeId(defaultTheme);
     try {
@@ -171,5 +165,13 @@ export function useTheme(defaultTheme: ThemeId = "default") {
     }
   }, [defaultTheme]);
 
-  return { themeId, setTheme, resetToDefault, isSyncing };
+  const current = findThemeOption(themeId);
+
+  return {
+    themeId,
+    setTheme,
+    resetToDefault,
+    isSyncing,
+    current,
+  };
 }

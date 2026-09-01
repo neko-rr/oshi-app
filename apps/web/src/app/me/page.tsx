@@ -12,11 +12,10 @@ export default async function MePage() {
   if (!hasSupabase) {
     return (
       <div className="flex flex-col justify-center gap-4 py-10">
-        <h1 className="text-2xl font-semibold">認証確認 (/me)</h1>
+        <h1 className="text-2xl font-semibold">認証確認</h1>
         <p className="text-sm text-destructive">
-          Supabase の NEXT_PUBLIC_* が未設定です。apps/web/.env.local に
-          NEXT_PUBLIC_SUPABASE_URL と NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-          を設定してください。
+          Supabase の公開設定（NEXT_PUBLIC_SUPABASE_URL /
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY）が未設定です。
         </p>
         <Link href="/" className="underline">
           ホームへ
@@ -41,37 +40,60 @@ export default async function MePage() {
     apiError =
       e instanceof Error
         ? e.message
-        : "API 呼び出しに失敗しました（Render/秘密設定は起きてからでも可）";
+        : "API の認証確認に失敗しました";
   }
+
+  // 画面には JWT / Cookie を出さない。members_id とメールのみ。
+  const sessionEmail = data.session.user.email ?? null;
+  const sessionMembersId = data.session.user.id;
 
   return (
     <div className="flex flex-col justify-center gap-4 py-10">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">認証確認 (/me)</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">認証確認</h1>
         <LogoutButton />
       </div>
+
+      <p className="text-sm text-muted-foreground">
+        ログイン中のユーザー識別子です。アクセストークンは表示しません。
+      </p>
+
       <div className="rounded-md border border-border bg-card p-4 text-sm text-card-foreground">
         <p>
-          Supabase session email:{" "}
-          <strong>{data.session.user.email ?? "(none)"}</strong>
+          メール:{" "}
+          <span className="font-medium">{sessionEmail ?? "（なし）"}</span>
         </p>
-        <p>
-          members_id (sub): <code>{data.session.user.id}</code>
+        <p className="mt-2 break-all">
+          members_id:{" "}
+          <code className="rounded bg-muted px-1 text-xs">{sessionMembersId}</code>
         </p>
       </div>
+
       <div className="rounded-md border border-border bg-card p-4 text-sm text-card-foreground">
-        <p className="font-medium">FastAPI GET /me</p>
+        <p className="font-medium">API GET /me（JWKS 検証後）</p>
         {apiMe ? (
-          <pre className="mt-2 overflow-auto text-xs">
-            {JSON.stringify(apiMe, null, 2)}
-          </pre>
+          <ul className="mt-2 space-y-1">
+            <li className="break-all">
+              members_id:{" "}
+              <code className="rounded bg-muted px-1 text-xs">
+                {apiMe.members_id}
+              </code>
+            </li>
+            <li>email: {apiMe.email ?? "（なし）"}</li>
+          </ul>
         ) : (
           <p className="mt-2 text-destructive">{apiError}</p>
         )}
       </div>
-      <Link href="/" className="underline">
-        ホームへ
-      </Link>
+
+      <div className="flex flex-wrap gap-3 text-sm">
+        <Link href="/settings" className="underline-offset-4 hover:underline">
+          設定へ
+        </Link>
+        <Link href="/" className="underline-offset-4 hover:underline">
+          ホームへ
+        </Link>
+      </div>
     </div>
   );
 }

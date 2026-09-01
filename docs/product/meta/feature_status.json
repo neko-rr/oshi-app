@@ -7,7 +7,10 @@
       "phase": "must",
       "status": "partial",
       "title_ja": "スマホ対応 Web",
-      "evidence_paths": ["apps/web/src/app"],
+      "evidence_paths": [
+        "apps/web/src/components/layout/Header.tsx",
+        "apps/web/src/app"
+      ],
       "expected_web_paths": ["/"],
       "expected_api_paths": []
     },
@@ -17,18 +20,28 @@
       "status": "partial",
       "title_ja": "推し色テーマ",
       "evidence_paths": [
+        "apps/web/src/app/settings/theme/page.tsx",
         "apps/web/src/components/ui/ThemePicker.tsx",
-        "apps/web/src/hooks/useTheme.ts"
+        "apps/web/src/hooks/useTheme.ts",
+        "apps/api/app/routers/theme_settings.py",
+        "apps/api/app/services/theme_service.py",
+        "docs/product/acceptance/settings.md"
       ],
-      "expected_web_paths": ["/settings"],
-      "expected_api_paths": []
+      "expected_web_paths": ["/settings", "/settings/theme"],
+      "expected_api_paths": ["/theme-settings"]
     },
     {
       "id": "barcode_capture",
       "phase": "must",
       "status": "partial",
       "title_ja": "バーコード読取・入力",
-      "evidence_paths": ["apps/web/src/components/RegisterForm.tsx"],
+      "evidence_paths": [
+        "apps/web/src/components/register/StepBarcode.tsx",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "apps/web/src/components/barcode/BarcodeScanner.tsx",
+        "apps/web/src/lib/barcode/detect.ts",
+        "apps/web/src/lib/products/findOwnedByBarcode.ts"
+      ],
       "expected_web_paths": ["/register"],
       "expected_api_paths": []
     },
@@ -54,7 +67,8 @@
       "title_ja": "正面写真登録",
       "evidence_paths": [
         "apps/api/app/routers/photos.py",
-        "apps/api/app/services/photo_service.py"
+        "apps/api/app/services/photo_service.py",
+        "apps/web/src/components/register/StepPhoto.tsx"
       ],
       "expected_web_paths": ["/register"],
       "expected_api_paths": ["/photos"]
@@ -88,6 +102,7 @@
       "title_ja": "登録フロー",
       "evidence_paths": [
         "apps/web/src/app/register/page.tsx",
+        "apps/web/src/components/register/RegisterWizard.tsx",
         "docs/product/flows/register.md",
         "docs/product/acceptance/register.md"
       ],
@@ -109,7 +124,7 @@
     {
       "id": "product_detail",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "製品詳細",
       "evidence_paths": [
         "apps/web/src/app/gallery/[registered_product_id]/page.tsx",
@@ -122,10 +137,12 @@
     {
       "id": "storage_locations",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "収納場所",
       "evidence_paths": [
         "apps/web/src/app/settings/storage-locations/page.tsx",
+        "apps/api/app/routers/tags.py",
+        "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
       "expected_web_paths": ["/settings/storage-locations"],
@@ -134,10 +151,12 @@
     {
       "id": "category_tags",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "カテゴリタグ",
       "evidence_paths": [
         "apps/web/src/app/settings/category-tags/page.tsx",
+        "apps/api/app/routers/tags.py",
+        "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
       "expected_web_paths": ["/settings/category-tags"],
@@ -146,10 +165,12 @@
     {
       "id": "color_tags",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "カラータグ",
       "evidence_paths": [
         "apps/web/src/app/settings/color-tags/page.tsx",
+        "apps/api/app/routers/tags.py",
+        "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
       "expected_web_paths": ["/settings/color-tags"],
@@ -158,19 +179,41 @@
     {
       "id": "search",
       "phase": "must",
-      "status": "planned",
+      "status": "partial",
       "title_ja": "検索",
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/web/src/app/search/page.tsx",
+        "apps/web/src/components/ProductSearchForm.tsx",
+        "apps/api/app/services/product_service.py"
+      ],
       "expected_web_paths": ["/search"],
-      "expected_api_paths": []
+      "expected_api_paths": ["/products"]
     },
     {
       "id": "privacy_policy",
       "phase": "must",
-      "status": "planned",
+      "status": "partial",
       "title_ja": "プライバシーポリシー",
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/web/src/app/privacy/page.tsx",
+        "apps/web/src/lib/middleware.ts"
+      ],
       "expected_web_paths": ["/privacy"],
+      "expected_api_paths": []
+    },
+    {
+      "id": "licenses_notices",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "ライセンス・表記（OSS／外部サービス）",
+      "evidence_paths": [
+        "apps/web/src/app/licenses/page.tsx",
+        "scripts/generate_third_party_notices.py",
+        "docs/legal/README.md",
+        "docs/legal/services.json",
+        "docs/product/acceptance/licenses.md"
+      ],
+      "expected_web_paths": ["/licenses"],
       "expected_api_paths": []
     },
     {
@@ -283,6 +326,9 @@
       "title_ja": "認証セッション",
       "evidence_paths": [
         "apps/web/src/app/auth/login/page.tsx",
+        "apps/web/src/app/me/page.tsx",
+        "apps/web/src/components/logout-button.tsx",
+        "apps/web/src/lib/middleware.ts",
         "docs/product/acceptance/auth.md"
       ],
       "expected_web_paths": ["/auth/login", "/auth/sign-up"],

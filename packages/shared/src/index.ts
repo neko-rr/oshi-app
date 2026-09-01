@@ -7,6 +7,7 @@ export const API_PATHS = {
   colorTags: "/color-tags",
   categoryTags: "/category-tags",
   storageLocations: "/storage-locations",
+  themeSettings: "/theme-settings",
   statsProducts: "/stats/products",
   dashboardCharts: "/dashboard/charts",
   assistVisionDescribe: "/assist/vision/describe",
@@ -28,6 +29,7 @@ export type HealthResponse = {
 export type ProductListItem = {
   registered_product_id: number;
   product_name: string | null;
+  barcode_number?: string | null;
   photo_id: number | null;
   photo_thumbnail_path: string | null;
   /** Storage signed URL（期限付き）。失敗時は null */
@@ -40,6 +42,9 @@ export type ProductListResponse = {
   members_id: string;
   limit: number;
   offset: number;
+  q?: string | null;
+  /** barcode_number 完全一致フィルタ */
+  barcode?: string | null;
 };
 
 export type CreateProductRequest = {
@@ -61,3 +66,5 @@ export type CreatePhotoResponse = {
   photo_thumbnail_path: string;
   photo_high_resolution_path: string;
 };
+
+export * from "./lucide_icon_catalog.js";

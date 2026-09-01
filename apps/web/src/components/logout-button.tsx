@@ -1,18 +1,40 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { createClient } from "@/lib/client";
+import { Button } from "@/components/ui/button";
 
-import { createClient } from '@/lib/client'
-import { Button } from '@/components/ui/button'
+type Props = {
+  variant?: "default" | "outline" | "ghost" | "destructive" | "secondary";
+  className?: string;
+};
 
-export function LogoutButton() {
-  const router = useRouter()
+export function LogoutButton({ variant = "outline", className }: Props) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const logout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/auth/login')
+  async function logout() {
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/auth/login");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return <Button onClick={logout}>Logout</Button>
+  return (
+    <Button
+      type="button"
+      variant={variant}
+      className={className}
+      disabled={loading}
+      onClick={() => void logout()}
+    >
+      {loading ? "ログアウト中…" : "ログアウト"}
+    </Button>
+  );
 }

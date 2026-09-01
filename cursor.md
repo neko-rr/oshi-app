@@ -1,5 +1,73 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-02: Lucide アイコン移行（タグ・収納）
+
+- `bi-*`（Bootstrap Icons）廃止 → Lucide slug（kebab-case）を DB/API に保存
+- 正本: `docs/design/meta/lucide_icon_picker.json`（カテゴリ 70+ / 収納 30）
+- 全ユーザー: migration で slot 1..6 を Lucide デフォルトにリセット。**slot 外・未設定の追加タグ／収納は削除**（製品参照は NULL）
+- UI: `IconPickerGrid` + `--motion-playful`（短い scale・reduced-motion 対応）
+- 生成: `python scripts/sync_lucide_icon_catalog.py`
+
+## 2026-09-01: 色設定 Lab B を本番採用＋ダーク可読性
+
+- `/settings/theme` ← Lab **B**（大きめ丸・写真帯・「自分の色にする」）
+- スウォッチ枠: **黒＝ライト / 白＝ダーク**
+- Lab の `text-zinc-900` 継承でダーク時に文字が黒くなる問題を修正（`[data-lab-theme-mock]` + パック fg）
+- カタログ: `apps/web/src/lib/themes/catalog.ts`
+
+## 2026-09-01: Design Lab に色設定（theme）3案
+
+- `/dev/design-lab` 画面切替「色設定」: A 密スウォッチ / B 大きめ丸+写真帯 / C ラベル付きリスト
+- タップで背景・文字・カード・ボタンが一式変わる見本（todo-app 方式）
+- 本番 `/settings/theme` への採用は人の本決定後
+
+## 2026-09-01: テーマ docs／rules／skills を todo-app 方式に統一
+
+- 「primary/ring だけ」「シェル全面塗替え禁止」を誤りとして訂正
+- 更新: `design.mdc` / `design-lab` / `design-change` / `design-mobile` / `README` / `principles` / `compare-workflow` / `components` / `brand-palette` / `a11y` / `motion` / `tokens`
+- 正: テーマ＝セマンティック変数一式。既定緑 `default`。hex 直書き禁止
+
+## 2026-09-01: テーマは todo-app 方式（フル・トークン）／緑 default
+
+- 正: `colors.css` の `data-theme` でセマンティック変数一式を切替（[todo-app](https://github.com/neko-rr/todo-app)）
+- 「primary/ring だけ」の docs 記述は誤り → `docs/design/themes.md` / `oshi-accents.md` を訂正
+- 既定: 緑系 `default`。仮ユーザーの `quartz`/`morph` 等は `theme_settings` を `default` にリセット
+- Dash/Bootswatch テーマ名は使わない
+
+## 2026-09-01: 設定まわり移行（スコープ C）
+
+- タグ／収納: カテゴリ・収納に編集 UI（PATCH）。API pytest 追加
+- `theme_settings` を wired（authenticated GRANT + RLS）。DEFAULT=`default`（緑系）
+- API: `GET/PUT /theme-settings`（allowlist）。Web: `/settings/theme`、Header から ThemePicker 撤去
+- 設定ハブ: 見た目／タグ・収納／アカウント（/me・パスワード）／法務。退会は deferred
+- 推し色スウォッチ・ブランド種スケールは後続（Design Lab）
+
+## 2026-09-01: Wave 5 認証 DoD 締め
+
+- ヘッダーにログイン／ログアウト、`LogoutButton` 日本語化
+- `/me` は members_id / email のみ表示（JWT 非表示）
+- acceptance/auth.md をクローズ（`auth_session` は shipped 維持）
+
+## 2026-09-01: Wave 4 製品詳細の基本項目編集
+
+- `ProductDetailEditor` で名前・メモ・価格・バーコード等を PATCH
+- `purchase_price: null` で価格クリア可能
+- `product_detail` → shipped
+
+## 2026-09-01: カメラ読取 + 購入済み判定の土台
+
+- Web: `BarcodeScanner`（BarcodeDetector → ZXing）、写真は `capture=environment`
+- API: `GET /products?barcode=` 完全一致（`findOwnedByBarcode` 再利用前提）
+- 登録ウィザードで同番号ヒント表示。店頭専用画面は未実装
+
+## 2026-09-01: Must 移行継続（Wave 0–3）
+
+- 認証ゲート: Supabase 未設定時は保護ルートを通さない（`AUTH_GATE_BYPASS=1` かつ非本番のみ例外）
+- `/privacy` 公開、`/dev/*` は本番リダイレクト
+- 登録ウィザード 1→2→6（楽天 LIVE なし・soft fail）
+- 検索: `GET /products?q=` + `/search` / ギャラリー内検索
+- 楽天 LIVE 連携は引き続きオフ前提
+
 ## 2026-08-31: Lab セーフエリア線は未実装（後回し）
 
 - fb-001 / status=`deferred`

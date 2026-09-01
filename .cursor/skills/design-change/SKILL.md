@@ -12,7 +12,7 @@ description: >-
 - `apps/web` の見た目・レイアウト・モーション
 - `apps/web/src/styles/` のトークン
 - `docs/design/` / ルート `DESIGN.md`
-- 推し色 UI・シェル・shadcn 部品の追加
+- 推し色 UI・テーマ・shadcn 部品の追加
 - 「女性らしい／推し活らしい」見た目の相談・実装
 
 **3案並列・スコア・本決定前の比較**は skill **`design-lab`**（こちらを先に）。
@@ -23,8 +23,8 @@ description: >-
 |----|------|
 | 入口 | `docs/design/README.md` |
 | 原則 | `docs/design/principles.md` |
-| 推し色 | `docs/design/oshi-accents.md` |
-| シェル | `docs/design/themes.md` |
+| シェル | `docs/design/themes.md`（テーマ＝トークン一式） |
+| 推し色・境界 | `docs/design/oshi-accents.md` |
 | 動き | `docs/design/motion.md` |
 | 3案比較（人向け） | `docs/design/compare-workflow.md` |
 | 3案比較（手順） | skill **`design-lab`** |
@@ -41,8 +41,8 @@ description: >-
 
 1. `docs/design/principles.md` を読む（雰囲気は UI/UX・動き。配置が先・色は次）
 2. skill **`design-feedback`** で `feedback_items.json` の **pending** を確認（accepted 以外を本番反映しない）
-3. 色の話なら `oshi-accents.md`（多数・簡単選択）とカラータグ分離を確認
-4. 大きな見た目変更なら **`design-lab`**（実装3案＋端末切替＋スコア。A から推し色を外さない）
+3. 色の話なら `themes.md`（トークン一式）と `oshi-accents.md`（カラータグ分離）を確認
+4. 大きな見た目変更なら **`design-lab`**（実装3案＋端末切替＋スコア。A からテーマ色を外さない）
 5. Lab 本決定後の画面反映は **`design-adoption`**（一括禁止）
 6. 色・フォーカス・モーションなら **`design-a11y`**（公式 WebFetch）
 7. ARCHIVE（Dash DESIGN）を正にしない
@@ -54,8 +54,8 @@ description: >-
 2. 比較が必要なら `design-lab` を完了し **人の本決定を待つ**
 3. 画面単位の採用は **`design-adoption`**
 4. 採用案だけ `docs/design`（手）とコードを更新
-5. hex 直書きを避け、セマンティック変数経由にする
-6. 推し色を減らす「整理」を勝手にしない
+5. hex 直書きを避け、セマンティック変数経由にする（テーマはトークン一式）
+6. テーマ色プリセットを減らす「整理」を勝手にしない
 7. `python scripts/check_design_compliance.py`（web を触ったとき）
 
 ## 完了後チェック

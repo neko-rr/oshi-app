@@ -58,6 +58,12 @@
   --lab-motion: 180ms;
 }
 
+[data-lab-theme-mock] {
+  /* 親シェルの text-zinc-900 継承を打ち消し、パックの文字色を正とする */
+  color: var(--lab-fg);
+  background-color: var(--lab-bg);
+}
+
 .lab-panel {
   background: var(--lab-bg);
   color: var(--lab-fg);

@@ -1136,7 +1136,7 @@
           "column": "theme",
           "type": "text",
           "not_null": true,
-          "default": "'minty'::text"
+          "default": "'default'::text"
         },
         {
           "column": "created_at",
@@ -1657,6 +1657,11 @@
       "grantee": "service_role",
       "table_name": "storage_location_preset_slot_dismissed",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "theme_settings",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
     },
     {
       "grantee": "service_role",

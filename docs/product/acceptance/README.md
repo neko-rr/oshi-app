@@ -11,5 +11,7 @@
 | [product_detail.md](product_detail.md) | 詳細 |
 | [settings.md](settings.md) | タグ・収納設定 |
 | [dashboard.md](dashboard.md) | ダッシュボード |
+| [privacy.md](privacy.md) | プライバシーポリシー |
+| [licenses.md](licenses.md) | OSS／外部サービスの表記 |
 
 満たしたら対応機能の `feature_status` を上げる（語彙は `meta/status_vocabulary.md`）。

@@ -27,8 +27,15 @@
       "path": "/settings",
       "lab_variant": null,
       "status": "not_started",
-      "notes_ja": "推し色スウォッチ UI は別タスク",
+      "notes_ja": "ハブ本体。テーマは /settings/theme",
       "updated_at": null
+    },
+    {
+      "path": "/settings/theme",
+      "lab_variant": "b",
+      "status": "adopted",
+      "notes_ja": "B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保",
+      "updated_at": "2026-09-01"
     },
     {
       "path": "/auth/login",
