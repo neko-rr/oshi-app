@@ -1,5 +1,5 @@
 ---
-description: Web UI・トークン・推し色・モーション・a11y。apps/web や docs/design を触るとき。
+description: Web UI・トークン・テーマ色・モーション・a11y。apps/web や docs/design を触るとき。
 globs: apps/web/**/*,docs/design/**,DESIGN.md
 alwaysApply: false
 ---
@@ -8,9 +8,9 @@ alwaysApply: false
 
 ## 正本（この順）
 
-1. `docs/design/` — 原則・推し色・シェル・動き・a11y・比較手順（**手**）
+1. `docs/design/` — 原則・テーマ色・動き・a11y・比較手順（**手**）
 2. `DESIGN.md` — 薄い入口のみ
-3. `apps/web/src/styles/colors.css` / `tailwind-theme.css` — 実装トークン
+3. `apps/web/src/styles/colors.css` / `tailwind-theme.css` — 実装トークン（[todo-app](https://github.com/neko-rr/todo-app) 方式）
 4. `apps/web/src/components/ui/` — shadcn 部品
 
 入口: `docs/design/README.md`。  
@@ -20,16 +20,17 @@ alwaysApply: false
 ## 命令
 
 - UI/UX・動きでブランド雰囲気を作れ。色の決め打ち（全面ピンク等）で「女性向け」にするな。
-- デザイン案は **配置・部品が先**、色の割り当ては次。用途最適案から推し色を外すな（C と同系の色使いで配置を最適化せよ）。
-- 顧客の色は **推し色**（スウォッチ等で簡単選択・多数可）。シェル全面塗替えにするな。
-- **カラータグ（製品ラベル）と推し色を統合するな。** カラータグ枠数を勝手に変えるな。
-- 部品は [shadcn/ui](https://ui.shadcn.com/) を正とする。画面に hex を直書きするな。
+- デザイン案は **配置・部品が先**、色の割り当ては次。用途最適案からテーマ色を外すな（C と同系の色使いで配置を最適化せよ）。
+- 顧客のテーマ色は **`data-theme` でセマンティック変数一式を切替**（背景・文字・カード・primary 等すべて）。`--primary` / `--ring` だけ差し替えは **誤り**。正は `themes.md`。
+- 部品・画面に hex／色名を直書きするな。`bg-primary` 等のセマンティック名のみ。
+- **カラータグ（製品ラベル）とテーマ色を統合するな。** カラータグ枠数を勝手に変えるな。
+- 部品は [shadcn/ui](https://ui.shadcn.com/) を正とする。
 - 見た目の大きな変更は skill **`design-lab`** → 人の本決定 → skill **`design-adoption`**（画面単位）で本番反映。
 - 要望・違和感は skill **`design-feedback`**（pending 可。勝手に accepted / 本番反映するな）。
 - コントラスト・フォーカス・モーション変更前は skill **`design-a11y`**（公式を WebFetch。`a11y.md` だけを最新扱いにするな）。
 - アイコンは `docs/design/meta/icons.json` が正本。**import は `@/lib/icons`**（生成物。手編集禁止）。
 - AI推奨を4列目のデザイン案にするな（スコア表で示せ）。
-- 推し色を「少ない方がよい」と勝手に削るな。
+- テーマ色プリセットを「少ない方がよい」と勝手に削るな。
 - 旧 Dash / Bootswatch / archive の DESIGN 計画を新規の正にするな。
-- ブランド種 `#9f606c` の詳細スケールは `brand-palette.md` が「後回し」と書く限り無理に完成させるな。
+- 既定テーマは緑系 `default`。ブランド種 `#9f606c` の詳細スケールは `brand-palette.md` が「後回し」と書く限り無理に完成させるな。
 - 変更後: `check_design_compliance`（該当時）+ `post-change-verify`。認証公開面なら `secure-change-checklist`。

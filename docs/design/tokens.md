@@ -5,16 +5,16 @@
 数値の最終確定は Design Lab 採用後に `colors.css` と同期する（フェーズ1以降）。  
 **名前の正本:** [meta/tokens.json](meta/tokens.json)。検査: `python scripts/check_design_tokens.py`（値の自動生成はまだしない）。
 
-## 色の3層
+## 色の考え方
 
-| 層 | 変えるもの | 数 | 誰が触る |
-|----|------------|----|----------|
-| シェル | 背景・本文・カード面など骨格 | 少数 | 設定で任意（普段は不要） |
-| ブランド既定 | アプリの「最初の印象」の種 | 1 | 開発（[brand-palette.md](brand-palette.md)） |
-| 推し色 | `primary` / `ring` などアクセント | **多数** | **顧客が簡単に選択** |
+| 層 | 変えるもの | 誰が触る |
+|----|------------|----------|
+| テーマパック | `colors.css` のセマンティック変数 **一式**（`data-theme`） | 顧客（`/settings/theme`） |
+| ブランド種 | 将来のブランド印象の出発点 | 開発（[brand-palette.md](brand-palette.md)、スケールは後回し） |
+| カラータグ | 製品ラベル色（別系統） | 顧客（`/settings/color-tags`） |
 
-デザイン案比較では **配置・部品が先**。推し色は全案で入れる（用途最適でも省略しない）。  
-詳細: [themes.md](themes.md) / [oshi-accents.md](oshi-accents.md) / [compare-workflow.md](compare-workflow.md)
+正本: [themes.md](themes.md)（[todo-app](https://github.com/neko-rr/todo-app) 方式）。  
+部品には hex／色名を直書きせず、セマンティック名だけを使う。
 
 ## セマンティック名（実装と揃える）
 
@@ -22,7 +22,7 @@
 |------------|------|
 | `--background` / `--foreground` | 画面の地と本文 |
 | `--card` / `--card-foreground` | カード面 |
-| `--primary` / `--primary-foreground` | 主なボタン・強調（推し色の主戦場） |
+| `--primary` / `--primary-foreground` | 主なボタン・強調（テーマの一部） |
 | `--muted` / `--muted-foreground` | 補助テキスト・薄い面 |
 | `--border` / `--input` / `--ring` | 線・入力・フォーカス |
 | `--destructive` | 削除など危険操作 |
@@ -43,4 +43,4 @@
 ## まだやらないこと
 
 - ブランド色 `#9f606c` の 50〜950 全スケールの文書化（後回し）  
-- 現行 `colors.css` の大量ダークテーマを正とする扱い（整理はフェーズ1以降）  
+- テーマ UI のスウォッチ化（任意。適用範囲は常にトークン一式）

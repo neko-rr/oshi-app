@@ -18,6 +18,20 @@
       ],
       "lab_ref": null,
       "when_ja": "apps/mobile（Expo）の画面実装が始まったあと"
+    },
+    {
+      "id": "fb-002",
+      "status": "accepted",
+      "created_at": "2026-09-01",
+      "source": "user",
+      "area": "design-lab/phone-orientation",
+      "request_ja": "Design Lab のスマホ画面で縦と横を切り替え、同時確認できるようにする。Web・モバイルも対象。",
+      "agent_note": "実装済。向き: 縦 / 横 / 縦+横。web-mobile と mobile-app で共通。",
+      "target_docs": [
+        "compare-workflow.md",
+        ".cursor/skills/design-lab/SKILL.md"
+      ],
+      "lab_ref": null
     }
   ]
 }

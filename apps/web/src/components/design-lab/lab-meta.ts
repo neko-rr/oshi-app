@@ -3,6 +3,12 @@ export type LabVariantId = "a" | "b" | "c";
 /** Lab の端末プレビュー（Web PC / Web モバイル / ネイティブアプリ想定） */
 export type LabPlatformId = "web-pc" | "web-mobile" | "mobile-app";
 
+/** スマホ枠の向き（Web・モバイル／モバイルアプリのみ） */
+export type LabPhoneOrientationId = "portrait" | "landscape";
+
+/** 向きの表示モード。both = 縦と横を同時確認 */
+export type LabPhoneOrientationMode = LabPhoneOrientationId | "both";
+
 /** UI 状態見本（全案で共通切替） */
 export type LabUiState =
   | "default"
@@ -35,31 +41,53 @@ export type LabUiStateMeta = {
   label: string;
 };
 
+/** Lab で見比べる画面シーン */
+export type LabSceneId = "home" | "theme-settings";
+
+export type LabSceneMeta = {
+  id: LabSceneId;
+  label: string;
+  hint: string;
+};
+
+export const LAB_SCENES: readonly LabSceneMeta[] = [
+  {
+    id: "home",
+    label: "ホーム見本",
+    hint: "一覧・登録導線の配置比較",
+  },
+  {
+    id: "theme-settings",
+    label: "色設定",
+    hint: "/settings/theme の UX 比較（トークン一式）",
+  },
+] as const;
+
 /**
  * Design Lab 固定3軸。
- * 差の主戦場は配置・部品・UI/UX。色は全案で推し色あり（A も C と同系の色使い）。
+ * 差の主戦場は配置・部品・UI/UX。色は全案でテーマ色あり。
  */
 export const LAB_VARIANTS: readonly LabVariantMeta[] = [
   {
     id: "a",
     title: "A 用途最適",
-    subtitle: "配置・密度・主CTAを最短に（色は C と同系＋推し色）",
+    subtitle: "配置・密度・主CTAを最短に（色は C と同系＋テーマ色）",
     ux_focus:
-      "登録・一覧・状態を最短。色はブランド種＋推し色アクセント。青一色など「色なし」にはしない。",
+      "登録・一覧・状態を最短。テーマ色あり。青一色など「色なし」にはしない。",
   },
   {
     id: "b",
     title: "B 推し活・遊び",
-    subtitle: "写真主役・推し色の実感・やさしい動き",
+    subtitle: "写真主役・テーマ色の実感・やさしい動き",
     ux_focus:
       "楽しさを優先しつつ業務は残す。部品の大きさ・余白・動きで差を出す。",
   },
   {
     id: "c",
     title: "C ブランド整合",
-    subtitle: "原則どおりの余白・階層・種色の置き方",
+    subtitle: "原則どおりの余白・階層・色の置き方",
     ux_focus:
-      "清潔で信頼感。推し色はボタン／フォーカス等のアクセントに限定。",
+      "清潔で信頼感。セマンティック色と階層をはっきり。",
   },
 ] as const;
 
@@ -80,6 +108,40 @@ export const LAB_PLATFORMS: readonly LabPlatformMeta[] = [
     hint: "Expo 想定（下タブ）",
   },
 ] as const;
+
+export type LabPhoneOrientationMeta = {
+  id: LabPhoneOrientationMode;
+  label: string;
+  hint: string;
+};
+
+/** スマホ枠の向き切替（縦 / 横 / 同時） */
+export const LAB_PHONE_ORIENTATION_MODES: readonly LabPhoneOrientationMeta[] = [
+  {
+    id: "portrait",
+    label: "縦",
+    hint: "縦持ち（一般的なスマホ）",
+  },
+  {
+    id: "landscape",
+    label: "横",
+    hint: "横持ち（折り返し・横幅の確認）",
+  },
+  {
+    id: "both",
+    label: "縦+横",
+    hint: "同じ案を縦と横で同時に見る",
+  },
+] as const;
+
+/** 端末フレームの論理サイズ（chrome 除くおおよそのコンテンツ領域） */
+export const LAB_PHONE_FRAME_SIZE: Record<
+  LabPhoneOrientationId,
+  { widthPx: number; contentMaxHeightPx: number }
+> = {
+  portrait: { widthPx: 390, contentMaxHeightPx: 640 },
+  landscape: { widthPx: 640, contentMaxHeightPx: 360 },
+};
 
 export const LAB_UI_STATES: readonly LabUiStateMeta[] = [
   { id: "default", label: "通常" },

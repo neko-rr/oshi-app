@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "updated_note": "外部サービス・ブランド表示のメモ（手）。OSS 依存は generate_third_party_notices.py が自動収集。",
+  "services": [
+    {
+      "id": "rakuten",
+      "name_ja": "楽天市場API（商品検索等）",
+      "attribution_required": true,
+      "status": "deferred_live_off",
+      "note_ja": "現在 RAKUTEN_LIVE_CALLS=0 のためアプリ上にロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を確認し、該当画面へ実装してから有効化する。",
+      "docs_url": "https://webservice.rakuten.co.jp/"
+    },
+    {
+      "id": "supabase",
+      "name_ja": "Supabase（Auth / DB / Storage）",
+      "attribution_required": false,
+      "status": "active",
+      "note_ja": "認証・データ保管に利用。ロゴ必須ではないが利用規約に従う。",
+      "docs_url": "https://supabase.com/docs"
+    },
+    {
+      "id": "io_intelligence",
+      "name_ja": "画像アシスト（IO Intelligence 等）",
+      "attribution_required": false,
+      "status": "optional_live",
+      "note_ja": "LIVE フラグとキーがあるときのみ利用。再学習目的での外部保存は行わない方針（プライバシーポリシー参照）。",
+      "docs_url": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+/* モーション（docs/design/motion.md）。遊び心は短く、機能を邪魔しない。 */
+:root {
+  --motion-fast: 150ms;
+  --motion-normal: 200ms;
+  --motion-playful: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-picker-tile,
+  .icon-picker-tile--active {
+    transition: none !important;
+    transform: none !important;
+  }
+}

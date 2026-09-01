@@ -47,7 +47,8 @@ pnpm dev:web
 ## 5. 移管状況
 
 コア（認証・製品・写真・タグ・統計・ダッシュボード・assist 設計）は移管済み。  
-後回し: 書籍/SNS、規約、theme_settings 表、全削除、カメラ本格ウィザード。  
-楽天は仕様変更で再登録まで停止可。IO は `IO_LIVE_CALLS=1` で実呼び出し。
+登録ウィザード（1→2→6）・検索・プライバシーページは Web で利用可。  
+後回し: 書籍/SNS、規約、theme_settings 表、全削除、カメラ本格読取、Vision LIVE。  
+楽天は仕様変更で再登録まで LIVE 停止前提（`RAKUTEN_LIVE_CALLS=0`）。IO は `IO_LIVE_CALLS=1` で実呼び出し。
 
 エージェント規約: `AGENTS.md` + `.cursor/rules/*.mdc` + skill `official-docs-first`

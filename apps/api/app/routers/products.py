@@ -23,6 +23,12 @@ def list_products(
     access_token: str = Depends(get_access_token),
     limit: int = Query(default=48, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    q: str | None = Query(default=None, max_length=200),
+    barcode: str | None = Query(
+        default=None,
+        max_length=64,
+        description="barcode_number 完全一致（自分の購入済み判定用）",
+    ),
 ) -> dict:
     try:
         items = list_products_for_member(
@@ -30,6 +36,8 @@ def list_products(
             access_token=access_token,
             limit=limit,
             offset=offset,
+            q=q,
+            barcode=barcode,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -41,6 +49,8 @@ def list_products(
         "members_id": user.members_id,
         "limit": limit,
         "offset": offset,
+        "q": q,
+        "barcode": barcode,
     }
 
 
@@ -129,8 +139,12 @@ def patch_product(
         "category_tag_id",
         "storage_location_id",
     ):
-        if key in data and data[key] is not None:
-            fields[key] = data[key]
+        if key not in data:
+            continue
+        # purchase_price のみ明示 null でクリア可（タグ系は clear_* フラグ）
+        if data[key] is None and key != "purchase_price":
+            continue
+        fields[key] = data[key]
     if data.get("clear_category_tag"):
         fields["category_tag_id"] = None
     if data.get("clear_storage_location"):

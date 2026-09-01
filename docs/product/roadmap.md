@@ -19,12 +19,12 @@
 | `tag_assist` | 自動タグ提案 | partial |
 | `register_flow` | 登録ウィザード（理想は [flows/register.md](flows/register.md)） | partial |
 | `gallery` | 登録グッズ一覧 | shipped |
-| `product_detail` | 詳細の閲覧・編集 | partial |
-| `storage_locations` | 収納場所タグの編集・付与 | partial |
-| `category_tags` | カテゴリタグ設定 | partial |
-| `color_tags` | カラータグ設定 | partial |
-| `search` | 検索 | planned |
-| `privacy_policy` | プライバシーポリシー（学習させない告知含む） | planned |
+| `product_detail` | 詳細の閲覧・編集 | shipped |
+| `storage_locations` | 収納場所タグの編集・付与 | shipped |
+| `category_tags` | カテゴリタグ設定 | shipped |
+| `color_tags` | カラータグ設定 | shipped |
+| `search` | 検索 | partial |
+| `privacy_policy` | プライバシーポリシー（学習させない告知含む） | partial |
 | `auth_session` | ログイン・セッション（[acceptance/auth.md](acceptance/auth.md)） | shipped |
 
 ## Phase 2
@@ -55,8 +55,10 @@
 /register         登録
 /gallery          一覧
 /gallery/[id]     詳細
+/search           検索
 /dashboard        ダッシュボード
 /settings         設定（テーマ・タグ・収納・アカウント系）
+/privacy          プライバシーポリシー
 /auth/*           ログイン・登録・パスワード
 ```
 

@@ -3,67 +3,207 @@
   "library": "lucide-react",
   "license": "ISC",
   "updated_note": "採用 lucide アイコンの正本。変更後は python scripts/sync_design_icons.py を実行。",
-  "export_types": ["LucideIcon", "LucideProps"],
+  "export_types": [
+    "LucideIcon",
+    "LucideProps"
+  ],
   "catalog": [
     {
       "usage_ja": "追加・登録",
-      "icons": ["Plus"],
+      "icons": [
+        "Plus"
+      ],
       "note_ja": "主 CTA の横は控えめ"
     },
     {
       "usage_ja": "設定",
-      "icons": ["Settings"],
+      "icons": [
+        "Settings"
+      ],
       "note_ja": "ナビ・設定入口"
     },
     {
       "usage_ja": "ギャラリー・写真",
-      "icons": ["Image", "Images"],
+      "icons": [
+        "Image",
+        "Images"
+      ],
       "note_ja": "一覧・サムネ欠け"
     },
     {
       "usage_ja": "検索",
-      "icons": ["Search"],
+      "icons": [
+        "Search"
+      ],
       "note_ja": "将来"
     },
     {
       "usage_ja": "戻る",
-      "icons": ["ChevronLeft"],
+      "icons": [
+        "ChevronLeft"
+      ],
       "note_ja": "詳細・フォーム"
     },
     {
       "usage_ja": "閉じる",
-      "icons": ["X"],
+      "icons": [
+        "X"
+      ],
       "note_ja": "モーダル・トースト"
     },
     {
       "usage_ja": "保存・完了",
-      "icons": ["Check"],
+      "icons": [
+        "Check"
+      ],
       "note_ja": "成功フィードバック"
     },
     {
       "usage_ja": "警告・エラー",
-      "icons": ["AlertCircle"],
+      "icons": [
+        "AlertCircle"
+      ],
       "note_ja": "エラー状態"
     },
     {
       "usage_ja": "読込中",
-      "icons": ["Loader2"],
+      "icons": [
+        "Loader2"
+      ],
       "note_ja": "Loader2 + animate-spin（短時間のみ）"
     },
     {
       "usage_ja": "削除",
-      "icons": ["Trash2"],
+      "icons": [
+        "Trash2"
+      ],
       "note_ja": "destructive 操作のみ"
     },
     {
       "usage_ja": "バーコード",
-      "icons": ["ScanBarcode"],
+      "icons": [
+        "ScanBarcode"
+      ],
       "note_ja": "登録フロー"
     },
     {
       "usage_ja": "タグ・収納",
-      "icons": ["Tag", "MapPin"],
+      "icons": [
+        "Tag",
+        "MapPin"
+      ],
       "note_ja": "タグ・場所"
+    },
+    {
+      "usage_ja": "タグ・収納ピッカー",
+      "icons": [
+        "AlertCircle",
+        "Archive",
+        "Award",
+        "Badge",
+        "Bed",
+        "Bird",
+        "BookMarked",
+        "BookOpen",
+        "Bookmark",
+        "Box",
+        "BrickWall",
+        "Briefcase",
+        "Brush",
+        "Camera",
+        "Car",
+        "Cat",
+        "Check",
+        "Cherry",
+        "ChevronLeft",
+        "Circle",
+        "CircleDot",
+        "Cloud",
+        "Coffee",
+        "Crown",
+        "Dice5",
+        "Disc",
+        "Ellipsis",
+        "FileText",
+        "Fish",
+        "Flower2",
+        "Frame",
+        "GalleryVertical",
+        "Gamepad2",
+        "Gem",
+        "Gift",
+        "Glasses",
+        "Grid3x3",
+        "HandHeart",
+        "Headphones",
+        "Heart",
+        "Home",
+        "Image",
+        "Images",
+        "Inbox",
+        "KeyRound",
+        "Lamp",
+        "LampDesk",
+        "Laptop",
+        "Layers",
+        "LayoutGrid",
+        "Library",
+        "Link",
+        "Loader2",
+        "MapPin",
+        "Medal",
+        "Mic",
+        "Mic2",
+        "Moon",
+        "Music",
+        "Music2",
+        "Newspaper",
+        "Package",
+        "Palette",
+        "PartyPopper",
+        "Pen",
+        "Pencil",
+        "PersonStanding",
+        "PictureInPicture",
+        "Pin",
+        "Plane",
+        "Plus",
+        "Puzzle",
+        "Rabbit",
+        "Radio",
+        "Ribbon",
+        "ScanBarcode",
+        "Scissors",
+        "ScrollText",
+        "Search",
+        "Settings",
+        "Shirt",
+        "ShoppingBag",
+        "Smartphone",
+        "Smile",
+        "Sofa",
+        "Sparkles",
+        "Square",
+        "Star",
+        "Sticker",
+        "Store",
+        "Sun",
+        "Tag",
+        "Tags",
+        "Ticket",
+        "Train",
+        "Trash2",
+        "Trophy",
+        "Tv",
+        "Umbrella",
+        "UserRound",
+        "Video",
+        "Wand2",
+        "Warehouse",
+        "Watch",
+        "X"
+      ],
+      "note_ja": "lucide_icon_picker.json から自動同期"
     }
   ]
 }

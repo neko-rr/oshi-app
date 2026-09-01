@@ -25,6 +25,8 @@ ALLOW_HEX_GLOBS = (
     "styles/tailwind-theme.css",
     "styles/design-lab.css",
     "components/design-lab/",
+    # テーマ選択スウォッチ用カタログ（部品本体への直書きではない）
+    "lib/themes/",
     # カラータグ / カテゴリ色は製品ラベル用（推し色・UI トークンとは別）
     "app/settings/color-tags/",
     "app/settings/category-tags/",

@@ -4,6 +4,7 @@
 @import "../styles/colors.css";
 @import "../styles/tailwind-theme.css";
 @import "../styles/design-lab.css";
+@import "../styles/motion.css";
 
 @layer base {
   html, body {

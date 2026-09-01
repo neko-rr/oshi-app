@@ -1,14 +1,45 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  allowsAnonymousWhenNotProduction,
+  shouldBlockDevPathInProduction,
+} from "@/lib/auth-path-policy";
+
+/** ローカル骨格用。本番では無効。AUTH_GATE_BYPASS=1 のときのみ認証ゲートを緩める */
+function authGateBypassAllowed(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.AUTH_GATE_BYPASS === "1"
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  const path = request.nextUrl.pathname;
+  const isProduction = process.env.NODE_ENV === "production";
+
+  // Design Lab 等は本番では公開しない（デザイン確認専用・開発時のみ）
+  if (shouldBlockDevPathInProduction(path, isProduction)) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/";
+    return NextResponse.redirect(redirectUrl);
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  // 未設定時は認証ゲートをスキップ（ローカル骨格用）
   if (!url || !key) {
+    // 明示フラグなしでは保護ルートを通さない（本番相当の穴を塞ぐ）
+    if (authGateBypassAllowed()) {
+      return supabaseResponse;
+    }
+    // 非本番の /dev はデザイン確認用に匿名可
+    if (!allowsAnonymousWhenNotProduction(path)) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/auth/login";
+      return NextResponse.redirect(redirectUrl);
+    }
     return supabaseResponse;
   }
 
@@ -34,15 +65,8 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  const path = request.nextUrl.pathname;
-  const isPublic =
-    path.startsWith("/auth") ||
-    path.startsWith("/dev") ||
-    path === "/" ||
-    path.startsWith("/_next") ||
-    path === "/favicon.ico";
-
-  if (!user && !isPublic) {
+  // 非本番 /dev は未ログインでも可（見本 UI のみ。業務データは載せない）
+  if (!user && !allowsAnonymousWhenNotProduction(path)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/login";
     return NextResponse.redirect(redirectUrl);

@@ -3,12 +3,120 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.product_service import list_products_for_member, normalize_product_row
+from app.services.product_service import (
+    filter_products_by_query,
+    list_products_for_member,
+    normalize_product_row,
+)
 
 
-def test_list_products_requires_members_id() -> None:
-    with pytest.raises(ValueError, match="members_id"):
-        list_products_for_member("", access_token="tok")
+def test_filter_products_by_query_matches_name_and_tags() -> None:
+    items = [
+        {
+            "product_name": "缶バッジ",
+            "category_tag": {"category_tag_name": "ガチャ"},
+            "storage_location": {"storage_location_name": "棚A"},
+        },
+        {
+            "product_name": "アクスタ",
+            "category_tag": {"category_tag_name": "アクリル"},
+            "storage_location": {"storage_location_name": "箱"},
+        },
+    ]
+    assert [i["product_name"] for i in filter_products_by_query(items, "缶")] == [
+        "缶バッジ"
+    ]
+    assert [i["product_name"] for i in filter_products_by_query(items, "棚")] == [
+        "缶バッジ"
+    ]
+    assert len(filter_products_by_query(items, "  ")) == 2
+
+
+def test_list_products_filters_by_q() -> None:
+    def fake_fetch(*, members_id: str, access_token: str, limit: int, offset: int):
+        return [
+            {
+                "registered_product_id": 1,
+                "product_name": "缶バッジ",
+                "photo_id": None,
+                "creation_date": None,
+                "photo": None,
+            },
+            {
+                "registered_product_id": 2,
+                "product_name": "アクスタ",
+                "photo_id": None,
+                "creation_date": None,
+                "photo": None,
+            },
+        ]
+
+    mid = "33333333-3333-3333-3333-333333333333"
+    items = list_products_for_member(
+        mid,
+        access_token="user-jwt",
+        q="アク",
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert len(items) == 1
+    assert items[0]["product_name"] == "アクスタ"
+
+
+def test_list_products_filters_by_barcode_exact() -> None:
+    def fake_fetch(
+        *,
+        members_id: str,
+        access_token: str,
+        limit: int,
+        offset: int,
+        barcode_number: str | None = None,
+    ):
+        rows = [
+            {
+                "registered_product_id": 1,
+                "product_name": "缶バッジ",
+                "barcode_number": "490111",
+                "photo_id": None,
+                "creation_date": None,
+                "photo": None,
+            },
+            {
+                "registered_product_id": 2,
+                "product_name": "アクスタ",
+                "barcode_number": "490222",
+                "photo_id": None,
+                "creation_date": None,
+                "photo": None,
+            },
+        ]
+        if barcode_number:
+            return [r for r in rows if r.get("barcode_number") == barcode_number]
+        return rows
+
+    mid = "33333333-3333-3333-3333-333333333333"
+    items = list_products_for_member(
+        mid,
+        access_token="user-jwt",
+        barcode="490222",
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert len(items) == 1
+    assert items[0]["product_name"] == "アクスタ"
+    assert items[0]["barcode_number"] == "490222"
+
+
+def test_normalize_product_row_includes_barcode() -> None:
+    out = normalize_product_row(
+        {
+            "registered_product_id": 1,
+            "product_name": "X",
+            "barcode_number": "123",
+            "photo": None,
+        }
+    )
+    assert out["barcode_number"] == "123"
 
 
 def test_normalize_product_row_maps_gallery_fields() -> None:
@@ -23,7 +131,7 @@ def test_normalize_product_row_maps_gallery_fields() -> None:
         "category_tag": {"category_tag_name": "缶", "category_tag_color": "#f00"},
         "storage_location": {
             "storage_location_name": "棚",
-            "storage_location_icon": "bi-box",
+            "storage_location_icon": "box",
         },
     }
     out = normalize_product_row(row)

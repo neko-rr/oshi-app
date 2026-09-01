@@ -5,6 +5,8 @@
 
 | 日付 | ID | 要約 | 反映先 |
 |------|-----|------|--------|
+| 2026-09-01 | theme-lab-b | 色設定 UI は Lab B。枠黒＝ライト／枠白＝ダーク。ダークは文字色をパック fg に | `/settings/theme` · ThemePicker |
+| 2026-09-01 | fb-002 | Lab スマホ枠は縦／横／縦+横（同時）。Web・モバイルとアプリで共通 | [compare-workflow.md](../compare-workflow.md) |
 | （例） | fb-001 | 主ボタンは `default` のみ1画面1つ | [components.md](../components.md) |
 
 ## 書き方

@@ -37,6 +37,7 @@
 | [db/](db/README.md) | DB・RLS・カタログ | [db/README.md](db/README.md) |
 | [product/](product/README.md) | 製品価値・ロードマップ・as-built | [product/README.md](product/README.md) |
 | [design/](design/README.md) | UI/UX・推し色・動き・トークン方針 | [design/README.md](design/README.md) |
+| [legal/](legal/README.md) | OSS NOTICE・外部サービス表示メモ | [legal/README.md](legal/README.md) |
 | [WAKE_UP.md](WAKE_UP.md) | クラウドで人がやる ToDo | **手** |
 | [deploy/](deploy/README.md) | env 契約・デプロイ（キー名のみ） | **手** |
 | [refs/official-links.md](refs/official-links.md) | 公式 URL 索引（正本ではない） | **手** |

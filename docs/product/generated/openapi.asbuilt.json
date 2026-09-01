@@ -91,6 +91,42 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "barcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "barcode_number 完全一致（自分の購入済み判定用）",
+              "title": "Barcode"
+            },
+            "description": "barcode_number 完全一致（自分の購入済み判定用）"
           }
         ],
         "responses": {
@@ -995,6 +1031,80 @@
         }
       }
     },
+    "/theme-settings": {
+      "get": {
+        "tags": [
+          "theme-settings"
+        ],
+        "summary": "Get Theme Settings",
+        "operationId": "get_theme_settings_theme_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Theme Settings Theme Settings Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "theme-settings"
+        ],
+        "summary": "Put Theme Settings",
+        "operationId": "put_theme_settings_theme_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThemeSettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Theme Settings Theme Settings Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/stats/products": {
       "get": {
         "tags": [
@@ -1130,7 +1240,7 @@
           "category_tag_icon": {
             "type": "string",
             "title": "Category Tag Icon",
-            "default": "bi-tag"
+            "default": "tag"
           }
         },
         "type": "object",
@@ -1152,7 +1262,7 @@
           "category_tag_icon": {
             "type": "string",
             "title": "Category Tag Icon",
-            "default": "bi-tag"
+            "default": "tag"
           }
         },
         "type": "object",
@@ -1674,7 +1784,7 @@
           "storage_location_icon": {
             "type": "string",
             "title": "Storage Location Icon",
-            "default": "bi-geo"
+            "default": "map-pin"
           }
         },
         "type": "object",
@@ -1692,7 +1802,7 @@
           "storage_location_icon": {
             "type": "string",
             "title": "Storage Location Icon",
-            "default": "bi-geo"
+            "default": "map-pin"
           }
         },
         "type": "object",
@@ -1700,6 +1810,21 @@
           "storage_location_name"
         ],
         "title": "StorageLocationUpdate"
+      },
+      "ThemeSettingsBody": {
+        "properties": {
+          "theme": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Theme"
+          }
+        },
+        "type": "object",
+        "required": [
+          "theme"
+        ],
+        "title": "ThemeSettingsBody"
       },
       "ValidationError": {
         "properties": {

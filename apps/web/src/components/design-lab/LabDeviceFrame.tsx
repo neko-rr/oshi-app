@@ -2,7 +2,11 @@
 
 import type { ReactNode } from "react";
 import LabThumbZoneOverlay from "@/components/design-lab/LabThumbZoneOverlay";
-import type { LabPlatformId } from "@/components/design-lab/lab-meta";
+import type {
+  LabPhoneOrientationId,
+  LabPlatformId,
+} from "@/components/design-lab/lab-meta";
+import { LAB_PHONE_FRAME_SIZE } from "@/components/design-lab/lab-meta";
 import type { LabTextScaleId } from "@/components/design-lab/lab-ux-preview";
 import { LAB_TEXT_SCALES } from "@/components/design-lab/lab-ux-preview";
 
@@ -12,6 +16,8 @@ type LabDeviceFrameProps = {
   /** モバイル枠のみ。親指ゾーンオーバーレイ */
   showThumbZone?: boolean;
   textScale?: LabTextScaleId;
+  /** web-mobile / mobile-app のみ。既定は縦 */
+  orientation?: LabPhoneOrientationId;
 };
 
 /**
@@ -22,6 +28,7 @@ export default function LabDeviceFrame({
   children,
   showThumbZone = false,
   textScale = "normal",
+  orientation = "portrait",
 }: LabDeviceFrameProps) {
   const scale =
     LAB_TEXT_SCALES.find((t) => t.id === textScale)?.scale ?? 1;
@@ -38,9 +45,16 @@ export default function LabDeviceFrame({
 
   const isApp = platform === "mobile-app";
   const thumbOn = showThumbZone;
+  const isLandscape = orientation === "landscape";
+  const size = LAB_PHONE_FRAME_SIZE[orientation];
+  const orientLabel = isLandscape ? "横" : "縦";
 
   return (
-    <div className="mx-auto w-full max-w-[390px]">
+    <div
+      className="mx-auto w-full"
+      style={{ maxWidth: size.widthPx }}
+      data-lab-orientation={orientation}
+    >
       <div className="overflow-hidden rounded-[1.75rem] border-[6px] border-zinc-800 bg-zinc-800 shadow-lg">
         {isApp ? (
           <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 text-[10px] text-zinc-300">
@@ -59,8 +73,11 @@ export default function LabDeviceFrame({
           </div>
         )}
         <div
-          className="relative max-h-[min(72vh,640px)] overflow-y-auto bg-[var(--lab-bg)]"
-          style={contentStyle}
+          className="relative overflow-y-auto bg-[var(--lab-bg)]"
+          style={{
+            ...contentStyle,
+            maxHeight: `min(72vh, ${size.contentMaxHeightPx}px)`,
+          }}
           data-lab-text-scale={textScale}
         >
           {children}
@@ -80,6 +97,7 @@ export default function LabDeviceFrame({
       </div>
       <p className="mt-2 text-center text-[10px] text-zinc-500">
         {isApp ? "モバイルアプリ想定フレーム" : "Web・モバイル幅フレーム"}
+        {` · ${orientLabel}`}
         {thumbOn ? " · 親指ゾーン表示中" : ""}
       </p>
     </div>

@@ -15,6 +15,7 @@ import {
 } from "@/components/design-lab/lab-cvd";
 import {
   LAB_VARIANTS,
+  type LabSceneId,
   type LabUiState,
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
@@ -33,6 +34,7 @@ type LabPcExpandPreviewProps = {
   onClose: () => void;
   initialVariant?: LabVariantId;
   uiState?: LabUiState;
+  scene?: LabSceneId;
   oshiIndex?: number;
   onOshiIndexChange?: (index: number) => void;
   cvdMode?: LabCvdModeId;
@@ -48,6 +50,7 @@ export default function LabPcExpandPreview({
   onClose,
   initialVariant = "a",
   uiState = "default",
+  scene = "home",
   oshiIndex = 0,
   onOshiIndexChange,
   cvdMode = "none",
@@ -241,6 +244,7 @@ export default function LabPcExpandPreview({
                   platform="web-pc"
                   pcWide
                   uiState={uiState}
+                  scene={scene}
                   oshiIndex={oshiIndex}
                   onOshiIndexChange={onOshiIndexChange}
                 />

@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-09-01T22:31:38Z",
+  "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
+  "packages": [
+    {
+      "name": "@radix-ui/react-avatar",
+      "version": "1.2.6",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://radix-ui.com/primitives"
+    },
+    {
+      "name": "@radix-ui/react-label",
+      "version": "2.1.15",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://radix-ui.com/primitives"
+    },
+    {
+      "name": "@radix-ui/react-slot",
+      "version": "1.3.3",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://radix-ui.com/primitives"
+    },
+    {
+      "name": "@supabase/ssr",
+      "version": "0.12.4",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/supabase/ssr#readme"
+    },
+    {
+      "name": "@supabase/supabase-js",
+      "version": "2.112.3",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/supabase/supabase-js/tree/master/packages/core/supabase-js"
+    },
+    {
+      "name": "@zxing/browser",
+      "version": "0.2.1",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/zxing-js/browser#readme"
+    },
+    {
+      "name": "class-variance-authority",
+      "version": "0.7.1",
+      "license": "Apache-2.0",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/joe-bell/cva#readme"
+    },
+    {
+      "name": "clsx",
+      "version": "2.1.1",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/lukeed/clsx#readme"
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.31.0",
+      "license": "ISC",
+      "ecosystem": "npm",
+      "homepage": "https://lucide.dev"
+    },
+    {
+      "name": "next",
+      "version": "15.5.7",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://nextjs.org"
+    },
+    {
+      "name": "qrcode",
+      "version": "1.5.4",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "http://github.com/soldair/node-qrcode"
+    },
+    {
+      "name": "radix-ui",
+      "version": "1.6.7",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://radix-ui.com/primitives"
+    },
+    {
+      "name": "react",
+      "version": "19.2.8",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://react.dev/"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.8",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://react.dev/"
+    },
+    {
+      "name": "tailwind-merge",
+      "version": "3.6.0",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/dcastil/tailwind-merge"
+    },
+    {
+      "name": "tw-animate-css",
+      "version": "1.4.0",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/Wombosvideo/tw-animate-css#readme"
+    },
+    {
+      "name": "fastapi",
+      "version": ">=0.115.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "httpx",
+      "version": ">=0.27.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "pydantic",
+      "version": ">=2.9.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "pydantic-settings",
+      "version": ">=2.6.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "PyJWT",
+      "version": "[crypto]>=2.9.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "python-dotenv",
+      "version": ">=1.0.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "python-multipart",
+      "version": ">=0.0.9",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "supabase",
+      "version": ">=2.10.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "uvicorn",
+      "version": "[standard]>=0.32.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    }
+  ],
+  "services": [
+    {
+      "id": "rakuten",
+      "name_ja": "楽天市場API（商品検索等）",
+      "attribution_required": true,
+      "status": "deferred_live_off",
+      "note_ja": "現在 RAKUTEN_LIVE_CALLS=0 のためアプリ上にロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を確認し、該当画面へ実装してから有効化する。",
+      "docs_url": "https://webservice.rakuten.co.jp/"
+    },
+    {
+      "id": "supabase",
+      "name_ja": "Supabase（Auth / DB / Storage）",
+      "attribution_required": false,
+      "status": "active",
+      "note_ja": "認証・データ保管に利用。ロゴ必須ではないが利用規約に従う。",
+      "docs_url": "https://supabase.com/docs"
+    },
+    {
+      "id": "io_intelligence",
+      "name_ja": "画像アシスト（IO Intelligence 等）",
+      "attribution_required": false,
+      "status": "optional_live",
+      "note_ja": "LIVE フラグとキーがあるときのみ利用。再学習目的での外部保存は行わない方針（プライバシーポリシー参照）。",
+      "docs_url": null
+    }
+  ]
+}

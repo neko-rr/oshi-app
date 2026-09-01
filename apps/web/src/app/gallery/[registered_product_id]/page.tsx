@@ -103,13 +103,14 @@ export default async function GalleryDetailPage({
             </div>
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               {detail.product_name?.trim() ||
                 `製品 #${detail.registered_product_id}`}
             </h1>
             <p className="text-sm text-muted-foreground">
-              id: {detail.registered_product_id}
-              {detail.creation_date ? ` · ${detail.creation_date}` : ""}
+              {detail.creation_date
+                ? `登録日: ${detail.creation_date}`
+                : "登録日不明"}
             </p>
             {detail.product_group_name ? (
               <p className="text-sm">グループ: {detail.product_group_name}</p>

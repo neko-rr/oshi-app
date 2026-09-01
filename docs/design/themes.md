@@ -1,34 +1,40 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
-# シェル（テーマ骨格）
+# テーマ（セマンティック・トークン一式）
 
-シェル = **背景・文字・カード面など「アプリの骨格」**。  
-推し色（アクセント）とは別。顧客は普段いじらなくてよい。
+参考実装: [todo-app](https://github.com/neko-rr/todo-app) の `colors.css` + `ThemePicker` + `data-theme`。
 
-## 方針
+## 目的
 
-| 項目 | 内容 |
-|------|------|
-| 数 | **少数**（まずは Light を正。Soft Night は任意） |
-| 役割 | 可読性・安心感を保つ |
-| 変えないもの | 余白の思想、部品の形、モーションの原則 |
+ユーザーがテーマを選ぶと、**部品が使う色トークン全体**（背景・文字・カード・ボーダー・primary・ring 等）が切り替わること。  
+コンポーネントには色名や `#RRGGBB` を直書きせず、`bg-primary` / `text-muted-foreground` などの **セマンティック名だけ**を使う。
 
-現行の `data-theme` 大量ダーク一覧は **仮実装**。整理対象（フェーズ1以降）。正は本ファイルの少数シェル。
+## 仕組み
 
-## 予定シェル（仮名・Lab で確定）
+| 層 | 役割 |
+|----|------|
+| `apps/web/src/styles/colors.css` | `data-theme="…"` ごとに CSS 変数一式を定義 |
+| `tailwind-theme.css` | `--primary` 等 → Tailwind `--color-*` へ橋渡し |
+| UI 部品 | `bg-primary` 等のみ（hex 禁止に近い運用） |
+| 保存 | FastAPI `GET/PUT /theme-settings` → `theme_settings.theme` |
 
-| ID（仮） | 雰囲気 |
-|----------|--------|
-| `shell-light` | 明るく清潔。既定 |
-| `shell-soft-night` | 暗めだが紫一辺倒にしない |
+`<select>` でテーマ ID を選び、`document.documentElement` の `data-theme` を切り替える。**これが意図した簡単さ**であり、accent だけ差し替える方式ではない。
 
-Design Lab の3案比較は、主にシェル／余白／動きの差を見る（推し色の削減ではない）。
+## 既定
 
-## 実装メモ（後で）
+| ID | 内容 |
+|----|------|
+| `default` | **緑系**（`:root` と同値）。未選択・初回・レガシー値のフォールバック |
 
-- `data-shell="light"` のようにシェルと推し色を属性分離するのが望ましい  
-- 現状の `data-theme` 一本化は移行時に整理  
+Dash / Bootswatch 名（`minty` / `quartz` / `morph` 等）は **使わない**。残存値は `default` に寄せる。
+
+## 推し色ドキュメントとの関係
+
+以前の「`--primary` / `--ring` だけ差し替え」は **誤り**（自動生成や下書きの混入）。  
+本番の正は **本ファイル＋ todo-app 方式のフル・トークンパック**。
+
+スウォッチ UI への見た目改善は後続でもよいが、適用範囲は常にトークン一式。
 
 ## 関連
 
-- 推し色: [oshi-accents.md](oshi-accents.md)  
-- 比較: [compare-workflow.md](compare-workflow.md)  
+- トークン名検査: [tokens.md](tokens.md) / `meta/tokens.json`
+- ブランド種（別議論）: [brand-palette.md](brand-palette.md)

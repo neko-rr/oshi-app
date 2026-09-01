@@ -23,6 +23,8 @@ WATCH_DIRS = (
     ROOT / "docs" / "product" / "generated",
     ROOT / "docs" / "design" / "generated",
     ROOT / "docs" / "db" / "generated",
+    ROOT / "docs" / "legal" / "generated",
+    ROOT / "apps" / "web" / "src" / "data" / "generated",
 )
 
 # FastAPI / Pydantic のマイナー差で揺れるため、構造チェック（inventory 等）に任せる
@@ -76,6 +78,7 @@ def main() -> int:
             "docs/db/generated/schema_snapshot.json",
         ]
     )
+    run([sys.executable, str(ROOT / "scripts" / "generate_third_party_notices.py")])
 
     after: dict[str, str] = {}
     for d in WATCH_DIRS:
@@ -99,7 +102,8 @@ def main() -> int:
     print(
         "再生成してコミット: python scripts/generate_product_docs.py && "
         "python scripts/generate_design_docs.py && "
-        "python scripts/generate_db_docs.py --snapshot docs/db/generated/schema_snapshot.json",
+        "python scripts/generate_db_docs.py --snapshot docs/db/generated/schema_snapshot.json && "
+        "python scripts/generate_third_party_notices.py",
         file=sys.stderr,
     )
     return 1

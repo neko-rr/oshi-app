@@ -28,6 +28,7 @@
 | `authenticated` | `storage_location` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `storage_location` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `storage_location_preset_slot_dismissed` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `theme_settings` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `theme_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `work` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `works_series` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |

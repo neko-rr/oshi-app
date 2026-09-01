@@ -2,7 +2,7 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-08-31T10:24:04Z`
+生成時刻 (UTC): `2026-09-01T22:27:59Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 
@@ -11,5 +11,6 @@
 | `/gallery` | `not_started` | None | None | Lab 比較後に画面単位で採用 |
 | `/register` | `not_started` | None | None |  |
 | `/dashboard` | `not_started` | None | None |  |
-| `/settings` | `not_started` | None | None | 推し色スウォッチ UI は別タスク |
+| `/settings` | `not_started` | None | None | ハブ本体。テーマは /settings/theme |
+| `/settings/theme` | `adopted` | 'b' | '2026-09-01' | B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保 |
 | `/auth/login` | `not_started` | None | None |  |

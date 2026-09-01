@@ -103,9 +103,19 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: apps/api/requirements.txt
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
       # product docs の OpenAPI 抽出で FastAPI を import する場合がある
       - name: Install API deps (for OpenAPI extract)
         run: pip install -r apps/api/requirements.txt
+      # npm ライセンス収集のため（third_party_notices）
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
       - name: Docs drift check
         env:
           PYTHONPATH: apps/api

@@ -13,6 +13,7 @@ from app.routers.photos import router as photos_router
 from app.routers.products import router as products_router
 from app.routers.stats import router as stats_router
 from app.routers.tags import router as tags_router
+from app.routers.theme_settings import router as theme_settings_router
 
 
 def create_app() -> FastAPI:
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     application.include_router(photos_router)
     application.include_router(assist_router)
     application.include_router(tags_router)
+    application.include_router(theme_settings_router)
     application.include_router(stats_router)
 
     @application.exception_handler(HTTPException)

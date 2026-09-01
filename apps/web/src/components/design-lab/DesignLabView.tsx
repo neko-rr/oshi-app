@@ -15,10 +15,15 @@ import {
 } from "@/components/design-lab/lab-cvd";
 import {
   LAB_OSHI_SWATCHES,
+  LAB_PHONE_ORIENTATION_MODES,
   LAB_PLATFORMS,
+  LAB_SCENES,
   LAB_UI_STATES,
   LAB_VARIANTS,
+  type LabPhoneOrientationId,
+  type LabPhoneOrientationMode,
   type LabPlatformId,
+  type LabSceneId,
   type LabUiState,
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
@@ -32,9 +37,12 @@ import {
 
 export default function DesignLabView() {
   const [platform, setPlatform] = useState<LabPlatformId>("web-pc");
+  const [phoneOrientationMode, setPhoneOrientationMode] =
+    useState<LabPhoneOrientationMode>("portrait");
   const [expandOpen, setExpandOpen] = useState(false);
   const [expandVariant, setExpandVariant] = useState<LabVariantId>("a");
   const [uiState, setUiState] = useState<LabUiState>("default");
+  const [scene, setScene] = useState<LabSceneId>("theme-settings");
   const [oshiIndex, setOshiIndex] = useState(0);
   const [cvdMode, setCvdMode] = useState<LabCvdModeId>("none");
   const [showThumbZone, setShowThumbZone] = useState(false);
@@ -42,6 +50,10 @@ export default function DesignLabView() {
   const [ambient, setAmbient] = useState<LabAmbientId>("none");
   const [labPageOrigin, setLabPageOrigin] = useState("");
   const isNarrow = platform !== "web-pc";
+  const phoneOrientations: LabPhoneOrientationId[] =
+    phoneOrientationMode === "both"
+      ? ["portrait", "landscape"]
+      : [phoneOrientationMode];
   const swatch = LAB_OSHI_SWATCHES[oshiIndex] ?? LAB_OSHI_SWATCHES[0];
   const previewFilter = labComposePreviewFilters(
     labCvdFilterCss(cvdMode),
@@ -72,9 +84,10 @@ export default function DesignLabView() {
   );
 
   return (
-    <div className="min-h-full bg-zinc-100 text-zinc-900">
+    /* text-zinc-900 は Lab シェルのみ。プレビュー内はテーマの --lab-fg を使う */
+    <div className="min-h-full bg-zinc-100">
       <LabCvdFilters />
-      <header className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-100/95 px-4 py-3 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-100/95 px-4 py-3 text-zinc-900 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -85,13 +98,43 @@ export default function DesignLabView() {
                 3案並列比較
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-zinc-600">
-                UX 補助: 色覚 · 親指ゾーン · 文字サイズ · 低輝度／屋外。
-                本決定はチャットで。
+                {scene === "theme-settings"
+                  ? "色設定（/settings/theme）の3案。スウォッチでトークン一式が変わるか確認。"
+                  : "UX 補助: 色覚 · 親指ゾーン · 文字サイズ · 低輝度／屋外。本決定はチャットで。"}
               </p>
             </div>
             <p className="shrink-0 text-xs text-zinc-500">
               本番ビルドでは 404 · AI推奨は列に出さない
             </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label="比較する画面"
+            >
+              <span className="text-xs font-medium text-zinc-600">画面:</span>
+              {LAB_SCENES.map((s) => {
+                const active = scene === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    aria-pressed={active}
+                    title={s.hint}
+                    onClick={() => setScene(s.id)}
+                    className={
+                      active
+                        ? "rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
+                        : "rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                    }
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -133,7 +176,37 @@ export default function DesignLabView() {
               >
                 PC 拡大プレビュー
               </button>
-            ) : null}
+            ) : (
+              <div
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-label="スマホの向き"
+              >
+                <span className="text-xs font-medium text-zinc-600">向き:</span>
+                {LAB_PHONE_ORIENTATION_MODES.map((m) => {
+                  const active = phoneOrientationMode === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      aria-pressed={active}
+                      title={m.hint}
+                      onClick={() => setPhoneOrientationMode(m.id)}
+                      className={
+                        active
+                          ? "rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
+                          : "rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                      }
+                    >
+                      {m.label}
+                    </button>
+                  );
+                })}
+                <span className="text-[11px] text-zinc-500">
+                  Web・モバイルとアプリで共通 · 縦+横は同時確認
+                </span>
+              </div>
+            )}
           </div>
 
           <div
@@ -162,6 +235,7 @@ export default function DesignLabView() {
             })}
           </div>
 
+          {scene === "home" ? (
           <div
             className="flex flex-wrap items-center gap-2"
             role="group"
@@ -191,6 +265,11 @@ export default function DesignLabView() {
               {swatch.label}（ボタン色に即反映）
             </span>
           </div>
+          ) : (
+            <p className="text-[11px] text-zinc-500">
+              色設定シーンでは各案内のスウォッチでトークン一式プレビュー。本番採用はチャットで本決定。
+            </p>
+          )}
 
           <div
             className="flex flex-wrap items-center gap-2"
@@ -303,7 +382,9 @@ export default function DesignLabView() {
         </div>
       </header>
 
-      {tools}
+      {tools ? (
+        <div className="text-zinc-900">{tools}</div>
+      ) : null}
 
       <div
         className={
@@ -321,7 +402,9 @@ export default function DesignLabView() {
             data-lab-variant={meta.id}
             className={
               isNarrow
-                ? "flex w-full max-w-[420px] flex-col"
+                ? phoneOrientationMode === "portrait"
+                  ? "flex w-full max-w-[420px] flex-col"
+                  : "flex w-full max-w-[1100px] flex-col"
                 : "lab-panel flex min-h-0 flex-col overflow-hidden"
             }
             aria-labelledby={`lab-variant-${meta.id}`}
@@ -358,27 +441,53 @@ export default function DesignLabView() {
                 {meta.ux_focus}
               </p>
             </div>
-            <LabDeviceFrame
-              platform={platform}
-              showThumbZone={showThumbZone && isNarrow}
-              textScale={textScale}
+            <div
+              className={
+                isNarrow && phoneOrientations.length > 1
+                  ? "flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:justify-center"
+                  : undefined
+              }
             >
-              <div
-                className={
-                  isNarrow
-                    ? "lab-panel border-0 p-4 shadow-none"
-                    : "flex-1 p-4"
-                }
-              >
-                <LabMockSurface
-                  variant={meta.id}
-                  platform={platform}
-                  uiState={uiState}
-                  oshiIndex={oshiIndex}
-                  onOshiIndexChange={setOshiIndex}
-                />
-              </div>
-            </LabDeviceFrame>
+              {isNarrow
+                ? phoneOrientations.map((orientation) => (
+                    <LabDeviceFrame
+                      key={orientation}
+                      platform={platform}
+                      orientation={orientation}
+                      showThumbZone={showThumbZone && isNarrow}
+                      textScale={textScale}
+                    >
+                      <div className="lab-panel border-0 p-4 shadow-none">
+                        <LabMockSurface
+                          variant={meta.id}
+                          platform={platform}
+                          uiState={uiState}
+                          scene={scene}
+                          oshiIndex={oshiIndex}
+                          onOshiIndexChange={setOshiIndex}
+                        />
+                      </div>
+                    </LabDeviceFrame>
+                  ))
+                : (
+                    <LabDeviceFrame
+                      platform={platform}
+                      showThumbZone={false}
+                      textScale={textScale}
+                    >
+                      <div className="flex-1 p-4">
+                        <LabMockSurface
+                          variant={meta.id}
+                          platform={platform}
+                          uiState={uiState}
+                          scene={scene}
+                          oshiIndex={oshiIndex}
+                          onOshiIndexChange={setOshiIndex}
+                        />
+                      </div>
+                    </LabDeviceFrame>
+                  )}
+            </div>
           </section>
         ))}
       </div>
@@ -388,6 +497,7 @@ export default function DesignLabView() {
         onClose={() => setExpandOpen(false)}
         initialVariant={expandVariant}
         uiState={uiState}
+        scene={scene}
         oshiIndex={oshiIndex}
         onOshiIndexChange={setOshiIndex}
         cvdMode={cvdMode}

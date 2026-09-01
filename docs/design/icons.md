@@ -67,6 +67,7 @@ import { Plus, Settings } from "@/lib/icons";
 | 削除 | `Trash2` | destructive 操作のみ |
 | バーコード | `ScanBarcode` | 登録フロー |
 | タグ・収納 | `Tag` / `MapPin` | タグ・場所 |
+| タグ・収納ピッカー | `AlertCircle` / `Archive` / `Award` / `Badge` / `Bed` / `Bird` / `BookMarked` / `BookOpen` / `Bookmark` / `Box` / `BrickWall` / `Briefcase` / `Brush` / `Camera` / `Car` / `Cat` / `Check` / `Cherry` / `ChevronLeft` / `Circle` / `CircleDot` / `Cloud` / `Coffee` / `Crown` / `Dice5` / `Disc` / `Ellipsis` / `FileText` / `Fish` / `Flower2` / `Frame` / `GalleryVertical` / `Gamepad2` / `Gem` / `Gift` / `Glasses` / `Grid3x3` / `HandHeart` / `Headphones` / `Heart` / `Home` / `Image` / `Images` / `Inbox` / `KeyRound` / `Lamp` / `LampDesk` / `Laptop` / `Layers` / `LayoutGrid` / `Library` / `Link` / `Loader2` / `MapPin` / `Medal` / `Mic` / `Mic2` / `Moon` / `Music` / `Music2` / `Newspaper` / `Package` / `Palette` / `PartyPopper` / `Pen` / `Pencil` / `PersonStanding` / `PictureInPicture` / `Pin` / `Plane` / `Plus` / `Puzzle` / `Rabbit` / `Radio` / `Ribbon` / `ScanBarcode` / `Scissors` / `ScrollText` / `Search` / `Settings` / `Shirt` / `ShoppingBag` / `Smartphone` / `Smile` / `Sofa` / `Sparkles` / `Square` / `Star` / `Sticker` / `Store` / `Sun` / `Tag` / `Tags` / `Ticket` / `Train` / `Trash2` / `Trophy` / `Tv` / `Umbrella` / `UserRound` / `Video` / `Wand2` / `Warehouse` / `Watch` / `X` | lucide_icon_picker.json から自動同期 |
 <!-- AUTO:icons-catalog END -->
 
 ## 追加するとき

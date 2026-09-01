@@ -263,7 +263,7 @@
 |------------|--------|----|------|---------|
 | 会員ID | `members_id` | `uuid` | NO | |
 | 会員種別名 | `members_type_name` | `text` | NO | |
-| テーマ | `theme` | `text` | NO | `'minty'::text` |
+| テーマ | `theme` | `text` | NO | `'default'::text` |
 | 作成日時 | `created_at` | `timestamp with time zone` | YES | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | YES | `now()` |
 

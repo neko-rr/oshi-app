@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-31T10:24:04Z",
+  "generated_at": "2026-09-01T22:27:59Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -102,6 +102,16 @@
       "is_dev": false
     },
     {
+      "path": "/licenses",
+      "file": "apps/web/src/app/licenses/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
       "path": "/me",
       "file": "apps/web/src/app/me/page.tsx",
       "has_hex_ui": false,
@@ -122,6 +132,16 @@
       "is_dev": false
     },
     {
+      "path": "/privacy",
+      "file": "apps/web/src/app/privacy/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
       "path": "/protected",
       "file": "apps/web/src/app/protected/page.tsx",
       "has_hex_ui": false,
@@ -134,6 +154,16 @@
     {
       "path": "/register",
       "file": "apps/web/src/app/register/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/search",
+      "file": "apps/web/src/app/search/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -174,6 +204,16 @@
     {
       "path": "/settings/storage-locations",
       "file": "apps/web/src/app/settings/storage-locations/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/theme",
+      "file": "apps/web/src/app/settings/theme/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -238,8 +278,15 @@
         "path": "/settings",
         "lab_variant": null,
         "status": "not_started",
-        "notes_ja": "推し色スウォッチ UI は別タスク",
+        "notes_ja": "ハブ本体。テーマは /settings/theme",
         "updated_at": null
+      },
+      {
+        "path": "/settings/theme",
+        "lab_variant": "b",
+        "status": "adopted",
+        "notes_ja": "B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保",
+        "updated_at": "2026-09-01"
       },
       {
         "path": "/auth/login",
@@ -250,5 +297,5 @@
       }
     ]
   },
-  "icons_catalog_count": 14
+  "icons_catalog_count": 105
 }
