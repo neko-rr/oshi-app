@@ -94,6 +94,18 @@ def test_normalize_for_check_ignores_generated_at() -> None:
     assert mod.normalize_payload_for_check(a) == mod.normalize_payload_for_check(b)
 
 
+def test_collect_pip_packages_uses_requirements_constraints_only() -> None:
+    mod = _load()
+    rows = mod.collect_pip_packages()
+    by_name = {row["name"]: row for row in rows}
+    assert "fastapi" in by_name
+    assert by_name["fastapi"]["version"] == ">=0.115.0"
+    assert by_name["fastapi"]["license"] == "UNKNOWN"
+    assert by_name["fastapi"]["homepage"] == ""
+    assert "pytest" not in by_name
+    assert "pytest-asyncio" not in by_name
+
+
 def test_write_outputs_syncs_web_and_docs(tmp_path: Path) -> None:
     mod = _load()
     docs_gen = tmp_path / "docs" / "legal" / "generated"

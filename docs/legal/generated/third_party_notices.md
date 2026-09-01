@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-09-01T22:28:00Z`
+生成時刻 (UTC): `2026-09-01T22:31:38Z`
 
 ## アプリ本体
 
@@ -30,15 +30,15 @@ oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直
 | react-dom | 19.2.8 | MIT | npm |
 | tailwind-merge | 3.6.0 | MIT | npm |
 | tw-animate-css | 1.4.0 | MIT | npm |
-| fastapi | 0.115.6 | UNKNOWN | pip |
-| httpx | 0.28.1 | BSD-3-Clause | pip |
-| pydantic | 2.12.5 | MIT | pip |
-| pydantic-settings | 2.15.0 | MIT | pip |
-| PyJWT | 2.13.0 | MIT | pip |
-| python-dotenv | 1.0.1 | BSD-3-Clause | pip |
-| python-multipart | 0.0.32 | Apache-2.0 | pip |
-| supabase | 2.31.0 | MIT | pip |
-| uvicorn | 0.34.0 | BSD-3-Clause | pip |
+| fastapi | >=0.115.0 | UNKNOWN | pip |
+| httpx | >=0.27.0 | UNKNOWN | pip |
+| pydantic | >=2.9.0 | UNKNOWN | pip |
+| pydantic-settings | >=2.6.0 | UNKNOWN | pip |
+| PyJWT | [crypto]>=2.9.0 | UNKNOWN | pip |
+| python-dotenv | >=1.0.0 | UNKNOWN | pip |
+| python-multipart | >=0.0.9 | UNKNOWN | pip |
+| supabase | >=2.10.0 | UNKNOWN | pip |
+| uvicorn | [standard]>=0.32.0 | UNKNOWN | pip |
 
 ## 外部サービス（表示・規約メモ）
 

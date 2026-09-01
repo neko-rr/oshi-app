@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T22:28:00Z",
+  "generated_at": "2026-09-01T22:31:38Z",
   "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -116,66 +116,66 @@
     },
     {
       "name": "fastapi",
-      "version": "0.115.6",
+      "version": ">=0.115.0",
       "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/fastapi/fastapi"
+      "homepage": ""
     },
     {
       "name": "httpx",
-      "version": "0.28.1",
-      "license": "BSD-3-Clause",
+      "version": ">=0.27.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/encode/httpx/blob/master/CHANGELOG.md"
+      "homepage": ""
     },
     {
       "name": "pydantic",
-      "version": "2.12.5",
-      "license": "MIT",
+      "version": ">=2.9.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/pydantic/pydantic"
+      "homepage": ""
     },
     {
       "name": "pydantic-settings",
-      "version": "2.15.0",
-      "license": "MIT",
+      "version": ">=2.6.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/pydantic/pydantic-settings"
+      "homepage": ""
     },
     {
       "name": "PyJWT",
-      "version": "2.13.0",
-      "license": "MIT",
+      "version": "[crypto]>=2.9.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/jpadilla/pyjwt"
+      "homepage": ""
     },
     {
       "name": "python-dotenv",
-      "version": "1.0.1",
-      "license": "BSD-3-Clause",
+      "version": ">=1.0.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/theskumar/python-dotenv"
+      "homepage": ""
     },
     {
       "name": "python-multipart",
-      "version": "0.0.32",
-      "license": "Apache-2.0",
+      "version": ">=0.0.9",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/Kludex/python-multipart"
+      "homepage": ""
     },
     {
       "name": "supabase",
-      "version": "2.31.0",
-      "license": "MIT",
+      "version": ">=2.10.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/supabase/supabase-py/tree/main/CHANGELOG.md"
+      "homepage": ""
     },
     {
       "name": "uvicorn",
-      "version": "0.34.0",
-      "license": "BSD-3-Clause",
+      "version": "[standard]>=0.32.0",
+      "license": "UNKNOWN",
       "ecosystem": "pip",
-      "homepage": "https://github.com/encode/uvicorn/blob/master/CHANGELOG.md"
+      "homepage": ""
     }
   ],
   "services": [

@@ -18,7 +18,6 @@ import re
 import subprocess
 import sys
 from datetime import datetime, timezone
-from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
@@ -246,63 +245,46 @@ _REQ_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 def parse_requirements_names(text: str) -> list[str]:
-    names: list[str] = []
+    return [row["name"] for row in parse_requirements_rows(text)]
+
+
+def parse_requirements_rows(text: str) -> list[dict[str, str]]:
+    """requirements.txt から名前と版制約を決定的に抽出（CI/OS 差分を避ける）。"""
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
     for line in text.splitlines():
         raw = line.strip()
         if not raw or raw.startswith("#") or raw.startswith("-"):
             continue
         base = raw.split(";", 1)[0].strip()
         name = re.split(r"[<>=!~\[]", base, maxsplit=1)[0].strip()
-        if name and _REQ_NAME_RE.match(name):
-            names.append(name)
-    seen: set[str] = set()
-    out: list[str] = []
-    for n in names:
-        key = n.lower()
+        if not name or not _REQ_NAME_RE.match(name):
+            continue
+        key = name.lower()
         if key in seen:
             continue
         seen.add(key)
-        out.append(n)
-    return out
+        constraint = base[len(name) :].strip()
+        rows.append({"name": name, "constraint": constraint})
+    return rows
 
 
 def collect_pip_packages() -> list[dict[str, Any]]:
     if not PIP_REQUIREMENTS.is_file():
         return []
-    names = parse_requirements_names(PIP_REQUIREMENTS.read_text(encoding="utf-8"))
     rows: list[dict[str, Any]] = []
-    for name in names:
+    for item in parse_requirements_rows(PIP_REQUIREMENTS.read_text(encoding="utf-8")):
+        name = item["name"]
         # テスト専用は一覧から外す（実行時配布物ではない）
         if name.lower() in {"pytest", "pytest-asyncio"}:
             continue
-        version = ""
-        license_s = "UNKNOWN"
-        homepage = ""
-        try:
-            dist = importlib_metadata.distribution(name)
-            version = dist.version
-            meta = dist.metadata
-            license_s = _license_to_str(meta.get("License"))
-            if license_s == "UNKNOWN":
-                # License-Expression (PEP 639) があれば使う
-                license_s = _license_to_str(meta.get("License-Expression"))
-            home = meta.get("Home-page") or ""
-            if isinstance(home, str):
-                homepage = home
-            if not homepage:
-                for key, val in meta.items():
-                    if key.lower() == "project-url" and isinstance(val, str):
-                        homepage = val.split(",", 1)[-1].strip()
-                        break
-        except importlib_metadata.PackageNotFoundError:
-            pass
         rows.append(
             {
                 "name": name,
-                "version": version,
-                "license": license_s,
+                "version": item["constraint"],
+                "license": "UNKNOWN",
                 "ecosystem": "pip",
-                "homepage": homepage,
+                "homepage": "",
             }
         )
     return rows
