@@ -2,13 +2,14 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-09-01T22:27:59Z`
+生成時刻 (UTC): `2026-09-02T12:20:55Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 
 | Path | status | lab_variant | updated_at | notes |
 |------|--------|-------------|------------|-------|
-| `/gallery` | `not_started` | None | None | Lab 比較後に画面単位で採用 |
+| `/gallery` | `adopted` | 'b' | '2026-09-02' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
+| `/gallery/[registered_product_id]` | `adopted` | 'b' | '2026-09-02' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る |
 | `/register` | `not_started` | None | None |  |
 | `/dashboard` | `not_started` | None | None |  |
 | `/settings` | `not_started` | None | None | ハブ本体。テーマは /settings/theme |

@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-09-01T22:27:59Z`
+生成時刻 (UTC): `2026-09-02T12:20:55Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -12,7 +12,6 @@
 |----|------|--------|
 | `/auth/login` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/dashboard` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
-| `/gallery` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/register` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/settings` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 
@@ -20,7 +19,8 @@
 
 | Path | status | lab_variant | notes |
 |------|--------|-------------|-------|
-| `/gallery` | `not_started` | None | Lab 比較後に画面単位で採用 |
+| `/gallery` | `adopted` | 'b' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
+| `/gallery/[registered_product_id]` | `adopted` | 'b' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る |
 | `/register` | `not_started` | None |  |
 | `/dashboard` | `not_started` | None |  |
 | `/settings` | `not_started` | None | ハブ本体。テーマは /settings/theme |

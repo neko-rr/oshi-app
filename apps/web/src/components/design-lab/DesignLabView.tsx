@@ -100,7 +100,9 @@ export default function DesignLabView() {
               <p className="mt-1 max-w-2xl text-sm text-zinc-600">
                 {scene === "theme-settings"
                   ? "色設定（/settings/theme）の3案。スウォッチでトークン一式が変わるか確認。"
-                  : "UX 補助: 色覚 · 親指ゾーン · 文字サイズ · 低輝度／屋外。本決定はチャットで。"}
+                  : scene === "gallery" || scene === "gallery-detail"
+                    ? "ギャラリー一覧／詳細の配置比較（検索・チップ・もっと見る・戻るコンテキスト）。"
+                    : "UX 補助: 色覚 · 親指ゾーン · 文字サイズ · 低輝度／屋外。本決定はチャットで。"}
               </p>
             </div>
             <p className="shrink-0 text-xs text-zinc-500">

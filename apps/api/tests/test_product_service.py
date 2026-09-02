@@ -1,7 +1,5 @@
-# TDD: 正規化にタグ系フィールドを含む
+# TDD: 正規化にタグ系フィールドを含む。一覧フィルタは fetch 側（DB）へ委譲。
 from __future__ import annotations
-
-import pytest
 
 from app.services.product_service import (
     filter_products_by_query,
@@ -11,16 +9,17 @@ from app.services.product_service import (
 
 
 def test_filter_products_by_query_matches_name_and_tags() -> None:
+    """ユーティリティの契約（テスト・移行用）。一覧本線は fetch に q を渡す。"""
     items = [
         {
             "product_name": "缶バッジ",
-            "category_tag": {"category_tag_name": "ガチャ"},
-            "storage_location": {"storage_location_name": "棚A"},
+            "category_tag": {"name": "ガチャ"},
+            "storage_location": {"name": "棚A"},
         },
         {
             "product_name": "アクスタ",
-            "category_tag": {"category_tag_name": "アクリル"},
-            "storage_location": {"storage_location_name": "箱"},
+            "category_tag": {"name": "アクリル"},
+            "storage_location": {"name": "箱"},
         },
     ]
     assert [i["product_name"] for i in filter_products_by_query(items, "缶")] == [
@@ -32,16 +31,26 @@ def test_filter_products_by_query_matches_name_and_tags() -> None:
     assert len(filter_products_by_query(items, "  ")) == 2
 
 
-def test_list_products_filters_by_q() -> None:
-    def fake_fetch(*, members_id: str, access_token: str, limit: int, offset: int):
+def test_list_products_passes_q_to_fetch_not_post_filter() -> None:
+    """q はページ取得後の絞り込みではなく fetch に渡す（DB 側想定）。"""
+    captured: dict = {}
+
+    def fake_fetch(
+        *,
+        members_id: str,
+        access_token: str,
+        limit: int,
+        offset: int,
+        barcode_number: str | None = None,
+        q: str | None = None,
+        category_tag_id: int | None = None,
+        storage_location_id: int | None = None,
+    ):
+        captured["q"] = q
+        captured["category_tag_id"] = category_tag_id
+        captured["storage_location_id"] = storage_location_id
+        # DB が既に絞った結果だけ返す
         return [
-            {
-                "registered_product_id": 1,
-                "product_name": "缶バッジ",
-                "photo_id": None,
-                "creation_date": None,
-                "photo": None,
-            },
             {
                 "registered_product_id": 2,
                 "product_name": "アクスタ",
@@ -59,8 +68,40 @@ def test_list_products_filters_by_q() -> None:
         fetch_page=fake_fetch,
         sign_object=lambda **_: None,
     )
+    assert captured["q"] == "アク"
     assert len(items) == 1
     assert items[0]["product_name"] == "アクスタ"
+
+
+def test_list_products_passes_tag_ids_to_fetch() -> None:
+    captured: dict = {}
+
+    def fake_fetch(
+        *,
+        members_id: str,
+        access_token: str,
+        limit: int,
+        offset: int,
+        barcode_number: str | None = None,
+        q: str | None = None,
+        category_tag_id: int | None = None,
+        storage_location_id: int | None = None,
+    ):
+        captured["category_tag_id"] = category_tag_id
+        captured["storage_location_id"] = storage_location_id
+        return []
+
+    mid = "33333333-3333-3333-3333-333333333333"
+    list_products_for_member(
+        mid,
+        access_token="user-jwt",
+        category_tag_id=11,
+        storage_location_id=22,
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert captured["category_tag_id"] == 11
+    assert captured["storage_location_id"] == 22
 
 
 def test_list_products_filters_by_barcode_exact() -> None:
@@ -71,6 +112,9 @@ def test_list_products_filters_by_barcode_exact() -> None:
         limit: int,
         offset: int,
         barcode_number: str | None = None,
+        q: str | None = None,
+        category_tag_id: int | None = None,
+        storage_location_id: int | None = None,
     ):
         rows = [
             {
@@ -128,7 +172,7 @@ def test_normalize_product_row_maps_gallery_fields() -> None:
         "photo": {"photo_thumbnail_url": "uid/thumb.jpg"},
         "category_tag_id": 1,
         "storage_location_id": 2,
-        "category_tag": {"category_tag_name": "缶", "category_tag_color": "#f00"},
+        "category_tag": {"category_tag_name": "缶", "category_tag_color": "#f00", "category_tag_icon": "circle"},
         "storage_location": {
             "storage_location_name": "棚",
             "storage_location_icon": "box",
@@ -137,12 +181,20 @@ def test_normalize_product_row_maps_gallery_fields() -> None:
     out = normalize_product_row(row)
     assert out["photo_thumbnail_path"] == "uid/thumb.jpg"
     assert out["photo_thumbnail_url"] is None
-    assert out["category_tag"]["category_tag_name"] == "缶"
+    assert out["category_tag"] == {
+        "name": "缶",
+        "color": "#f00",
+        "icon": "circle",
+    }
+    assert out["storage_location"] == {
+        "name": "棚",
+        "icon": "box",
+    }
     assert out["color_tag_slots"] == []
 
 
 def test_list_products_uses_fetch_and_filters_by_member_context() -> None:
-    def fake_fetch(*, members_id: str, access_token: str, limit: int, offset: int):
+    def fake_fetch(*, members_id: str, access_token: str, limit: int, offset: int, **_kw):
         return [
             {
                 "registered_product_id": 1,

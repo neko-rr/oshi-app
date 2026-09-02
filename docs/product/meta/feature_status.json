@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_note": "エージェントが実装ステータスを更新する。語彙は status_vocabulary.md。人間は roadmap.md を読む。",
+  "updated_note": "2026-09-03: Must 本線をほぼ shipped。残 partial は responsive / theme。語彙は status_vocabulary.md。",
   "features": [
     {
       "id": "responsive_web",
@@ -11,7 +11,9 @@
         "apps/web/src/components/layout/Header.tsx",
         "apps/web/src/app"
       ],
-      "expected_web_paths": ["/"],
+      "expected_web_paths": [
+        "/"
+      ],
       "expected_api_paths": []
     },
     {
@@ -27,13 +29,18 @@
         "apps/api/app/services/theme_service.py",
         "docs/product/acceptance/settings.md"
       ],
-      "expected_web_paths": ["/settings", "/settings/theme"],
-      "expected_api_paths": ["/theme-settings"]
+      "expected_web_paths": [
+        "/settings",
+        "/settings/theme"
+      ],
+      "expected_api_paths": [
+        "/theme-settings"
+      ]
     },
     {
       "id": "barcode_capture",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "バーコード読取・入力",
       "evidence_paths": [
         "apps/web/src/components/register/StepBarcode.tsx",
@@ -42,19 +49,26 @@
         "apps/web/src/lib/barcode/detect.ts",
         "apps/web/src/lib/products/findOwnedByBarcode.ts"
       ],
-      "expected_web_paths": ["/register"],
+      "expected_web_paths": [
+        "/register"
+      ],
       "expected_api_paths": []
     },
     {
       "id": "product_lookup",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "製品情報照合",
       "evidence_paths": [
         "apps/api/app/routers/assist.py",
-        "apps/api/app/services/barcode_lookup_service.py"
+        "apps/api/app/services/barcode_lookup_service.py",
+        "apps/api/tests/test_barcode_lookup_soft.py",
+        "docs/migration/v2/assist_external_apis.md",
+        "docs/product/acceptance/register.md"
       ],
-      "expected_web_paths": [],
+      "expected_web_paths": [
+        "/register"
+      ],
       "expected_api_paths": [
         "/assist/barcode/lookup",
         "/assist/barcode/keyword"
@@ -63,51 +77,76 @@
     {
       "id": "photo_front",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "正面写真登録",
       "evidence_paths": [
         "apps/api/app/routers/photos.py",
         "apps/api/app/services/photo_service.py",
         "apps/web/src/components/register/StepPhoto.tsx"
       ],
-      "expected_web_paths": ["/register"],
-      "expected_api_paths": ["/photos"]
+      "expected_web_paths": [
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/photos"
+      ]
     },
     {
       "id": "vision_assist",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "画像 Vision アシスト",
       "evidence_paths": [
-        "apps/api/app/services/io_intelligence_service.py"
+        "apps/api/app/services/io_intelligence_service.py",
+        "apps/web/src/components/register/assist/runAssistPipeline.ts",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "docs/product/acceptance/register.md"
       ],
-      "expected_web_paths": [],
-      "expected_api_paths": ["/assist/vision/describe"]
+      "expected_web_paths": [
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/assist/vision/describe"
+      ]
     },
     {
       "id": "tag_assist",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "タグ自動抽出",
       "evidence_paths": [
-        "apps/api/app/services/tag_extraction_service.py"
+        "apps/api/app/services/io_intelligence_service.py",
+        "apps/web/src/components/register/assist/applyAssistToDraft.ts",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "docs/product/acceptance/register.md"
       ],
-      "expected_web_paths": [],
-      "expected_api_paths": ["/assist/tags/extract"]
+      "expected_web_paths": [
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/assist/vision/describe"
+      ]
     },
     {
       "id": "register_flow",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "登録フロー",
       "evidence_paths": [
         "apps/web/src/app/register/page.tsx",
         "apps/web/src/components/register/RegisterWizard.tsx",
+        "apps/web/src/components/register/assist/runAssistPipeline.ts",
         "docs/product/flows/register.md",
         "docs/product/acceptance/register.md"
       ],
-      "expected_web_paths": ["/register"],
-      "expected_api_paths": ["/products", "/photos"]
+      "expected_web_paths": [
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/products",
+        "/photos",
+        "/assist/vision/describe"
+      ]
     },
     {
       "id": "gallery",
@@ -116,10 +155,15 @@
       "title_ja": "ギャラリー一覧",
       "evidence_paths": [
         "apps/web/src/app/gallery/page.tsx",
-        "docs/product/acceptance/gallery.md"
+        "docs/product/acceptance/gallery.md",
+        "docs/product/flows/gallery.md"
       ],
-      "expected_web_paths": ["/gallery"],
-      "expected_api_paths": ["/products"]
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products"
+      ]
     },
     {
       "id": "product_detail",
@@ -131,8 +175,12 @@
         "apps/web/src/components/ProductDetailEditor.tsx",
         "docs/product/acceptance/product_detail.md"
       ],
-      "expected_web_paths": ["/gallery/[registered_product_id]"],
-      "expected_api_paths": ["/products/{registered_product_id}"]
+      "expected_web_paths": [
+        "/gallery/[registered_product_id]"
+      ],
+      "expected_api_paths": [
+        "/products/{registered_product_id}"
+      ]
     },
     {
       "id": "storage_locations",
@@ -145,8 +193,12 @@
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
-      "expected_web_paths": ["/settings/storage-locations"],
-      "expected_api_paths": ["/storage-locations"]
+      "expected_web_paths": [
+        "/settings/storage-locations"
+      ],
+      "expected_api_paths": [
+        "/storage-locations"
+      ]
     },
     {
       "id": "category_tags",
@@ -159,8 +211,12 @@
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
-      "expected_web_paths": ["/settings/category-tags"],
-      "expected_api_paths": ["/category-tags"]
+      "expected_web_paths": [
+        "/settings/category-tags"
+      ],
+      "expected_api_paths": [
+        "/category-tags"
+      ]
     },
     {
       "id": "color_tags",
@@ -173,38 +229,50 @@
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
       ],
-      "expected_web_paths": ["/settings/color-tags"],
-      "expected_api_paths": ["/color-tags"]
+      "expected_web_paths": [
+        "/settings/color-tags"
+      ],
+      "expected_api_paths": [
+        "/color-tags"
+      ]
     },
     {
       "id": "search",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "検索",
       "evidence_paths": [
         "apps/web/src/app/search/page.tsx",
         "apps/web/src/components/ProductSearchForm.tsx",
-        "apps/api/app/services/product_service.py"
+        "apps/api/app/services/product_service.py",
+        "docs/product/acceptance/search.md"
       ],
-      "expected_web_paths": ["/search"],
-      "expected_api_paths": ["/products"]
+      "expected_web_paths": [
+        "/search"
+      ],
+      "expected_api_paths": [
+        "/products"
+      ]
     },
     {
       "id": "privacy_policy",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "プライバシーポリシー",
       "evidence_paths": [
         "apps/web/src/app/privacy/page.tsx",
-        "apps/web/src/lib/middleware.ts"
+        "apps/web/src/lib/middleware.ts",
+        "docs/product/acceptance/privacy.md"
       ],
-      "expected_web_paths": ["/privacy"],
+      "expected_web_paths": [
+        "/privacy"
+      ],
       "expected_api_paths": []
     },
     {
       "id": "licenses_notices",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "ライセンス・表記（OSS／外部サービス）",
       "evidence_paths": [
         "apps/web/src/app/licenses/page.tsx",
@@ -213,7 +281,9 @@
         "docs/legal/services.json",
         "docs/product/acceptance/licenses.md"
       ],
-      "expected_web_paths": ["/licenses"],
+      "expected_web_paths": [
+        "/licenses"
+      ],
       "expected_api_paths": []
     },
     {
@@ -226,8 +296,12 @@
         "apps/api/app/services/dashboard_service.py",
         "docs/product/acceptance/dashboard.md"
       ],
-      "expected_web_paths": ["/dashboard"],
-      "expected_api_paths": ["/dashboard/charts"]
+      "expected_web_paths": [
+        "/dashboard"
+      ],
+      "expected_api_paths": [
+        "/dashboard/charts"
+      ]
     },
     {
       "id": "spending",
@@ -280,7 +354,9 @@
       "status": "deferred",
       "title_ja": "推し部屋",
       "evidence_paths": [],
-      "expected_web_paths": ["/oshi-room"],
+      "expected_web_paths": [
+        "/oshi-room"
+      ],
       "expected_api_paths": []
     },
     {
@@ -289,7 +365,9 @@
       "status": "deferred",
       "title_ja": "SNSシェア",
       "evidence_paths": [],
-      "expected_web_paths": ["/share"],
+      "expected_web_paths": [
+        "/share"
+      ],
       "expected_api_paths": []
     },
     {
@@ -298,7 +376,9 @@
       "status": "deferred",
       "title_ja": "規約・問い合わせ等",
       "evidence_paths": [],
-      "expected_web_paths": ["/terms"],
+      "expected_web_paths": [
+        "/terms"
+      ],
       "expected_api_paths": []
     },
     {
@@ -307,7 +387,9 @@
       "status": "deferred",
       "title_ja": "データ削除・退会",
       "evidence_paths": [],
-      "expected_web_paths": ["/settings/delete-account"],
+      "expected_web_paths": [
+        "/settings/delete-account"
+      ],
       "expected_api_paths": []
     },
     {
@@ -316,7 +398,9 @@
       "status": "deferred",
       "title_ja": "プレミアム",
       "evidence_paths": [],
-      "expected_web_paths": ["/premium"],
+      "expected_web_paths": [
+        "/premium"
+      ],
       "expected_api_paths": []
     },
     {
@@ -331,8 +415,13 @@
         "apps/web/src/lib/middleware.ts",
         "docs/product/acceptance/auth.md"
       ],
-      "expected_web_paths": ["/auth/login", "/auth/sign-up"],
-      "expected_api_paths": ["/me"]
+      "expected_web_paths": [
+        "/auth/login",
+        "/auth/sign-up"
+      ],
+      "expected_api_paths": [
+        "/me"
+      ]
     }
   ]
 }

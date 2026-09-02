@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_PATHS } from "@oshi/shared";
+import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,11 +18,14 @@ type ColorTagItem = {
 type CategoryTagItem = {
   category_tag_id: number;
   category_tag_name: string;
+  category_tag_color?: string;
+  category_tag_icon?: string;
 };
 
 type StorageLocationItem = {
   storage_location_id: number;
   storage_location_name: string;
+  storage_location_icon?: string;
 };
 
 type ProductDetail = {
@@ -46,9 +50,14 @@ function apiBase(): string {
 
 type Props = {
   registeredProductId: number;
+  /** 削除後の戻り先（一覧クエリ付き可） */
+  galleryHref?: string;
 };
 
-export function ProductDetailEditor({ registeredProductId }: Props) {
+export function ProductDetailEditor({
+  registeredProductId,
+  galleryHref = "/gallery",
+}: Props) {
   const router = useRouter();
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
   const [storageLocations, setStorageLocations] = useState<StorageLocationItem[]>([]);
@@ -60,8 +69,10 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
   const [purchaseLocation, setPurchaseLocation] = useState("");
   const [barcodeNumber, setBarcodeNumber] = useState("");
   const [memo, setMemo] = useState("");
-  const [categoryTagId, setCategoryTagId] = useState<string>("");
-  const [storageLocationId, setStorageLocationId] = useState<string>("");
+  const [categoryTagId, setCategoryTagId] = useState<number | null>(null);
+  const [storageLocationId, setStorageLocationId] = useState<number | null>(
+    null,
+  );
   const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,12 +133,12 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
         setBarcodeNumber(detail.barcode_number?.trim() ?? "");
         setMemo(detail.memo ?? "");
         setCategoryTagId(
-          detail.category_tag_id != null ? String(detail.category_tag_id) : "",
+          detail.category_tag_id != null ? detail.category_tag_id : null,
         );
         setStorageLocationId(
           detail.storage_location_id != null
-            ? String(detail.storage_location_id)
-            : "",
+            ? detail.storage_location_id
+            : null,
         );
         setSelectedSlots(new Set(detail.color_tag_slots ?? []));
       } catch (e: unknown) {
@@ -178,13 +189,13 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
             : null,
         color_tag_slots: Array.from(selectedSlots).sort((a, b) => a - b),
       };
-      if (categoryTagId) {
-        body.category_tag_id = Number(categoryTagId);
+      if (categoryTagId != null) {
+        body.category_tag_id = categoryTagId;
       } else {
         body.clear_category_tag = true;
       }
-      if (storageLocationId) {
-        body.storage_location_id = Number(storageLocationId);
+      if (storageLocationId != null) {
+        body.storage_location_id = storageLocationId;
       } else {
         body.clear_storage_location = true;
       }
@@ -227,7 +238,7 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
       if (!res.ok) {
         throw new Error(`削除失敗: ${(await res.text()).slice(0, 160)}`);
       }
-      router.push("/gallery");
+      router.push(galleryHref);
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "削除に失敗しました");
@@ -242,9 +253,9 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
   return (
     <form
       onSubmit={onSave}
-      className="flex max-w-lg flex-col gap-4 rounded-md border border-border p-4"
+      className="flex max-w-lg flex-col gap-4"
     >
-      <h2 className="text-lg font-medium">製品情報の編集</h2>
+      <h2 className="sr-only">製品情報の編集</h2>
 
       <div className="grid gap-2">
         <Label htmlFor="detail_product_name">製品名（必須）</Label>
@@ -314,39 +325,30 @@ export function ProductDetailEditor({ registeredProductId }: Props) {
 
       <h3 className="pt-2 text-base font-medium">タグ・収納</h3>
 
-      <div className="grid gap-2">
-        <Label htmlFor="category_tag_id">カテゴリータグ</Label>
-        <select
-          id="category_tag_id"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-          value={categoryTagId}
-          onChange={(e) => setCategoryTagId(e.target.value)}
-        >
-          <option value="">未設定</option>
-          {categories.map((c) => (
-            <option key={c.category_tag_id} value={c.category_tag_id}>
-              {c.category_tag_name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <TagChipPicker
+        label="カテゴリータグ"
+        variant="category"
+        value={categoryTagId}
+        onChange={setCategoryTagId}
+        options={categories.map((c) => ({
+          id: c.category_tag_id,
+          name: c.category_tag_name,
+          icon: c.category_tag_icon,
+          color: c.category_tag_color,
+        }))}
+      />
 
-      <div className="grid gap-2">
-        <Label htmlFor="storage_location_id">収納場所</Label>
-        <select
-          id="storage_location_id"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-          value={storageLocationId}
-          onChange={(e) => setStorageLocationId(e.target.value)}
-        >
-          <option value="">未設定</option>
-          {storageLocations.map((r) => (
-            <option key={r.storage_location_id} value={r.storage_location_id}>
-              {r.storage_location_name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <TagChipPicker
+        label="収納場所"
+        variant="storage"
+        value={storageLocationId}
+        onChange={setStorageLocationId}
+        options={storageLocations.map((r) => ({
+          id: r.storage_location_id,
+          name: r.storage_location_name,
+          icon: r.storage_location_icon,
+        }))}
+      />
 
       <fieldset className="grid gap-2">
         <legend className="text-sm font-medium">カラータグ</legend>

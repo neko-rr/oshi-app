@@ -60,6 +60,7 @@ import { Plus, Settings } from "@/lib/icons";
 | ギャラリー・写真 | `Image` / `Images` | 一覧・サムネ欠け |
 | 検索 | `Search` | 将来 |
 | 戻る | `ChevronLeft` | 詳細・フォーム |
+| 並び替え | `ChevronUp` / `ChevronDown` | 設定タグ一覧 |
 | 閉じる | `X` | モーダル・トースト |
 | 保存・完了 | `Check` | 成功フィードバック |
 | 警告・エラー | `AlertCircle` | エラー状態 |

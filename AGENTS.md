@@ -7,6 +7,9 @@
 
 推し活グッズ管理アプリ。バーコード・写真から登録し、収納タグで実物とデータをつなぐ。
 
+**v2 移行（2026-09）:** Must 本線はほぼ完了。正本は [docs/product/v2_status.md](docs/product/v2_status.md) / [roadmap.md](docs/product/roadmap.md)。  
+Phase 2・モバイル本番・deferred は要求に応じて。ARCHIVE / Dash を新規設計の正にしない。
+
 ## スタック（v2）
 
 | 層 | 技術 | 配置 |

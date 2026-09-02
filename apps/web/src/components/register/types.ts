@@ -1,9 +1,25 @@
+import type { FieldSources } from "./assist/types";
+import { emptyFieldSources } from "./assist/types";
+
 export type WizardStep = "barcode" | "photo" | "confirm";
 
 export type ColorTagItem = {
   slot: number;
   color_tag_name: string;
   color_tag_color: string;
+};
+
+export type CategoryTagItem = {
+  category_tag_id: number;
+  category_tag_name: string;
+  category_tag_color?: string | null;
+  category_tag_icon?: string | null;
+};
+
+export type StorageLocationItem = {
+  storage_location_id: number;
+  storage_location_name: string;
+  storage_location_icon?: string | null;
 };
 
 export type BarcodeLookupResponse = {
@@ -25,6 +41,11 @@ export type RegisterDraft = {
   purchasePrice: string;
   memo: string;
   selectedSlots: Set<number>;
+  categoryTagId: number | null;
+  storageLocationId: number | null;
+  visualTags: string[];
+  unmatchedProductType: string | null;
+  fieldSources: FieldSources;
 };
 
 export function emptyDraft(): RegisterDraft {
@@ -41,5 +62,12 @@ export function emptyDraft(): RegisterDraft {
     purchasePrice: "",
     memo: "",
     selectedSlots: new Set(),
+    categoryTagId: null,
+    storageLocationId: null,
+    visualTags: [],
+    unmatchedProductType: null,
+    fieldSources: emptyFieldSources(),
   };
 }
+
+export type { FieldSources, FieldSource } from "./assist/types";

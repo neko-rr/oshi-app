@@ -127,6 +127,40 @@
               "title": "Barcode"
             },
             "description": "barcode_number 完全一致（自分の購入済み判定用）"
+          },
+          {
+            "name": "category_tag_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Tag Id"
+            }
+          },
+          {
+            "name": "storage_location_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Storage Location Id"
+            }
           }
         ],
         "responses": {
@@ -745,6 +779,102 @@
         ]
       }
     },
+    "/category-tags/order": {
+      "put": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Put Category Tags Order",
+        "operationId": "put_category_tags_order_category_tags_order_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Category Tags Order Category Tags Order Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/category-tags/restore-preset": {
+      "post": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Post Restore Category Preset",
+        "operationId": "post_restore_category_preset_category_tags_restore_preset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestorePresetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Restore Category Preset Category Tags Restore Preset Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/category-tags/{category_tag_id}": {
       "patch": {
         "tags": [
@@ -903,6 +1033,102 @@
                   "additionalProperties": true,
                   "type": "object",
                   "title": "Response Post Storage Location Storage Locations Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/storage-locations/order": {
+      "put": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Put Storage Locations Order",
+        "operationId": "put_storage_locations_order_storage_locations_order_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Storage Locations Order Storage Locations Order Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/storage-locations/restore-preset": {
+      "post": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Post Restore Storage Preset",
+        "operationId": "post_restore_storage_preset_storage_locations_restore_preset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestorePresetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Post Restore Storage Preset Storage Locations Restore Preset Post"
                 }
               }
             }
@@ -1775,6 +2001,21 @@
         "title": "PatchProductRequest",
         "description": "PATCH /products/{id} — スカラーとタグ付け。"
       },
+      "RestorePresetRequest": {
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Slot"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot"
+        ],
+        "title": "RestorePresetRequest"
+      },
       "StorageLocationCreate": {
         "properties": {
           "storage_location_name": {
@@ -1810,6 +2051,23 @@
           "storage_location_name"
         ],
         "title": "StorageLocationUpdate"
+      },
+      "TagOrderRequest": {
+        "properties": {
+          "ordered_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Ordered Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ordered_ids"
+        ],
+        "title": "TagOrderRequest"
       },
       "ThemeSettingsBody": {
         "properties": {

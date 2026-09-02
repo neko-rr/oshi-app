@@ -39,6 +39,14 @@ class StorageLocationUpdate(BaseModel):
     storage_location_icon: str = "map-pin"
 
 
+class TagOrderRequest(BaseModel):
+    ordered_ids: list[int] = Field(min_length=1)
+
+
+class RestorePresetRequest(BaseModel):
+    slot: int = Field(ge=1, le=6)
+
+
 def _err(exc: Exception) -> HTTPException:
     if isinstance(exc, ValueError):
         return HTTPException(
@@ -93,12 +101,46 @@ def get_category_tags(
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
-        items = tag_service.list_category_tags(
+        items, dismissed = tag_service.list_category_tags(
             members_id=user.members_id, access_token=access_token
         )
     except Exception as exc:
         raise _err(exc) from exc
+    return {"items": items, "dismissed_preset_slots": dismissed}
+
+
+@router.put("/category-tags/order")
+def put_category_tags_order(
+    body: TagOrderRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    access_token: str = Depends(get_access_token),
+) -> dict:
+    try:
+        items = tag_service.reorder_category_tags(
+            members_id=user.members_id,
+            access_token=access_token,
+            ordered_ids=body.ordered_ids,
+        )
+    except Exception as exc:
+        raise _err(exc) from exc
     return {"items": items}
+
+
+@router.post("/category-tags/restore-preset")
+def post_restore_category_preset(
+    body: RestorePresetRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    access_token: str = Depends(get_access_token),
+) -> dict:
+    try:
+        result = tag_service.restore_category_preset(
+            members_id=user.members_id,
+            access_token=access_token,
+            slot=body.slot,
+        )
+    except Exception as exc:
+        raise _err(exc) from exc
+    return {"ok": True, **result}
 
 
 @router.post("/category-tags", status_code=status.HTTP_201_CREATED)
@@ -164,12 +206,46 @@ def get_storage_locations(
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
-        items = tag_service.list_storage_locations(
+        items, dismissed = tag_service.list_storage_locations(
             members_id=user.members_id, access_token=access_token
         )
     except Exception as exc:
         raise _err(exc) from exc
+    return {"items": items, "dismissed_preset_slots": dismissed}
+
+
+@router.put("/storage-locations/order")
+def put_storage_locations_order(
+    body: TagOrderRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    access_token: str = Depends(get_access_token),
+) -> dict:
+    try:
+        items = tag_service.reorder_storage_locations(
+            members_id=user.members_id,
+            access_token=access_token,
+            ordered_ids=body.ordered_ids,
+        )
+    except Exception as exc:
+        raise _err(exc) from exc
     return {"items": items}
+
+
+@router.post("/storage-locations/restore-preset")
+def post_restore_storage_preset(
+    body: RestorePresetRequest,
+    user: AuthenticatedUser = Depends(get_current_user),
+    access_token: str = Depends(get_access_token),
+) -> dict:
+    try:
+        result = tag_service.restore_storage_preset(
+            members_id=user.members_id,
+            access_token=access_token,
+            slot=body.slot,
+        )
+    except Exception as exc:
+        raise _err(exc) from exc
+    return {"ok": True, **result}
 
 
 @router.post("/storage-locations", status_code=status.HTTP_201_CREATED)
