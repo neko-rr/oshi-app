@@ -9,17 +9,24 @@ import {
   LUCIDE_ICON_FALLBACK_CATEGORY,
 } from "@oshi/shared";
 import IconPickerGrid from "@/components/settings/IconPickerGrid";
+import { DismissedPresetsPanel } from "@/components/settings/DismissedPresetsPanel";
+import { TagOrderControls } from "@/components/settings/TagOrderControls";
 import { LucideIconBySlug } from "@/components/ui/LucideIconBySlug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
+import {
+  CATEGORY_PRESET_LABELS,
+  isPresetSlot,
+} from "@/lib/tagPresets";
 
 type CategoryTagItem = {
   category_tag_id: number;
   category_tag_name: string;
   category_tag_color: string;
   category_tag_icon?: string;
+  slot?: number | null;
 };
 
 function apiBase(): string {
@@ -31,6 +38,8 @@ function apiBase(): string {
 export default function CategoryTagsSettingsPage() {
   const router = useRouter();
   const [items, setItems] = useState<CategoryTagItem[]>([]);
+  const [dismissedSlots, setDismissedSlots] = useState<number[]>([]);
+  const [reordering, setReordering] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState("#6c757d");
   const [createIcon, setCreateIcon] = useState<string>(
@@ -66,8 +75,12 @@ export default function CategoryTagsSettingsPage() {
       if (!res.ok) {
         throw new Error(`取得失敗: ${(await res.text()).slice(0, 160)}`);
       }
-      const json = (await res.json()) as { items?: CategoryTagItem[] };
+      const json = (await res.json()) as {
+        items?: CategoryTagItem[];
+        dismissed_preset_slots?: number[];
+      };
       setItems(json.items ?? []);
+      setDismissedSlots(json.dismissed_preset_slots ?? []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "読み込みに失敗しました");
     } finally {
@@ -163,6 +176,71 @@ export default function CategoryTagsSettingsPage() {
     }
   }
 
+  async function persistOrder(nextItems: CategoryTagItem[]) {
+    setReordering(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const orderedIds = nextItems.map((i) => i.category_tag_id);
+      const res = await fetch(`${apiBase()}${API_PATHS.categoryTagsOrder}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ordered_ids: orderedIds }),
+      });
+      if (!res.ok) {
+        throw new Error(`並び替え失敗: ${(await res.text()).slice(0, 160)}`);
+      }
+      const json = (await res.json()) as { items?: CategoryTagItem[] };
+      setItems(json.items ?? nextItems);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "並び替えに失敗しました");
+      await load();
+    } finally {
+      setReordering(false);
+    }
+  }
+
+  function moveItem(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= items.length) return;
+    const next = [...items];
+    [next[index], next[target]] = [next[target], next[index]];
+    setItems(next);
+    void persistOrder(next);
+  }
+
+  async function onRestorePreset(slot: number) {
+    setSaving(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await fetch(
+        `${apiBase()}${API_PATHS.categoryTagsRestorePreset}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ slot }),
+        },
+      );
+      if (!res.ok) {
+        throw new Error(`再表示失敗: ${(await res.text()).slice(0, 160)}`);
+      }
+      await load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "再表示に失敗しました");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function onDelete(id: number) {
     setError(null);
     try {
@@ -195,9 +273,18 @@ export default function CategoryTagsSettingsPage() {
           カテゴリータグ
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          グッズの種類に合う Lucide アイコンを選べます（LOFT 系・お洒落可愛い）。
+          よく使う順に並べ替えられます。使わない初期タグは「非表示」にできます。
         </p>
       </div>
+
+      <DismissedPresetsPanel
+        slots={dismissedSlots}
+        labelForSlot={(slot) =>
+          CATEGORY_PRESET_LABELS[slot] ?? `プリセット ${slot}`
+        }
+        onRestore={(slot) => void onRestorePreset(slot)}
+        busy={saving || reordering}
+      />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">読み込み中…</p>
@@ -206,7 +293,7 @@ export default function CategoryTagsSettingsPage() {
           {items.length === 0 ? (
             <li className="text-sm text-muted-foreground">まだありません</li>
           ) : (
-            items.map((item) => (
+            items.map((item, index) => (
               <li
                 key={item.category_tag_id}
                 className="rounded-2xl border border-border bg-card px-3 py-2"
@@ -264,36 +351,53 @@ export default function CategoryTagsSettingsPage() {
                     </div>
                   </form>
                 ) : (
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 text-sm">
-                      <span
-                        className="flex size-8 items-center justify-center rounded-xl border border-border"
-                        style={{ backgroundColor: item.category_tag_color }}
-                      >
-                        <LucideIconBySlug
-                          slug={item.category_tag_icon || LUCIDE_ICON_FALLBACK_CATEGORY}
-                          className="size-4 text-foreground"
-                        />
-                      </span>
-                      <span>{item.category_tag_name}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => startEdit(item)}
-                      >
-                        編集
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => void onDelete(item.category_tag_id)}
-                      >
-                        削除
-                      </Button>
+                  <div className="flex items-center gap-2">
+                    <TagOrderControls
+                      onMoveUp={() => moveItem(index, -1)}
+                      onMoveDown={() => moveItem(index, 1)}
+                      disableUp={index === 0}
+                      disableDown={index === items.length - 1}
+                      busy={reordering}
+                    />
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2.5 text-sm">
+                        <span
+                          className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border"
+                          style={{ backgroundColor: item.category_tag_color }}
+                        >
+                          <LucideIconBySlug
+                            slug={
+                              item.category_tag_icon ||
+                              LUCIDE_ICON_FALLBACK_CATEGORY
+                            }
+                            className="size-4 text-foreground"
+                          />
+                        </span>
+                        <span className="truncate">{item.category_tag_name}</span>
+                        {isPresetSlot(item.slot) ? (
+                          <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                            初期
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEdit(item)}
+                        >
+                          編集
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => void onDelete(item.category_tag_id)}
+                        >
+                          {isPresetSlot(item.slot) ? "非表示" : "削除"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -6,7 +6,11 @@ export const API_PATHS = {
   photos: "/photos",
   colorTags: "/color-tags",
   categoryTags: "/category-tags",
+  categoryTagsOrder: "/category-tags/order",
+  categoryTagsRestorePreset: "/category-tags/restore-preset",
   storageLocations: "/storage-locations",
+  storageLocationsOrder: "/storage-locations/order",
+  storageLocationsRestorePreset: "/storage-locations/restore-preset",
   themeSettings: "/theme-settings",
   statsProducts: "/stats/products",
   dashboardCharts: "/dashboard/charts",
@@ -26,6 +30,12 @@ export type HealthResponse = {
 };
 
 /** GET /products の1件（一覧スライス） */
+export type ProductTagSummary = {
+  name: string;
+  color?: string | null;
+  icon?: string | null;
+};
+
 export type ProductListItem = {
   registered_product_id: number;
   product_name: string | null;
@@ -35,6 +45,8 @@ export type ProductListItem = {
   /** Storage signed URL（期限付き）。失敗時は null */
   photo_thumbnail_url: string | null;
   creation_date: string | null;
+  category_tag?: ProductTagSummary | null;
+  storage_location?: ProductTagSummary | null;
 };
 
 export type ProductListResponse = {
@@ -45,6 +57,16 @@ export type ProductListResponse = {
   q?: string | null;
   /** barcode_number 完全一致フィルタ */
   barcode?: string | null;
+  category_tag_id?: number | null;
+  storage_location_id?: number | null;
+  /** 取得件数が limit 以上なら次ページの可能性あり */
+  has_more?: boolean;
+};
+
+/** GET /category-tags / GET /storage-locations */
+export type TagMasterListResponse<TItem> = {
+  items: TItem[];
+  dismissed_preset_slots: number[];
 };
 
 export type CreateProductRequest = {

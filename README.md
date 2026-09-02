@@ -2,6 +2,9 @@
 
 推し活グッズ管理。**共同作業・別セッションの入口は [AGENTS.md](AGENTS.md)**。
 
+**v2 移行:** Must 本線はほぼ完了（登録・一覧・設定・認証・楽天）。要約は [docs/product/v2_status.md](docs/product/v2_status.md)。  
+残りはレスポンシブ／推し色磨き、Phase 2、モバイル本番、Later（deferred）。
+
 **ライセンス:** [LICENSE](LICENSE) — Copyright (c) 2026 neko-rr. **All Rights Reserved**（無断複製・再配布・派生開発禁止）。  
 旧プロトタイプ: [oshi-app-prototype](https://github.com/neko-rr/oshi-app-prototype)
 

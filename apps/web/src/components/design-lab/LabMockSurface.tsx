@@ -9,6 +9,7 @@ import {
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
 import { bestButtonForeground } from "@/components/design-lab/lab-contrast";
+import LabGalleryMock from "@/components/design-lab/LabGalleryMock";
 import LabThemeSettingsMock from "@/components/design-lab/LabThemeSettingsMock";
 
 type LabMockSurfaceProps = {
@@ -254,6 +255,20 @@ export default function LabMockSurface({
     return (
       <div data-lab-variant={variant}>
         <LabThemeSettingsMock variant={variant} uiState={uiState} />
+      </div>
+    );
+  }
+
+  if (scene === "gallery" || scene === "gallery-detail") {
+    return (
+      <div data-lab-variant={variant} style={oshiStyle(oshiIndex)}>
+        <LoggedInShell platform={pcWide ? "web-pc" : platform}>
+          <LabGalleryMock
+            variant={variant}
+            uiState={uiState}
+            mode={scene}
+          />
+        </LoggedInShell>
       </div>
     );
   }

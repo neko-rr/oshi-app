@@ -18,7 +18,7 @@ creation_date,
 category_tag_id,
 storage_location_id,
 photo(photo_thumbnail_url),
-category_tag(category_tag_name,category_tag_color),
+category_tag(category_tag_name,category_tag_color,category_tag_icon),
 storage_location(storage_location_name,storage_location_icon)
 """.replace(
     "\n", ""
@@ -57,6 +57,55 @@ def create_user_client(access_token: str) -> Any:
     )
 
 
+def _escape_ilike_fragment(raw: str) -> str:
+    """PostgREST ilike 用に % _ , を緩和。"""
+    return (
+        raw.replace("\\", " ")
+        .replace("%", " ")
+        .replace("_", " ")
+        .replace(",", " ")
+        .replace(".", " ")
+        .replace("(", " ")
+        .replace(")", " ")
+    )
+
+
+def _resolve_tag_ids_matching_name(
+    client: Any,
+    *,
+    table: str,
+    id_column: str,
+    name_column: str,
+    members_id: str,
+    needle: str,
+) -> list[int]:
+    pattern = f"%{_escape_ilike_fragment(needle)}%"
+    try:
+        resp = (
+            client.table(table)
+            .select(id_column)
+            .eq("members_id", members_id)
+            .ilike(name_column, pattern)
+            .execute()
+        )
+    except Exception:
+        logger.exception("タグ名検索に失敗: %s", table)
+        return []
+    data = resp.data if hasattr(resp, "data") else None
+    if not isinstance(data, list):
+        return []
+    out: list[int] = []
+    for row in data:
+        if not isinstance(row, dict):
+            continue
+        raw_id = row.get(id_column)
+        if isinstance(raw_id, int):
+            out.append(raw_id)
+        elif isinstance(raw_id, str) and raw_id.isdigit():
+            out.append(int(raw_id))
+    return out
+
+
 def fetch_products_page(
     *,
     members_id: str,
@@ -64,10 +113,15 @@ def fetch_products_page(
     limit: int = 48,
     offset: int = 0,
     barcode_number: str | None = None,
+    q: str | None = None,
+    category_tag_id: int | None = None,
+    storage_location_id: int | None = None,
 ) -> list[dict[str, Any]]:
     """registered_product を 1 ページ取得（RLS + eq members_id）。
 
     barcode_number 指定時は番号完全一致（購入済み判定用）。
+    q は製品名・タグ名の部分一致を DB 側で OR。
+    category_tag_id / storage_location_id は AND。
     """
     if limit <= 0:
         return []
@@ -81,6 +135,47 @@ def fetch_products_page(
     code = (barcode_number or "").strip()
     if code:
         query = query.eq("barcode_number", code)
+    if category_tag_id is not None:
+        query = query.eq("category_tag_id", int(category_tag_id))
+    if storage_location_id is not None:
+        query = query.eq("storage_location_id", int(storage_location_id))
+
+    needle = (q or "").strip()
+    if needle:
+        cat_ids = _resolve_tag_ids_matching_name(
+            client,
+            table="category_tag",
+            id_column="category_tag_id",
+            name_column="category_tag_name",
+            members_id=members_id,
+            needle=needle,
+        )
+        storage_ids = _resolve_tag_ids_matching_name(
+            client,
+            table="storage_location",
+            id_column="storage_location_id",
+            name_column="storage_location_name",
+            members_id=members_id,
+            needle=needle,
+        )
+        frag = _escape_ilike_fragment(needle)
+        # PostgREST: ワイルドカード付きは二重引用符で囲む
+        pattern = f"\"%{frag}%\""
+        or_parts = [
+            f"product_name.ilike.{pattern}",
+            f"character_name.ilike.{pattern}",
+            f"title.ilike.{pattern}",
+            f"product_group_name.ilike.{pattern}",
+            f"works_series_name.ilike.{pattern}",
+        ]
+        if cat_ids:
+            ids_csv = ",".join(str(i) for i in cat_ids)
+            or_parts.append(f"category_tag_id.in.({ids_csv})")
+        if storage_ids:
+            ids_csv = ",".join(str(i) for i in storage_ids)
+            or_parts.append(f"storage_location_id.in.({ids_csv})")
+        query = query.or_(",".join(or_parts))
+
     response = (
         query.order("creation_date", desc=True).range(offset, end).execute()
     )
@@ -91,7 +186,6 @@ def fetch_products_page(
     if not isinstance(data, list):
         return []
     return data
-
 
 def insert_product_row(
     *,

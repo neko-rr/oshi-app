@@ -11,6 +11,7 @@ DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**
 |----------|------|------|
 | [value.md](value.md) | 顧客価値・非交渉 | **手** |
 | [roadmap.md](roadmap.md) | Must / Phase2 / Later | **手** |
+| [v2_status.md](v2_status.md) | v2 移行の要約（ほぼ完了の境界） | **手** |
 | [flows/](flows/) | 主要ユーザーフロー | **手** |
 | [acceptance/](acceptance/) | 画面ごとの受け入れ条件（DoD） | **手** |
 | [meta/status_vocabulary.md](meta/status_vocabulary.md) | shipped/partial/… の定義 | **手** |
@@ -20,10 +21,11 @@ DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**
 ## 読む順（あなた向け）
 
 1. [value.md](value.md) … 何のためのアプリか  
-2. [roadmap.md](roadmap.md) … 今やる／後でやる  
-3. [flows/register.md](flows/register.md) … 登録の理想フロー  
-4. [acceptance/](acceptance/) … できているかの短冊  
-5. [generated/](generated/) … **いま実装されている事実**（手で直さない）
+2. [v2_status.md](v2_status.md) … 移行はどこまで終わったか  
+3. [roadmap.md](roadmap.md) … 今やる／後でやる  
+4. [flows/register.md](flows/register.md) … 登録の理想フロー  
+5. [acceptance/](acceptance/) … できているかの短冊  
+6. [generated/](generated/) … **いま実装されている事実**（手で直さない）
 
 ## ステータス語彙（要約）
 

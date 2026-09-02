@@ -12,6 +12,30 @@ FetchPage = Callable[..., list[dict[str, Any]]]
 SignObject = Callable[..., str | None]
 
 
+def _tag_summary_from_embed(
+    embed: dict[str, Any] | None,
+    *,
+    name_key: str,
+    color_key: str | None = None,
+    icon_key: str | None = None,
+) -> dict[str, Any] | None:
+    if not isinstance(embed, dict):
+        return None
+    name = embed.get(name_key)
+    if not isinstance(name, str) or not name.strip():
+        return None
+    out: dict[str, Any] = {"name": name.strip()}
+    if color_key:
+        color = embed.get(color_key)
+        if isinstance(color, str) and color.strip():
+            out["color"] = color.strip()
+    if icon_key:
+        icon = embed.get(icon_key)
+        if isinstance(icon, str) and icon.strip():
+            out["icon"] = icon.strip()
+    return out
+
+
 def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
     """PostgREST 行を API レスポンス形へ正規化（署名前）。"""
     photo = row.get("photo")
@@ -44,12 +68,19 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
         "creation_date": row.get("creation_date"),
         "category_tag_id": row.get("category_tag_id"),
         "storage_location_id": row.get("storage_location_id"),
-        "category_tag": row.get("category_tag")
-        if isinstance(row.get("category_tag"), dict)
-        else None,
-        "storage_location": row.get("storage_location")
-        if isinstance(row.get("storage_location"), dict)
-        else None,
+        "category_tag": _tag_summary_from_embed(
+            row.get("category_tag") if isinstance(row.get("category_tag"), dict) else None,
+            name_key="category_tag_name",
+            color_key="category_tag_color",
+            icon_key="category_tag_icon",
+        ),
+        "storage_location": _tag_summary_from_embed(
+            row.get("storage_location")
+            if isinstance(row.get("storage_location"), dict)
+            else None,
+            name_key="storage_location_name",
+            icon_key="storage_location_icon",
+        ),
         "color_tag_slots": [],
     }
 
@@ -68,11 +99,13 @@ def filter_products_by_query(
         cat = item.get("category_tag")
         cat_name = ""
         if isinstance(cat, dict):
-            cat_name = str(cat.get("category_tag_name") or "").casefold()
+            cat_name = str(cat.get("name") or cat.get("category_tag_name") or "").casefold()
         storage = item.get("storage_location")
         storage_name = ""
         if isinstance(storage, dict):
-            storage_name = str(storage.get("storage_location_name") or "").casefold()
+            storage_name = str(
+                storage.get("name") or storage.get("storage_location_name") or ""
+            ).casefold()
         blob = f"{name} {cat_name} {storage_name}"
         if needle in blob:
             matched.append(item)
@@ -102,6 +135,8 @@ def list_products_for_member(
     offset: int = 0,
     q: str | None = None,
     barcode: str | None = None,
+    category_tag_id: int | None = None,
+    storage_location_id: int | None = None,
     fetch_page: FetchPage | None = None,
     sign_object: SignObject | None = None,
 ) -> list[dict[str, Any]]:
@@ -109,7 +144,7 @@ def list_products_for_member(
 
     fetch_page 未指定時は Supabase（ユーザー JWT）へ問い合わせる。
     サムネイル path があれば signed URL を付与（失敗時は url=null、一覧自体は返す）。
-    q 指定時は取得後に名前・タグで絞り込み（ページ内フィルタ）。
+    q / タグ ID は fetch（DB）側で絞り込み、その後に limit/offset。
     barcode 指定時は番号完全一致（DB 側フィルタ＋防御的再フィルタ）。
     """
     if not members_id or not str(members_id).strip():
@@ -118,6 +153,7 @@ def list_products_for_member(
         raise ValueError("access_token が空です")
 
     barcode_norm = (barcode or "").strip() or None
+    q_norm = (q or "").strip() or None
 
     fetcher = fetch_page
     if fetcher is None:
@@ -125,22 +161,38 @@ def list_products_for_member(
 
         fetcher = fetch_products_page
 
+    mid = str(members_id).strip()
+    token = str(access_token).strip()
+    q_applied_in_fetch = False
     try:
         rows = fetcher(
-            members_id=str(members_id).strip(),
-            access_token=str(access_token).strip(),
+            members_id=mid,
+            access_token=token,
             limit=limit,
             offset=offset,
             barcode_number=barcode_norm,
+            q=q_norm,
+            category_tag_id=category_tag_id,
+            storage_location_id=storage_location_id,
         )
+        q_applied_in_fetch = True
     except TypeError:
-        # 古い fetch 差し替え用（barcode_number 未対応）
-        rows = fetcher(
-            members_id=str(members_id).strip(),
-            access_token=str(access_token).strip(),
-            limit=limit,
-            offset=offset,
-        )
+        # 古い fetch 差し替え用（新引数未対応）
+        try:
+            rows = fetcher(
+                members_id=mid,
+                access_token=token,
+                limit=limit,
+                offset=offset,
+                barcode_number=barcode_norm,
+            )
+        except TypeError:
+            rows = fetcher(
+                members_id=mid,
+                access_token=token,
+                limit=limit,
+                offset=offset,
+            )
     except RuntimeError as exc:
         logger.warning("製品一覧を取得できません: %s", exc)
         return []
@@ -153,14 +205,15 @@ def list_products_for_member(
 
     items = [normalize_product_row(r) for r in rows if isinstance(r, dict)]
     items = filter_products_by_barcode(items, barcode_norm)
-    items = filter_products_by_query(items, q)
+    # 旧 fetch 互換時のみメモリ側で q フォールバック
+    if q_norm and not q_applied_in_fetch:
+        items = filter_products_by_query(items, q_norm)
 
     signer = sign_object
     if signer is None:
         from app.infra.photo_signing import create_signed_url_for_object
 
         signer = create_signed_url_for_object
-
     token = str(access_token).strip()
     for item in items:
         path = item.get("photo_thumbnail_path")
@@ -388,12 +441,19 @@ def normalize_product_detail(row: dict[str, Any]) -> dict[str, Any]:
         "purchase_location": row.get("purchase_location"),
         "category_tag_id": row.get("category_tag_id"),
         "storage_location_id": row.get("storage_location_id"),
-        "category_tag": row.get("category_tag")
-        if isinstance(row.get("category_tag"), dict)
-        else None,
-        "storage_location": row.get("storage_location")
-        if isinstance(row.get("storage_location"), dict)
-        else None,
+        "category_tag": _tag_summary_from_embed(
+            row.get("category_tag") if isinstance(row.get("category_tag"), dict) else None,
+            name_key="category_tag_name",
+            color_key="category_tag_color",
+            icon_key="category_tag_icon",
+        ),
+        "storage_location": _tag_summary_from_embed(
+            row.get("storage_location")
+            if isinstance(row.get("storage_location"), dict)
+            else None,
+            name_key="storage_location_name",
+            icon_key="storage_location_icon",
+        ),
         "color_tag_slots": [],
     }
 

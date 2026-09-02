@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T22:27:59Z",
+  "generated_at": "2026-09-02T12:20:55Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -234,11 +234,6 @@
       "detail": "status=`not_started` lab_variant=None"
     },
     {
-      "id": "/gallery",
-      "kind": "lab_not_fully_adopted",
-      "detail": "status=`not_started` lab_variant=None"
-    },
-    {
       "id": "/register",
       "kind": "lab_not_fully_adopted",
       "detail": "status=`not_started` lab_variant=None"
@@ -255,10 +250,17 @@
     "screens": [
       {
         "path": "/gallery",
-        "lab_variant": null,
-        "status": "not_started",
-        "notes_ja": "Lab 比較後に画面単位で採用",
-        "updated_at": null
+        "lab_variant": "b",
+        "status": "adopted",
+        "notes_ja": "B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元",
+        "updated_at": "2026-09-02"
+      },
+      {
+        "path": "/gallery/[registered_product_id]",
+        "lab_variant": "b",
+        "status": "adopted",
+        "notes_ja": "B: ヒーロー写真＋details で編集。一覧クエリ付き戻る",
+        "updated_at": "2026-09-02"
       },
       {
         "path": "/register",
@@ -297,5 +299,5 @@
       }
     ]
   },
-  "icons_catalog_count": 105
+  "icons_catalog_count": 107
 }

@@ -35,7 +35,7 @@
 | 場所 | 役割 | 入口 |
 |------|------|------|
 | [db/](db/README.md) | DB・RLS・カタログ | [db/README.md](db/README.md) |
-| [product/](product/README.md) | 製品価値・ロードマップ・as-built | [product/README.md](product/README.md) |
+| [product/](product/README.md) | 製品価値・ロードマップ・v2 移行要約・as-built | [product/README.md](product/README.md)（要約: [product/v2_status.md](product/v2_status.md)） |
 | [design/](design/README.md) | UI/UX・推し色・動き・トークン方針 | [design/README.md](design/README.md) |
 | [legal/](legal/README.md) | OSS NOTICE・外部サービス表示メモ | [legal/README.md](legal/README.md) |
 | [WAKE_UP.md](WAKE_UP.md) | クラウドで人がやる ToDo | **手** |

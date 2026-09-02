@@ -29,6 +29,8 @@ def list_products(
         max_length=64,
         description="barcode_number 完全一致（自分の購入済み判定用）",
     ),
+    category_tag_id: int | None = Query(default=None, ge=1),
+    storage_location_id: int | None = Query(default=None, ge=1),
 ) -> dict:
     try:
         items = list_products_for_member(
@@ -38,6 +40,8 @@ def list_products(
             offset=offset,
             q=q,
             barcode=barcode,
+            category_tag_id=category_tag_id,
+            storage_location_id=storage_location_id,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -51,6 +55,9 @@ def list_products(
         "offset": offset,
         "q": q,
         "barcode": barcode,
+        "category_tag_id": category_tag_id,
+        "storage_location_id": storage_location_id,
+        "has_more": len(items) >= limit,
     }
 
 

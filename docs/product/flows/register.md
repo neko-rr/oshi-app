@@ -7,11 +7,14 @@
 
 ## 現状との差
 
-現行 UI は `RegisterWizard`（手順 1 → 2 → 6）で番号入力・カメラ読取・写真・確認まで完走できる。  
+現行 UI は `RegisterWizard`（手順 1 → 2 → 6）で番号入力・カメラ読取・写真・確認まで完走できる（**Must 本線は shipped**）。  
 **バーコード:** ライブカメラ（`BarcodeDetector` 優先、ZXing フォールバック）＋画像アップロード＋番号入力。  
 読取後は `GET /products?barcode=` で自分のリストに同番号があるかヒント表示（将来の購入済み判定の土台）。  
-**未実装:** Vision / タグ抽出の LIVE オーケストレーション、店頭専用の購入済み判定画面。  
-楽天 LIVE は仕様変更により当面オフ前提。
+**裏アシスト:** 写真あり時は `POST /assist/vision/describe` を **1回**呼び、見た目タグ・商品種類・色提案を確認画面へ反映。  
+フィールド優先は **手入力 > バーコード照合値 > Vision**（商品名・価格はバーコード優先）。  
+`/assist/tags/extract` は登録本線では呼ばない（API は残置）。  
+**楽天照合:** 2026 新API（openapi + accessKey）再登録済み。`RAKUTEN_LIVE_CALLS=1` で実呼び出し可。  
+**後続（Must 本線外）:** 店頭専用の購入済み判定画面、写真ライブプレビュー、一括登録 / CLIP / 連続モード切替 UI。
 
 ## 手順 1 — バーコード
 
@@ -43,28 +46,21 @@
 
 API: `POST /assist/barcode/lookup`（LIVE フラグ・キー方針は `docs/migration/v2/assist_external_apis.md`）
 
-## 手順 4 — 画像説明（裏）
+## 手順 4〜5 — 画像 Vision（裏・1回）
 
-- Input: 手順 2 の写真
-- IO Intelligence Vision を使う（キー未設定時は接続しない）
-- 手順 3 失敗時は、画像テキスト化結果などでキーワード照合を検討
-- 手順 3 成功時は説明テキスト化が主
+- Input: 手順 2 の写真（なければスキップ）
+- IO Intelligence Vision を **1回**呼び、説明・`product_type`・色・見た目タグ（12〜16目安）を同時取得
+- 種類は既存 `category_tag` 名とマッチして自動選択。色は `color_tag` 枠へ。見た目タグはチップ（メモ追記可）
+- キー未設定 / LIVE オフでも soft status で落ちない
+- 別呼び出しのタグ専用 LLM（`/assist/tags/extract`）は登録本線では使わない
 
-API: `POST /assist/vision/describe`、必要なら `assist/barcode/keyword`
-
-## 手順 5 — タグ抽出（裏）
-
-- 手順 3・4 の情報から登録用タグを抽出
-- 1 と 2 を両方スキップした場合は提案なし → 手順 6 で手入力
-
-API: `POST /assist/tags/extract`
+API: `POST /assist/vision/describe`
 
 ## 手順 6 — 微調整と本登録
 
-- 3〜5 の完了待ち中はローディングを表示してよい
-- **タグ抽出が終わっていなくても登録ボタンで本保存可能**
-- 提案を表示し、利用者が修正
-- 登録成功の通知のあと、手順 1 に戻る
+- Vision 待ち中はローディング表示可。**終わっていなくても登録ボタンで本保存可能**
+- 提案を表示し、利用者が修正（バーコード由来の名・価格は上書きしない）
+- 登録成功後は「続けて登録」（手順 1 へ）またはギャラリーへ
 
 本保存: `POST /photos`（任意）+ `POST /products`（アシストに依存しない）
 

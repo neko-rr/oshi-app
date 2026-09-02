@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { FormEvent } from "react";
+import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ColorTagItem } from "./types";
+import type {
+  CategoryTagItem,
+  ColorTagItem,
+  StorageLocationItem,
+} from "./types";
 
 type Props = {
   productName: string;
@@ -15,8 +20,15 @@ type Props = {
   barcode: string;
   memo: string;
   colors: ColorTagItem[];
+  categories: CategoryTagItem[];
+  storageLocations: StorageLocationItem[];
+  categoryTagId: number | null;
+  storageLocationId: number | null;
   selectedSlots: Set<number>;
+  visualTags: string[];
+  unmatchedProductType: string | null;
   assistHint: string | null;
+  assistPhase: "idle" | "running" | "done";
   error: string | null;
   loading: boolean;
   onProductName: (v: string) => void;
@@ -25,9 +37,14 @@ type Props = {
   onPurchasePrice: (v: string) => void;
   onBarcode: (v: string) => void;
   onMemo: (v: string) => void;
+  onCategoryTagId: (id: number | null) => void;
+  onStorageLocationId: (id: number | null) => void;
   onToggleSlot: (slot: number) => void;
+  onApplyVisualTag: (tag: string) => void;
   onBack: () => void;
   onSubmit: (e: FormEvent) => void;
+  onContinueRegister: () => void;
+  showContinue: boolean;
 };
 
 export function StepConfirm({
@@ -38,8 +55,15 @@ export function StepConfirm({
   barcode,
   memo,
   colors,
+  categories,
+  storageLocations,
+  categoryTagId,
+  storageLocationId,
   selectedSlots,
+  visualTags,
+  unmatchedProductType,
   assistHint,
+  assistPhase,
   error,
   loading,
   onProductName,
@@ -48,9 +72,14 @@ export function StepConfirm({
   onPurchasePrice,
   onBarcode,
   onMemo,
+  onCategoryTagId,
+  onStorageLocationId,
   onToggleSlot,
+  onApplyVisualTag,
   onBack,
   onSubmit,
+  onContinueRegister,
+  showContinue,
 }: Props) {
   return (
     <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4">
@@ -59,6 +88,11 @@ export function StepConfirm({
         <p className="mt-1 text-sm text-muted-foreground">
           内容を確認・修正して登録します。外部アシストがなくても保存できます。
         </p>
+        {assistPhase === "running" ? (
+          <p className="mt-2 text-xs text-muted-foreground" role="status">
+            提案を反映中…（登録はそのままできます）
+          </p>
+        ) : null}
         {assistHint ? (
           <p className="mt-2 text-xs text-muted-foreground" role="status">
             {assistHint}
@@ -114,6 +148,41 @@ export function StepConfirm({
         />
       </div>
 
+      {categories.length > 0 ? (
+        <TagChipPicker
+          label="カテゴリ（種類）"
+          variant="category"
+          value={categoryTagId}
+          onChange={onCategoryTagId}
+          options={categories.map((c) => ({
+            id: c.category_tag_id,
+            name: c.category_tag_name,
+            icon: c.category_tag_icon,
+            color: c.category_tag_color,
+          }))}
+        />
+      ) : null}
+
+      {unmatchedProductType ? (
+        <p className="text-xs text-muted-foreground">
+          種類の提案「{unmatchedProductType}」は既存カテゴリと一致しませんでした。上から選ぶか手入力してください。
+        </p>
+      ) : null}
+
+      {storageLocations.length > 0 ? (
+        <TagChipPicker
+          label="収納場所"
+          variant="storage"
+          value={storageLocationId}
+          onChange={onStorageLocationId}
+          options={storageLocations.map((s) => ({
+            id: s.storage_location_id,
+            name: s.storage_location_name,
+            icon: s.storage_location_icon,
+          }))}
+        />
+      ) : null}
+
       <div className="grid gap-2">
         <Label htmlFor="memo">メモ</Label>
         <Input
@@ -122,6 +191,26 @@ export function StepConfirm({
           onChange={(e) => onMemo(e.target.value)}
         />
       </div>
+
+      {visualTags.length > 0 ? (
+        <fieldset className="grid gap-2">
+          <legend className="text-sm font-medium">見た目タグ提案（タップでメモへ追記）</legend>
+          <div className="flex flex-wrap gap-2">
+            {visualTags.map((tag) => (
+              <Button
+                key={tag}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-auto rounded-full px-3 py-1 text-xs font-normal"
+                onClick={() => onApplyVisualTag(tag)}
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
 
       {colors.length > 0 ? (
         <fieldset className="grid gap-2">
@@ -152,6 +241,11 @@ export function StepConfirm({
         <Button type="submit" disabled={loading}>
           {loading ? "保存中…" : "登録する"}
         </Button>
+        {showContinue ? (
+          <Button type="button" variant="secondary" onClick={onContinueRegister}>
+            続けて登録
+          </Button>
+        ) : null}
         <Button type="button" variant="outline" onClick={onBack}>
           戻る
         </Button>

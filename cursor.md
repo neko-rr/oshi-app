@@ -1,5 +1,48 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-03: v2 Must 本線を「ほぼ移行完了」として文書同期
+
+- 新設: `docs/product/v2_status.md`
+- `feature_status` / roadmap: 登録クラスタ・検索・privacy・licenses 等を shipped
+- 残 partial（Must）: `responsive_web` / `theme_colors`（推し色スウォッチ）
+- Phase 2・モバイル・deferred は未完了のまま明記
+- acceptance: `search.md` 追加。`generate_product_docs.py` 再実行
+
+## 2026-09-03: 楽天API 再登録完了・ドキュメント同期
+
+- Developer 再登録済み（市場APIスコープ / Webアプリ＋許可サイト）
+- ローカル疎通: `lookup_by_keyword` → success（秘密はチャット・Git に出さない）
+- env: `RAKUTEN_APPLICATION_ID` + `RAKUTEN_ACCESS_KEY` + `RAKUTEN_ORIGIN` + `RAKUTEN_LIVE_CALLS`
+- docs: flows/register・assist_external_apis・feature_status(`product_lookup`=shipped)・roadmap・acceptance・official-links
+- `.env.example` はコメントのみ（実値禁止）
+
+## 2026-09-02: ギャラリー Web UX（Lab B 採用）
+
+- Lab: `/dev/design-lab` で画面「ギャラリー」「ギャラリー詳細」
+- 本番: 写真主役グリッド、カテゴリ/収納チップ、`has_more` もっと見る、DB 側 `q`、詳細→一覧のクエリ復元、編集は `<details>`
+- API: `GET /products` に `category_tag_id` / `storage_location_id` / `has_more`
+- Mobile ギャラリーは未着手
+
+## 2026-09-02: 楽天API 形を新仕様へ（のち再登録完了 → 2026-09-03）
+
+- エンドポイント: `openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701`
+- `RAKUTEN_ACCESS_KEY` / `RAKUTEN_ORIGIN` 追加
+- モバイル直叩き不可の話は「端末→楽天」。oshi は API サーバー経由
+
+## 2026-09-02: 登録 Vision 1回＋バーコード優先マージ
+
+- 写真あり → `POST /assist/vision/describe` のみ（見た目タグ 12〜16・種類・色を structured_data）
+- 優先: 手入力 > バーコード名/価格 > Vision。`/assist/tags/extract` は登録本線外
+- 確認画面: カテゴリ/収納ピッカー、見た目タグチップ、続けて登録
+- テスト: `apps/api/tests/test_vision_structured.py`、`applyAssistToDraft.test.ts`（node --test）
+
+## 2026-09-02: タグ並び替え・プリセット非表示・アイコン本番表示
+
+- **並び替え**: 設定一覧は ↑↓（モバイル向け）。`PUT /category-tags/order` / `PUT /storage-locations/order`
+- **プリセット非表示**: slot 1–6 削除時は `*_preset_slot_dismissed` に記録（再自動作成しない）。`POST .../restore-preset` で復帰
+- **本番表示**: ギャラリー一覧・詳細ヘッダに `ProductTagChip`。詳細編集は `TagChipPicker`（select 廃止）
+- migration: `20260902160000_wire_preset_slot_dismissed_grants.sql`（Supabase 適用済み）
+
 ## 2026-09-02: Lucide アイコン移行（タグ・収納）
 
 - `bi-*`（Bootstrap Icons）廃止 → Lucide slug（kebab-case）を DB/API に保存

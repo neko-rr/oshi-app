@@ -49,6 +49,18 @@ DB 変更時は skill **`db-schema-change`** と [docs/db/security.md](../db/sec
 | Cloudflare Pages | https://developers.cloudflare.com/pages/ |
 | Next.js Deploy | https://nextjs.org/docs/app/getting-started/deploying |
 
+## 外部アシスト（楽天ほか）
+
+判断の正本は公式ページ。実装メモは [docs/migration/v2/assist_external_apis.md](../migration/v2/assist_external_apis.md)。  
+**ブログ・二次記事を正にしない。**
+
+| 題材 | URL |
+|------|-----|
+| 楽天ウェブサービス（トップ） | https://webservice.rakuten.co.jp/ |
+| 楽天 Ichiba Item Search API（現行ドキュメント） | https://webservice.rakuten.co.jp/documentation/ichiba-item-search |
+| 楽天 Developer Dashboard（アプリ一覧・再登録） | https://webservice.rakuten.co.jp/app/list |
+| 楽天ウェブサービス お知らせ（移行案内など） | https://www.tumblr.com/rakuten-webservice/tagged/%E3%81%8A%E7%9F%A5%E3%82%89%E3%81%9B |
+
 ## アクセシビリティ・UX
 
 **判断の正本は公式ページ。** 変更前に skill **`design-a11y`** で WebFetch せよ（索引だけを正にするな）。
@@ -79,5 +91,6 @@ DB 変更時は skill **`db-schema-change`** と [docs/db/security.md](../db/sec
 | データ・RLS | `database.mdc` + `db-schema-change` + `docs/db/security.md` |
 | プラットフォーム | `platform.mdc` / `mobile.mdc` |
 | デプロイ | `deploy.mdc` |
+| 外部アシスト（楽天） | `docs/migration/v2/assist_external_apis.md` + `official-docs-first` |
 | Library UI | `supabase-library.mdc` |
 | アクセシビリティ・UX | `design.mdc` + **`design-a11y`** + `docs/design/a11y.md` |

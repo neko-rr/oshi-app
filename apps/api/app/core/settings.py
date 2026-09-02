@@ -36,7 +36,10 @@ class Settings(BaseSettings):
     io_live_calls: bool = False
 
     rakuten_application_id: str = ""
+    rakuten_access_key: str = ""
     rakuten_affiliate_id: str = ""
+    # Developer コンソールの「許可されたWebサイト」と揃える（Origin/Referer 用）
+    rakuten_origin: str = ""
     rakuten_live_calls: bool = False
 
     @property

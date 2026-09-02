@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { API_PATHS } from "@oshi/shared";
+import { API_PATHS, type ProductTagSummary } from "@oshi/shared";
 import { ProductDetailEditor } from "@/components/ProductDetailEditor";
+import { ProductTagChip } from "@/components/tags/ProductTagChip";
 import { apiFetch } from "@/lib/api";
+import {
+  galleryListHref,
+  parseGalleryListQuery,
+} from "@/lib/galleryListQuery";
 
 type ProductDetail = {
   registered_product_id: number;
@@ -18,22 +23,26 @@ type ProductDetail = {
   purchase_location?: string | null;
   works_series_name?: string | null;
   title?: string | null;
-  category_tag?: {
-    category_tag_name?: string;
-    category_tag_color?: string;
-  } | null;
-  storage_location?: {
-    storage_location_name?: string;
-  } | null;
+  category_tag?: ProductTagSummary | null;
+  storage_location?: ProductTagSummary | null;
   color_tag_slots?: number[];
 };
 
 export default async function GalleryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ registered_product_id: string }>;
+  searchParams: Promise<{
+    q?: string;
+    category_tag_id?: string;
+    storage_location_id?: string;
+    offset?: string;
+  }>;
 }) {
   const { registered_product_id: idParam } = await params;
+  const listQuery = parseGalleryListQuery(await searchParams);
+  const backHref = galleryListHref(listQuery);
   const id = Number(idParam);
   if (!Number.isFinite(id) || id <= 0) {
     notFound();
@@ -72,10 +81,10 @@ export default async function GalleryDetailPage({
     detail?.photo_high_resolution_url || detail?.photo_thumbnail_url;
 
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-5 py-6">
       <Link
-        href="/gallery"
-        className="text-sm text-primary underline-offset-4 hover:underline"
+        href={backHref}
+        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
       >
         ← ギャラリー
       </Link>
@@ -86,8 +95,8 @@ export default async function GalleryDetailPage({
 
       {detail ? (
         <>
-          <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <div className="aspect-square max-h-[28rem] bg-muted sm:aspect-auto sm:h-80">
+          <div className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-border">
+            <div className="aspect-[4/5] max-h-[min(70vh,36rem)] bg-muted sm:aspect-[16/10] sm:max-h-[28rem]">
               {imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -102,6 +111,7 @@ export default async function GalleryDetailPage({
               )}
             </div>
           </div>
+
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               {detail.product_name?.trim() ||
@@ -133,15 +143,24 @@ export default async function GalleryDetailPage({
             {detail.barcode_number ? (
               <p className="text-sm">バーコード: {detail.barcode_number}</p>
             ) : null}
-            {detail.category_tag?.category_tag_name ? (
-              <p className="text-sm">
-                カテゴリー: {detail.category_tag.category_tag_name}
-              </p>
-            ) : null}
-            {detail.storage_location?.storage_location_name ? (
-              <p className="text-sm">
-                収納場所: {detail.storage_location.storage_location_name}
-              </p>
+            {detail.category_tag || detail.storage_location ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {detail.category_tag ? (
+                  <ProductTagChip
+                    name={detail.category_tag.name}
+                    icon={detail.category_tag.icon}
+                    color={detail.category_tag.color}
+                    variant="category"
+                  />
+                ) : null}
+                {detail.storage_location ? (
+                  <ProductTagChip
+                    name={detail.storage_location.name}
+                    icon={detail.storage_location.icon}
+                    variant="storage"
+                  />
+                ) : null}
+              </div>
             ) : null}
             {detail.color_tag_slots && detail.color_tag_slots.length > 0 ? (
               <p className="text-sm">
@@ -153,7 +172,17 @@ export default async function GalleryDetailPage({
             ) : null}
           </div>
 
-          <ProductDetailEditor registeredProductId={id} />
+          <details className="rounded-2xl border border-border bg-card p-4 open:shadow-sm">
+            <summary className="cursor-pointer text-base font-medium">
+              編集する
+            </summary>
+            <div className="mt-4">
+              <ProductDetailEditor
+                registeredProductId={id}
+                galleryHref={backHref}
+              />
+            </div>
+          </details>
         </>
       ) : null}
     </div>

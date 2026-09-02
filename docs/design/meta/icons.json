@@ -45,6 +45,14 @@
       "note_ja": "詳細・フォーム"
     },
     {
+      "usage_ja": "並び替え",
+      "icons": [
+        "ChevronUp",
+        "ChevronDown"
+      ],
+      "note_ja": "設定タグ一覧"
+    },
+    {
       "usage_ja": "閉じる",
       "icons": [
         "X"

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   API_PATHS,
@@ -10,6 +10,12 @@ import {
 import { createClient } from "@/lib/client";
 import type { DecodedBarcode } from "@/lib/barcode/formats";
 import { findOwnedProductsByBarcode } from "@/lib/products/findOwnedByBarcode";
+import {
+  applyAssistToDraft,
+  matchCategoryId,
+} from "./assist/applyAssistToDraft";
+import { runAssistPipeline } from "./assist/runAssistPipeline";
+import type { AssistDraftSlice, FieldSources } from "./assist/types";
 import { assistStatusMessage } from "./assistMessages";
 import {
   StepBarcode,
@@ -20,8 +26,10 @@ import { StepPhoto } from "./StepPhoto";
 import {
   emptyDraft,
   type BarcodeLookupResponse,
+  type CategoryTagItem,
   type ColorTagItem,
   type RegisterDraft,
+  type StorageLocationItem,
   type WizardStep,
 } from "./types";
 
@@ -38,16 +46,46 @@ async function getAccessToken(): Promise<string | null> {
   return data.session.access_token;
 }
 
+function toAssistSlice(draft: RegisterDraft): AssistDraftSlice {
+  return {
+    product_name: draft.productName,
+    purchase_price: draft.purchasePrice,
+    character_name: draft.characterName,
+    product_group_name: draft.productGroupName,
+    memo: draft.memo,
+    category_tag_id: draft.categoryTagId,
+    selected_slots: Array.from(draft.selectedSlots),
+    visual_tags: draft.visualTags,
+    unmatched_product_type: draft.unmatchedProductType,
+  };
+}
+
+function markUserSource(
+  prev: FieldSources,
+  key: keyof FieldSources,
+): FieldSources {
+  return { ...prev, [key]: "user" };
+}
+
 export function RegisterWizard() {
   const router = useRouter();
   const [step, setStep] = useState<WizardStep>("barcode");
   const [draft, setDraft] = useState<RegisterDraft>(() => emptyDraft());
   const [colors, setColors] = useState<ColorTagItem[]>([]);
+  const [categories, setCategories] = useState<CategoryTagItem[]>([]);
+  const [storageLocations, setStorageLocations] = useState<
+    StorageLocationItem[]
+  >([]);
   const [lookingUp, setLookingUp] = useState(false);
   const [assistHint, setAssistHint] = useState<string | null>(null);
+  const [assistPhase, setAssistPhase] = useState<"idle" | "running" | "done">(
+    "idle",
+  );
   const [ownedHint, setOwnedHint] = useState<OwnedProductHint | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
+  const assistAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,20 +93,64 @@ export function RegisterWizard() {
       try {
         const token = await getAccessToken();
         if (!token || cancelled) return;
-        const res = await fetch(`${apiBase()}${API_PATHS.colorTags}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok || cancelled) return;
-        const json = (await res.json()) as { items?: ColorTagItem[] };
-        if (!cancelled) setColors(json.items ?? []);
+        const headers = { Authorization: `Bearer ${token}` };
+        const [colorRes, catRes, storageRes] = await Promise.all([
+          fetch(`${apiBase()}${API_PATHS.colorTags}`, { headers }),
+          fetch(`${apiBase()}${API_PATHS.categoryTags}`, { headers }),
+          fetch(`${apiBase()}${API_PATHS.storageLocations}`, { headers }),
+        ]);
+        if (cancelled) return;
+        if (colorRes.ok) {
+          const json = (await colorRes.json()) as { items?: ColorTagItem[] };
+          setColors(json.items ?? []);
+        }
+        if (catRes.ok) {
+          const json = (await catRes.json()) as { items?: CategoryTagItem[] };
+          setCategories(json.items ?? []);
+        }
+        if (storageRes.ok) {
+          const json = (await storageRes.json()) as {
+            items?: StorageLocationItem[];
+          };
+          setStorageLocations(json.items ?? []);
+        }
       } catch {
-        // カラータグ未取得でも登録自体は続行
+        // タグ未取得でも登録自体は続行
       }
     })();
     return () => {
       cancelled = true;
+      assistAbortRef.current?.abort();
     };
   }, []);
+
+  // Vision 後にカテゴリ一覧が届いたら種類名を再マッチ
+  useEffect(() => {
+    if (categories.length === 0) return;
+    setDraft((prev) => {
+      if (
+        prev.fieldSources.category_tag_id === "user" ||
+        prev.categoryTagId != null ||
+        !prev.unmatchedProductType
+      ) {
+        return prev;
+      }
+      const matchedId = matchCategoryId(
+        prev.unmatchedProductType,
+        categories.map((c) => ({
+          category_tag_id: c.category_tag_id,
+          category_tag_name: c.category_tag_name,
+        })),
+      );
+      if (matchedId == null) return prev;
+      return {
+        ...prev,
+        categoryTagId: matchedId,
+        unmatchedProductType: null,
+        fieldSources: { ...prev.fieldSources, category_tag_id: "vision" },
+      };
+    });
+  }, [categories]);
 
   function patchDraft(partial: Partial<RegisterDraft>) {
     setDraft((prev) => ({ ...prev, ...partial }));
@@ -79,7 +161,28 @@ export function RegisterWizard() {
       const next = new Set(prev.selectedSlots);
       if (next.has(slot)) next.delete(slot);
       else next.add(slot);
-      return { ...prev, selectedSlots: next };
+      return {
+        ...prev,
+        selectedSlots: next,
+        fieldSources: markUserSource(prev.fieldSources, "color_tag_slots"),
+      };
+    });
+  }
+
+  function applyVisualTag(tag: string) {
+    setDraft((prev) => {
+      const trimmed = tag.trim();
+      if (!trimmed) return prev;
+      const memo = prev.memo.trim()
+        ? prev.memo.includes(trimmed)
+          ? prev.memo
+          : `${prev.memo} ${trimmed}`
+        : trimmed;
+      return {
+        ...prev,
+        memo,
+        fieldSources: markUserSource(prev.fieldSources, "memo"),
+      };
     });
   }
 
@@ -107,7 +210,6 @@ export function RegisterWizard() {
         product_name: first.product_name,
       });
     } catch {
-      // 購入済みチェック失敗は登録を止めない
       setOwnedHint(null);
     }
   }
@@ -148,19 +250,35 @@ export function RegisterWizard() {
           first?.price != null && Number.isFinite(Number(first.price))
             ? String(first.price)
             : "";
-        setDraft((prev) => ({
-          ...prev,
-          barcodeNote: assistStatusMessage(
-            status,
-            `候補 ${json.items!.length} 件`,
-          ),
-          productName: prev.productName.trim() ? prev.productName : name,
-          purchasePrice: prev.purchasePrice.trim()
-            ? prev.purchasePrice
-            : price,
-          suggestedName: name,
-          suggestedPrice: price,
-        }));
+        setDraft((prev) => {
+          const sources = { ...prev.fieldSources };
+          const nextName =
+            prev.fieldSources.product_name === "user"
+              ? prev.productName
+              : name || prev.productName;
+          const nextPrice =
+            prev.fieldSources.purchase_price === "user"
+              ? prev.purchasePrice
+              : price || prev.purchasePrice;
+          if (name && prev.fieldSources.product_name !== "user") {
+            sources.product_name = "barcode";
+          }
+          if (price && prev.fieldSources.purchase_price !== "user") {
+            sources.purchase_price = "barcode";
+          }
+          return {
+            ...prev,
+            barcodeNote: assistStatusMessage(
+              status,
+              `候補 ${json.items!.length} 件`,
+            ),
+            productName: nextName,
+            purchasePrice: nextPrice,
+            suggestedName: name,
+            suggestedPrice: price,
+            fieldSources: sources,
+          };
+        });
         setAssistHint(null);
         return;
       }
@@ -202,21 +320,120 @@ export function RegisterWizard() {
     }
   }
 
+  async function startVisionAssist(file: File | null) {
+    assistAbortRef.current?.abort();
+    const controller = new AbortController();
+    assistAbortRef.current = controller;
+
+    if (!file) {
+      setAssistPhase("done");
+      if (!draft.barcode.trim()) {
+        setAssistHint("バーコード・写真なしのため、タグ提案はありません。");
+      } else if (draft.barcodeNote) {
+        setAssistHint(draft.barcodeNote);
+      } else {
+        setAssistHint(null);
+      }
+      return;
+    }
+
+    setAssistPhase("running");
+    setAssistHint("提案を反映中…");
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        router.push("/auth/login");
+        return;
+      }
+      const result = await runAssistPipeline({
+        apiBase: apiBase(),
+        accessToken: token,
+        file,
+        signal: controller.signal,
+      });
+      if (result.kind === "aborted") return;
+      if (result.kind === "http_error") {
+        setAssistHint(result.message);
+        setAssistPhase("done");
+        return;
+      }
+      if (result.kind === "skipped") {
+        setAssistPhase("done");
+        return;
+      }
+
+      if (result.status !== "success") {
+        setAssistHint(assistStatusMessage(result.status, result.message));
+        setAssistPhase("done");
+        return;
+      }
+
+      setDraft((prev) => {
+        const merged = applyAssistToDraft(
+          result.vision,
+          toAssistSlice(prev),
+          prev.fieldSources,
+          categories.map((c) => ({
+            category_tag_id: c.category_tag_id,
+            category_tag_name: c.category_tag_name,
+          })),
+          colors.map((c) => ({
+            slot: c.slot,
+            color_tag_name: c.color_tag_name,
+          })),
+        );
+        const barcodeProtected =
+          prev.fieldSources.product_name === "barcode" ||
+          prev.fieldSources.purchase_price === "barcode";
+        return {
+          ...prev,
+          productName: merged.draft.product_name,
+          purchasePrice: merged.draft.purchase_price,
+          characterName: merged.draft.character_name,
+          productGroupName: merged.draft.product_group_name,
+          memo: merged.draft.memo,
+          categoryTagId: merged.draft.category_tag_id,
+          selectedSlots: new Set(merged.draft.selected_slots),
+          visualTags: merged.draft.visual_tags,
+          unmatchedProductType: merged.draft.unmatched_product_type,
+          fieldSources: merged.sources,
+          barcodeNote: barcodeProtected
+            ? "バーコードの商品名・価格を優先しています。"
+            : prev.barcodeNote,
+        };
+      });
+      const tagCount = result.vision.visual_tags.length;
+      setAssistHint(
+        tagCount > 0
+          ? `見た目タグを ${tagCount} 件提案しました。必要なら修正してください。`
+          : "画像アシストを反映しました。必要なら修正してください。",
+      );
+      setAssistPhase("done");
+    } catch {
+      setAssistHint("画像アシストに失敗しました。手入力で続行できます。");
+      setAssistPhase("done");
+    }
+  }
+
   function goConfirmFromPhoto(opts?: { clearPhoto?: boolean }) {
-    const hasPhoto = opts?.clearPhoto ? false : Boolean(draft.file);
+    const file = opts?.clearPhoto ? null : draft.file;
     if (opts?.clearPhoto) {
       patchDraft({ file: null });
     }
-    if (!assistHint && draft.barcodeNote) {
-      setAssistHint(draft.barcodeNote);
-    } else if (!draft.barcode.trim() && !hasPhoto) {
-      setAssistHint("バーコード・写真なしのため、タグ提案はありません。");
-    } else if (!assistHint) {
-      setAssistHint(
-        "画像アシストは現在オフ、または未設定です。手入力で続行できます。",
-      );
-    }
+    setJustRegistered(false);
     setStep("confirm");
+    void startVisionAssist(file);
+  }
+
+  function resetForContinue() {
+    assistAbortRef.current?.abort();
+    setDraft(emptyDraft());
+    setOwnedHint(null);
+    setAssistHint(null);
+    setAssistPhase("idle");
+    setError(null);
+    setJustRegistered(false);
+    setStep("barcode");
   }
 
   async function onSubmit(e: FormEvent) {
@@ -271,6 +488,8 @@ export function RegisterWizard() {
               ? Math.trunc(priceNum)
               : null,
           color_tag_slots: slots.length > 0 ? slots : null,
+          category_tag_id: draft.categoryTagId,
+          storage_location_id: draft.storageLocationId,
         }),
       });
       if (!productRes.ok) {
@@ -278,8 +497,10 @@ export function RegisterWizard() {
         throw new Error(`製品登録失敗: ${text.slice(0, 160)}`);
       }
       const created = (await productRes.json()) as CreateProductResponse;
-      router.push(`/gallery?registered=${created.registered_product_id}`);
-      router.refresh();
+      setJustRegistered(true);
+      setAssistHint(
+        `登録しました（ID: ${created.registered_product_id}）。続けて登録するかギャラリーへ進めます。`,
+      );
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "登録に失敗しました");
     } finally {
@@ -327,6 +548,7 @@ export function RegisterWizard() {
           onManualAll={() => {
             setOwnedHint(null);
             setAssistHint("すべて手動入力モードです。");
+            setAssistPhase("done");
             setStep("confirm");
           }}
         />
@@ -351,19 +573,76 @@ export function RegisterWizard() {
           barcode={draft.barcode}
           memo={draft.memo}
           colors={colors}
+          categories={categories}
+          storageLocations={storageLocations}
+          categoryTagId={draft.categoryTagId}
+          storageLocationId={draft.storageLocationId}
           selectedSlots={draft.selectedSlots}
+          visualTags={draft.visualTags}
+          unmatchedProductType={draft.unmatchedProductType}
           assistHint={assistHint}
+          assistPhase={assistPhase}
           error={error}
           loading={loading}
-          onProductName={(v) => patchDraft({ productName: v })}
-          onProductGroupName={(v) => patchDraft({ productGroupName: v })}
-          onCharacterName={(v) => patchDraft({ characterName: v })}
-          onPurchasePrice={(v) => patchDraft({ purchasePrice: v })}
+          showContinue={justRegistered}
+          onProductName={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              productName: v,
+              fieldSources: markUserSource(prev.fieldSources, "product_name"),
+            }))
+          }
+          onProductGroupName={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              productGroupName: v,
+              fieldSources: markUserSource(
+                prev.fieldSources,
+                "product_group_name",
+              ),
+            }))
+          }
+          onCharacterName={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              characterName: v,
+              fieldSources: markUserSource(prev.fieldSources, "character_name"),
+            }))
+          }
+          onPurchasePrice={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              purchasePrice: v,
+              fieldSources: markUserSource(prev.fieldSources, "purchase_price"),
+            }))
+          }
           onBarcode={(v) => patchDraft({ barcode: v })}
-          onMemo={(v) => patchDraft({ memo: v })}
+          onMemo={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              memo: v,
+              fieldSources: markUserSource(prev.fieldSources, "memo"),
+            }))
+          }
+          onCategoryTagId={(id) =>
+            setDraft((prev) => ({
+              ...prev,
+              categoryTagId: id,
+              unmatchedProductType: null,
+              fieldSources: markUserSource(prev.fieldSources, "category_tag_id"),
+            }))
+          }
+          onStorageLocationId={(id) =>
+            patchDraft({ storageLocationId: id })
+          }
           onToggleSlot={toggleSlot}
-          onBack={() => setStep("photo")}
+          onApplyVisualTag={applyVisualTag}
+          onBack={() => {
+            assistAbortRef.current?.abort();
+            setStep("photo");
+          }}
           onSubmit={(e) => void onSubmit(e)}
+          onContinueRegister={resetForContinue}
         />
       ) : null}
     </div>

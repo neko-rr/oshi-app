@@ -42,7 +42,11 @@ export type LabUiStateMeta = {
 };
 
 /** Lab で見比べる画面シーン */
-export type LabSceneId = "home" | "theme-settings";
+export type LabSceneId =
+  | "home"
+  | "theme-settings"
+  | "gallery"
+  | "gallery-detail";
 
 export type LabSceneMeta = {
   id: LabSceneId;
@@ -55,6 +59,16 @@ export const LAB_SCENES: readonly LabSceneMeta[] = [
     id: "home",
     label: "ホーム見本",
     hint: "一覧・登録導線の配置比較",
+  },
+  {
+    id: "gallery",
+    label: "ギャラリー",
+    hint: "/gallery 一覧（検索・チップ・もっと見る）",
+  },
+  {
+    id: "gallery-detail",
+    label: "ギャラリー詳細",
+    hint: "/gallery/[id] 写真主役と編集",
   },
   {
     id: "theme-settings",

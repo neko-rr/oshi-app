@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T22:27:59Z",
+  "generated_at": "2026-09-02T19:04:11Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -156,6 +156,18 @@
       "router_var": "router"
     },
     {
+      "method": "PUT",
+      "path": "/category-tags/order",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/category-tags/restore-preset",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
       "method": "DELETE",
       "path": "/category-tags/{category_tag_id}",
       "file": "apps/api/app/routers/tags.py",
@@ -252,6 +264,18 @@
       "router_var": "router"
     },
     {
+      "method": "PUT",
+      "path": "/storage-locations/order",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
+      "method": "POST",
+      "path": "/storage-locations/restore-preset",
+      "file": "apps/api/app/routers/tags.py",
+      "router_var": "router"
+    },
+    {
       "method": "DELETE",
       "path": "/storage-locations/{storage_location_id}",
       "file": "apps/api/app/routers/tags.py",
@@ -302,8 +326,24 @@
       "path": "/category-tags"
     },
     {
+      "key": "categoryTagsOrder",
+      "path": "/category-tags/order"
+    },
+    {
+      "key": "categoryTagsRestorePreset",
+      "path": "/category-tags/restore-preset"
+    },
+    {
       "key": "storageLocations",
       "path": "/storage-locations"
+    },
+    {
+      "key": "storageLocationsOrder",
+      "path": "/storage-locations/order"
+    },
+    {
+      "key": "storageLocationsRestorePreset",
+      "path": "/storage-locations/restore-preset"
     },
     {
       "key": "themeSettings",

@@ -2,30 +2,32 @@
 # ロードマップ（製品）
 
 ステータスの機械可読版は [meta/feature_status.json](meta/feature_status.json)。  
-**いま何があるか**は [generated/](generated/) を正とする。
+**いま何があるか**は [generated/](generated/) を正とする。  
+**v2 移行の要約:** [v2_status.md](v2_status.md)
 
 ステータス語彙: `shipped` / `partial` / `planned` / `deferred`（定義は [meta/status_vocabulary.md](meta/status_vocabulary.md)）
 
-## Must（絶対必要に近い）
+## Must（絶対必要に近い）— ほぼ移行完了
 
 | ID | 内容 | 状態（目安） |
 |----|------|--------------|
-| `responsive_web` | スマホ画面で使える Web | partial |
-| `theme_colors` | 推し色に合わせたテーマ変更 | partial |
-| `barcode_capture` | バーコード読取・番号入力 | partial |
-| `product_lookup` | グッズ情報との照合（楽天等） | partial |
-| `photo_front` | 正面写真の撮影・アップロード | partial |
-| `vision_assist` | 画像からの説明・照合アシスト | partial |
-| `tag_assist` | 自動タグ提案 | partial |
-| `register_flow` | 登録ウィザード（理想は [flows/register.md](flows/register.md)） | partial |
+| `auth_session` | ログイン・セッション | shipped |
+| `register_flow` | 登録ウィザード | shipped |
+| `barcode_capture` | バーコード読取・番号入力 | shipped |
+| `product_lookup` | グッズ情報照合（楽天） | shipped |
+| `photo_front` | 正面写真の撮影・アップロード | shipped |
+| `vision_assist` | 画像 Vision アシスト | shipped |
+| `tag_assist` | 見た目タグ・種類提案（Vision 1回） | shipped |
 | `gallery` | 登録グッズ一覧 | shipped |
 | `product_detail` | 詳細の閲覧・編集 | shipped |
-| `storage_locations` | 収納場所タグの編集・付与 | shipped |
+| `storage_locations` | 収納場所タグ | shipped |
 | `category_tags` | カテゴリタグ設定 | shipped |
 | `color_tags` | カラータグ設定 | shipped |
-| `search` | 検索 | partial |
-| `privacy_policy` | プライバシーポリシー（学習させない告知含む） | partial |
-| `auth_session` | ログイン・セッション（[acceptance/auth.md](acceptance/auth.md)） | shipped |
+| `search` | 検索 | shipped |
+| `privacy_policy` | プライバシーポリシー | shipped |
+| `licenses_notices` | ライセンス・表記 | shipped |
+| `theme_colors` | 推し色テーマ（パック可。スウォッチは後続） | partial |
+| `responsive_web` | スマホ画面で使える Web | partial |
 
 ## Phase 2
 
@@ -59,6 +61,7 @@
 /dashboard        ダッシュボード
 /settings         設定（テーマ・タグ・収納・アカウント系）
 /privacy          プライバシーポリシー
+/licenses         ライセンス・表記
 /auth/*           ログイン・登録・パスワード
 ```
 

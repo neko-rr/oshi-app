@@ -56,8 +56,10 @@
 | `IO_INTELLIGENCE_API_KEY` | 任意 | 秘密 | Assist オン時 | 同上 | `IO_LIVE_CALLS=1` のとき実呼出 |
 | `IO_LIVE_CALLS` | 任意 | — | 既定オフ想定 | 必要なときだけ `1` | |
 | `IO_INTELLIGENCE_API_URL` / `IO_*_MODEL*` | 任意 | — | モデル名など | 同上 | キー本体ではない |
-| `RAKUTEN_APPLICATION_ID` | 任意 | 秘密寄り | バーコード連携時 | 同上 | |
+| `RAKUTEN_APPLICATION_ID` | 任意 | 秘密寄り | バーコード連携時 | 同上 | 2026〜 UUID 形式（再登録後） |
+| `RAKUTEN_ACCESS_KEY` | 任意 | 秘密 | 同上（新API必須） | 同上 | applicationId とセット |
 | `RAKUTEN_AFFILIATE_ID` | 任意 | — | 同上 | 同上 | |
+| `RAKUTEN_ORIGIN` | 任意 | — | 許可Webサイトと一致する Origin | 同上 | サーバーから付与 |
 | `RAKUTEN_LIVE_CALLS` | 任意 | — | 既定オフ | 同上 | |
 
 テンプレ正本: `apps/api/.env.example`（Pydantic: `apps/api/app/core/settings.py`）。
