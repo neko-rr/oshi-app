@@ -7,6 +7,7 @@
 |------|----|------|
 | `authenticated` | `category_tag` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `category_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `category_tag_preset_slot_dismissed` | `DELETE,INSERT,SELECT` |
 | `service_role` | `category_tag_preset_slot_dismissed` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `character` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `color` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
@@ -14,6 +15,10 @@
 | `service_role` | `color_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `copyright_company` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `currency_unit` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `display_settings` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `display_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `gallery_view` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `gallery_view` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `icon_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `member` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `member_type` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
@@ -27,11 +32,14 @@
 | `service_role` | `registered_product_color_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `storage_location` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `storage_location` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `storage_location_preset_slot_dismissed` | `DELETE,INSERT,SELECT` |
 | `service_role` | `storage_location_preset_slot_dismissed` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `theme_settings` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `theme_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `work` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `works_series` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `oshi_accent_settings` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `oshi_accent_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 
 ## RLS ポリシー
 
@@ -40,6 +48,8 @@
 | `category_tag` | `category_tag_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `category_tag_preset_slot_dismissed` | `category_tag_preset_slot_dismissed_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `color_tag` | `color_tag_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `display_settings` | `display_settings_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `gallery_view` | `gallery_view_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
 | `member` | `member_self_insert` | `a` | `` | `(auth.uid() = members_id)` |
 | `member` | `member_self_select` | `r` | `(auth.uid() = members_id)` | `` |
 | `member` | `member_self_update` | `w` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
@@ -52,3 +62,4 @@
 | `storage_location` | `storage_location_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `storage_location_preset_slot_dismissed` | `storage_location_preset_slot_dismissed_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `theme_settings` | `theme_settings_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `oshi_accent_settings` | `oshi_accent_settings_self_all` | `*` | `((SELECT auth.uid()) = members_id)` | `((SELECT auth.uid()) = members_id)` |

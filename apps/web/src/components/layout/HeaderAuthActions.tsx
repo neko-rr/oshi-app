@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
 import { createClient } from "@/lib/client";
@@ -10,6 +11,7 @@ import { createClient } from "@/lib/client";
  * JWT 本文は表示しない。
  */
 export function HeaderAuthActions() {
+  const t = useTranslations("Nav");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function HeaderAuthActions() {
   if (!signedIn) {
     return (
       <Link href="/auth/login" className="hover:underline">
-        ログイン
+        {t("login")}
       </Link>
     );
   }

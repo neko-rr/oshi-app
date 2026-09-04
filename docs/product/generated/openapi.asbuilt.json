@@ -135,15 +135,17 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "integer",
-                  "minimum": 1
+                  "type": "string",
+                  "maxLength": 200
                 },
                 {
                   "type": "null"
                 }
               ],
+              "description": "カンマ区切り category_tag_id（同種 OR）",
               "title": "Category Tag Id"
-            }
+            },
+            "description": "カンマ区切り category_tag_id（同種 OR）"
           },
           {
             "name": "storage_location_id",
@@ -152,15 +154,55 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "integer",
-                  "minimum": 1
+                  "type": "string",
+                  "maxLength": 200
                 },
                 {
                   "type": "null"
                 }
               ],
+              "description": "カンマ区切り storage_location_id（同種 OR）",
               "title": "Storage Location Id"
-            }
+            },
+            "description": "カンマ区切り storage_location_id（同種 OR）"
+          },
+          {
+            "name": "color_tag_slot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "カンマ区切り color_tag slot 1..7（同種 OR）",
+              "title": "Color Tag Slot"
+            },
+            "description": "カンマ区切り color_tag slot 1..7（同種 OR）"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "newest / name / created_at",
+              "default": "newest",
+              "title": "Sort"
+            },
+            "description": "newest / name / created_at"
           }
         ],
         "responses": {
@@ -231,6 +273,54 @@
             }
           }
         }
+      }
+    },
+    "/products/bulk": {
+      "patch": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Bulk Patch Products",
+        "operationId": "bulk_patch_products_products_bulk_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkPatchProductsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Bulk Patch Products Products Bulk Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/products/{registered_product_id}": {
@@ -1331,6 +1421,476 @@
         ]
       }
     },
+    "/oshi-accent-settings": {
+      "get": {
+        "tags": [
+          "oshi-accent-settings"
+        ],
+        "summary": "Get Oshi Accent Settings",
+        "operationId": "get_oshi_accent_settings_oshi_accent_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Oshi Accent Settings Oshi Accent Settings Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "oshi-accent-settings"
+        ],
+        "summary": "Put Oshi Accent Settings",
+        "operationId": "put_oshi_accent_settings_oshi_accent_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OshiAccentSettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Oshi Accent Settings Oshi Accent Settings Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/display-settings": {
+      "get": {
+        "tags": [
+          "display-settings"
+        ],
+        "summary": "Get Display Settings",
+        "operationId": "get_display_settings_display_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Display Settings Display Settings Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "display-settings"
+        ],
+        "summary": "Put Display Settings",
+        "operationId": "put_display_settings_display_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisplaySettingsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Display Settings Display Settings Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/gallery-views": {
+      "get": {
+        "tags": [
+          "gallery-views"
+        ],
+        "summary": "List Gallery Views",
+        "operationId": "list_gallery_views_gallery_views_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response List Gallery Views Gallery Views Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "gallery-views"
+        ],
+        "summary": "Create Gallery View",
+        "operationId": "create_gallery_view_gallery_views_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GalleryViewCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Gallery View Gallery Views Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/gallery-views/{gallery_view_id}": {
+      "patch": {
+        "tags": [
+          "gallery-views"
+        ],
+        "summary": "Patch Gallery View",
+        "operationId": "patch_gallery_view_gallery_views__gallery_view_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "gallery_view_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Gallery View Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GalleryViewRenameBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Gallery View Gallery Views  Gallery View Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gallery-views"
+        ],
+        "summary": "Delete Gallery View",
+        "operationId": "delete_gallery_view_gallery_views__gallery_view_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "gallery_view_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Gallery View Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Delete Gallery View Gallery Views  Gallery View Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exports": {
+      "post": {
+        "tags": [
+          "exports"
+        ],
+        "summary": "Create Export",
+        "operationId": "create_export_exports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Export Exports Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/exports/{export_id}": {
+      "get": {
+        "tags": [
+          "exports"
+        ],
+        "summary": "Get Export",
+        "operationId": "get_export_exports__export_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Export Exports  Export Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exports/{export_id}/file": {
+      "get": {
+        "tags": [
+          "exports"
+        ],
+        "summary": "Download Export File",
+        "operationId": "download_export_file_exports__export_id__file_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/stats/products": {
       "get": {
         "tags": [
@@ -1451,6 +2011,59 @@
           "file"
         ],
         "title": "Body_upload_photo_photos_post"
+      },
+      "BulkPatchProductsRequest": {
+        "properties": {
+          "registered_product_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Registered Product Ids"
+          },
+          "storage_location_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Location Id"
+          },
+          "clear_storage_location": {
+            "type": "boolean",
+            "title": "Clear Storage Location",
+            "default": false
+          },
+          "category_tag_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Tag Id"
+          },
+          "clear_category_tag": {
+            "type": "boolean",
+            "title": "Clear Category Tag",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "registered_product_ids"
+        ],
+        "title": "BulkPatchProductsRequest",
+        "description": "PATCH /products/bulk — 複数製品の一括更新（収納・カテゴリ）。"
       },
       "CategoryCreate": {
         "properties": {
@@ -1634,6 +2247,18 @@
             ],
             "title": "Purchase Price"
           },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code"
+          },
           "purchase_location": {
             "anyOf": [
               {
@@ -1755,6 +2380,157 @@
         ],
         "title": "DescribeImageRequest"
       },
+      "DisplaySettingsBody": {
+        "properties": {
+          "text_scale": {
+            "type": "integer",
+            "maximum": 7.0,
+            "minimum": 1.0,
+            "title": "Text Scale"
+          },
+          "ui_density": {
+            "type": "integer",
+            "maximum": 7.0,
+            "minimum": 1.0,
+            "title": "Ui Density"
+          },
+          "list_sort": {
+            "type": "string",
+            "enum": [
+              "newest",
+              "name",
+              "created_at"
+            ],
+            "title": "List Sort"
+          },
+          "gallery_layout": {
+            "type": "string",
+            "enum": [
+              "grid",
+              "large",
+              "list"
+            ],
+            "title": "Gallery Layout"
+          },
+          "landing_page": {
+            "type": "string",
+            "enum": [
+              "home",
+              "gallery",
+              "register"
+            ],
+            "title": "Landing Page"
+          },
+          "residence_region": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Residence Region"
+          },
+          "timezone_override": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone Override"
+          },
+          "date_format_mode": {
+            "type": "string",
+            "enum": [
+              "residence",
+              "ui_locale",
+              "iso"
+            ],
+            "title": "Date Format Mode"
+          },
+          "currency_code_override": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code Override"
+          },
+          "currency_format_mode": {
+            "type": "string",
+            "enum": [
+              "residence",
+              "ui_locale",
+              "plain"
+            ],
+            "title": "Currency Format Mode"
+          },
+          "register_start_step": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Register Start Step"
+          },
+          "default_storage_location_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Storage Location Id"
+          },
+          "gallery_show_name": {
+            "type": "boolean",
+            "title": "Gallery Show Name",
+            "default": true
+          },
+          "gallery_show_tags": {
+            "type": "boolean",
+            "title": "Gallery Show Tags",
+            "default": true
+          },
+          "gallery_show_price": {
+            "type": "boolean",
+            "title": "Gallery Show Price",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "text_scale",
+          "ui_density",
+          "list_sort",
+          "gallery_layout",
+          "landing_page",
+          "residence_region",
+          "date_format_mode",
+          "currency_format_mode",
+          "register_start_step"
+        ],
+        "title": "DisplaySettingsBody"
+      },
+      "ExportCreateBody": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "description": "text | media"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "ExportCreateBody"
+      },
       "ExtractTagsRequest": {
         "properties": {
           "description": {
@@ -1797,6 +2573,73 @@
         },
         "type": "object",
         "title": "ExtractTagsRequest"
+      },
+      "GalleryViewCreateBody": {
+        "properties": {
+          "view_name": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "View Name"
+          },
+          "q": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          },
+          "category_tag_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Category Tag Ids"
+          },
+          "storage_location_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Storage Location Ids"
+          },
+          "color_tag_slots": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Color Tag Slots"
+          },
+          "list_sort": {
+            "type": "string",
+            "title": "List Sort",
+            "default": "newest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "view_name"
+        ],
+        "title": "GalleryViewCreateBody"
+      },
+      "GalleryViewRenameBody": {
+        "properties": {
+          "view_name": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "View Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "view_name"
+        ],
+        "title": "GalleryViewRenameBody"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1848,6 +2691,69 @@
           "members_id"
         ],
         "title": "MeResponse"
+      },
+      "OshiAccentPresetBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "main_hex": {
+            "type": "string",
+            "maxLength": 7,
+            "minLength": 4,
+            "title": "Main Hex"
+          },
+          "sub_hex": {
+            "type": "string",
+            "maxLength": 7,
+            "minLength": 4,
+            "title": "Sub Hex"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "main_hex",
+          "sub_hex"
+        ],
+        "title": "OshiAccentPresetBody"
+      },
+      "OshiAccentSettingsBody": {
+        "properties": {
+          "main_hex": {
+            "type": "string",
+            "maxLength": 7,
+            "minLength": 4,
+            "title": "Main Hex"
+          },
+          "sub_hex": {
+            "type": "string",
+            "maxLength": 7,
+            "minLength": 4,
+            "title": "Sub Hex"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active",
+            "default": false
+          },
+          "presets": {
+            "items": {
+              "$ref": "#/components/schemas/OshiAccentPresetBody"
+            },
+            "type": "array",
+            "title": "Presets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "main_hex",
+          "sub_hex"
+        ],
+        "title": "OshiAccentSettingsBody"
       },
       "PatchProductRequest": {
         "properties": {
@@ -1916,6 +2822,18 @@
               }
             ],
             "title": "Purchase Price"
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code"
           },
           "purchase_location": {
             "anyOf": [

@@ -25,9 +25,12 @@ python -m pytest apps/api/tests tests -q
 
 ```powershell
 pnpm -C packages/shared build
+python scripts/check_i18n_message_keys.py
 pnpm -C apps/web lint
 pnpm -C apps/web exec tsc --noEmit
 ```
+
+`messages/ja.json` / `en.json` を変えたときは skill **`i18n-web-sync`**（en 下書き。CI はキー欠落のみ検知し、自動上書きしない）。
 
 ### デザイン docs / tokens（触った場合）
 
@@ -96,6 +99,7 @@ CI（GitHub Actions）は上記の主要チェックを push/PR で自動実行�
 | `compileall` + pytest / `pnpm test:api` | `api-compile-pytest` |
 | `check_api_contract_sync` / `pnpm check:api-contract` | 同上（API contract sync ステップ） |
 | `pnpm lint:web` / `typecheck:web` / `build:web` | `web-lint-typecheck-build` |
+| `check_i18n_message_keys` | 同上（i18n message keys ステップ） |
 | design tokens / icons `--check` / compliance | `design-quality` |
 | `check_docs_drift`（含 third_party_notices） | `docs-generated-drift` |
 | `generate_third_party_notices` / `--check` | 同上（docs ジョブ内） |

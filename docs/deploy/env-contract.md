@@ -61,6 +61,7 @@
 | `RAKUTEN_AFFILIATE_ID` | 任意 | — | 同上 | 同上 | |
 | `RAKUTEN_ORIGIN` | 任意 | — | 許可Webサイトと一致する Origin | 同上 | サーバーから付与 |
 | `RAKUTEN_LIVE_CALLS` | 任意 | — | 既定オフ | 同上 | |
+| `OSHI_ACCENT_ENTITLED` | 任意 | — | 開発確認のみ `1`/`true` | 本番は未設定（false） | 推し色の保存・全体適用ゲート。課金前は全員ロック |
 
 テンプレ正本: `apps/api/.env.example`（Pydantic: `apps/api/app/core/settings.py`）。
 

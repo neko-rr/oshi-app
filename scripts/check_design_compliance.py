@@ -27,9 +27,16 @@ ALLOW_HEX_GLOBS = (
     "components/design-lab/",
     # テーマ選択スウォッチ用カタログ（部品本体への直書きではない）
     "lib/themes/",
+    # 推し色スウォッチ・コントラスト計算（色データ本体。UI 部品への直書きではない）
+    "lib/oshiContrast.ts",
+    "lib/oshiContrast.selftest.ts",
+    "lib/oshiAccentPrefs.ts",
+    "components/settings/OshiAccentPanel.tsx",
     # カラータグ / カテゴリ色は製品ラベル用（推し色・UI トークンとは別）
     "app/settings/color-tags/",
     "app/settings/category-tags/",
+    "app/[locale]/settings/color-tags/",
+    "app/[locale]/settings/category-tags/",
 )
 ALLOW_RAW_BUTTON_GLOBS = (
     "components/design-lab/",

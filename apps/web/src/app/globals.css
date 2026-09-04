@@ -3,6 +3,8 @@
 
 @import "../styles/colors.css";
 @import "../styles/tailwind-theme.css";
+@import "../styles/display-prefs.css";
+@import "../styles/oshi-accent.css";
 @import "../styles/design-lab.css";
 @import "../styles/motion.css";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 type DismissedPresetsPanelProps = {
@@ -16,16 +17,17 @@ export function DismissedPresetsPanel({
   onRestore,
   busy = false,
 }: DismissedPresetsPanelProps) {
+  const t = useTranslations("TagPresets");
+  const tCommon = useTranslations("Common");
+
   if (slots.length === 0) return null;
 
   return (
     <section className="rounded-2xl border border-dashed border-border bg-muted/30 p-4">
       <h2 className="text-sm font-medium text-muted-foreground">
-        非表示にしたプリセット
+        {t("dismissedTitle")}
       </h2>
-      <p className="mt-1 text-xs text-muted-foreground">
-        使わない初期タグを隠しています。再表示すると一覧に戻ります。
-      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("dismissedBody")}</p>
       <ul className="mt-3 flex flex-col gap-2">
         {slots.map((slot) => (
           <li
@@ -40,7 +42,7 @@ export function DismissedPresetsPanel({
               disabled={busy}
               onClick={() => onRestore(slot)}
             >
-              再表示
+              {tCommon("showAgain")}
             </Button>
           </li>
         ))}

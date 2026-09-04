@@ -1,7 +1,32 @@
 {
   "version": 1,
-  "updated_note": "2026-09-03: Must 本線をほぼ shipped。残 partial は responsive / theme。語彙は status_vocabulary.md。",
+  "updated_note": "2026-09-04: data_export shipped（設定から text/media ZIP 書き出し。再取り込みなし）。",
   "features": [
+    {
+      "id": "data_export",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "データ書き出し",
+      "evidence_paths": [
+        "apps/api/app/services/export_service.py",
+        "apps/api/app/services/export_manifest.py",
+        "apps/api/app/routers/exports.py",
+        "apps/web/src/app/[locale]/settings/export/page.tsx",
+        "apps/web/src/components/settings/DataExportPanel.tsx",
+        "supabase/migrations/20260904190000_create_data_export.sql",
+        "docs/product/flows/export.md",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/export"
+      ],
+      "expected_api_paths": [
+        "/exports",
+        "/exports/{export_id}",
+        "/exports/{export_id}/file"
+      ],
+      "notes": "書き出しのみ。text=JSON+CSV、media=写真同梱 ZIP。format_version 付き。account_delete より先。"
+    },
     {
       "id": "responsive_web",
       "phase": "must",
@@ -17,12 +42,33 @@
       "expected_api_paths": []
     },
     {
+      "id": "i18n_web",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "多言語（ja/en・URL）",
+      "evidence_paths": [
+        "apps/web/src/i18n/routing.ts",
+        "apps/web/messages/ja.json",
+        "apps/web/messages/en.json",
+        "apps/web/src/components/settings/LocaleSwitcher.tsx",
+        "apps/web/src/middleware.ts",
+        "docs/product/i18n.md",
+        "docs/product/i18n_glossary.md",
+        "scripts/check_i18n_message_keys.py",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/theme"
+      ],
+      "expected_api_paths": []
+    },
+    {
       "id": "theme_colors",
       "phase": "must",
-      "status": "partial",
-      "title_ja": "推し色テーマ",
+      "status": "shipped",
+      "title_ja": "テーマパック",
       "evidence_paths": [
-        "apps/web/src/app/settings/theme/page.tsx",
+        "apps/web/src/app/[locale]/settings/theme/page.tsx",
         "apps/web/src/components/ui/ThemePicker.tsx",
         "apps/web/src/hooks/useTheme.ts",
         "apps/api/app/routers/theme_settings.py",
@@ -36,6 +82,80 @@
       "expected_api_paths": [
         "/theme-settings"
       ]
+    },
+    {
+      "id": "oshi_accent",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "推し色スウォッチ（メイン＋サブ）",
+      "evidence_paths": [
+        "apps/web/src/app/[locale]/settings/theme/page.tsx",
+        "apps/web/src/components/settings/OshiAccentPanel.tsx",
+        "apps/web/src/hooks/useOshiAccent.ts",
+        "apps/web/src/lib/oshiContrast.ts",
+        "apps/api/app/routers/oshi_accent_settings.py",
+        "apps/api/app/services/oshi_accent_service.py",
+        "supabase/migrations/20260904180000_create_oshi_accent_settings.sql",
+        "docs/design/oshi-accents.md",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/theme"
+      ],
+      "expected_api_paths": [
+        "/oshi-accent-settings"
+      ]
+    },
+    {
+      "id": "display_settings",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "文字・密度・並び・着地・居住地日時・金額表示",
+      "evidence_paths": [
+        "apps/web/src/app/[locale]/settings/theme/page.tsx",
+        "apps/web/src/components/settings/DisplaySettingsPanel.tsx",
+        "apps/web/src/components/settings/ResidenceSettingsPanel.tsx",
+        "apps/web/src/components/format/FormattedAppMoney.tsx",
+        "apps/web/src/hooks/useDisplaySettings.ts",
+        "apps/web/src/lib/residencePrefs.ts",
+        "apps/api/app/routers/display_settings.py",
+        "apps/api/app/services/display_settings_service.py",
+        "supabase/migrations/20260903180000_display_settings_residence.sql",
+        "supabase/migrations/20260904033000_display_settings_currency.sql",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/theme"
+      ],
+      "expected_api_paths": [
+        "/display-settings"
+      ]
+    },
+    {
+      "id": "register_wizard_defaults",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "登録ウィザード既定（開始手順・収納）",
+      "evidence_paths": [
+        "apps/web/src/app/[locale]/settings/register/page.tsx",
+        "apps/web/src/components/settings/RegisterDefaultsPanel.tsx",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "apps/web/src/lib/registerPrefs.ts",
+        "apps/web/src/hooks/useDisplaySettings.ts",
+        "apps/api/app/services/display_settings_service.py",
+        "apps/api/app/services/tag_service.py",
+        "supabase/migrations/20260904120000_register_wizard_defaults.sql",
+        "docs/product/acceptance/register.md",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/register",
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/display-settings"
+      ],
+      "notes": "register_start_step / default_storage_location_id。未指定時は register_pick_count で並びのみ。"
     },
     {
       "id": "barcode_capture",
@@ -164,6 +284,149 @@
       "expected_api_paths": [
         "/products"
       ]
+    },
+    {
+      "id": "gallery_card_fields",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリーカード表示項目（名前・タグ・価格）",
+      "evidence_paths": [
+        "apps/web/src/components/ProductGalleryGrid.tsx",
+        "apps/web/src/components/settings/DisplaySettingsPanel.tsx",
+        "apps/web/src/lib/displayPrefs.ts",
+        "apps/web/src/hooks/useDisplaySettings.ts",
+        "apps/api/app/services/display_settings_service.py",
+        "supabase/migrations/20260904140000_gallery_card_fields.sql",
+        "docs/product/acceptance/gallery.md",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/theme",
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/display-settings"
+      ],
+      "notes": "gallery_show_name / gallery_show_tags / gallery_show_price。既定 ON。名前 OFF 時も a11y 名は維持。"
+    },
+    {
+      "id": "gallery_filters_v2",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー絞り込み（複数・色）",
+      "evidence_paths": [
+        "apps/web/src/lib/galleryListQuery.ts",
+        "apps/web/src/components/gallery/GalleryFilterChips.tsx",
+        "apps/api/app/services/product_list_filters.py",
+        "apps/api/app/infra/supabase_user.py",
+        "docs/product/acceptance/gallery.md",
+        "docs/product/flows/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products"
+      ],
+      "notes": "同種 OR・異種 AND。URL カンマ区切り＋クエリ版 v=1（当面固定）。いまの条件要約＋一発クリア。"
+    },
+    {
+      "id": "gallery_sort_ui",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー上の並び替え",
+      "evidence_paths": [
+        "apps/web/src/components/gallery/GalleryFilterChips.tsx",
+        "apps/web/src/lib/galleryListQuery.ts",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products",
+        "/display-settings"
+      ],
+      "notes": "URL sort ＋ display_settings.list_sort 同期。"
+    },
+    {
+      "id": "gallery_bulk_storage",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー一括収納変更",
+      "evidence_paths": [
+        "apps/web/src/components/gallery/GalleryBrowse.tsx",
+        "apps/web/src/components/gallery/GalleryBulkBar.tsx",
+        "apps/api/app/routers/products.py",
+        "apps/api/app/services/product_service.py",
+        "packages/shared/src/index.ts",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products/bulk"
+      ],
+      "notes": "PATCH /products/bulk。収納・カテゴリ共通。"
+    },
+    {
+      "id": "gallery_selection_scope",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー選択の範囲操作",
+      "evidence_paths": [
+        "apps/web/src/lib/gallerySelection.ts",
+        "apps/web/src/components/gallery/GalleryBrowse.tsx",
+        "apps/web/src/components/gallery/GalleryBulkBar.tsx",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [],
+      "notes": "UI 状態: showSelectedOnly / ページ全選択 / 条件結果最大100（API bulk 上限と揃え）。"
+    },
+    {
+      "id": "gallery_saved_views",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー保存ビュー",
+      "evidence_paths": [
+        "supabase/migrations/20260904160000_create_gallery_view.sql",
+        "apps/api/app/services/gallery_view_service.py",
+        "apps/api/app/routers/gallery_views.py",
+        "apps/web/src/components/gallery/GallerySavedViewsBar.tsx",
+        "apps/web/src/lib/galleryViewQuery.ts",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/gallery-views"
+      ],
+      "notes": "無料・上限20。display_settings に JSON を増やさない。適用は v=1 クエリ再利用。"
+    },
+    {
+      "id": "gallery_bulk_category",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー一括カテゴリ変更",
+      "evidence_paths": [
+        "apps/web/src/components/gallery/GalleryBrowse.tsx",
+        "apps/web/src/components/gallery/GalleryBulkBar.tsx",
+        "apps/api/app/routers/products.py",
+        "apps/api/app/services/product_service.py",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products/bulk"
+      ],
+      "notes": "category_tag_id / clear_category_tag。選択モードは収納と共用。"
     },
     {
       "id": "product_detail",
@@ -402,6 +665,41 @@
         "/premium"
       ],
       "expected_api_paths": []
+    },
+    {
+      "id": "product_currency_fiat",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "製品ごとの法定通貨記録",
+      "evidence_paths": [
+        "apps/api/app/services/currency_codes.py",
+        "apps/api/app/services/product_service.py",
+        "apps/web/src/components/settings/CurrencyCodePicker.tsx",
+        "apps/web/src/components/format/FormattedAppMoney.tsx",
+        "apps/web/src/components/register/StepConfirm.tsx",
+        "apps/web/src/components/ProductDetailEditor.tsx",
+        "apps/web/src/components/ProductGalleryGrid.tsx",
+        "supabase/migrations/20260904050000_registered_product_currency_code.sql",
+        "docs/product/acceptance/register.md"
+      ],
+      "expected_web_paths": [
+        "/register",
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products"
+      ],
+      "notes": "registered_product.currency_code（ISO）。currency_unit 表は未使用。記録通貨優先・換算なし。"
+    },
+    {
+      "id": "crypto_nft_assets",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "暗号資産・NFT",
+      "evidence_paths": [],
+      "expected_web_paths": [],
+      "expected_api_paths": [],
+      "notes": "法定通貨枠に押し込めない。別モデル。Must 本線ではやらない。"
     },
     {
       "id": "auth_session",

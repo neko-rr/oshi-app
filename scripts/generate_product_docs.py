@@ -61,6 +61,9 @@ def scan_web_routes() -> list[dict[str, str]]:
         for part in rel.parts[:-1]:
             if part.startswith("(") and part.endswith(")"):
                 continue
+            # next-intl の [locale] は論理パスから除外（/gallery として記録）
+            if part == "[locale]":
+                continue
             parts.append(part)
         url = "/" + "/".join(parts) if parts else "/"
         kind = "page" if name.startswith("page.") else "route"

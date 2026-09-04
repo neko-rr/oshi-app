@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ProductTagChip } from "@/components/tags/ProductTagChip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,8 +28,11 @@ export function TagChipPicker({
   value,
   onChange,
   variant,
-  noneLabel = "未設定",
+  noneLabel,
 }: TagChipPickerProps) {
+  const t = useTranslations("ProductDetail");
+  const resolvedNoneLabel = noneLabel ?? t("noneLabel");
+
   return (
     <fieldset className="grid gap-2">
       <legend className="text-sm font-medium">{label}</legend>
@@ -48,7 +52,7 @@ export function TagChipPicker({
           onClick={() => onChange(null)}
           aria-pressed={value === null}
         >
-          {noneLabel}
+          {resolvedNoneLabel}
         </Button>
         {options.map((opt) => {
           const selected = value === opt.id;

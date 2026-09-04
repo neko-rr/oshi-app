@@ -15,6 +15,17 @@ DB の `photo` 行と、Supabase Storage のオブジェクトはセットで扱
 
 実装の目安: `apps/api/app/infra/photo_storage.py` / `photo_signing.py`
 
+## 書き出し成果物（exports）
+
+| 項目 | 値 |
+|------|-----|
+| バケット | `exports`（Private） |
+| オブジェクト path | `{members_id}/{data_export_id}.zip` |
+| 用途 | 設定のデータ書き出し（TTL 後は失効。API がストリーム） |
+| 注意 | アーカイブに **signed URL を入れない**（path／バイトのみ） |
+
+表: `public.data_export`（ジョブ状態）。RLS は `members_id = auth.uid()`。
+
 ## 作成時
 
 1. `photo` 行を insert（`members_id` = JWT sub）

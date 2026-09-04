@@ -92,6 +92,60 @@
 | 作成日時 | `created_at` | `timestamp with time zone` | YES | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | YES | `now()` |
 
+## `data_export`（データ書き出し）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| データ書き出しID | `data_export_id` | `uuid` | NO | `gen_random_uuid()` |
+| 会員ID | `members_id` | `uuid` | NO | |
+| 種別 | `kind` | `text` | NO | |
+| 状態 | `status` | `text` | NO | `'pending'::text` |
+| ストレージパス | `storage_path` | `text` | YES | |
+| エラーコード | `error_code` | `text` | YES | |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
+| 失効日時 | `expires_at` | `timestamp with time zone` | NO | |
+
+## `display_settings`（表示設定）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| 会員ID | `members_id` | `uuid` | NO | |
+| 会員種別名 | `members_type_name` | `text` | NO | `'default'::text` |
+| 文字倍率 | `text_scale` | `smallint` | NO | `3` |
+| UI密度 | `ui_density` | `smallint` | NO | `4` |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
+| 一覧並び | `list_sort` | `text` | NO | `'newest'::text` |
+| ギャラリー表示 | `gallery_layout` | `text` | NO | `'grid'::text` |
+| 着地ページ | `landing_page` | `text` | NO | `'home'::text` |
+| 居住地域 | `residence_region` | `text` | NO | `'jp'::text` |
+| タイムゾーン上書き | `timezone_override` | `text` | YES | |
+| 日付形式モード | `date_format_mode` | `text` | NO | `'residence'::text` |
+| 通貨コード上書き | `currency_code_override` | `text` | YES | |
+| 金額形式モード | `currency_format_mode` | `text` | NO | `'residence'::text` |
+| 登録開始手順 | `register_start_step` | `text` | NO | `'barcode'::text` |
+| 既定収納場所ID | `default_storage_location_id` | `integer` | YES | |
+| ギャラリー名前表示 | `gallery_show_name` | `boolean` | NO | `true` |
+| ギャラリータグ表示 | `gallery_show_tags` | `boolean` | NO | `true` |
+| ギャラリー価格表示 | `gallery_show_price` | `boolean` | NO | `true` |
+
+## `gallery_view`（ギャラリー保存ビュー）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| ギャラリー保存ビューID | `gallery_view_id` | `bigint` | NO | |
+| 会員ID | `members_id` | `uuid` | NO | |
+| ビュー名 | `view_name` | `text` | NO | |
+| 検索語 | `q` | `text` | YES | |
+| カテゴリタグID一覧 | `category_tag_ids` | `integer[]` | NO | `'{}'::integer[]` |
+| 収納場所ID一覧 | `storage_location_ids` | `integer[]` | NO | `'{}'::integer[]` |
+| カラータグスロット一覧 | `color_tag_slots` | `integer[]` | NO | `'{}'::integer[]` |
+| 一覧並び | `list_sort` | `text` | NO | `'newest'::text` |
+| 表示順 | `display_order` | `integer` | NO | `0` |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
+
 ## `icon_tag`（アイコンタグ）
 
 | 日本語列名 | 物理名 | 型 | NULL | default |
@@ -126,6 +180,19 @@
 | 高解像度登録可能枚数 | `high_resolution_registerable_number` | `integer` | YES | `10` |
 | 作成日時 | `created_at` | `timestamp with time zone` | YES | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | YES | `now()` |
+
+## `oshi_accent_settings`（推し色設定）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| 会員ID | `members_id` | `uuid` | NO | |
+| 会員種別名 | `members_type_name` | `text` | NO | `'default'::text` |
+| メイン色 | `main_hex` | `text` | NO | `'#9f606c'::text` |
+| サブ色 | `sub_hex` | `text` | NO | `'#6a9bb8'::text` |
+| 有効 | `active` | `boolean` | NO | `false` |
+| プリセット一覧 | `presets` | `jsonb` | NO | `'[]'::jsonb` |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
 
 ## `photo`（写真）
 
@@ -219,6 +286,7 @@
 | おまけフラグ | `freebie_flag` | `integer` | YES | `0` |
 | 製品シリーズコンプリートフラグ | `product_series_complete_flag` | `integer` | YES | `0` |
 | 製品グループ名 | `product_group_name` | `text` | YES | |
+| 通貨コード | `currency_code` | `text` | YES | |
 
 ## `registered_product_color_tag`（登録製品カラータグ）
 
@@ -248,6 +316,8 @@
 | 会員ID | `members_id` | `uuid` | NO | |
 | スロット | `slot` | `integer` | YES | |
 | 表示順 | `display_order` | `integer` | NO | `0` |
+| 登録選択回数 | `register_pick_count` | `integer` | NO | `0` |
+| 最終登録選択日時 | `last_register_picked_at` | `timestamp with time zone` | YES | |
 
 ## `storage_location_preset_slot_dismissed`（収納場所プリセット削除済）
 

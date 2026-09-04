@@ -58,6 +58,7 @@ Phase 2・モバイル本番・deferred は要求に応じて。ARCHIVE / Dash �
 | **Render / Cloudflare / 本番 env・CORS** | **`deploy-change`** |
 | **製品仕様・画面/API ルート・flows / acceptance** | **`product-spec-sync`** |
 | **shared API_PATHS ↔ FastAPI ルート** | **`api-contract-sync`** |
+| **Web messages ja→en 下書き・キー欠落** | **`i18n-web-sync`** |
 | **Web UI・トークン・推し色・docs/design** | **`design-change`** |
 | **Design Lab・3案スコア・本決定前比較** | **`design-lab`** |
 | **Lab 案の本番画面単位採用** | **`design-adoption`** |

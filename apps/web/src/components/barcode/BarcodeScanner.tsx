@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ type Props = {
  * 将来の「購入済み判定」画面からも同じコンポーネントを使う前提。
  */
 export function BarcodeScanner({ onDetected, disabled }: Props) {
+  const t = useTranslations("Register.scanner");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scanningRef = useRef(false);
@@ -34,7 +36,7 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
     const stream = streamRef.current;
     streamRef.current = null;
     if (stream) {
-      stream.getTracks().forEach((t) => t.stop());
+      stream.getTracks().forEach((track) => track.stop());
     }
     const video = videoRef.current;
     if (video) {
@@ -54,12 +56,12 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
     setError(null);
     setEngineNote(
       isNativeBarcodeDetectorAvailable()
-        ? "ネイティブ読取を使用します"
-        : "互換モード（ZXing）で読取します",
+        ? t("engineNative")
+        : t("engineZxing"),
     );
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        setError("このブラウザではカメラを使えません。番号入力か画像を使ってください。");
+        setError(t("cameraUnsupported"));
         return;
       }
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -73,7 +75,7 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
       streamRef.current = stream;
       const video = videoRef.current;
       if (!video) {
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((track) => track.stop());
         return;
       }
       video.srcObject = stream;
@@ -82,9 +84,7 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
       scanningRef.current = true;
       void scanLoop();
     } catch {
-      setError(
-        "カメラを開始できませんでした。権限を許可するか、番号入力・画像を使ってください。",
-      );
+      setError(t("cameraStartFailed"));
       await stopCamera();
     }
   }
@@ -111,7 +111,7 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
     await stopCamera();
     const decoded = await detectFromImageFile(file);
     if (!decoded) {
-      setError("画像からバーコードを読めませんでした。別の画像か番号入力を試してください。");
+      setError(t("imageDecodeFailed"));
       return;
     }
     onDetected(decoded);
@@ -145,7 +145,7 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
             disabled={disabled}
             onClick={() => void startCamera()}
           >
-            カメラで読取
+            {t("startCamera")}
           </Button>
         ) : (
           <Button
@@ -153,13 +153,13 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
             variant="secondary"
             onClick={() => void stopCamera()}
           >
-            カメラを止める
+            {t("stopCamera")}
           </Button>
         )}
       </div>
 
       <div className="grid gap-1">
-        <Label htmlFor="barcode_image_upload">バーコード画像をアップロード</Label>
+        <Label htmlFor="barcode_image_upload">{t("uploadLabel")}</Label>
         <Input
           id="barcode_image_upload"
           type="file"

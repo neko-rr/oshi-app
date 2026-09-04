@@ -20,6 +20,9 @@ export type StorageLocationItem = {
   storage_location_id: number;
   storage_location_name: string;
   storage_location_icon?: string | null;
+  display_order?: number | null;
+  register_pick_count?: number | null;
+  last_register_picked_at?: string | null;
 };
 
 export type BarcodeLookupResponse = {
@@ -39,6 +42,8 @@ export type RegisterDraft = {
   productGroupName: string;
   characterName: string;
   purchasePrice: string;
+  /** ISO 4217。価格があるときの記録通貨 */
+  currencyCode: string;
   memo: string;
   selectedSlots: Set<number>;
   categoryTagId: number | null;
@@ -60,6 +65,7 @@ export function emptyDraft(): RegisterDraft {
     productGroupName: "",
     characterName: "",
     purchasePrice: "",
+    currencyCode: "",
     memo: "",
     selectedSlots: new Set(),
     categoryTagId: null,

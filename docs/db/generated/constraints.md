@@ -7,11 +7,24 @@
 |----|------|------|
 | `category_tag` | `category_tag_slot_range` | `CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))` |
 | `category_tag_preset_slot_dismissed` | `category_tag_preset_slot_dismissed_slot_range` | `CHECK (((slot >= 1) AND (slot <= 6)))` |
-| `color_tag` | `color_tag_color_hex_check` | `CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))` |
 | `color_tag` | `color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
+| `color_tag` | `color_tag_color_hex_check` | `CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))` |
+| `display_settings` | `display_settings_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
+| `display_settings` | `display_settings_register_start_step_check` | `CHECK ((register_start_step = ANY (ARRAY['barcode'::text, 'photo'::text, 'confirm'::text])))` |
+| `display_settings` | `display_settings_text_scale_check` | `CHECK (((text_scale >= 1) AND (text_scale <= 7)))` |
+| `display_settings` | `display_settings_ui_density_check` | `CHECK (((ui_density >= 1) AND (ui_density <= 7)))` |
+| `display_settings` | `display_settings_date_format_mode_check` | `CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))` |
+| `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
+| `display_settings` | `display_settings_gallery_layout_check` | `CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))` |
+| `display_settings` | `display_settings_landing_page_check` | `CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))` |
+| `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
+| `gallery_view` | `gallery_view_color_tag_slots_check` | `CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))` |
+| `gallery_view` | `gallery_view_view_name_len_check` | `CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))` |
 | `registered_product_color_tag` | `registration_product_color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
 | `storage_location` | `receipt_location_slot_range` | `CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))` |
 | `storage_location_preset_slot_dismissed` | `receipt_location_preset_slot_dismissed_slot_range` | `CHECK (((slot >= 1) AND (slot <= 6)))` |
+| `oshi_accent_settings` | `oshi_accent_settings_main_hex_format` | `CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))` |
+| `oshi_accent_settings` | `oshi_accent_settings_sub_hex_format` | `CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))` |
 
 ## 外部キー（抜粋）
 
@@ -19,24 +32,27 @@
 |------|----|------|
 | `category_tag` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `category_tag_preset_slot_dismissed` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
-| `character` | `works_series` | `FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE` |
+| `character` | `color` | `FOREIGN KEY (eye_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
 | `character` | `color` | `FOREIGN KEY (theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
 | `character` | `color` | `FOREIGN KEY (hair_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
-| `character` | `color` | `FOREIGN KEY (eye_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
 | `character` | `work` | `FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE CASCADE` |
+| `character` | `works_series` | `FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE` |
 | `color_tag` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
-| `member` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
+| `display_settings` | `storage_location` | `FOREIGN KEY (default_storage_location_id) REFERENCES storage_location(storage_location_id) ON DELETE SET NULL` |
+| `display_settings` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
+| `gallery_view` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `member` | `member_type` | `FOREIGN KEY (members_type_name) REFERENCES member_type(members_type_name) ON DELETE SET NULL` |
+| `member` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `photo` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `photo` | `color` | `FOREIGN KEY (photo_theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
 | `product_size` | `product_type` | `FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL` |
-| `registered_product` | `character` | `FOREIGN KEY (character_id) REFERENCES "character"(character_id) ON DELETE SET NULL` |
+| `registered_product` | `product_type` | `FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL` |
 | `registered_product` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `registered_product` | `photo` | `FOREIGN KEY (photo_id) REFERENCES photo(photo_id) ON DELETE SET NULL` |
 | `registered_product` | `works_series` | `FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL` |
 | `registered_product` | `work` | `FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE SET NULL` |
+| `registered_product` | `character` | `FOREIGN KEY (character_id) REFERENCES "character"(character_id) ON DELETE SET NULL` |
 | `registered_product` | `copyright_company` | `FOREIGN KEY (copyright_company_id) REFERENCES copyright_company(copyright_company_id) ON DELETE SET NULL` |
-| `registered_product` | `product_type` | `FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL` |
 | `registered_product` | `product_size` | `FOREIGN KEY (product_size_id) REFERENCES product_size(product_size_id) ON DELETE SET NULL` |
 | `registered_product` | `storage_location` | `FOREIGN KEY (storage_location_id) REFERENCES storage_location(storage_location_id) ON DELETE SET NULL` |
 | `registered_product` | `color_tag` | `FOREIGN KEY (color_tag_id) REFERENCES color_tag(color_tag_id) ON DELETE SET NULL` |
@@ -49,6 +65,7 @@
 | `storage_location_preset_slot_dismissed` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `theme_settings` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `work` | `works_series` | `FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL` |
+| `oshi_accent_settings` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 
 ## インデックス
 
@@ -73,6 +90,11 @@
 | `copyright_company` | `idx_copyright_company_name` | `CREATE INDEX idx_copyright_company_name ON public.copyright_company USING btree (copyright_company_name)` |
 | `currency_unit` | `currency_unit_currency_name_key` | `CREATE UNIQUE INDEX currency_unit_currency_name_key ON public.currency_unit USING btree (currency_name)` |
 | `currency_unit` | `currency_unit_pkey` | `CREATE UNIQUE INDEX currency_unit_pkey ON public.currency_unit USING btree (currency_unit_id)` |
+| `display_settings` | `display_settings_members_id_idx` | `CREATE INDEX display_settings_members_id_idx ON public.display_settings USING btree (members_id)` |
+| `display_settings` | `display_settings_pkey` | `CREATE UNIQUE INDEX display_settings_pkey ON public.display_settings USING btree (members_id, members_type_name)` |
+| `gallery_view` | `gallery_view_members_id_idx` | `CREATE INDEX gallery_view_members_id_idx ON public.gallery_view USING btree (members_id)` |
+| `gallery_view` | `gallery_view_members_view_name_key` | `CREATE UNIQUE INDEX gallery_view_members_view_name_key ON public.gallery_view USING btree (members_id, view_name)` |
+| `gallery_view` | `gallery_view_pkey` | `CREATE UNIQUE INDEX gallery_view_pkey ON public.gallery_view USING btree (gallery_view_id)` |
 | `icon_tag` | `icon_tag_pkey` | `CREATE UNIQUE INDEX icon_tag_pkey ON public.icon_tag USING btree (icon)` |
 | `member` | `member_email_address_key` | `CREATE UNIQUE INDEX member_email_address_key ON public.member USING btree (email_address)` |
 | `member` | `member_pkey` | `CREATE UNIQUE INDEX member_pkey ON public.member USING btree (members_id)` |
@@ -117,3 +139,5 @@
 | `works_series` | `idx_works_series_name` | `CREATE INDEX idx_works_series_name ON public.works_series USING btree (works_series_name)` |
 | `works_series` | `works_series_pkey` | `CREATE UNIQUE INDEX works_series_pkey ON public.works_series USING btree (works_series_id)` |
 | `works_series` | `works_series_works_series_name_key` | `CREATE UNIQUE INDEX works_series_works_series_name_key ON public.works_series USING btree (works_series_name)` |
+| `oshi_accent_settings` | `oshi_accent_settings_pkey` | `CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)` |
+| `oshi_accent_settings` | `oshi_accent_settings_members_id_idx` | `CREATE INDEX oshi_accent_settings_members_id_idx ON public.oshi_accent_settings USING btree (members_id)` |

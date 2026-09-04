@@ -8,6 +8,8 @@
 ## 現状との差
 
 現行 UI は `RegisterWizard`（手順 1 → 2 → 6）で番号入力・カメラ読取・写真・確認まで完走できる（**Must 本線は shipped**）。  
+**開始手順の既定:** `/settings/register` の `register_start_step`（`barcode` / `photo` / `confirm`）。「続けて登録」も同じ設定に従う。スキップ操作後に「次からこの手順」提案あり。  
+**収納:** `default_storage_location_id` があれば確認画面で選択済み＋先頭。なければ登録時の選択履歴で並びのみ（自動選択なし）。  
 **バーコード:** ライブカメラ（`BarcodeDetector` 優先、ZXing フォールバック）＋画像アップロード＋番号入力。  
 読取後は `GET /products?barcode=` で自分のリストに同番号があるかヒント表示（将来の購入済み判定の土台）。  
 **裏アシスト:** 写真あり時は `POST /assist/vision/describe` を **1回**呼び、見た目タグ・商品種類・色提案を確認画面へ反映。  

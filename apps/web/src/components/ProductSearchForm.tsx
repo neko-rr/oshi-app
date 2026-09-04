@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +13,13 @@ type Props = {
   /** 検索送信先（既定 /search） */
   actionPath?: string;
   initialQuery?: string;
-  /** ギャラリー時: 他の絞込を維持 */
+  /** ギャラリー時: 他の絞込・並びを維持 */
   preserveFilters?: Pick<
     GalleryListQuery,
-    "category_tag_id" | "storage_location_id"
+    | "category_tag_ids"
+    | "storage_location_ids"
+    | "color_tag_slots"
+    | "sort"
   >;
 };
 
@@ -25,6 +29,7 @@ export function ProductSearchForm({
   preserveFilters,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("Search");
   const [q, setQ] = useState(initialQuery);
 
   function onSubmit(e: FormEvent) {
@@ -34,8 +39,10 @@ export function ProductSearchForm({
       router.push(
         galleryListHref({
           ...(trimmed ? { q: trimmed } : {}),
-          category_tag_id: preserveFilters?.category_tag_id,
-          storage_location_id: preserveFilters?.storage_location_id,
+          category_tag_ids: preserveFilters?.category_tag_ids,
+          storage_location_ids: preserveFilters?.storage_location_ids,
+          color_tag_slots: preserveFilters?.color_tag_slots,
+          sort: preserveFilters?.sort,
         }),
       );
       return;
@@ -54,20 +61,20 @@ export function ProductSearchForm({
     >
       <div className="grid flex-1 gap-1">
         <Label htmlFor="product_search_q" className="sr-only">
-          製品を検索
+          {t("formLabel")}
         </Label>
         <Input
           id="product_search_q"
           name="q"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="名前・カテゴリ・収納場所"
+          placeholder={t("formPlaceholder")}
           autoComplete="off"
           className="min-h-11 rounded-full"
         />
       </div>
       <Button type="submit" className="min-h-11 shrink-0 rounded-full px-6">
-        検索
+        {t("formSubmit")}
       </Button>
     </form>
   );

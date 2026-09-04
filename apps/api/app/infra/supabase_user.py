@@ -15,6 +15,8 @@ product_name,
 barcode_number,
 photo_id,
 creation_date,
+purchase_price,
+currency_code,
 category_tag_id,
 storage_location_id,
 photo(photo_thumbnail_url),
@@ -114,19 +116,53 @@ def fetch_products_page(
     offset: int = 0,
     barcode_number: str | None = None,
     q: str | None = None,
-    category_tag_id: int | None = None,
-    storage_location_id: int | None = None,
+    category_tag_ids: list[int] | None = None,
+    storage_location_ids: list[int] | None = None,
+    color_tag_slots: list[int] | None = None,
+    sort: str | None = None,
 ) -> list[dict[str, Any]]:
     """registered_product を 1 ページ取得（RLS + eq members_id）。
 
     barcode_number 指定時は番号完全一致（購入済み判定用）。
     q は製品名・タグ名の部分一致を DB 側で OR。
-    category_tag_id / storage_location_id は AND。
+    category / storage / color は同種 OR・異種 AND。
+    sort: newest（登録日新しい順）/ name（名前）/ created_at（登録日古い順）。
     """
     if limit <= 0:
         return []
     client = create_user_client(access_token)
     end = offset + limit - 1
+
+    cat_ids = [int(x) for x in (category_tag_ids or []) if int(x) >= 1]
+    storage_ids_filter = [
+        int(x) for x in (storage_location_ids or []) if int(x) >= 1
+    ]
+    color_slots = [
+        int(x) for x in (color_tag_slots or []) if 1 <= int(x) <= 7
+    ]
+
+    # 色スロット: junction から product id を先に取得（ページング前）
+    color_product_ids: list[int] | None = None
+    if color_slots:
+        color_resp = (
+            client.table("registered_product_color_tag")
+            .select("registered_product_id")
+            .eq("members_id", members_id)
+            .in_("slot", color_slots)
+            .execute()
+        )
+        seen: set[int] = set()
+        color_product_ids = []
+        for row in color_resp.data or []:
+            if not isinstance(row, dict):
+                continue
+            pid = row.get("registered_product_id")
+            if isinstance(pid, int) and pid not in seen:
+                seen.add(pid)
+                color_product_ids.append(pid)
+        if not color_product_ids:
+            return []
+
     query = (
         client.table("registered_product")
         .select(_PRODUCT_LIST_SELECT)
@@ -135,14 +171,16 @@ def fetch_products_page(
     code = (barcode_number or "").strip()
     if code:
         query = query.eq("barcode_number", code)
-    if category_tag_id is not None:
-        query = query.eq("category_tag_id", int(category_tag_id))
-    if storage_location_id is not None:
-        query = query.eq("storage_location_id", int(storage_location_id))
+    if cat_ids:
+        query = query.in_("category_tag_id", cat_ids)
+    if storage_ids_filter:
+        query = query.in_("storage_location_id", storage_ids_filter)
+    if color_product_ids is not None:
+        query = query.in_("registered_product_id", color_product_ids)
 
     needle = (q or "").strip()
     if needle:
-        cat_ids = _resolve_tag_ids_matching_name(
+        cat_ids_q = _resolve_tag_ids_matching_name(
             client,
             table="category_tag",
             id_column="category_tag_id",
@@ -168,16 +206,24 @@ def fetch_products_page(
             f"product_group_name.ilike.{pattern}",
             f"works_series_name.ilike.{pattern}",
         ]
-        if cat_ids:
-            ids_csv = ",".join(str(i) for i in cat_ids)
+        if cat_ids_q:
+            ids_csv = ",".join(str(i) for i in cat_ids_q)
             or_parts.append(f"category_tag_id.in.({ids_csv})")
         if storage_ids:
             ids_csv = ",".join(str(i) for i in storage_ids)
             or_parts.append(f"storage_location_id.in.({ids_csv})")
         query = query.or_(",".join(or_parts))
 
+    sort_key = (sort or "newest").strip()
+    if sort_key == "name":
+        order_column, order_desc = "product_name", False
+    elif sort_key == "created_at":
+        order_column, order_desc = "creation_date", False
+    else:
+        order_column, order_desc = "creation_date", True
+
     response = (
-        query.order("creation_date", desc=True).range(offset, end).execute()
+        query.order(order_column, desc=order_desc).range(offset, end).execute()
     )
     if getattr(response, "error", None):
         logger.exception("製品一覧の取得に失敗: %s", response.error)
@@ -200,6 +246,7 @@ def insert_product_row(
     title: str | None = None,
     character_name: str | None = None,
     purchase_price: int | None = None,
+    currency_code: str | None = None,
     purchase_location: str | None = None,
     memo: str | None = None,
     category_tag_id: int | None = None,
@@ -231,6 +278,8 @@ def insert_product_row(
         payload["photo_id"] = photo_id
     if purchase_price is not None:
         payload["purchase_price"] = purchase_price
+    if currency_code is not None:
+        payload["currency_code"] = currency_code
     if category_tag_id is not None:
         payload["category_tag_id"] = category_tag_id
     if storage_location_id is not None:
@@ -264,6 +313,7 @@ works_series_name,
 title,
 character_name,
 purchase_price,
+currency_code,
 purchase_location,
 category_tag_id,
 storage_location_id,
@@ -314,6 +364,38 @@ def patch_product_row(
     client.table("registered_product").update(fields).eq(
         "members_id", members_id
     ).eq("registered_product_id", registered_product_id).execute()
+
+
+def bulk_patch_product_storage(
+    *,
+    members_id: str,
+    access_token: str,
+    registered_product_ids: list[int],
+    storage_location_id: int | None,
+) -> None:
+    """複数製品の storage_location_id を一括更新（null 可）。"""
+    bulk_patch_product_fields(
+        members_id=members_id,
+        access_token=access_token,
+        registered_product_ids=registered_product_ids,
+        fields={"storage_location_id": storage_location_id},
+    )
+
+
+def bulk_patch_product_fields(
+    *,
+    members_id: str,
+    access_token: str,
+    registered_product_ids: list[int],
+    fields: dict[str, Any],
+) -> None:
+    """複数製品のスカラー列を一括更新。"""
+    if not registered_product_ids or not fields:
+        return
+    client = create_user_client(access_token)
+    client.table("registered_product").update(fields).eq(
+        "members_id", members_id
+    ).in_("registered_product_id", registered_product_ids).execute()
 
 
 def delete_product_row(

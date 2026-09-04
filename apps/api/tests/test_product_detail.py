@@ -132,3 +132,158 @@ def test_patch_product_can_clear_purchase_price() -> None:
     assert res.status_code == 200
     assert "purchase_price" in mocked.call_args[1]["fields"]
     assert mocked.call_args[1]["fields"]["purchase_price"] is None
+
+
+def test_normalize_product_detail_includes_currency_code() -> None:
+    from app.services.product_service import normalize_product_detail
+
+    detail = normalize_product_detail(
+        {
+            "registered_product_id": 1,
+            "product_name": "A",
+            "purchase_price": 1200,
+            "currency_code": "USD",
+        }
+    )
+    assert detail["purchase_price"] == 1200
+    assert detail["currency_code"] == "USD"
+
+
+def test_normalize_product_row_includes_price_and_currency() -> None:
+    from app.services.product_service import normalize_product_row
+
+    row = normalize_product_row(
+        {
+            "registered_product_id": 1,
+            "product_name": "A",
+            "purchase_price": 500,
+            "currency_code": "JPY",
+        }
+    )
+    assert row["purchase_price"] == 500
+    assert row["currency_code"] == "JPY"
+
+
+def test_create_product_passes_currency_code() -> None:
+    captured: dict = {}
+
+    def fake_insert(**kwargs):
+        captured.update(kwargs)
+        return 10
+
+    from app.services.product_service import create_product_for_member
+
+    create_product_for_member(
+        "11111111-1111-1111-1111-111111111111",
+        access_token="tok",
+        product_name="グッズ",
+        purchase_price=1000,
+        currency_code="eur",
+        insert_product=fake_insert,
+    )
+    assert captured["purchase_price"] == 1000
+    assert captured["currency_code"] == "EUR"
+
+
+def test_create_product_drops_currency_when_no_price() -> None:
+    captured: dict = {}
+
+    def fake_insert(**kwargs):
+        captured.update(kwargs)
+        return 11
+
+    from app.services.product_service import create_product_for_member
+
+    create_product_for_member(
+        "11111111-1111-1111-1111-111111111111",
+        access_token="tok",
+        product_name="グッズ",
+        purchase_price=None,
+        currency_code="JPY",
+        insert_product=fake_insert,
+    )
+    assert captured.get("currency_code") is None
+
+
+def test_create_product_rejects_unknown_currency_code() -> None:
+    from app.services.product_service import create_product_for_member
+
+    with pytest.raises(ValueError, match="currency_code"):
+        create_product_for_member(
+            "11111111-1111-1111-1111-111111111111",
+            access_token="tok",
+            product_name="グッズ",
+            purchase_price=100,
+            currency_code="XXX",
+            insert_product=lambda **_: 1,
+        )
+
+
+def test_patch_product_accepts_currency_code() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email=None,
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.patch_product_for_member",
+            return_value={
+                "registered_product_id": 1,
+                "purchase_price": 10,
+                "currency_code": "USD",
+            },
+        ) as mocked,
+    ):
+        res = client.patch(
+            "/products/1",
+            headers={"Authorization": "Bearer x"},
+            json={"currency_code": "USD"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["fields"]["currency_code"] == "USD"
+
+
+def test_patch_product_clearing_price_also_clears_currency() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email=None,
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.patch_product_for_member",
+            return_value={
+                "registered_product_id": 1,
+                "purchase_price": None,
+                "currency_code": None,
+            },
+        ) as mocked,
+    ):
+        res = client.patch(
+            "/products/1",
+            headers={"Authorization": "Bearer x"},
+            json={"purchase_price": None},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["fields"]["purchase_price"] is None
+    assert mocked.call_args[1]["fields"]["currency_code"] is None
+
+
+def test_post_products_rejects_unknown_currency() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with patch("app.deps.auth.verify_access_token", return_value=user):
+        res = client.post(
+            "/products",
+            headers={"Authorization": "Bearer fake-jwt"},
+            json={
+                "product_name": "アクスタ",
+                "purchase_price": 100,
+                "currency_code": "XXX",
+            },
+        )
+    assert res.status_code == 400
+    assert res.json()["error"]["code"] == "VALIDATION_ERROR"

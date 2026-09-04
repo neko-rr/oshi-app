@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   allowsAnonymousWhenNotProduction,
+  getLocaleFromPath,
   shouldBlockDevPathInProduction,
+  stripLocalePrefix,
+  withLocalePrefix,
 } from "@/lib/auth-path-policy";
 
 /** ローカル骨格用。本番では無効。AUTH_GATE_BYPASS=1 のときのみ認証ゲートを緩める */
@@ -16,13 +19,15 @@ function authGateBypassAllowed(): boolean {
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
-  const path = request.nextUrl.pathname;
+  const rawPath = request.nextUrl.pathname;
+  const locale = getLocaleFromPath(rawPath);
+  const path = stripLocalePrefix(rawPath);
   const isProduction = process.env.NODE_ENV === "production";
 
   // Design Lab 等は本番では公開しない（デザイン確認専用・開発時のみ）
   if (shouldBlockDevPathInProduction(path, isProduction)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/";
+    redirectUrl.pathname = withLocalePrefix(locale, "/");
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -37,7 +42,7 @@ export async function updateSession(request: NextRequest) {
     // 非本番の /dev はデザイン確認用に匿名可
     if (!allowsAnonymousWhenNotProduction(path)) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/auth/login";
+      redirectUrl.pathname = withLocalePrefix(locale, "/auth/login");
       return NextResponse.redirect(redirectUrl);
     }
     return supabaseResponse;
@@ -68,7 +73,7 @@ export async function updateSession(request: NextRequest) {
   // 非本番 /dev は未ログインでも可（見本 UI のみ。業務データは載せない）
   if (!user && !allowsAnonymousWhenNotProduction(path)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/auth/login";
+    redirectUrl.pathname = withLocalePrefix(locale, "/auth/login");
     return NextResponse.redirect(redirectUrl);
   }
 

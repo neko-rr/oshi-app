@@ -3,6 +3,7 @@ export const API_PATHS = {
   health: "/health",
   me: "/me",
   products: "/products",
+  productsBulk: "/products/bulk",
   photos: "/photos",
   colorTags: "/color-tags",
   categoryTags: "/category-tags",
@@ -12,6 +13,10 @@ export const API_PATHS = {
   storageLocationsOrder: "/storage-locations/order",
   storageLocationsRestorePreset: "/storage-locations/restore-preset",
   themeSettings: "/theme-settings",
+  oshiAccentSettings: "/oshi-accent-settings",
+  displaySettings: "/display-settings",
+  galleryViews: "/gallery-views",
+  exports: "/exports",
   statsProducts: "/stats/products",
   dashboardCharts: "/dashboard/charts",
   assistVisionDescribe: "/assist/vision/describe",
@@ -45,6 +50,8 @@ export type ProductListItem = {
   /** Storage signed URL（期限付き）。失敗時は null */
   photo_thumbnail_url: string | null;
   creation_date: string | null;
+  purchase_price?: number | null;
+  currency_code?: string | null;
   category_tag?: ProductTagSummary | null;
   storage_location?: ProductTagSummary | null;
 };
@@ -57,8 +64,10 @@ export type ProductListResponse = {
   q?: string | null;
   /** barcode_number 完全一致フィルタ */
   barcode?: string | null;
-  category_tag_id?: number | null;
-  storage_location_id?: number | null;
+  category_tag_ids?: number[];
+  storage_location_ids?: number[];
+  color_tag_slots?: number[];
+  sort?: string | null;
   /** 取得件数が limit 以上なら次ページの可能性あり */
   has_more?: boolean;
 };

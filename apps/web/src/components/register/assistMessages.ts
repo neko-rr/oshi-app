@@ -1,20 +1,51 @@
-/** アシスト soft status を利用者向け短文に変換（登録は止めない） */
-export function assistStatusMessage(
-  status: string | undefined,
-  fallback?: string | null,
-): string {
+/** アシスト soft status の翻訳キー（登録は止めない） */
+export type AssistStatusKey =
+  | "liveDisabled"
+  | "missingCredentials"
+  | "notReady"
+  | "error"
+  | "success"
+  | "default";
+
+export type AssistStatusMessage = {
+  key: AssistStatusKey;
+  /** error / success で API 等から渡された文言を優先表示 */
+  fallback?: string;
+};
+
+export function assistStatusKey(status: string | undefined): AssistStatusKey {
   switch (status) {
     case "live_disabled":
-      return "外部照合は現在オフです。手入力で続行できます。";
+      return "liveDisabled";
     case "missing_credentials":
-      return "外部照合の設定がありません。手入力で続行できます。";
+      return "missingCredentials";
     case "not_ready":
-      return "入力が不足しています。スキップするか番号を入れてください。";
+      return "notReady";
     case "error":
-      return fallback?.trim() || "照合に失敗しました。手入力で続行できます。";
+      return "error";
     case "success":
-      return fallback?.trim() || "候補を取得しました。";
+      return "success";
     default:
-      return fallback?.trim() || "照合結果を取得できませんでした。手入力で続行できます。";
+      return "default";
   }
+}
+
+export function assistStatusDescriptor(
+  status: string | undefined,
+  fallback?: string | null,
+): AssistStatusMessage {
+  const key = assistStatusKey(status);
+  const trimmed = fallback?.trim();
+  if ((key === "error" || key === "success") && trimmed) {
+    return { key, fallback: trimmed };
+  }
+  return { key };
+}
+
+export function resolveAssistMessage(
+  translate: (key: AssistStatusKey) => string,
+  descriptor: AssistStatusMessage,
+): string {
+  if (descriptor.fallback) return descriptor.fallback;
+  return translate(descriptor.key);
 }

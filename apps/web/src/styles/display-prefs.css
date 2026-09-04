@@ -1,0 +1,116 @@
+/* 顧客向け表示プリセット（文字サイズ・UI密度）。data-* は AppPreferencesRoot / ブート script が付与 */
+
+html {
+  --text-scale: 1;
+  --line-height-body: 1.5;
+  --density-space: 1;
+  font-size: calc(100% * var(--text-scale));
+}
+
+body {
+  line-height: var(--line-height-body);
+}
+
+/* 文字の大きさ 1〜7（既定 3 = ×1.0） */
+html[data-text-scale="1"] {
+  --text-scale: 0.875;
+}
+html[data-text-scale="2"] {
+  --text-scale: 0.9375;
+}
+html[data-text-scale="3"] {
+  --text-scale: 1;
+}
+html[data-text-scale="4"] {
+  --text-scale: 1.0625;
+}
+html[data-text-scale="5"] {
+  --text-scale: 1.125;
+}
+html[data-text-scale="6"] {
+  --text-scale: 1.25;
+}
+html[data-text-scale="7"] {
+  --text-scale: 1.375;
+}
+
+/* UI密度 1〜7（既定 4）。行間 + 縦リズム */
+html[data-ui-density="1"] {
+  --line-height-body: 1.25;
+  --density-space: 0.7;
+}
+html[data-ui-density="2"] {
+  --line-height-body: 1.35;
+  --density-space: 0.8;
+}
+html[data-ui-density="3"] {
+  --line-height-body: 1.45;
+  --density-space: 0.9;
+}
+html[data-ui-density="4"] {
+  --line-height-body: 1.5;
+  --density-space: 1;
+}
+html[data-ui-density="5"] {
+  --line-height-body: 1.65;
+  --density-space: 1.12;
+}
+html[data-ui-density="6"] {
+  --line-height-body: 1.75;
+  --density-space: 1.25;
+}
+html[data-ui-density="7"] {
+  --line-height-body: 1.9;
+  --density-space: 1.4;
+}
+
+/* ユーティリティ（設定・一覧・ギャラリー） */
+.gap-y-density {
+  row-gap: calc(0.5rem * var(--density-space));
+}
+
+.gap-density {
+  gap: calc(0.75rem * var(--density-space));
+}
+
+.py-density {
+  padding-block: calc(0.75rem * var(--density-space));
+}
+
+.py-density-main {
+  padding-block: calc(1.5rem * var(--density-space));
+}
+
+/* ギャラリーグリッドの余白 */
+.gallery-density-grid {
+  gap: calc(0.625rem * var(--density-space));
+}
+
+@media (min-width: 640px) {
+  .gallery-density-grid {
+    gap: calc(0.75rem * var(--density-space));
+  }
+}
+
+.gallery-density-card-pad {
+  padding: calc(0.625rem * var(--density-space));
+}
+
+@media (min-width: 640px) {
+  .gallery-density-card-pad {
+    padding: calc(0.75rem * var(--density-space));
+  }
+}
+
+/* スタック（ホーム・詳細など flex-col + 固定 gap の代替） */
+.stack-density {
+  display: flex;
+  flex-direction: column;
+  gap: calc(1rem * var(--density-space));
+}
+
+.stack-density-lg {
+  display: flex;
+  flex-direction: column;
+  gap: calc(1.5rem * var(--density-space));
+}

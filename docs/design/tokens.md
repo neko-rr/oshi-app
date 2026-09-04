@@ -40,6 +40,22 @@
 | 角 | 柔らかめ（sharp すぎない）。数値は Lab 後に固定 |
 | タッチ | 主要操作は指で押しやすい大きさ |
 
+## 顧客向け表示プリセット（`display_settings`）
+
+`/settings/theme`（見た目）で変更。実装: `apps/web/src/styles/display-prefs.css`。  
+**全ページ適用:** `AppPreferencesRoot`（テーマ=`ThemeRoot`、文字・密度=`DisplaySettingsRoot`）。初回描画前は layout のブート script が localStorage を `html` に載せる。
+
+| 軸 | 段階 | 既定 | 効果 |
+|----|------|------|------|
+| `text_scale`（文字の大きさ） | 1〜7 | 3（×1.0） | `html` の `font-size` 倍率（0.875〜1.375） |
+| `ui_density`（UI密度） | 1〜7 | 4 | 行間・main／ギャラリー余白（つめつめ←→ゆったり） |
+| `list_sort`（一覧の並び） | `newest` / `name` / `created_at` | `newest` | ギャラリー・検索の既定ソート |
+| `gallery_layout`（ギャラリー表示） | `grid` / `large` / `list` | `grid` | 写真主役グリッド／大きめ／リスト |
+| `landing_page`（ログイン後の着地） | `home` / `gallery` / `register` | `home` | `/`・`/gallery`・`/register` |
+| テーマ | パック ID | `default` | `html[data-theme]` でセマンティック色一式 |
+
+値は離散のみ（連続スライダーの生値は保存しない）。ドラッグ中も即 CSS 反映。
+
 ## まだやらないこと
 
 - ブランド色 `#9f606c` の 50〜950 全スケールの文書化（後回し）  

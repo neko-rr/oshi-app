@@ -367,6 +367,258 @@
       ]
     },
     {
+      "table_name": "data_export",
+      "comment": "ユーザー別データ書き出しジョブ（再取り込みなし。成果物は TTL 付き）",
+      "columns": [
+        {
+          "column": "data_export_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "kind",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "status",
+          "type": "text",
+          "not_null": true,
+          "default": "'pending'::text"
+        },
+        {
+          "column": "storage_path",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "error_code",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "expires_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": null
+        }
+      ]
+    },
+    {
+      "table_name": "display_settings",
+      "comment": "ユーザー別の文字サイズ・UI密度（1〜7 の離散プリセット）",
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_type_name",
+          "type": "text",
+          "not_null": true,
+          "default": "'default'::text"
+        },
+        {
+          "column": "text_scale",
+          "type": "smallint",
+          "not_null": true,
+          "default": "3"
+        },
+        {
+          "column": "ui_density",
+          "type": "smallint",
+          "not_null": true,
+          "default": "4"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "list_sort",
+          "type": "text",
+          "not_null": true,
+          "default": "'newest'::text"
+        },
+        {
+          "column": "gallery_layout",
+          "type": "text",
+          "not_null": true,
+          "default": "'grid'::text"
+        },
+        {
+          "column": "landing_page",
+          "type": "text",
+          "not_null": true,
+          "default": "'home'::text"
+        },
+        {
+          "column": "residence_region",
+          "type": "text",
+          "not_null": true,
+          "default": "'jp'::text"
+        },
+        {
+          "column": "timezone_override",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "date_format_mode",
+          "type": "text",
+          "not_null": true,
+          "default": "'residence'::text"
+        },
+        {
+          "column": "currency_code_override",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "currency_format_mode",
+          "type": "text",
+          "not_null": true,
+          "default": "'residence'::text"
+        },
+        {
+          "column": "register_start_step",
+          "type": "text",
+          "not_null": true,
+          "default": "'barcode'::text"
+        },
+        {
+          "column": "default_storage_location_id",
+          "type": "integer",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "gallery_show_name",
+          "type": "boolean",
+          "not_null": true,
+          "default": "true"
+        },
+        {
+          "column": "gallery_show_tags",
+          "type": "boolean",
+          "not_null": true,
+          "default": "true"
+        },
+        {
+          "column": "gallery_show_price",
+          "type": "boolean",
+          "not_null": true,
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "table_name": "gallery_view",
+      "comment": "ユーザー別のギャラリー保存ビュー（フィルタ＋並び。JSON 黒箱なし）",
+      "columns": [
+        {
+          "column": "gallery_view_id",
+          "type": "bigint",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "view_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "q",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "category_tag_ids",
+          "type": "integer[]",
+          "not_null": true,
+          "default": "'{}'::integer[]"
+        },
+        {
+          "column": "storage_location_ids",
+          "type": "integer[]",
+          "not_null": true,
+          "default": "'{}'::integer[]"
+        },
+        {
+          "column": "color_tag_slots",
+          "type": "integer[]",
+          "not_null": true,
+          "default": "'{}'::integer[]"
+        },
+        {
+          "column": "list_sort",
+          "type": "text",
+          "not_null": true,
+          "default": "'newest'::text"
+        },
+        {
+          "column": "display_order",
+          "type": "integer",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        }
+      ]
+    },
+    {
       "table_name": "icon_tag",
       "comment": null,
       "columns": [
@@ -500,6 +752,60 @@
           "column": "updated_at",
           "type": "timestamp with time zone",
           "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "comment": "ユーザー別推し色（メイン／サブ hex・適用フラグ・プリセット最大3）",
+      "columns": [
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_type_name",
+          "type": "text",
+          "not_null": true,
+          "default": "'default'::text"
+        },
+        {
+          "column": "main_hex",
+          "type": "text",
+          "not_null": true,
+          "default": "'#9f606c'::text"
+        },
+        {
+          "column": "sub_hex",
+          "type": "text",
+          "not_null": true,
+          "default": "'#6a9bb8'::text"
+        },
+        {
+          "column": "active",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "presets",
+          "type": "jsonb",
+          "not_null": true,
+          "default": "'[]'::jsonb"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
           "default": "now()"
         }
       ]
@@ -963,6 +1269,12 @@
           "type": "text",
           "not_null": false,
           "default": null
+        },
+        {
+          "column": "currency_code",
+          "type": "text",
+          "not_null": false,
+          "default": null
         }
       ]
     },
@@ -1089,6 +1401,18 @@
           "type": "integer",
           "not_null": true,
           "default": "0"
+        },
+        {
+          "column": "register_pick_count",
+          "type": "integer",
+          "not_null": true,
+          "default": "0"
+        },
+        {
+          "column": "last_register_picked_at",
+          "type": "timestamp with time zone",
+          "not_null": false,
+          "default": null
         }
       ]
     },
@@ -1322,6 +1646,31 @@
       "indexdef": "CREATE UNIQUE INDEX currency_unit_pkey ON public.currency_unit USING btree (currency_unit_id)"
     },
     {
+      "tablename": "display_settings",
+      "indexname": "display_settings_members_id_idx",
+      "indexdef": "CREATE INDEX display_settings_members_id_idx ON public.display_settings USING btree (members_id)"
+    },
+    {
+      "tablename": "display_settings",
+      "indexname": "display_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX display_settings_pkey ON public.display_settings USING btree (members_id, members_type_name)"
+    },
+    {
+      "tablename": "gallery_view",
+      "indexname": "gallery_view_members_id_idx",
+      "indexdef": "CREATE INDEX gallery_view_members_id_idx ON public.gallery_view USING btree (members_id)"
+    },
+    {
+      "tablename": "gallery_view",
+      "indexname": "gallery_view_members_view_name_key",
+      "indexdef": "CREATE UNIQUE INDEX gallery_view_members_view_name_key ON public.gallery_view USING btree (members_id, view_name)"
+    },
+    {
+      "tablename": "gallery_view",
+      "indexname": "gallery_view_pkey",
+      "indexdef": "CREATE UNIQUE INDEX gallery_view_pkey ON public.gallery_view USING btree (gallery_view_id)"
+    },
+    {
       "tablename": "icon_tag",
       "indexname": "icon_tag_pkey",
       "indexdef": "CREATE UNIQUE INDEX icon_tag_pkey ON public.icon_tag USING btree (icon)"
@@ -1540,6 +1889,16 @@
       "tablename": "works_series",
       "indexname": "works_series_works_series_name_key",
       "indexdef": "CREATE UNIQUE INDEX works_series_works_series_name_key ON public.works_series USING btree (works_series_name)"
+    },
+    {
+      "tablename": "oshi_accent_settings",
+      "indexname": "oshi_accent_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)"
+    },
+    {
+      "tablename": "oshi_accent_settings",
+      "indexname": "oshi_accent_settings_members_id_idx",
+      "indexdef": "CREATE INDEX oshi_accent_settings_members_id_idx ON public.oshi_accent_settings USING btree (members_id)"
     }
   ],
   "grants": [
@@ -1552,6 +1911,11 @@
       "grantee": "service_role",
       "table_name": "category_tag",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "category_tag_preset_slot_dismissed",
+      "privs": "DELETE,INSERT,SELECT"
     },
     {
       "grantee": "service_role",
@@ -1586,6 +1950,26 @@
     {
       "grantee": "service_role",
       "table_name": "currency_unit",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "display_settings",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "display_settings",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "gallery_view",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "gallery_view",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     },
     {
@@ -1654,6 +2038,11 @@
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     },
     {
+      "grantee": "authenticated",
+      "table_name": "storage_location_preset_slot_dismissed",
+      "privs": "DELETE,INSERT,SELECT"
+    },
+    {
       "grantee": "service_role",
       "table_name": "storage_location_preset_slot_dismissed",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
@@ -1676,6 +2065,16 @@
     {
       "grantee": "service_role",
       "table_name": "works_series",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "oshi_accent_settings",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "oshi_accent_settings",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     }
   ],
@@ -1700,6 +2099,20 @@
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "display_settings",
+      "polname": "display_settings_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
+    },
+    {
+      "table_name": "gallery_view",
+      "polname": "gallery_view_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
     },
     {
       "table_name": "member",
@@ -1784,6 +2197,13 @@
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "polname": "oshi_accent_settings_self_all",
+      "polcmd": "*",
+      "using_expr": "((SELECT auth.uid()) = members_id)",
+      "with_check": "((SELECT auth.uid()) = members_id)"
     }
   ],
   "fks": [
@@ -1805,11 +2225,11 @@
     },
     {
       "table_name": "character",
-      "constraint_name": "character_works_series_id_fkey",
-      "column_name": "works_series_id",
-      "foreign_table": "works_series",
-      "foreign_column": "works_series_id",
-      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE"
+      "constraint_name": "character_eye_color_fkey",
+      "column_name": "eye_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (eye_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
     },
     {
       "table_name": "character",
@@ -1829,19 +2249,19 @@
     },
     {
       "table_name": "character",
-      "constraint_name": "character_eye_color_fkey",
-      "column_name": "eye_color",
-      "foreign_table": "color",
-      "foreign_column": "color_group_id",
-      "definition": "FOREIGN KEY (eye_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "character",
       "constraint_name": "character_works_id_fkey",
       "column_name": "work_id",
       "foreign_table": "work",
       "foreign_column": "work_id",
       "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE"
     },
     {
       "table_name": "color_tag",
@@ -1852,8 +2272,24 @@
       "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
-      "table_name": "member",
-      "constraint_name": "member_information_members_id_fkey",
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_default_storage_location_id_fkey",
+      "column_name": "default_storage_location_id",
+      "foreign_table": "storage_location",
+      "foreign_column": "storage_location_id",
+      "definition": "FOREIGN KEY (default_storage_location_id) REFERENCES storage_location(storage_location_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_members_id_fkey",
       "column_name": "members_id",
       "foreign_table": null,
       "foreign_column": null,
@@ -1866,6 +2302,14 @@
       "foreign_table": "member_type",
       "foreign_column": "members_type_name",
       "definition": "FOREIGN KEY (members_type_name) REFERENCES member_type(members_type_name) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "member",
+      "constraint_name": "member_information_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
       "table_name": "photo",
@@ -1893,11 +2337,11 @@
     },
     {
       "table_name": "registered_product",
-      "constraint_name": "registration_product_information_character_id_fkey",
-      "column_name": "character_id",
-      "foreign_table": "character",
-      "foreign_column": "character_id",
-      "definition": "FOREIGN KEY (character_id) REFERENCES \"character\"(character_id) ON DELETE SET NULL"
+      "constraint_name": "registration_product_information_product_group_id_fkey",
+      "column_name": "product_group_id",
+      "foreign_table": "product_type",
+      "foreign_column": "product_group_id",
+      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
     },
     {
       "table_name": "registered_product",
@@ -1933,19 +2377,19 @@
     },
     {
       "table_name": "registered_product",
+      "constraint_name": "registration_product_information_character_id_fkey",
+      "column_name": "character_id",
+      "foreign_table": "character",
+      "foreign_column": "character_id",
+      "definition": "FOREIGN KEY (character_id) REFERENCES \"character\"(character_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
       "constraint_name": "registration_product_information_copyright_company_id_fkey",
       "column_name": "copyright_company_id",
       "foreign_table": "copyright_company",
       "foreign_column": "copyright_company_id",
       "definition": "FOREIGN KEY (copyright_company_id) REFERENCES copyright_company(copyright_company_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_product_group_id_fkey",
-      "column_name": "product_group_id",
-      "foreign_table": "product_type",
-      "foreign_column": "product_group_id",
-      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
     },
     {
       "table_name": "registered_product",
@@ -1997,6 +2441,22 @@
     },
     {
       "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "members_id",
+      "foreign_table": "color_tag",
+      "foreign_column": "slot",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "slot",
+      "foreign_table": "color_tag",
+      "foreign_column": "members_id",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
       "constraint_name": "registration_product_color_tag_members_id_fkey",
       "column_name": "members_id",
       "foreign_table": null,
@@ -2015,22 +2475,6 @@
       "table_name": "registered_product_color_tag",
       "constraint_name": "registration_product_color_tag_member_slot_fk",
       "column_name": "members_id",
-      "foreign_table": "color_tag",
-      "foreign_column": "members_id",
-      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
-    },
-    {
-      "table_name": "registered_product_color_tag",
-      "constraint_name": "registration_product_color_tag_member_slot_fk",
-      "column_name": "members_id",
-      "foreign_table": "color_tag",
-      "foreign_column": "slot",
-      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
-    },
-    {
-      "table_name": "registered_product_color_tag",
-      "constraint_name": "registration_product_color_tag_member_slot_fk",
-      "column_name": "slot",
       "foreign_table": "color_tag",
       "foreign_column": "members_id",
       "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
@@ -2066,6 +2510,14 @@
       "foreign_table": "works_series",
       "foreign_column": "works_series_id",
       "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     }
   ],
   "checks": [
@@ -2081,13 +2533,68 @@
     },
     {
       "table_name": "color_tag",
+      "constraint_name": "color_tag_slot_range",
+      "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
+    },
+    {
+      "table_name": "color_tag",
       "constraint_name": "color_tag_color_hex_check",
       "definition": "CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))"
     },
     {
-      "table_name": "color_tag",
-      "constraint_name": "color_tag_slot_range",
-      "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_list_sort_check",
+      "definition": "CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_register_start_step_check",
+      "definition": "CHECK ((register_start_step = ANY (ARRAY['barcode'::text, 'photo'::text, 'confirm'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_text_scale_check",
+      "definition": "CHECK (((text_scale >= 1) AND (text_scale <= 7)))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_ui_density_check",
+      "definition": "CHECK (((ui_density >= 1) AND (ui_density <= 7)))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_date_format_mode_check",
+      "definition": "CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_currency_format_mode_check",
+      "definition": "CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_gallery_layout_check",
+      "definition": "CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_landing_page_check",
+      "definition": "CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_list_sort_check",
+      "definition": "CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_color_tag_slots_check",
+      "definition": "CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_view_name_len_check",
+      "definition": "CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))"
     },
     {
       "table_name": "registered_product_color_tag",
@@ -2103,6 +2610,16 @@
       "table_name": "storage_location_preset_slot_dismissed",
       "constraint_name": "receipt_location_preset_slot_dismissed_slot_range",
       "definition": "CHECK (((slot >= 1) AND (slot <= 6)))"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_main_hex_format",
+      "definition": "CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_sub_hex_format",
+      "definition": "CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
     }
   ]
 }
