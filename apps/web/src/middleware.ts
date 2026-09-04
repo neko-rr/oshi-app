@@ -1,21 +1,37 @@
-import { type NextRequest } from 'next/server'
+import createMiddleware from "next-intl/middleware";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/middleware";
+import { routing } from "@/i18n/routing";
 
-import { updateSession } from '@/lib/middleware'
+const handleI18nRouting = createMiddleware(routing);
 
+/**
+ * 1) 認証・Cookie 更新（locale 除去した論理パスで判定）
+ * 2) next-intl の locale ルーティング
+ * 認証 Redirect の Cookie を i18n レスポンスへ引き継ぐ。
+ */
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const authResponse = await updateSession(request);
+
+  // 未ログイン Redirect や /dev 遮断はそのまま返す
+  if (authResponse.headers.get("location")) {
+    return authResponse;
+  }
+
+  const i18nResponse = handleI18nRouting(request);
+
+  // Supabase が付けた Cookie を i18n 応答へコピー
+  authResponse.cookies.getAll().forEach((cookie) => {
+    i18nResponse.cookies.set(cookie.name, cookie.value);
+  });
+
+  return i18nResponse;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/",
+    "/(ja|en)/:path*",
+    "/((?!_next|_vercel|.*\\..*).*)",
   ],
-}
+};

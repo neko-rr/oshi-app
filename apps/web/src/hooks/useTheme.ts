@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
 import {
@@ -17,6 +25,16 @@ const LOCAL_KEY = "oshiapp:themeId";
 const SYNC_DEBOUNCE_MS = 800;
 
 const ALLOWED = new Set<string>(THEME_IDS);
+
+export type ThemeContextValue = {
+  themeId: ThemeId;
+  setTheme: (t: ThemeId) => void;
+  resetToDefault: () => void;
+  isSyncing: boolean;
+  current: ReturnType<typeof findThemeOption>;
+};
+
+export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function apiBase(): string {
   return (
@@ -71,7 +89,10 @@ async function putThemeViaFastAPI(
   }
 }
 
-export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
+/** Provider 用（JSX なし）。layout の ThemeRoot から呼ぶ。 */
+export function useThemeState(
+  defaultTheme: ThemeId = DEFAULT_THEME_ID,
+): ThemeContextValue {
   const [themeId, setThemeId] = useState<ThemeId>(() => {
     try {
       if (typeof window === "undefined") return defaultTheme;
@@ -84,6 +105,7 @@ export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
   const [isSyncing, setIsSyncing] = useState(false);
   const mounted = useRef(false);
   const debounceTimer = useRef<number | null>(null);
+  const skipNextSync = useRef(false);
 
   const applyDataTheme = useCallback((t: ThemeId) => {
     if (typeof document === "undefined") return;
@@ -106,6 +128,10 @@ export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
+      return;
+    }
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
       return;
     }
     if (debounceTimer.current) window.clearTimeout(debounceTimer.current);
@@ -141,6 +167,7 @@ export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
         if (!token) return;
         const serverTheme = await fetchThemeViaFastAPI(token);
         if (serverTheme && alive) {
+          skipNextSync.current = true;
           setThemeId(serverTheme);
         }
       } catch {
@@ -167,11 +194,22 @@ export function useTheme(defaultTheme: ThemeId = DEFAULT_THEME_ID) {
 
   const current = findThemeOption(themeId);
 
-  return {
-    themeId,
-    setTheme,
-    resetToDefault,
-    isSyncing,
-    current,
-  };
+  return useMemo(
+    () => ({
+      themeId,
+      setTheme,
+      resetToDefault,
+      isSyncing,
+      current,
+    }),
+    [themeId, setTheme, resetToDefault, isSyncing, current],
+  );
+}
+
+export function useTheme(): ThemeContextValue {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) {
+    throw new Error("useTheme は ThemeRoot 内で使ってください");
+  }
+  return ctx;
 }

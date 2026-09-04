@@ -43,12 +43,14 @@ def test_list_products_passes_q_to_fetch_not_post_filter() -> None:
         offset: int,
         barcode_number: str | None = None,
         q: str | None = None,
-        category_tag_id: int | None = None,
-        storage_location_id: int | None = None,
+        category_tag_ids: list[int] | None = None,
+        storage_location_ids: list[int] | None = None,
+        color_tag_slots: list[int] | None = None,
+        sort: str | None = None,
     ):
         captured["q"] = q
-        captured["category_tag_id"] = category_tag_id
-        captured["storage_location_id"] = storage_location_id
+        captured["category_tag_ids"] = category_tag_ids
+        captured["storage_location_ids"] = storage_location_ids
         # DB が既に絞った結果だけ返す
         return [
             {
@@ -84,25 +86,29 @@ def test_list_products_passes_tag_ids_to_fetch() -> None:
         offset: int,
         barcode_number: str | None = None,
         q: str | None = None,
-        category_tag_id: int | None = None,
-        storage_location_id: int | None = None,
+        category_tag_ids: list[int] | None = None,
+        storage_location_ids: list[int] | None = None,
+        color_tag_slots: list[int] | None = None,
+        sort: str | None = None,
     ):
-        captured["category_tag_id"] = category_tag_id
-        captured["storage_location_id"] = storage_location_id
+        captured["category_tag_ids"] = category_tag_ids
+        captured["storage_location_ids"] = storage_location_ids
+        captured["color_tag_slots"] = color_tag_slots
         return []
 
     mid = "33333333-3333-3333-3333-333333333333"
     list_products_for_member(
         mid,
         access_token="user-jwt",
-        category_tag_id=11,
-        storage_location_id=22,
+        category_tag_ids=[11, 12],
+        storage_location_ids=[22],
+        color_tag_slots=[3],
         fetch_page=fake_fetch,
         sign_object=lambda **_: None,
     )
-    assert captured["category_tag_id"] == 11
-    assert captured["storage_location_id"] == 22
-
+    assert captured["category_tag_ids"] == [11, 12]
+    assert captured["storage_location_ids"] == [22]
+    assert captured["color_tag_slots"] == [3]
 
 def test_list_products_filters_by_barcode_exact() -> None:
     def fake_fetch(
@@ -115,6 +121,7 @@ def test_list_products_filters_by_barcode_exact() -> None:
         q: str | None = None,
         category_tag_id: int | None = None,
         storage_location_id: int | None = None,
+        sort: str | None = None,
     ):
         rows = [
             {

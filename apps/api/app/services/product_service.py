@@ -6,6 +6,8 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+from app.services.currency_codes import normalize_currency_code
+
 logger = logging.getLogger(__name__)
 
 FetchPage = Callable[..., list[dict[str, Any]]]
@@ -68,6 +70,8 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
         "creation_date": row.get("creation_date"),
         "category_tag_id": row.get("category_tag_id"),
         "storage_location_id": row.get("storage_location_id"),
+        "purchase_price": row.get("purchase_price"),
+        "currency_code": row.get("currency_code"),
         "category_tag": _tag_summary_from_embed(
             row.get("category_tag") if isinstance(row.get("category_tag"), dict) else None,
             name_key="category_tag_name",
@@ -135,8 +139,10 @@ def list_products_for_member(
     offset: int = 0,
     q: str | None = None,
     barcode: str | None = None,
-    category_tag_id: int | None = None,
-    storage_location_id: int | None = None,
+    category_tag_ids: list[int] | None = None,
+    storage_location_ids: list[int] | None = None,
+    color_tag_slots: list[int] | None = None,
+    sort: str | None = None,
     fetch_page: FetchPage | None = None,
     sign_object: SignObject | None = None,
 ) -> list[dict[str, Any]]:
@@ -146,6 +152,7 @@ def list_products_for_member(
     サムネイル path があれば signed URL を付与（失敗時は url=null、一覧自体は返す）。
     q / タグ ID は fetch（DB）側で絞り込み、その後に limit/offset。
     barcode 指定時は番号完全一致（DB 側フィルタ＋防御的再フィルタ）。
+    sort: newest / name / created_at。
     """
     if not members_id or not str(members_id).strip():
         raise ValueError("members_id が空です")
@@ -154,6 +161,13 @@ def list_products_for_member(
 
     barcode_norm = (barcode or "").strip() or None
     q_norm = (q or "").strip() or None
+    sort_norm = (sort or "newest").strip() or "newest"
+    if sort_norm not in {"newest", "name", "created_at"}:
+        raise ValueError("未対応の並び順です")
+
+    cat_ids = list(category_tag_ids or [])
+    storage_ids = list(storage_location_ids or [])
+    color_slots = list(color_tag_slots or [])
 
     fetcher = fetch_page
     if fetcher is None:
@@ -172,8 +186,10 @@ def list_products_for_member(
             offset=offset,
             barcode_number=barcode_norm,
             q=q_norm,
-            category_tag_id=category_tag_id,
-            storage_location_id=storage_location_id,
+            category_tag_ids=cat_ids or None,
+            storage_location_ids=storage_ids or None,
+            color_tag_slots=color_slots or None,
+            sort=sort_norm,
         )
         q_applied_in_fetch = True
     except TypeError:
@@ -266,12 +282,14 @@ def create_product_for_member(
     title: str | None = None,
     character_name: str | None = None,
     purchase_price: int | None = None,
+    currency_code: str | None = None,
     purchase_location: str | None = None,
     memo: str | None = None,
     category_tag_id: int | None = None,
     storage_location_id: int | None = None,
     color_tag_slots: list[int] | None = None,
     insert_product: Callable[..., int] | None = None,
+    record_storage_pick: Callable[..., None] | None = None,
 ) -> dict[str, Any]:
     """製品を1件登録（IO / 楽天なし）。製品名必須。"""
     if not members_id or not str(members_id).strip():
@@ -282,16 +300,24 @@ def create_product_for_member(
     if not name:
         raise ValueError("製品名は必須です")
 
+    # 価格なしでは記録通貨を保存しない
+    resolved_currency: str | None = None
+    if purchase_price is not None:
+        resolved_currency = normalize_currency_code(currency_code)
+
     inserter = insert_product
     if inserter is None:
         from app.infra.supabase_user import insert_product_row
 
         inserter = insert_product_row
 
+    mid = str(members_id).strip()
+    token = str(access_token).strip()
+
     try:
         new_id = inserter(
-            members_id=str(members_id).strip(),
-            access_token=str(access_token).strip(),
+            members_id=mid,
+            access_token=token,
             product_name=name,
             photo_id=photo_id,
             barcode_number=(barcode_number or "").strip() or None,
@@ -301,6 +327,7 @@ def create_product_for_member(
             title=(title or "").strip() or None,
             character_name=(character_name or "").strip() or None,
             purchase_price=purchase_price,
+            currency_code=resolved_currency,
             purchase_location=(purchase_location or "").strip() or None,
             memo=(memo or "").strip() or None,
             category_tag_id=category_tag_id,
@@ -324,11 +351,27 @@ def create_product_for_member(
         from app.services.product_color_tag_service import set_product_color_slots
 
         set_product_color_slots(
-            members_id=str(members_id).strip(),
-            access_token=str(access_token).strip(),
+            members_id=mid,
+            access_token=token,
             registered_product_id=new_id,
             slots=color_tag_slots,
         )
+
+    # 登録ウィザード向け「よく使う収納」カウンタ（詳細 PATCH では増やさない）
+    if storage_location_id is not None:
+        picker = record_storage_pick
+        if picker is None:
+            from app.services.tag_service import record_storage_location_register_pick
+
+            picker = record_storage_location_register_pick
+        try:
+            picker(
+                members_id=mid,
+                access_token=token,
+                storage_location_id=int(storage_location_id),
+            )
+        except Exception:
+            logger.exception("収納の登録回数更新に失敗（製品登録は成功）")
 
     return {
         "registered_product_id": new_id,
@@ -357,12 +400,17 @@ def patch_product_for_member(
         return None
     from app.infra.supabase_user import patch_product_row
 
-    if fields:
+    patch_fields = dict(fields)
+    if "currency_code" in patch_fields:
+        patch_fields["currency_code"] = normalize_currency_code(
+            patch_fields.get("currency_code")
+        )
+    if patch_fields:
         patch_product_row(
             members_id=str(members_id).strip(),
             access_token=str(access_token).strip(),
             registered_product_id=registered_product_id,
-            fields=fields,
+            fields=patch_fields,
         )
     if color_tag_slots is not None:
         from app.services.product_color_tag_service import set_product_color_slots
@@ -403,6 +451,132 @@ def delete_product_for_member(
     return True
 
 
+def bulk_patch_products_for_member(
+    members_id: str,
+    *,
+    access_token: str,
+    registered_product_ids: list[int],
+    storage_location_id: int | None = None,
+    clear_storage_location: bool = False,
+    category_tag_id: int | None = None,
+    clear_category_tag: bool = False,
+) -> dict[str, Any]:
+    """複数製品の収納・カテゴリを一括更新。所有外 ID があれば全体エラー。"""
+    if not members_id or not str(members_id).strip():
+        raise ValueError("members_id が空です")
+    if not access_token or not str(access_token).strip():
+        raise ValueError("access_token が空です")
+
+    storage_touched = clear_storage_location or storage_location_id is not None
+    category_touched = clear_category_tag or category_tag_id is not None
+    if not storage_touched and not category_touched:
+        raise ValueError("収納またはカテゴリのいずれかを指定してください")
+    if clear_storage_location and storage_location_id is not None:
+        raise ValueError("収納の指定とクリアは同時にできません")
+    if clear_category_tag and category_tag_id is not None:
+        raise ValueError("カテゴリの指定とクリアは同時にできません")
+
+    seen: set[int] = set()
+    ids: list[int] = []
+    for raw in registered_product_ids:
+        try:
+            n = int(raw)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("未対応の製品 ID です") from exc
+        if n < 1:
+            raise ValueError("未対応の製品 ID です")
+        if n in seen:
+            continue
+        seen.add(n)
+        ids.append(n)
+    if not ids:
+        raise ValueError("製品 ID が空です")
+    if len(ids) > 100:
+        raise ValueError("一度に更新できるのは 100 件までです")
+
+    mid = str(members_id).strip()
+    token = str(access_token).strip()
+    from app.infra.supabase_user import (
+        bulk_patch_product_fields,
+        create_user_client,
+    )
+
+    client = create_user_client(token)
+    owned_resp = (
+        client.table("registered_product")
+        .select("registered_product_id")
+        .eq("members_id", mid)
+        .in_("registered_product_id", ids)
+        .execute()
+    )
+    owned: set[int] = set()
+    for row in owned_resp.data or []:
+        if isinstance(row, dict) and isinstance(row.get("registered_product_id"), int):
+            owned.add(int(row["registered_product_id"]))
+    if owned != set(ids):
+        raise ValueError("一部の製品が見つからないか、権限がありません")
+
+    fields: dict[str, Any] = {}
+    if storage_touched:
+        if not clear_storage_location and storage_location_id is not None:
+            loc = (
+                client.table("storage_location")
+                .select("storage_location_id")
+                .eq("members_id", mid)
+                .eq("storage_location_id", int(storage_location_id))
+                .limit(1)
+                .execute()
+            )
+            if not (loc.data or []):
+                raise ValueError("収納場所が見つかりません")
+            fields["storage_location_id"] = int(storage_location_id)
+        else:
+            fields["storage_location_id"] = None
+    if category_touched:
+        if not clear_category_tag and category_tag_id is not None:
+            cat = (
+                client.table("category_tag")
+                .select("category_tag_id")
+                .eq("members_id", mid)
+                .eq("category_tag_id", int(category_tag_id))
+                .limit(1)
+                .execute()
+            )
+            if not (cat.data or []):
+                raise ValueError("カテゴリが見つかりません")
+            fields["category_tag_id"] = int(category_tag_id)
+        else:
+            fields["category_tag_id"] = None
+
+    bulk_patch_product_fields(
+        members_id=mid,
+        access_token=token,
+        registered_product_ids=ids,
+        fields=fields,
+    )
+    return {
+        "updated_count": len(ids),
+        "registered_product_ids": ids,
+    }
+
+
+# 互換エイリアス（旧名）
+def bulk_patch_storage_for_member(
+    members_id: str,
+    *,
+    access_token: str,
+    registered_product_ids: list[int],
+    storage_location_id: int | None,
+    clear_storage_location: bool,
+) -> dict[str, Any]:
+    return bulk_patch_products_for_member(
+        members_id,
+        access_token=access_token,
+        registered_product_ids=registered_product_ids,
+        storage_location_id=storage_location_id,
+        clear_storage_location=clear_storage_location,
+    )
+
 
 def normalize_product_detail(row: dict[str, Any]) -> dict[str, Any]:
     """詳細用正規化（署名前）。"""
@@ -438,6 +612,7 @@ def normalize_product_detail(row: dict[str, Any]) -> dict[str, Any]:
         "title": row.get("title"),
         "character_name": row.get("character_name"),
         "purchase_price": row.get("purchase_price"),
+        "currency_code": row.get("currency_code"),
         "purchase_location": row.get("purchase_location"),
         "category_tag_id": row.get("category_tag_id"),
         "storage_location_id": row.get("storage_location_id"),

@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-09-01T22:28:00.019337+00:00
+-- generated_at_utc: 2026-09-04T08:40:30.403150+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -86,6 +86,57 @@ CREATE TABLE IF NOT EXISTS public.currency_unit (
   updated_at timestamp with time zone DEFAULT now()
 );
 
+-- === data_export ===
+CREATE TABLE IF NOT EXISTS public.data_export (
+  data_export_id uuid NOT NULL DEFAULT gen_random_uuid(),
+  members_id uuid NOT NULL,
+  kind text NOT NULL,
+  status text NOT NULL DEFAULT 'pending'::text,
+  storage_path text,
+  error_code text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  expires_at timestamp with time zone NOT NULL
+);
+
+-- === display_settings ===
+CREATE TABLE IF NOT EXISTS public.display_settings (
+  members_id uuid NOT NULL,
+  members_type_name text NOT NULL DEFAULT 'default'::text,
+  text_scale smallint NOT NULL DEFAULT 3,
+  ui_density smallint NOT NULL DEFAULT 4,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  list_sort text NOT NULL DEFAULT 'newest'::text,
+  gallery_layout text NOT NULL DEFAULT 'grid'::text,
+  landing_page text NOT NULL DEFAULT 'home'::text,
+  residence_region text NOT NULL DEFAULT 'jp'::text,
+  timezone_override text,
+  date_format_mode text NOT NULL DEFAULT 'residence'::text,
+  currency_code_override text,
+  currency_format_mode text NOT NULL DEFAULT 'residence'::text,
+  register_start_step text NOT NULL DEFAULT 'barcode'::text,
+  default_storage_location_id integer,
+  gallery_show_name boolean NOT NULL DEFAULT true,
+  gallery_show_tags boolean NOT NULL DEFAULT true,
+  gallery_show_price boolean NOT NULL DEFAULT true
+);
+
+-- === gallery_view ===
+CREATE TABLE IF NOT EXISTS public.gallery_view (
+  gallery_view_id bigint NOT NULL,
+  members_id uuid NOT NULL,
+  view_name text NOT NULL,
+  q text,
+  category_tag_ids integer[] NOT NULL DEFAULT '{}'::integer[],
+  storage_location_ids integer[] NOT NULL DEFAULT '{}'::integer[],
+  color_tag_slots integer[] NOT NULL DEFAULT '{}'::integer[],
+  list_sort text NOT NULL DEFAULT 'newest'::text,
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
 -- === icon_tag ===
 CREATE TABLE IF NOT EXISTS public.icon_tag (
   icon text NOT NULL,
@@ -116,6 +167,18 @@ CREATE TABLE IF NOT EXISTS public.member_type (
   high_resolution_registerable_number integer DEFAULT 10,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
+);
+
+-- === oshi_accent_settings ===
+CREATE TABLE IF NOT EXISTS public.oshi_accent_settings (
+  members_id uuid NOT NULL,
+  members_type_name text NOT NULL DEFAULT 'default'::text,
+  main_hex text NOT NULL DEFAULT '#9f606c'::text,
+  sub_hex text NOT NULL DEFAULT '#6a9bb8'::text,
+  active boolean NOT NULL DEFAULT false,
+  presets jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
 -- === photo ===
@@ -204,7 +267,8 @@ CREATE TABLE IF NOT EXISTS public.registered_product (
   want_object_flag integer DEFAULT 0,
   freebie_flag integer DEFAULT 0,
   product_series_complete_flag integer DEFAULT 0,
-  product_group_name text
+  product_group_name text,
+  currency_code text
 );
 
 -- === registered_product_color_tag ===
@@ -231,7 +295,9 @@ CREATE TABLE IF NOT EXISTS public.storage_location (
   storage_location_use_flag integer DEFAULT 1,
   members_id uuid NOT NULL,
   slot integer,
-  display_order integer NOT NULL DEFAULT 0
+  display_order integer NOT NULL DEFAULT 0,
+  register_pick_count integer NOT NULL DEFAULT 0,
+  last_register_picked_at timestamp with time zone
 );
 
 -- === storage_location_preset_slot_dismissed ===

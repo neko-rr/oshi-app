@@ -56,6 +56,46 @@ def test_create_product_calls_insert_with_members_id() -> None:
     assert captured["photo_id"] == 5
 
 
+def test_create_product_records_storage_register_pick() -> None:
+    picks: list[dict] = []
+
+    def fake_insert(**_kwargs):
+        return 42
+
+    def fake_pick(**kwargs):
+        picks.append(kwargs)
+
+    mid = "11111111-1111-1111-1111-111111111111"
+    create_product_for_member(
+        mid,
+        access_token="user-jwt",
+        product_name="アクスタ",
+        storage_location_id=8,
+        insert_product=fake_insert,
+        record_storage_pick=fake_pick,
+    )
+    assert picks == [
+        {
+            "members_id": mid,
+            "access_token": "user-jwt",
+            "storage_location_id": 8,
+        }
+    ]
+
+
+def test_create_product_skips_storage_pick_when_no_location() -> None:
+    picks: list[dict] = []
+
+    create_product_for_member(
+        "11111111-1111-1111-1111-111111111111",
+        access_token="user-jwt",
+        product_name="アクスタ",
+        insert_product=lambda **_: 1,
+        record_storage_pick=lambda **kwargs: picks.append(kwargs),
+    )
+    assert picks == []
+
+
 def test_post_products_returns_created() -> None:
     user = AuthenticatedUser(
         members_id="22222222-2222-2222-2222-222222222222",

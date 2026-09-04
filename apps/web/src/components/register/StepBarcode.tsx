@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { BarcodeScanner } from "@/components/barcode/BarcodeScanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,29 +36,27 @@ export function StepBarcode({
   onSkip,
   onManualAll,
 }: Props) {
+  const t = useTranslations("Register.barcode");
+  const tCommon = useTranslations("Common");
+
   return (
     <div className="flex max-w-md flex-col gap-4">
       <div>
-        <h2 className="text-lg font-semibold">手順 1 — バーコード</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          カメラ読取 → 画像 → 番号入力の順。読取結果は購入済みチェックにも使えます。
-        </p>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
 
-      <BarcodeScanner
-        disabled={lookingUp}
-        onDetected={onDetected}
-      />
+      <BarcodeScanner disabled={lookingUp} onDetected={onDetected} />
 
       <div className="grid gap-2">
-        <Label htmlFor="wizard_barcode">バーコード番号</Label>
+        <Label htmlFor="wizard_barcode">{t("label")}</Label>
         <Input
           id="wizard_barcode"
           inputMode="numeric"
           autoComplete="off"
           value={barcode}
           onChange={(e) => onBarcodeChange(e.target.value)}
-          placeholder="例: 4901234567890"
+          placeholder={t("placeholder")}
         />
         {note ? (
           <p className="text-xs text-muted-foreground" role="status">
@@ -69,15 +68,15 @@ export function StepBarcode({
             className="rounded-md border border-border bg-card px-3 py-2 text-xs text-card-foreground"
             role="status"
           >
-            同じバーコードの製品が既にあります:{" "}
+            {t("ownedPrefix")}{" "}
             <Link
               href={`/gallery/${ownedHint.registered_product_id}`}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               {ownedHint.product_name?.trim() ||
                 `#${ownedHint.registered_product_id}`}
-            </Link>
-            （続行して追加登録もできます）
+            </Link>{" "}
+            {t("ownedSuffix")}
           </p>
         ) : null}
       </div>
@@ -88,13 +87,13 @@ export function StepBarcode({
           disabled={lookingUp || !barcode.trim()}
           onClick={onLookupAndNext}
         >
-          {lookingUp ? "照合中…" : "次へ（照合）"}
+          {lookingUp ? t("lookingUp") : t("lookupNext")}
         </Button>
         <Button type="button" variant="secondary" onClick={onSkip}>
-          スキップ
+          {tCommon("skip")}
         </Button>
         <Button type="button" variant="outline" onClick={onManualAll}>
-          すべて手動入力
+          {t("manualAll")}
         </Button>
       </div>
     </div>

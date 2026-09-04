@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-02T12:20:55Z",
+  "generated_at": "2026-09-04T08:40:30Z",
   "pages": [
     {
       "path": "/auth/error",
-      "file": "apps/web/src/app/auth/error/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/error/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -13,7 +13,7 @@
     },
     {
       "path": "/auth/forgot-password",
-      "file": "apps/web/src/app/auth/forgot-password/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/forgot-password/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -23,7 +23,7 @@
     },
     {
       "path": "/auth/login",
-      "file": "apps/web/src/app/auth/login/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/login/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -33,7 +33,7 @@
     },
     {
       "path": "/auth/sign-up",
-      "file": "apps/web/src/app/auth/sign-up/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/sign-up/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -43,7 +43,7 @@
     },
     {
       "path": "/auth/sign-up-success",
-      "file": "apps/web/src/app/auth/sign-up-success/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/sign-up-success/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -53,7 +53,7 @@
     },
     {
       "path": "/auth/update-password",
-      "file": "apps/web/src/app/auth/update-password/page.tsx",
+      "file": "apps/web/src/app/[locale]/auth/update-password/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -63,7 +63,7 @@
     },
     {
       "path": "/dashboard",
-      "file": "apps/web/src/app/dashboard/page.tsx",
+      "file": "apps/web/src/app/[locale]/dashboard/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -73,7 +73,7 @@
     },
     {
       "path": "/dev/design-lab",
-      "file": "apps/web/src/app/dev/design-lab/page.tsx",
+      "file": "apps/web/src/app/[locale]/dev/design-lab/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -83,7 +83,7 @@
     },
     {
       "path": "/gallery/[registered_product_id]",
-      "file": "apps/web/src/app/gallery/[registered_product_id]/page.tsx",
+      "file": "apps/web/src/app/[locale]/gallery/[registered_product_id]/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -93,7 +93,7 @@
     },
     {
       "path": "/gallery",
-      "file": "apps/web/src/app/gallery/page.tsx",
+      "file": "apps/web/src/app/[locale]/gallery/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -103,7 +103,7 @@
     },
     {
       "path": "/licenses",
-      "file": "apps/web/src/app/licenses/page.tsx",
+      "file": "apps/web/src/app/[locale]/licenses/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -113,7 +113,7 @@
     },
     {
       "path": "/me",
-      "file": "apps/web/src/app/me/page.tsx",
+      "file": "apps/web/src/app/[locale]/me/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -123,7 +123,7 @@
     },
     {
       "path": "/",
-      "file": "apps/web/src/app/page.tsx",
+      "file": "apps/web/src/app/[locale]/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -133,7 +133,7 @@
     },
     {
       "path": "/privacy",
-      "file": "apps/web/src/app/privacy/page.tsx",
+      "file": "apps/web/src/app/[locale]/privacy/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -143,7 +143,7 @@
     },
     {
       "path": "/protected",
-      "file": "apps/web/src/app/protected/page.tsx",
+      "file": "apps/web/src/app/[locale]/protected/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -153,7 +153,7 @@
     },
     {
       "path": "/register",
-      "file": "apps/web/src/app/register/page.tsx",
+      "file": "apps/web/src/app/[locale]/register/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -163,7 +163,7 @@
     },
     {
       "path": "/search",
-      "file": "apps/web/src/app/search/page.tsx",
+      "file": "apps/web/src/app/[locale]/search/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -173,7 +173,7 @@
     },
     {
       "path": "/settings/category-tags",
-      "file": "apps/web/src/app/settings/category-tags/page.tsx",
+      "file": "apps/web/src/app/[locale]/settings/category-tags/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -183,7 +183,17 @@
     },
     {
       "path": "/settings/color-tags",
-      "file": "apps/web/src/app/settings/color-tags/page.tsx",
+      "file": "apps/web/src/app/[locale]/settings/color-tags/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/export",
+      "file": "apps/web/src/app/[locale]/settings/export/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -193,7 +203,17 @@
     },
     {
       "path": "/settings",
-      "file": "apps/web/src/app/settings/page.tsx",
+      "file": "apps/web/src/app/[locale]/settings/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/register",
+      "file": "apps/web/src/app/[locale]/settings/register/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -203,7 +223,7 @@
     },
     {
       "path": "/settings/storage-locations",
-      "file": "apps/web/src/app/settings/storage-locations/page.tsx",
+      "file": "apps/web/src/app/[locale]/settings/storage-locations/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -213,7 +233,7 @@
     },
     {
       "path": "/settings/theme",
-      "file": "apps/web/src/app/settings/theme/page.tsx",
+      "file": "apps/web/src/app/[locale]/settings/theme/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,

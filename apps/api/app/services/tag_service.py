@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 from app.infra.supabase_user import create_user_client
@@ -398,6 +399,38 @@ def list_storage_locations(
         ),
     )
     return items, sorted(dismissed)
+
+
+def record_storage_location_register_pick(
+    *,
+    members_id: str,
+    access_token: str,
+    storage_location_id: int,
+) -> None:
+    """登録成功時に収納の使用回数・最終使用を更新する。"""
+    if storage_location_id < 1:
+        return
+    client = create_user_client(access_token)
+    resp = (
+        client.table("storage_location")
+        .select("storage_location_id,register_pick_count")
+        .eq("members_id", members_id)
+        .eq("storage_location_id", storage_location_id)
+        .limit(1)
+        .execute()
+    )
+    rows: list[dict[str, Any]] = list(resp.data or [])
+    if not rows:
+        return
+    prev = int(rows[0].get("register_pick_count") or 0)
+    client.table("storage_location").update(
+        {
+            "register_pick_count": prev + 1,
+            "last_register_picked_at": datetime.now(timezone.utc).isoformat(),
+        }
+    ).eq("members_id", members_id).eq(
+        "storage_location_id", storage_location_id
+    ).execute()
 
 
 def create_storage_location(

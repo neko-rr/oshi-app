@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,17 +20,18 @@ export function StepPhoto({
   onSkip,
   onBack,
 }: Props) {
+  const t = useTranslations("Register.photo");
+  const tCommon = useTranslations("Common");
+
   return (
     <div className="flex max-w-md flex-col gap-4">
       <div>
-        <h2 className="text-lg font-semibold">手順 2 — 正面写真</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          スマホではカメラが開きます。PC ではファイル選択もできます。なくても登録できます。
-        </p>
+        <h2 className="text-lg font-semibold">{t("title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="wizard_photo">正面写真（撮影またはアップロード）</Label>
+        <Label htmlFor="wizard_photo">{t("label")}</Label>
         <Input
           id="wizard_photo"
           type="file"
@@ -38,19 +40,21 @@ export function StepPhoto({
           onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
         />
         {fileName ? (
-          <p className="text-xs text-muted-foreground">選択中: {fileName}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("selected", { name: fileName })}
+          </p>
         ) : null}
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={onNext}>
-          次へ
+          {tCommon("next")}
         </Button>
         <Button type="button" variant="secondary" onClick={onSkip}>
-          スキップ
+          {tCommon("skip")}
         </Button>
         <Button type="button" variant="outline" onClick={onBack}>
-          戻る
+          {tCommon("back")}
         </Button>
       </div>
     </div>

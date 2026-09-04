@@ -1,0 +1,15 @@
+/* 推し色オーバーレイ用の補助変数（適用時は JS が --primary 等も上書き） */
+:root {
+  --oshi-soft: var(--accent);
+  --oshi-soft-foreground: var(--accent-foreground);
+}
+
+html[data-oshi-accent="preview"] {
+  /* プレビュー中も通常どおりセマンティック変数を使う */
+}
+
+html[data-oshi-accent="on"] .bg-oshi-soft,
+html[data-oshi-accent="preview"] .bg-oshi-soft {
+  background-color: var(--oshi-soft);
+  color: var(--oshi-soft-foreground);
+}

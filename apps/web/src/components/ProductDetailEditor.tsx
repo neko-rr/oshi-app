@@ -1,13 +1,17 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { API_PATHS } from "@oshi/shared";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
+import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
+import { useDisplaySettings } from "@/hooks/useDisplaySettings";
+import { findResidenceRegion } from "@/lib/residencePrefs";
 
 type ColorTagItem = {
   slot: number;
@@ -34,6 +38,7 @@ type ProductDetail = {
   product_group_name?: string | null;
   character_name?: string | null;
   purchase_price?: number | null;
+  currency_code?: string | null;
   purchase_location?: string | null;
   barcode_number?: string | null;
   memo?: string | null;
@@ -41,12 +46,6 @@ type ProductDetail = {
   storage_location_id: number | null;
   color_tag_slots: number[];
 };
-
-function apiBase(): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!base) throw new Error("NEXT_PUBLIC_API_BASE_URL が未設定です");
-  return base.replace(/\/$/, "");
-}
 
 type Props = {
   registeredProductId: number;
@@ -59,6 +58,11 @@ export function ProductDetailEditor({
   galleryHref = "/gallery",
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("ProductDetail");
+  const tCommon = useTranslations("Common");
+  const tGallery = useTranslations("Gallery");
+  const { residenceRegion } = useDisplaySettings();
+  const defaultCurrency = findResidenceRegion(residenceRegion).currencyCode;
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
   const [storageLocations, setStorageLocations] = useState<StorageLocationItem[]>([]);
   const [colors, setColors] = useState<ColorTagItem[]>([]);
@@ -66,6 +70,7 @@ export function ProductDetailEditor({
   const [productGroupName, setProductGroupName] = useState("");
   const [characterName, setCharacterName] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
+  const [currencyCode, setCurrencyCode] = useState("");
   const [purchaseLocation, setPurchaseLocation] = useState("");
   const [barcodeNumber, setBarcodeNumber] = useState("");
   const [memo, setMemo] = useState("");
@@ -78,6 +83,12 @@ export function ProductDetailEditor({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const apiBase = useCallback(() => {
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!base) throw new Error(tGallery("apiBaseMissing"));
+    return base.replace(/\/$/, "");
+  }, [tGallery]);
 
   const getToken = useCallback(async () => {
     const supabase = createClient();
@@ -109,9 +120,8 @@ export function ProductDetailEditor({
         ]);
         if (!catRes.ok || !recRes.ok || !colRes.ok || !detailRes.ok) {
           const bad = [catRes, recRes, colRes, detailRes].find((r) => !r.ok);
-          throw new Error(
-            `読み込み失敗: ${bad ? (await bad.text()).slice(0, 160) : ""}`,
-          );
+          const detail = bad ? (await bad.text()).slice(0, 160) : "";
+          throw new Error(tCommon("loadFailedPrefix", { detail }));
         }
         const catJson = (await catRes.json()) as { items?: CategoryTagItem[] };
         const recJson = (await recRes.json()) as {
@@ -129,6 +139,10 @@ export function ProductDetailEditor({
         setPurchasePrice(
           detail.purchase_price != null ? String(detail.purchase_price) : "",
         );
+        setCurrencyCode(
+          detail.currency_code?.trim() ||
+            (detail.purchase_price != null ? defaultCurrency : ""),
+        );
         setPurchaseLocation(detail.purchase_location?.trim() ?? "");
         setBarcodeNumber(detail.barcode_number?.trim() ?? "");
         setMemo(detail.memo ?? "");
@@ -143,7 +157,9 @@ export function ProductDetailEditor({
         setSelectedSlots(new Set(detail.color_tag_slots ?? []));
       } catch (e: unknown) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "読み込みに失敗しました");
+          setError(
+            e instanceof Error ? e.message : tCommon("loadFailed"),
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -152,7 +168,7 @@ export function ProductDetailEditor({
     return () => {
       cancelled = true;
     };
-  }, [getToken, registeredProductId]);
+  }, [apiBase, defaultCurrency, getToken, registeredProductId, tCommon]);
 
   function toggleSlot(slot: number) {
     setSelectedSlots((prev) => {
@@ -167,7 +183,7 @@ export function ProductDetailEditor({
     e.preventDefault();
     const name = productName.trim();
     if (!name) {
-      setError("製品名は必須です");
+      setError(t("productNameRequired"));
       return;
     }
     setSaving(true);
@@ -176,6 +192,7 @@ export function ProductDetailEditor({
       const token = await getToken();
       if (!token) return;
       const priceNum = purchasePrice.trim() ? Number(purchasePrice.trim()) : null;
+      const hasPrice = priceNum != null && Number.isFinite(priceNum);
       const body: Record<string, unknown> = {
         product_name: name,
         product_group_name: productGroupName.trim(),
@@ -183,10 +200,10 @@ export function ProductDetailEditor({
         purchase_location: purchaseLocation.trim(),
         barcode_number: barcodeNumber.trim(),
         memo: memo.trim(),
-        purchase_price:
-          priceNum != null && Number.isFinite(priceNum)
-            ? Math.trunc(priceNum)
-            : null,
+        purchase_price: hasPrice ? Math.trunc(priceNum) : null,
+        currency_code: hasPrice
+          ? currencyCode || defaultCurrency
+          : null,
         color_tag_slots: Array.from(selectedSlots).sort((a, b) => a - b),
       };
       if (categoryTagId != null) {
@@ -211,18 +228,21 @@ export function ProductDetailEditor({
         },
       );
       if (!res.ok) {
-        throw new Error(`更新失敗: ${(await res.text()).slice(0, 160)}`);
+        const detail = (await res.text()).slice(0, 160);
+        throw new Error(tCommon("updateFailedPrefix", { detail }));
       }
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "更新に失敗しました");
+      setError(
+        err instanceof Error ? err.message : tCommon("updateFailed"),
+      );
     } finally {
       setSaving(false);
     }
   }
 
   async function onDelete() {
-    if (!window.confirm("この製品を削除しますか？")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     setDeleting(true);
     setError(null);
     try {
@@ -236,18 +256,23 @@ export function ProductDetailEditor({
         },
       );
       if (!res.ok) {
-        throw new Error(`削除失敗: ${(await res.text()).slice(0, 160)}`);
+        const detail = (await res.text()).slice(0, 160);
+        throw new Error(tCommon("deleteFailedPrefix", { detail }));
       }
       router.push(galleryHref);
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "削除に失敗しました");
+      setError(
+        err instanceof Error ? err.message : tCommon("deleteFailed"),
+      );
       setDeleting(false);
     }
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">編集フォーム読み込み中…</p>;
+    return (
+      <p className="text-sm text-muted-foreground">{t("loadingForm")}</p>
+    );
   }
 
   return (
@@ -255,10 +280,10 @@ export function ProductDetailEditor({
       onSubmit={onSave}
       className="flex max-w-lg flex-col gap-4"
     >
-      <h2 className="sr-only">製品情報の編集</h2>
+      <h2 className="sr-only">{t("editorTitle")}</h2>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_product_name">製品名（必須）</Label>
+        <Label htmlFor="detail_product_name">{t("productNameLabel")}</Label>
         <Input
           id="detail_product_name"
           required
@@ -268,7 +293,7 @@ export function ProductDetailEditor({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_product_group_name">グループ名</Label>
+        <Label htmlFor="detail_product_group_name">{t("groupNameLabel")}</Label>
         <Input
           id="detail_product_group_name"
           value={productGroupName}
@@ -277,7 +302,7 @@ export function ProductDetailEditor({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_character_name">キャラクター名</Label>
+        <Label htmlFor="detail_character_name">{t("characterNameLabel")}</Label>
         <Input
           id="detail_character_name"
           value={characterName}
@@ -286,18 +311,32 @@ export function ProductDetailEditor({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_purchase_price">購入価格</Label>
+        <Label htmlFor="detail_purchase_price">{t("purchasePriceLabel")}</Label>
         <Input
           id="detail_purchase_price"
           type="number"
           inputMode="numeric"
           value={purchasePrice}
-          onChange={(e) => setPurchasePrice(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setPurchasePrice(v);
+            if (v.trim() && !currencyCode) {
+              setCurrencyCode(defaultCurrency);
+            }
+          }}
         />
       </div>
 
+      <CurrencyCodePicker
+        id="detail_currency_code"
+        value={currencyCode || defaultCurrency}
+        onChange={setCurrencyCode}
+      />
+
       <div className="grid gap-2">
-        <Label htmlFor="detail_purchase_location">購入場所</Label>
+        <Label htmlFor="detail_purchase_location">
+          {t("purchaseLocationLabel")}
+        </Label>
         <Input
           id="detail_purchase_location"
           value={purchaseLocation}
@@ -306,7 +345,7 @@ export function ProductDetailEditor({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_barcode_number">バーコード</Label>
+        <Label htmlFor="detail_barcode_number">{t("barcodeLabel")}</Label>
         <Input
           id="detail_barcode_number"
           value={barcodeNumber}
@@ -315,7 +354,7 @@ export function ProductDetailEditor({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="detail_memo">メモ</Label>
+        <Label htmlFor="detail_memo">{t("memoLabel")}</Label>
         <Input
           id="detail_memo"
           value={memo}
@@ -323,10 +362,10 @@ export function ProductDetailEditor({
         />
       </div>
 
-      <h3 className="pt-2 text-base font-medium">タグ・収納</h3>
+      <h3 className="pt-2 text-base font-medium">{t("tagsSection")}</h3>
 
       <TagChipPicker
-        label="カテゴリータグ"
+        label={t("categoryTagLabel")}
         variant="category"
         value={categoryTagId}
         onChange={setCategoryTagId}
@@ -339,7 +378,7 @@ export function ProductDetailEditor({
       />
 
       <TagChipPicker
-        label="収納場所"
+        label={t("storageLocationLabel")}
         variant="storage"
         value={storageLocationId}
         onChange={setStorageLocationId}
@@ -351,9 +390,9 @@ export function ProductDetailEditor({
       />
 
       <fieldset className="grid gap-2">
-        <legend className="text-sm font-medium">カラータグ</legend>
+        <legend className="text-sm font-medium">{t("colorTagsLegend")}</legend>
         {colors.length === 0 ? (
-          <p className="text-sm text-muted-foreground">カラータグ未設定</p>
+          <p className="text-sm text-muted-foreground">{t("colorTagsEmpty")}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {colors.map((c) => (
@@ -371,7 +410,7 @@ export function ProductDetailEditor({
                   style={{ backgroundColor: c.color_tag_color }}
                   aria-hidden
                 />
-                {c.color_tag_name}（{c.slot}）
+                {t("colorTagSlot", { name: c.color_tag_name, slot: c.slot })}
               </label>
             ))}
           </div>
@@ -382,7 +421,7 @@ export function ProductDetailEditor({
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saving || deleting}>
-          {saving ? "保存中…" : "保存する"}
+          {saving ? tCommon("saving") : tCommon("saveAction")}
         </Button>
         <Button
           type="button"
@@ -390,7 +429,7 @@ export function ProductDetailEditor({
           disabled={saving || deleting}
           onClick={() => void onDelete()}
         >
-          {deleting ? "削除中…" : "製品を削除"}
+          {deleting ? tCommon("deleting") : t("deleteProduct")}
         </Button>
       </div>
     </form>

@@ -16,6 +16,10 @@
   "category_tag": { "ja": "カテゴリータグ", "status": "wired" },
   "registered_product": { "ja": "登録製品", "status": "wired" },
   "theme_settings": { "ja": "テーマ設定", "status": "wired" },
+  "oshi_accent_settings": { "ja": "推し色設定", "status": "wired" },
+  "display_settings": { "ja": "表示設定", "status": "wired" },
+  "gallery_view": { "ja": "ギャラリー保存ビュー", "status": "wired" },
+  "data_export": { "ja": "データ書き出し", "status": "wired" },
   "registered_product_color_tag": { "ja": "登録製品カラータグ", "status": "wired" },
   "storage_location_preset_slot_dismissed": { "ja": "収納場所プリセット削除済", "status": "schema_ready" },
   "category_tag_preset_slot_dismissed": { "ja": "カテゴリプリセット削除済", "status": "schema_ready" }

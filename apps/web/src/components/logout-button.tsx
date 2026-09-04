@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function LogoutButton({ variant = "outline", className }: Props) {
+  const t = useTranslations("Nav");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +36,7 @@ export function LogoutButton({ variant = "outline", className }: Props) {
       disabled={loading}
       onClick={() => void logout()}
     >
-      {loading ? "ログアウト中…" : "ログアウト"}
+      {loading ? t("loggingOut") : t("logout")}
     </Button>
   );
 }

@@ -2,7 +2,7 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-09-02T12:20:55Z`
+生成時刻 (UTC): `2026-09-04T08:40:30Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 

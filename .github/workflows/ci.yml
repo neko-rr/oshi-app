@@ -60,6 +60,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - uses: pnpm/action-setup@v4
         with:
           version: 10.28.0
@@ -71,6 +74,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build shared
         run: pnpm build:shared
+      - name: i18n message keys (ja/en)
+        run: python scripts/check_i18n_message_keys.py
       - name: Lint
         run: pnpm lint:web
       - name: Typecheck

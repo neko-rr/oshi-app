@@ -14,6 +14,9 @@ DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**
 | [v2_status.md](v2_status.md) | v2 移行の要約（ほぼ完了の境界） | **手** |
 | [flows/](flows/) | 主要ユーザーフロー | **手** |
 | [acceptance/](acceptance/) | 画面ごとの受け入れ条件（DoD） | **手** |
+| [i18n.md](i18n.md) | Web 多言語（next-intl・`/en`） | **手** |
+| [i18n_glossary.md](i18n_glossary.md) | 翻訳用語集（推し活・製品語） | **手** |
+| [i18n_legal_en.md](i18n_legal_en.md) | 法務英語レビューの流れ（個人開発） | **手** |
 | [meta/status_vocabulary.md](meta/status_vocabulary.md) | shipped/partial/… の定義 | **手** |
 | [meta/feature_status.json](meta/feature_status.json) | 機能 ID → status / expected paths | **エージェント**（承認後） |
 | [generated/](generated/README.md) | ルート・API・OpenAPI・gaps | **自動** |

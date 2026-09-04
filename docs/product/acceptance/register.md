@@ -10,9 +10,13 @@
 - [x] 読取後、同じバーコードが自分のリストにあればヒント表示（追加登録は妨げない）
 - [x] 写真あり時に Vision 1回で見た目タグ・種類提案を呼べる（LIVE オフ／キー未設定でも落ちない）
 - [x] バーコードで埋まった商品名・価格は Vision で上書きしない（手入力も優先）
-- [x] 登録成功後に「続けて登録」で手順 1 に戻れる
+- [x] 購入価格に記録通貨（ISO）を選べる（既定は居住地。価格なしでは保存しない）
+- [x] 登録成功後に「続けて登録」で設定した開始手順に戻れる
+- [x] `/settings/register` で開始手順（barcode / photo / confirm）と「いつも選ぶ収納」を設定できる
+- [x] いつも選ぶ収納あり → 確認画面で選択済み＋チップ先頭。なし → 登録回数順（自動選択なし）
+- [x] バーコード／手動スキップ後に「次からこの手順」の提案が出る（セッション中1回）
 - [x] 楽天 2026 API（applicationId + accessKey）でバーコード／キーワード照合できる（LIVE オフでも落ちない）
 
 後続（Must 本線外）: 店頭専用購入済み画面、写真ライブプレビュー、一括／CLIP／連続モード。
 
-関連: `register_flow` / `docs/product/flows/register.md`
+関連: `register_flow` / `register_wizard_defaults` / `docs/product/flows/register.md`

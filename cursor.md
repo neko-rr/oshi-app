@@ -1,10 +1,142 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-04: websockets 版ピン（API pytest）
+
+- `realtime` 2.31+ は `websockets.asyncio` が必要。12 系だと `test_supabase_user_client` が import 失敗する
+- `apps/api/requirements.txt` に `websockets>=13,<16` を明示
+
+## 2026-09-04: ギャラリー保存ビュー（無料・上限20）
+
+- 表 `gallery_view`（allowlist 列。JSON 黒箱なし）＋ RLS
+- `GET/POST/PATCH/DELETE /gallery-views`
+- ギャラリー上で保存・適用・削除。適用は既存 `galleryListQuery` / `v=1`
+
+## 2026-09-04: ギャラリー URL クエリ版 `v=1`
+
+- `buildGalleryListSearch` がパラメータ付き URL に `v=1` を付与（空の `/gallery` は無し）
+- 欠落・未知の `v` も現行ルール（v1）で読む。当面版上げしない
+- `GET /products` には `v` を送らない
+
+## 2026-09-04: ギャラリー選択の範囲操作
+
+- UI 契約: `gallerySelection.ts`（`showSelectedOnly` / ページ全選択 / 条件結果最大100）
+- 「選択した N 件だけ表示」「このページ全選択」「絞り込み結果を選択（最大100）」
+- 一括上限は API と揃え、超過時は案内のみ（サーバ側一括拡張はしない）
+
+## 2026-09-04: ギャラリー「いまの条件」要約＋一発クリア
+
+- チップ上部に件数要約（例: カテゴリ2・収納1・色1。検索ありなら「検索」も）
+- クリアは検索・タグ絞り込みを解除し、並び `sort` は残す
+
+## 2026-09-04: ギャラリー一括カテゴリ変更
+
+- `PATCH /products/bulk` に `category_tag_id` / `clear_category_tag`（収納と同一選択モード）
+- UI: GalleryBulkBar の「カテゴリを変更…」
+
+## 2026-09-04: ギャラリー絞り込み強化＋並び＋一括収納
+
+- 複数チップ（同種 OR・異種 AND）＋色スロット。URL カンマ区切り
+- 並び UI → URL `sort` ＋ `display_settings.list_sort`
+- `PATCH /products/bulk` で収納一括（最大 100）→ カテゴリも同エンドポイント
+
+## 2026-09-04: ギャラリーカード表示項目（gallery_card_fields shipped）
+
+- `/settings/theme`: カードに名前／タグ／価格の独立 ON/OFF（既定すべて ON）
+- `display_settings.gallery_show_*`。名前 OFF 時もリンク `aria-label` で a11y 名を維持
+- 将来項目は同じ boolean 列＋`GALLERY_CARD_FIELD_IDS` レジストリで追加
+
+## 2026-09-04: 登録ウィザード既定（register_wizard_defaults shipped）
+
+- `/settings/register`: 開始手順（barcode/photo/confirm）＋いつも選ぶ収納
+- `display_settings.register_start_step` / `default_storage_location_id`
+- 収納頻度: `storage_location.register_pick_count`（POST /products 時のみ）
+- ウィザード内スキップ後の「次から覚える」提案あり
+
+## 2026-09-04: 製品ごとの法定通貨（product_currency_fiat shipped）
+
+- 列 `registered_product.currency_code`（ISO）。登録・詳細で選択。既定は居住地
+- 表示は記録通貨優先 → display_settings。一覧カードにも金額。換算なし
+- `currency_unit` 表は未使用のまま
+
+## 2026-09-04: 通貨方針（製品ごと法定通貨 → NFT は後続）
+
+- **Must 本線:** まず **法定通貨の製品ごと記録**（購入価格＋記録通貨。アカウント表示設定とは分離）
+- **表示:** 製品の記録通貨優先 → なければ居住地／`display_settings` の表示通貨（換算なし）
+- **NFT／暗号資産:** **deferred**（法定通貨枠に押し込めない。別モデル・要求待ち）
+- 正本: `docs/product/roadmap.md` / `docs/product/meta/feature_status.json`（`product_currency_fiat` / `crypto_nft_assets`）
+
+## 2026-09-04: 金額表示（通貨・桁区切り）
+
+- `currency_code_override` / `currency_format_mode`（residence|ui_locale|plain）。換算なし・表示のみ
+- 詳細の購入価格は `FormattedAppMoney`。居住地変更で通貨上書きも解除
+
+## 2026-09-04: 居住地・日時の全世界対応
+
+- 居住地: 大陸別カタログ＋検索付きコンボ。TZ 上書き: IANA 全件（`Intl.supportedValuesOf` / API `zoneinfo`）
+- DB の短い CHECK は削除（`20260904020000_display_settings_iana_timezone.sql`）。検証は API
+
+## 2026-09-03: 居住地・日時表示（display_settings）
+
+- `/settings/theme` に居住地プリセット（既定 jp）＋折りたたみ個別（TZ／日付形式）
+- 列: `residence_region` / `timezone_override` / `date_format_mode`。詳細の登録日は `FormattedAppDate`
+
+## 2026-09-03: 法務英語レビューの流れ（メモ）
+
+- 正本は日本語。en Privacy は draft。個人開発向け手順: `docs/product/i18n_legal_en.md`
+- 英語ユーザー募集・課金前までは人レビュー必須ではない
+
+## 2026-09-03: i18n 仕組み化（キー検査＋sync skill）
+
+- 検査: `python scripts/check_i18n_message_keys.py`（CI web job／post-change-verify）
+- 下書き: skill `i18n-web-sync`（en 自動上書きはしない）
+- 用語集: `docs/product/i18n_glossary.md`。法務英語は上記メモへ
+
+## 2026-09-03: Web 文言キー化完了（i18n_web shipped）
+
+- 主要画面の表示文言は `messages/ja.json`（正本）+ `en.json` + `t()`。ルーティングは Phase1 のまま
+- 仕組み化は上記エントリへ
+
+## 2026-09-03: 多言語 Phase 1（next-intl）
+
+- App Router `app/[locale]` + `localePrefix: as-needed`（ja 無印 / en は `/en`）
+- 辞書: `apps/web/messages/{ja,en}.json`。方針: `docs/product/i18n.md`
+- 言語切替: `/settings/theme`。言語追加は locales + messages + APP_LOCALES + matcher
+
+## 2026-09-04: 推し色スウォッチ（メイン＋サブ・有料前提）
+
+- テーマパックとは別層。メイン＝ボタン／リング、サブ＝やわらかい面（キャンバス背景はパックのまま）
+- 文字色は WCAG AA 4.5:1 目安で自動選定（白／濃色／派生）
+- 無料: ロック＋プレビュー。適用・DB保存は `OSHI_ACCENT_ENTITLED` または将来プレミアム
+- API: `GET/PUT /oshi-accent-settings` / 表 `oshi_accent_settings`
+- UI: `/settings/theme` の「推し色」セクション
+
+## 2026-09-03: 並び・ギャラリー表示・ログイン着地
+
+- `display_settings` に `list_sort` / `gallery_layout` / `landing_page` を追加
+- ギャラリー・検索で並びと表示モードを反映。ログイン後は着地へ
+- 設定 UI は `/settings/theme`（見た目）に統合
+
+## 2026-09-03: モーション方針（分かりやすさ優先）
+
+- 本番: 短い有用な反応のみ。長い演出・本線の遊び尽くしはしない
+- 推し活らしい華やかさは将来「スポット祝福／任意モード」に閉じる（常時本線に載せない）
+- アプリ内「動きを控えめに」設定は作らない。OS `prefers-reduced-motion` は追従
+- 正本: `docs/design/motion.md` / 決定ログ `motion-clarity-first`
+
+## 2026-09-03: 見た目設定（文字サイズ・UI密度）
+
+- 新表 `display_settings`（wired / RLS self_all）: `text_scale`・`ui_density` 各 1〜7
+- API: `GET/PUT /display-settings`
+- Web: `/settings/theme` を「見た目」1画面化（テーマ＋定点スナップバー＋プレビュー）
+- **全ページ:** `AppPreferencesRoot`（ThemeRoot + DisplaySettingsRoot）+ layout ブート script
+- 密度: ギャラリーグリッド・main・stack ユーティリティ（`display-prefs.css`）
+- モバイル設定 UI は未着手（API は共用可）
+
 ## 2026-09-03: v2 Must 本線を「ほぼ移行完了」として文書同期
 
 - 新設: `docs/product/v2_status.md`
 - `feature_status` / roadmap: 登録クラスタ・検索・privacy・licenses 等を shipped
-- 残 partial（Must）: `responsive_web` / `theme_colors`（推し色スウォッチ）
+- 残 partial（Must）: `responsive_web`
 - Phase 2・モバイル・deferred は未完了のまま明記
 - acceptance: `search.md` 追加。`generate_product_docs.py` 再実行
 

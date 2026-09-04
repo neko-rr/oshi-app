@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 
@@ -19,8 +20,10 @@ export function TagOrderControls({
   disableDown,
   busy = false,
 }: TagOrderControlsProps) {
+  const t = useTranslations("TagPresets");
+
   return (
-    <div className="flex shrink-0 flex-col gap-0.5" aria-label="並び替え">
+    <div className="flex shrink-0 flex-col gap-0.5" aria-label={t("reorder")}>
       <Button
         type="button"
         variant="outline"
@@ -28,7 +31,7 @@ export function TagOrderControls({
         className="size-8"
         disabled={disableUp || busy}
         onClick={onMoveUp}
-        aria-label="上へ"
+        aria-label={t("moveUp")}
       >
         <ChevronUp className="size-4" />
       </Button>
@@ -39,7 +42,7 @@ export function TagOrderControls({
         className="size-8"
         disabled={disableDown || busy}
         onClick={onMoveDown}
-        aria-label="下へ"
+        aria-label={t("moveDown")}
       >
         <ChevronDown className="size-4" />
       </Button>

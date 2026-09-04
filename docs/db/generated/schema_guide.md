@@ -3,7 +3,7 @@
 
 コード・SQL は英語物理名。**このファイルは意味の説明用**（自動生成）。
 
-生成日時(UTC): `2026-09-01 22:28:00Z`
+生成日時(UTC): `2026-09-04 08:40:30Z`
 
 ## 使い方
 
@@ -121,6 +121,69 @@
 | 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 | 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 
+## データ書き出し（`data_export`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 9
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| データ書き出しID | `data_export_id` | `uuid` | 識別子または外部キー |
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| 種別 | `kind` | `text` |  |
+| 状態 | `status` | `text` |  |
+| ストレージパス | `storage_path` | `text` |  |
+| エラーコード | `error_code` | `text` |  |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 失効日時 | `expires_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+
+## 表示設定（`display_settings`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 19
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| 会員種別名 | `members_type_name` | `text` |  |
+| 文字倍率 | `text_scale` | `smallint` |  |
+| UI密度 | `ui_density` | `smallint` |  |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 一覧並び | `list_sort` | `text` |  |
+| ギャラリー表示 | `gallery_layout` | `text` |  |
+| 着地ページ | `landing_page` | `text` |  |
+| 居住地域 | `residence_region` | `text` |  |
+| タイムゾーン上書き | `timezone_override` | `text` |  |
+| 日付形式モード | `date_format_mode` | `text` |  |
+| 通貨コード上書き | `currency_code_override` | `text` |  |
+| 金額形式モード | `currency_format_mode` | `text` |  |
+| 登録開始手順 | `register_start_step` | `text` |  |
+| 既定収納場所ID | `default_storage_location_id` | `integer` | 識別子または外部キー |
+| ギャラリー名前表示 | `gallery_show_name` | `boolean` |  |
+| ギャラリータグ表示 | `gallery_show_tags` | `boolean` |  |
+| ギャラリー価格表示 | `gallery_show_price` | `boolean` |  |
+
+## ギャラリー保存ビュー（`gallery_view`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 11
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| ギャラリー保存ビューID | `gallery_view_id` | `bigint` | 識別子または外部キー |
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| ビュー名 | `view_name` | `text` |  |
+| 検索語 | `q` | `text` |  |
+| カテゴリタグID一覧 | `category_tag_ids` | `integer[]` |  |
+| 収納場所ID一覧 | `storage_location_ids` | `integer[]` |  |
+| カラータグスロット一覧 | `color_tag_slots` | `integer[]` |  |
+| 一覧並び | `list_sort` | `text` |  |
+| 表示順 | `display_order` | `integer` | 表示並び順 |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+
 ## アイコンタグ（`icon_tag`）
 
 - **状態:** DB のみ・未連携（Data API 不可）（`schema_ready`）
@@ -162,6 +225,22 @@
 | サムネイル画質 | `thumbnail_image_quality` | `integer` |  |
 | 登録可能数 | `registerable_number` | `integer` |  |
 | 高解像度登録可能枚数 | `high_resolution_registerable_number` | `integer` |  |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+
+## 推し色設定（`oshi_accent_settings`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 8
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| 会員種別名 | `members_type_name` | `text` |  |
+| メイン色 | `main_hex` | `text` |  |
+| サブ色 | `sub_hex` | `text` |  |
+| 有効 | `active` | `boolean` |  |
+| プリセット一覧 | `presets` | `jsonb` |  |
 | 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 | 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 
@@ -218,7 +297,7 @@
 ## 登録製品（`registered_product`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 47
+- **列数:** 48
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -269,6 +348,7 @@
 | おまけフラグ | `freebie_flag` | `integer` | 真偽・0/1 フラグ |
 | 製品シリーズコンプリートフラグ | `product_series_complete_flag` | `integer` | 真偽・0/1 フラグ |
 | 製品グループ名 | `product_group_name` | `text` |  |
+| 通貨コード | `currency_code` | `text` |  |
 
 ## 登録製品カラータグ（`registered_product_color_tag`）
 
@@ -284,7 +364,7 @@
 ## 収納場所（`storage_location`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 16
+- **列数:** 18
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -304,6 +384,8 @@
 | 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
 | スロット | `slot` | `integer` | 枠番号（プリセット等） |
 | 表示順 | `display_order` | `integer` | 表示並び順 |
+| 登録選択回数 | `register_pick_count` | `integer` |  |
+| 最終登録選択日時 | `last_register_picked_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 
 ## 収納場所プリセット削除済（`storage_location_preset_slot_dismissed`）
 

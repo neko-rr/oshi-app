@@ -29,12 +29,14 @@ Dash / Bootswatch 名（`minty` / `quartz` / `morph` 等）は **使わない**�
 
 ## 推し色ドキュメントとの関係
 
-以前の「`--primary` / `--ring` だけ差し替え」は **誤り**（自動生成や下書きの混入）。  
-本番の正は **本ファイル＋ todo-app 方式のフル・トークンパック**。
+テーマパック自体を「`--primary` / `--ring` だけ差し替え」で済ませるのは **誤り**。  
+本番のテーマの正は **本ファイル＋ todo-app 方式のフル・トークンパック**。
 
-スウォッチ UI への見た目改善は後続でもよいが、適用範囲は常にトークン一式。
+それとは別に、顧客の **推し色（メイン＋サブ）** がパックの上に限定オーバーレイする機能がある。  
+詳細・境界は [oshi-accents.md](oshi-accents.md)。キャンバス `--background` はパック側のまま。
 
 ## 関連
 
 - トークン名検査: [tokens.md](tokens.md) / `meta/tokens.json`
+- 推し色オーバーレイ: [oshi-accents.md](oshi-accents.md)
 - ブランド種（別議論）: [brand-palette.md](brand-palette.md)

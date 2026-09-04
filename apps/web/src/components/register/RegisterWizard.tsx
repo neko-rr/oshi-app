@@ -1,22 +1,30 @@
-"use client";
+﻿"use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   API_PATHS,
   type CreatePhotoResponse,
   type CreateProductResponse,
 } from "@oshi/shared";
 import { createClient } from "@/lib/client";
+import { useDisplaySettings } from "@/hooks/useDisplaySettings";
+import { findResidenceRegion } from "@/lib/residencePrefs";
+import { orderStorageLocationsForRegister } from "@/lib/registerPrefs";
 import type { DecodedBarcode } from "@/lib/barcode/formats";
 import { findOwnedProductsByBarcode } from "@/lib/products/findOwnedByBarcode";
+import { Button } from "@/components/ui/button";
 import {
   applyAssistToDraft,
   matchCategoryId,
 } from "./assist/applyAssistToDraft";
 import { runAssistPipeline } from "./assist/runAssistPipeline";
 import type { AssistDraftSlice, FieldSources } from "./assist/types";
-import { assistStatusMessage } from "./assistMessages";
+import {
+  assistStatusDescriptor,
+  resolveAssistMessage,
+} from "./assistMessages";
 import {
   StepBarcode,
   type OwnedProductHint,
@@ -69,23 +77,62 @@ function markUserSource(
 
 export function RegisterWizard() {
   const router = useRouter();
-  const [step, setStep] = useState<WizardStep>("barcode");
+  const t = useTranslations("Register");
+  const tAssist = useTranslations("Register.assist");
+  const tBarcode = useTranslations("Register.barcode");
+  const tConfirm = useTranslations("Register.confirm");
+  const tDefaults = useTranslations("RegisterDefaults");
+  const {
+    residenceRegion,
+    registerStartStep,
+    defaultStorageLocationId,
+    setRegisterStartStep,
+  } = useDisplaySettings();
+  const defaultCurrency = findResidenceRegion(residenceRegion).currencyCode;
+  const [step, setStep] = useState<WizardStep>(registerStartStep);
   const [draft, setDraft] = useState<RegisterDraft>(() => emptyDraft());
   const [colors, setColors] = useState<ColorTagItem[]>([]);
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
-  const [storageLocations, setStorageLocations] = useState<
+  const [storageLocationsRaw, setStorageLocationsRaw] = useState<
     StorageLocationItem[]
   >([]);
   const [lookingUp, setLookingUp] = useState(false);
   const [assistHint, setAssistHint] = useState<string | null>(null);
   const [assistPhase, setAssistPhase] = useState<"idle" | "running" | "done">(
-    "idle",
+    () => (registerStartStep === "confirm" ? "done" : "idle"),
   );
   const [ownedHint, setOwnedHint] = useState<OwnedProductHint | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
+  const [startNudge, setStartNudge] = useState<"photo" | "confirm" | null>(
+    null,
+  );
   const assistAbortRef = useRef<AbortController | null>(null);
+  const nudgeShownRef = useRef(false);
+  const defaultStorageAppliedRef = useRef(false);
+
+  const storageLocations = useMemo(
+    () =>
+      orderStorageLocationsForRegister(
+        storageLocationsRaw,
+        defaultStorageLocationId,
+      ),
+    [storageLocationsRaw, defaultStorageLocationId],
+  );
+
+  const formatAssist = useCallback(
+    (status: string | undefined, fallback?: string | null) =>
+      resolveAssistMessage((key) => tAssist(key), assistStatusDescriptor(status, fallback)),
+    [tAssist],
+  );
+
+  function maybeOfferStartNudge(next: "photo" | "confirm") {
+    if (nudgeShownRef.current) return;
+    if (registerStartStep === next) return;
+    nudgeShownRef.current = true;
+    setStartNudge(next);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +159,7 @@ export function RegisterWizard() {
           const json = (await storageRes.json()) as {
             items?: StorageLocationItem[];
           };
-          setStorageLocations(json.items ?? []);
+          setStorageLocationsRaw(json.items ?? []);
         }
       } catch {
         // タグ未取得でも登録自体は続行
@@ -124,6 +171,23 @@ export function RegisterWizard() {
     };
   }, []);
 
+  // いつも選ぶ収納を初回だけ下書きへ反映
+  useEffect(() => {
+    if (defaultStorageAppliedRef.current) return;
+    if (defaultStorageLocationId == null) return;
+    if (
+      !storageLocationsRaw.some(
+        (s) => s.storage_location_id === defaultStorageLocationId,
+      )
+    ) {
+      return;
+    }
+    defaultStorageAppliedRef.current = true;
+    setDraft((prev) => {
+      if (prev.storageLocationId != null) return prev;
+      return { ...prev, storageLocationId: defaultStorageLocationId };
+    });
+  }, [defaultStorageLocationId, storageLocationsRaw]);
   // Vision 後にカテゴリ一覧が届いたら種類名を再マッチ
   useEffect(() => {
     if (categories.length === 0) return;
@@ -236,9 +300,9 @@ export function RegisterWizard() {
       });
       if (!res.ok) {
         patchDraft({
-          barcodeNote: "照合APIに接続できませんでした。手入力で続行できます。",
+          barcodeNote: tAssist("lookupApiFailed"),
         });
-        setAssistHint("外部照合をスキップして手動登録できます。");
+        setAssistHint(tAssist("skipExternalLookup"));
         return;
       }
       const json = (await res.json()) as BarcodeLookupResponse;
@@ -268,9 +332,9 @@ export function RegisterWizard() {
           }
           return {
             ...prev,
-            barcodeNote: assistStatusMessage(
+            barcodeNote: formatAssist(
               status,
-              `候補 ${json.items!.length} 件`,
+              tAssist("successCandidates", { count: json.items!.length }),
             ),
             productName: nextName,
             purchasePrice: nextPrice,
@@ -282,14 +346,14 @@ export function RegisterWizard() {
         setAssistHint(null);
         return;
       }
-      const msg = assistStatusMessage(status, json.message);
+      const msg = formatAssist(status, json.message);
       patchDraft({ barcodeNote: msg });
       setAssistHint(msg);
     } catch {
       patchDraft({
-        barcodeNote: "照合に失敗しました。手入力で続行できます。",
+        barcodeNote: tAssist("lookupFailed"),
       });
-      setAssistHint("外部照合に失敗しました。手入力で続行できます。");
+      setAssistHint(tAssist("externalLookupFailed"));
     }
   }
 
@@ -298,7 +362,7 @@ export function RegisterWizard() {
     patchDraft({
       barcode: code,
       barcodeType: decoded.format,
-      barcodeNote: "カメラで読み取りました",
+      barcodeNote: tBarcode("scannedByCamera"),
     });
     setLookingUp(true);
     try {
@@ -328,7 +392,7 @@ export function RegisterWizard() {
     if (!file) {
       setAssistPhase("done");
       if (!draft.barcode.trim()) {
-        setAssistHint("バーコード・写真なしのため、タグ提案はありません。");
+        setAssistHint(tAssist("noTagSuggestions"));
       } else if (draft.barcodeNote) {
         setAssistHint(draft.barcodeNote);
       } else {
@@ -338,7 +402,7 @@ export function RegisterWizard() {
     }
 
     setAssistPhase("running");
-    setAssistHint("提案を反映中…");
+    setAssistHint(tAssist("applyingSuggestions"));
     try {
       const token = await getAccessToken();
       if (!token) {
@@ -353,7 +417,7 @@ export function RegisterWizard() {
       });
       if (result.kind === "aborted") return;
       if (result.kind === "http_error") {
-        setAssistHint(result.message);
+        setAssistHint(tAssist(result.messageKey));
         setAssistPhase("done");
         return;
       }
@@ -363,7 +427,7 @@ export function RegisterWizard() {
       }
 
       if (result.status !== "success") {
-        setAssistHint(assistStatusMessage(result.status, result.message));
+        setAssistHint(formatAssist(result.status, result.message));
         setAssistPhase("done");
         return;
       }
@@ -398,28 +462,30 @@ export function RegisterWizard() {
           unmatchedProductType: merged.draft.unmatched_product_type,
           fieldSources: merged.sources,
           barcodeNote: barcodeProtected
-            ? "バーコードの商品名・価格を優先しています。"
+            ? tAssist("barcodeNamePricePriority")
             : prev.barcodeNote,
         };
       });
       const tagCount = result.vision.visual_tags.length;
       setAssistHint(
         tagCount > 0
-          ? `見た目タグを ${tagCount} 件提案しました。必要なら修正してください。`
-          : "画像アシストを反映しました。必要なら修正してください。",
+          ? tAssist("visualTagsSuggested", { count: tagCount })
+          : tAssist("visionApplied"),
       );
       setAssistPhase("done");
     } catch {
-      setAssistHint("画像アシストに失敗しました。手入力で続行できます。");
+      setAssistHint(tAssist("visionFailed"));
       setAssistPhase("done");
     }
   }
 
   function goConfirmFromPhoto(opts?: { clearPhoto?: boolean }) {
     const file = opts?.clearPhoto ? null : draft.file;
-    if (opts?.clearPhoto) {
-      patchDraft({ file: null });
-    }
+    setDraft((prev) => ({
+      ...prev,
+      file: opts?.clearPhoto ? null : prev.file,
+      currencyCode: prev.currencyCode || defaultCurrency,
+    }));
     setJustRegistered(false);
     setStep("confirm");
     void startVisionAssist(file);
@@ -427,13 +493,27 @@ export function RegisterWizard() {
 
   function resetForContinue() {
     assistAbortRef.current?.abort();
-    setDraft(emptyDraft());
     setOwnedHint(null);
     setAssistHint(null);
-    setAssistPhase("idle");
+    setAssistPhase(registerStartStep === "confirm" ? "done" : "idle");
     setError(null);
     setJustRegistered(false);
-    setStep("barcode");
+    setStartNudge(null);
+    defaultStorageAppliedRef.current = false;
+    const next = emptyDraft();
+    next.currencyCode = defaultCurrency;
+    if (
+      defaultStorageLocationId != null &&
+      storageLocationsRaw.some(
+        (s) => s.storage_location_id === defaultStorageLocationId,
+      )
+    ) {
+      next.storageLocationId = defaultStorageLocationId;
+      defaultStorageAppliedRef.current = true;
+    }
+    setDraft(next);
+    // 続けて登録でも設定の開始手順に従う
+    setStep(registerStartStep);
   }
 
   async function onSubmit(e: FormEvent) {
@@ -458,7 +538,9 @@ export function RegisterWizard() {
         });
         if (!photoRes.ok) {
           const text = await photoRes.text();
-          throw new Error(`写真アップロード失敗: ${text.slice(0, 160)}`);
+          throw new Error(
+            tConfirm("photoUploadFailed", { detail: text.slice(0, 160) }),
+          );
         }
         const photoJson = (await photoRes.json()) as CreatePhotoResponse;
         photoId = photoJson.photo_id;
@@ -467,6 +549,7 @@ export function RegisterWizard() {
       const priceNum = draft.purchasePrice.trim()
         ? Number(draft.purchasePrice.trim())
         : null;
+      const hasPrice = priceNum != null && Number.isFinite(priceNum);
       const slots = Array.from(draft.selectedSlots).sort((a, b) => a - b);
 
       const productRes = await fetch(`${apiBase()}${API_PATHS.products}`, {
@@ -483,10 +566,10 @@ export function RegisterWizard() {
           photo_id: photoId,
           product_group_name: draft.productGroupName.trim() || null,
           character_name: draft.characterName.trim() || null,
-          purchase_price:
-            priceNum != null && Number.isFinite(priceNum)
-              ? Math.trunc(priceNum)
-              : null,
+          purchase_price: hasPrice ? Math.trunc(priceNum) : null,
+          currency_code: hasPrice
+            ? draft.currencyCode || defaultCurrency
+            : null,
           color_tag_slots: slots.length > 0 ? slots : null,
           category_tag_id: draft.categoryTagId,
           storage_location_id: draft.storageLocationId,
@@ -494,15 +577,21 @@ export function RegisterWizard() {
       });
       if (!productRes.ok) {
         const text = await productRes.text();
-        throw new Error(`製品登録失敗: ${text.slice(0, 160)}`);
+        throw new Error(
+          tConfirm("productCreateFailed", { detail: text.slice(0, 160) }),
+        );
       }
       const created = (await productRes.json()) as CreateProductResponse;
       setJustRegistered(true);
       setAssistHint(
-        `登録しました（ID: ${created.registered_product_id}）。続けて登録するかギャラリーへ進めます。`,
+        tConfirm("registeredSuccess", {
+          id: created.registered_product_id,
+        }),
       );
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "登録に失敗しました");
+      setError(
+        err instanceof Error ? err.message : tConfirm("registerFailed"),
+      );
     } finally {
       setLoading(false);
     }
@@ -512,20 +601,68 @@ export function RegisterWizard() {
     <div className="flex flex-col gap-4">
       <ol
         className="flex flex-wrap gap-2 text-xs text-muted-foreground"
-        aria-label="登録ステップ"
+        aria-label={t("stepsAria")}
       >
         <li className={step === "barcode" ? "font-semibold text-foreground" : ""}>
-          1. バーコード
+          {t("step1")}
+          {registerStartStep === "photo" || registerStartStep === "confirm" ? (
+            <span className="ml-1 font-normal">({tDefaults("stepSkipped")})</span>
+          ) : null}
         </li>
         <li aria-hidden>/</li>
         <li className={step === "photo" ? "font-semibold text-foreground" : ""}>
-          2. 写真
+          {t("step2")}
+          {registerStartStep === "confirm" ? (
+            <span className="ml-1 font-normal">({tDefaults("stepSkipped")})</span>
+          ) : null}
         </li>
         <li aria-hidden>/</li>
         <li className={step === "confirm" ? "font-semibold text-foreground" : ""}>
-          6. 確認
+          {t("step6")}
         </li>
       </ol>
+
+      <p className="text-xs text-muted-foreground">
+        <Link
+          href="/settings/register"
+          className="underline-offset-4 hover:underline"
+        >
+          {tDefaults("settingsLink")}
+        </Link>
+      </p>
+
+      {startNudge ? (
+        <div
+          className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm"
+          role="status"
+        >
+          <p>
+            {startNudge === "photo"
+              ? tDefaults("nudgePhoto")
+              : tDefaults("nudgeConfirm")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setRegisterStartStep(startNudge);
+                setStartNudge(null);
+              }}
+            >
+              {tDefaults("nudgeAccept")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setStartNudge(null)}
+            >
+              {tDefaults("nudgeDismiss")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       {step === "barcode" ? (
         <StepBarcode
@@ -544,12 +681,18 @@ export function RegisterWizard() {
             setOwnedHint(null);
             setAssistHint(null);
             setStep("photo");
+            maybeOfferStartNudge("photo");
           }}
           onManualAll={() => {
             setOwnedHint(null);
-            setAssistHint("すべて手動入力モードです。");
+            setAssistHint(tAssist("manualMode"));
             setAssistPhase("done");
+            setDraft((prev) => ({
+              ...prev,
+              currencyCode: prev.currencyCode || defaultCurrency,
+            }));
             setStep("confirm");
+            maybeOfferStartNudge("confirm");
           }}
         />
       ) : null}
@@ -570,6 +713,7 @@ export function RegisterWizard() {
           productGroupName={draft.productGroupName}
           characterName={draft.characterName}
           purchasePrice={draft.purchasePrice}
+          currencyCode={draft.currencyCode || defaultCurrency}
           barcode={draft.barcode}
           memo={draft.memo}
           colors={colors}
@@ -613,7 +757,14 @@ export function RegisterWizard() {
             setDraft((prev) => ({
               ...prev,
               purchasePrice: v,
+              currencyCode: prev.currencyCode || defaultCurrency,
               fieldSources: markUserSource(prev.fieldSources, "purchase_price"),
+            }))
+          }
+          onCurrencyCode={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              currencyCode: v,
             }))
           }
           onBarcode={(v) => patchDraft({ barcode: v })}

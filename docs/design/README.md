@@ -26,7 +26,7 @@
 | [themes.md](themes.md) | テーマ（トークン一式・todo-app 方式） | **手** |
 | [oshi-accents.md](oshi-accents.md) | テーマ色／推し色（カラータグとの違い） | **手** |
 | [compare-workflow.md](compare-workflow.md) | 3案並列・端末切替の手順 | **手** |
-| [motion.md](motion.md) | 動き・フィードバック | **手** |
+| [motion.md](motion.md) | 動き・フィードバック（短い有用反応／長い遊びは本線外） | **手** |
 | [a11y.md](a11y.md) | アクセシビリティ要約（最新は公式 WebFetch） | **手** |
 | [feedback/README.md](feedback/README.md) | 要望 inbox → pending → 採用 | **手** |
 | [feedback/inbox.md](feedback/inbox.md) | 走り書きメモ | **手** |

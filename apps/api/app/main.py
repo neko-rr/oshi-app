@@ -13,7 +13,11 @@ from app.routers.photos import router as photos_router
 from app.routers.products import router as products_router
 from app.routers.stats import router as stats_router
 from app.routers.tags import router as tags_router
+from app.routers.display_settings import router as display_settings_router
+from app.routers.gallery_views import router as gallery_views_router
 from app.routers.theme_settings import router as theme_settings_router
+from app.routers.oshi_accent_settings import router as oshi_accent_settings_router
+from app.routers.exports import router as exports_router
 
 
 def create_app() -> FastAPI:
@@ -33,6 +37,10 @@ def create_app() -> FastAPI:
     application.include_router(assist_router)
     application.include_router(tags_router)
     application.include_router(theme_settings_router)
+    application.include_router(oshi_accent_settings_router)
+    application.include_router(display_settings_router)
+    application.include_router(gallery_views_router)
+    application.include_router(exports_router)
     application.include_router(stats_router)
 
     @application.exception_handler(HTTPException)

@@ -19,9 +19,9 @@ function fileToDataUri(file: File): Promise<string> {
         resolve(result);
         return;
       }
-      reject(new Error("画像の読み込みに失敗しました"));
+      reject(new Error("image_load_failed"));
     };
-    reader.onerror = () => reject(new Error("画像の読み込みに失敗しました"));
+    reader.onerror = () => reject(new Error("image_load_failed"));
     reader.readAsDataURL(file);
   });
 }
@@ -53,6 +53,12 @@ function normalizeStructured(
   };
 }
 
+/** UI は Register.assist.* で翻訳する */
+export type VisionHttpErrorKey =
+  | "imageLoadFailed"
+  | "visionConnectFailed"
+  | "visionFailed";
+
 export type RunAssistPipelineResult =
   | { kind: "skipped"; reason: "no_photo" }
   | { kind: "aborted" }
@@ -62,7 +68,7 @@ export type RunAssistPipelineResult =
       message: string | null;
       vision: VisionStructured;
     }
-  | { kind: "http_error"; message: string };
+  | { kind: "http_error"; messageKey: VisionHttpErrorKey };
 
 /**
  * 写真があるときだけ POST /assist/vision/describe を1回呼ぶ。
@@ -85,7 +91,7 @@ export async function runAssistPipeline(options: {
   try {
     imageSource = await fileToDataUri(file);
   } catch {
-    return { kind: "http_error", message: "画像の読み込みに失敗しました。" };
+    return { kind: "http_error", messageKey: "imageLoadFailed" };
   }
   if (signal?.aborted) {
     return { kind: "aborted" };
@@ -107,7 +113,7 @@ export async function runAssistPipeline(options: {
     if (!res.ok) {
       return {
         kind: "http_error",
-        message: "画像アシストに接続できませんでした。手入力で続行できます。",
+        messageKey: "visionConnectFailed",
       };
     }
     const json = (await res.json()) as VisionDescribeResponse;
@@ -124,7 +130,7 @@ export async function runAssistPipeline(options: {
     }
     return {
       kind: "http_error",
-      message: "画像アシストに失敗しました。手入力で続行できます。",
+      messageKey: "visionFailed",
     };
   }
 }
