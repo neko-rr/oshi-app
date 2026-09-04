@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T05:16:48Z",
+  "generated_at": "2026-09-04T08:40:31Z",
   "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -74,7 +74,7 @@
     },
     {
       "name": "next-intl",
-      "version": "4.14.2",
+      "version": "4.0.0",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://next-intl.dev"
@@ -178,8 +178,22 @@
       "homepage": ""
     },
     {
+      "name": "tzdata",
+      "version": ">=2024.1",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
       "name": "uvicorn",
       "version": "[standard]>=0.32.0",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "websockets",
+      "version": ">=13,<16",
       "license": "UNKNOWN",
       "ecosystem": "pip",
       "homepage": ""

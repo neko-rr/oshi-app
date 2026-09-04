@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import type { ProductListItem } from "@oshi/shared";
 import { FormattedAppMoney } from "@/components/format/FormattedAppMoney";
 import { ProductTagChip } from "@/components/tags/ProductTagChip";
+import { Button } from "@/components/ui/button";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
   type GalleryCardFields,
@@ -171,19 +172,20 @@ export function ProductGalleryGrid({
           return (
             <li key={item.registered_product_id}>
               {selectionMode ? (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   aria-label={title}
                   aria-pressed={selected}
                   onClick={() => onToggleSelect?.(item.registered_product_id)}
                   className={cn(
                     shellClass,
-                    "w-full text-left",
+                    "h-auto w-full justify-start p-0 text-left hover:bg-transparent",
                     selected && "ring-2 ring-primary",
                   )}
                 >
                   {body}
-                </button>
+                </Button>
               ) : (
                 <Link
                   href={galleryDetailHref(item.registered_product_id, listQuery)}
@@ -254,18 +256,22 @@ export function ProductGalleryGrid({
         return (
           <li key={item.registered_product_id}>
             {selectionMode ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 aria-label={title}
                 aria-pressed={selected}
                 onClick={() => onToggleSelect?.(item.registered_product_id)}
-                className={cn(shellClass, "w-full text-left")}
+                className={cn(
+                  shellClass,
+                  "h-auto w-full justify-start p-0 text-left hover:bg-transparent",
+                )}
                 style={{
                   animationDelay: `${Math.min(index, 8) * 40}ms`,
                 }}
               >
                 {body}
-              </button>
+              </Button>
             ) : (
               <Link
                 href={galleryDetailHref(item.registered_product_id, listQuery)}

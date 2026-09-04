@@ -66,6 +66,9 @@ def scan_pages() -> list[dict[str, Any]]:
         for part in rel.parts[:-1]:
             if part.startswith("(") and part.endswith(")"):
                 continue
+            # next-intl の [locale] は論理パスから除外（/gallery として記録）
+            if part == "[locale]":
+                continue
             parts.append(part)
         url = "/" + "/".join(parts) if parts else "/"
         text = path.read_text(encoding="utf-8")

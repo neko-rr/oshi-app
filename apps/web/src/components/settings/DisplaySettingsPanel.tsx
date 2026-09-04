@@ -71,15 +71,16 @@ function FieldSwitch({ id, label, checked, onCheckedChange }: FieldSwitchProps) 
       <label htmlFor={id} className="text-sm text-foreground">
         {label}
       </label>
-      <button
+      <Button
         id={id}
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onCheckedChange(!checked)}
+        variant="ghost"
         className={cn(
-          "relative h-7 w-12 shrink-0 rounded-full border border-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          checked ? "bg-primary" : "bg-muted",
+          "relative h-7 w-12 shrink-0 rounded-full border border-border p-0 transition-colors hover:bg-transparent",
+          checked ? "bg-primary hover:bg-primary" : "bg-muted hover:bg-muted",
         )}
       >
         <span
@@ -89,7 +90,7 @@ function FieldSwitch({ id, label, checked, onCheckedChange }: FieldSwitchProps) 
           )}
           aria-hidden
         />
-      </button>
+      </Button>
     </div>
   );
 }

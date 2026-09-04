@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-09-03T05:16:48Z`
+生成時刻 (UTC): `2026-09-04T08:40:31Z`
 
 ## アプリ本体
 
@@ -24,7 +24,7 @@ oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直
 | clsx | 2.1.1 | MIT | npm |
 | lucide-react | 1.31.0 | ISC | npm |
 | next | 15.5.7 | MIT | npm |
-| next-intl | 4.14.2 | MIT | npm |
+| next-intl | 4.0.0 | MIT | npm |
 | qrcode | 1.5.4 | MIT | npm |
 | radix-ui | 1.6.7 | MIT | npm |
 | react | 19.2.8 | MIT | npm |
@@ -39,7 +39,9 @@ oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直
 | python-dotenv | >=1.0.0 | UNKNOWN | pip |
 | python-multipart | >=0.0.9 | UNKNOWN | pip |
 | supabase | >=2.10.0 | UNKNOWN | pip |
+| tzdata | >=2024.1 | UNKNOWN | pip |
 | uvicorn | [standard]>=0.32.0 | UNKNOWN | pip |
+| websockets | >=13,<16 | UNKNOWN | pip |
 
 ## 外部サービス（表示・規約メモ）
 

@@ -224,24 +224,28 @@ export function GallerySavedViewsBar({
               className="inline-flex items-center gap-0.5"
               role="listitem"
             >
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 className={cn(
-                  "inline-flex min-h-9 items-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-muted/60",
+                  "min-h-9 rounded-full border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted/60",
                 )}
                 onClick={() => applyView(view)}
               >
                 {view.view_name}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-full text-xs text-muted-foreground transition hover:bg-muted/60 hover:text-destructive"
+                variant="ghost"
+                size="icon-sm"
+                className="min-h-9 min-w-9 rounded-full text-xs text-muted-foreground hover:bg-muted/60 hover:text-destructive"
                 aria-label={t("savedViewDeleteAria", { name: view.view_name })}
                 disabled={busyId === view.gallery_view_id}
                 onClick={() => void removeView(view)}
               >
                 ×
-              </button>
+              </Button>
             </div>
           ))}
         </div>
