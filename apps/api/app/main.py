@@ -18,6 +18,7 @@ from app.routers.gallery_views import router as gallery_views_router
 from app.routers.theme_settings import router as theme_settings_router
 from app.routers.oshi_accent_settings import router as oshi_accent_settings_router
 from app.routers.exports import router as exports_router
+from app.routers.account import router as account_router
 
 
 def create_app() -> FastAPI:
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     application.include_router(display_settings_router)
     application.include_router(gallery_views_router)
     application.include_router(exports_router)
+    application.include_router(account_router)
     application.include_router(stats_router)
 
     @application.exception_handler(HTTPException)

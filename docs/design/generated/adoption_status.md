@@ -2,16 +2,17 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-09-04T08:40:30Z`
+生成時刻 (UTC): `2026-09-06T05:57:25Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 
 | Path | status | lab_variant | updated_at | notes |
 |------|--------|-------------|------------|-------|
+| `/ (shell)` | `adopted` | 'a' | '2026-09-06' | A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持 |
 | `/gallery` | `adopted` | 'b' | '2026-09-02' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
-| `/gallery/[registered_product_id]` | `adopted` | 'b' | '2026-09-02' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る |
-| `/register` | `not_started` | None | None |  |
+| `/gallery/[registered_product_id]` | `adopted` | 'b' | '2026-09-06' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る。フルスクリーン拡大追加 |
+| `/register` | `partial` | 'a' | '2026-09-06' | 写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き） |
 | `/dashboard` | `not_started` | None | None |  |
-| `/settings` | `not_started` | None | None | ハブ本体。テーマは /settings/theme |
+| `/settings` | `adopted` | 'a' | '2026-09-06' | その他ハブ: 分析・設定・ログアウト・法務。下部タブ「その他」の着地 |
 | `/settings/theme` | `adopted` | 'b' | '2026-09-01' | B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保 |
 | `/auth/login` | `not_started` | None | None |  |

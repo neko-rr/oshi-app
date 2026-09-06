@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
+import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 
 export type BulkTagOption = {
   id: number;
@@ -26,6 +27,7 @@ type Props = {
   picking: BulkPickKind | null;
   saving: boolean;
   error: string | null;
+  errorOffline?: boolean;
   onSelectAllPage: () => void;
   onSelectFiltered: () => void;
   onToggleShowSelectedOnly: () => void;
@@ -35,6 +37,7 @@ type Props = {
   onPickCategory: (id: number | null) => void;
   onClearSelection: () => void;
   onExitSelectMode: () => void;
+  onRetryError?: () => void;
 };
 
 /**
@@ -53,6 +56,7 @@ export function GalleryBulkBar({
   picking,
   saving,
   error,
+  errorOffline = false,
   onSelectAllPage,
   onSelectFiltered,
   onToggleShowSelectedOnly,
@@ -62,12 +66,17 @@ export function GalleryBulkBar({
   onPickCategory,
   onClearSelection,
   onExitSelectMode,
+  onRetryError,
 }: Props) {
   const t = useTranslations("Gallery");
   const busy = saving || selectingFiltered;
 
   return (
-    <div className="sticky top-0 z-10 flex flex-col gap-2 rounded-xl border border-border bg-card/95 px-3 py-3 shadow-sm backdrop-blur">
+    <div
+      className="fixed inset-x-0 bottom-[calc(3.25rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto flex max-w-3xl flex-col gap-2 border-t border-border bg-card/95 px-3 py-3 shadow-sm backdrop-blur lg:sticky lg:top-14 lg:bottom-auto lg:z-10 lg:rounded-xl lg:border"
+      role="region"
+      aria-label={t("bulkSelected", { count: selectedCount })}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-sm font-medium text-foreground">
           {t("bulkSelected", { count: selectedCount })}
@@ -154,9 +163,11 @@ export function GalleryBulkBar({
         </p>
       ) : null}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
+        <NetworkRetryNotice
+          message={error}
+          offline={errorOffline}
+          onRetry={onRetryError}
+        />
       ) : null}
       {picking === "storage" ? (
         <div className="rounded-md border border-border px-2 py-2">

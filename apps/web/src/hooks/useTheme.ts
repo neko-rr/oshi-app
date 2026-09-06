@@ -11,6 +11,7 @@ import {
 } from "react";
 import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
+import { canSyncUserPrefsToServer } from "@/lib/authGuest";
 import {
   DEFAULT_THEME_ID,
   THEME_IDS,
@@ -141,8 +142,9 @@ export function useThemeState(
         const supabase = tryCreateClient();
         if (!supabase) return;
         const session = await supabase.auth.getSession();
+        const user = session.data?.session?.user;
         const token = session.data?.session?.access_token;
-        if (!token) return;
+        if (!token || !canSyncUserPrefsToServer(user)) return;
         await putThemeViaFastAPI(
           sanitizeTheme(themeId, defaultTheme),
           token,
@@ -163,8 +165,9 @@ export function useThemeState(
         const supabase = tryCreateClient();
         if (!supabase) return;
         const session = await supabase.auth.getSession();
+        const user = session.data?.session?.user;
         const token = session.data?.session?.access_token;
-        if (!token) return;
+        if (!token || !canSyncUserPrefsToServer(user)) return;
         const serverTheme = await fetchThemeViaFastAPI(token);
         if (serverTheme && alive) {
           skipNextSync.current = true;

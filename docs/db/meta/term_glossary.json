@@ -155,6 +155,8 @@
     "gallery_show_name": "ギャラリー名前表示",
     "gallery_show_tags": "ギャラリータグ表示",
     "gallery_show_price": "ギャラリー価格表示",
+    "gallery_image_fit": "ギャラリー画像フィット",
+    "image_fit": "画像フィット",
     "show": "表示",
     "tags": "タグ",
     "price": "価格",

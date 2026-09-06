@@ -9,6 +9,7 @@ import {
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
 import { bestButtonForeground } from "@/components/design-lab/lab-contrast";
+import LabBottomTabMock from "@/components/design-lab/LabBottomTabMock";
 import LabGalleryMock from "@/components/design-lab/LabGalleryMock";
 import LabThemeSettingsMock from "@/components/design-lab/LabThemeSettingsMock";
 
@@ -31,40 +32,103 @@ const MOCK_ITEMS = [
   { name: "トレカ", place: "ファイル", status: "登録済" },
 ] as const;
 
-/** 本番 Header に近いログイン後シェル（Lab 見本） */
+/** ログイン後シェル見本。狭幅は下部タブ、PC は上部リンク。 */
 function LoggedInShell({
   platform,
+  variant = "a",
   children,
 }: {
   platform: LabPlatformId;
+  variant?: LabVariantId;
   children: ReactNode;
 }) {
-  const compact = platform !== "web-pc";
+  const mobile = platform !== "web-pc";
+  const headerPad =
+    variant === "c" ? "!py-3" : variant === "b" ? "!py-2.5" : "!py-2";
+
   return (
-    <div className="flex flex-col gap-3">
-      <header className="lab-surface !py-2.5">
-        <div
-          className={
-            compact
-              ? "flex flex-col gap-2"
-              : "flex flex-wrap items-center justify-between gap-2"
-          }
-        >
-          <p className="text-sm font-bold tracking-tight">oshi-app</p>
-          <nav
-            className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]"
-            aria-label="ログイン後ナビ（見本）"
-          >
-            <span className="font-medium text-[var(--lab-primary)]">ホーム</span>
-            <span className="lab-muted">ギャラリー</span>
-            <span className="lab-muted">登録</span>
-            <span className="lab-muted">ダッシュボード</span>
-            <span className="lab-muted">設定</span>
-          </nav>
-        </div>
+    <div className="flex min-h-0 flex-col">
+      <header className={`lab-surface ${headerPad}`}>
+        {mobile ? (
+          <div className="flex items-center justify-between gap-2">
+            <p
+              className={
+                variant === "c"
+                  ? "text-base font-bold tracking-tight"
+                  : "text-sm font-bold tracking-tight"
+              }
+            >
+              oshi-app
+            </p>
+            <span className="lab-muted text-[10px]">ログアウト</span>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-bold tracking-tight">oshi-app</p>
+            <nav
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]"
+              aria-label="ログイン後ナビ（見本）"
+            >
+              <span className="lab-muted">ホーム</span>
+              <span className="font-medium text-[var(--lab-primary)]">
+                ギャラリー
+              </span>
+              <span className="lab-muted">登録</span>
+              <span className="lab-muted">検索</span>
+              <span className="lab-muted">ダッシュボード</span>
+              <span className="lab-muted">設定</span>
+            </nav>
+          </div>
+        )}
       </header>
-      {children}
+      <div
+        className={
+          variant === "c"
+            ? "flex flex-col gap-4 p-3"
+            : variant === "b"
+              ? "flex flex-col gap-3 p-3"
+              : "flex flex-col gap-2 p-2.5"
+        }
+      >
+        {children}
+      </div>
+      {mobile ? <LabBottomTabMock variant={variant} /> : null}
     </div>
+  );
+}
+
+/** スマホシェル専用シーン（タブ配置の差を主役に） */
+function AppShellScene({
+  variant,
+  platform,
+}: {
+  variant: LabVariantId;
+  platform: LabPlatformId;
+}) {
+  const mobile = platform !== "web-pc";
+  return (
+    <LoggedInShell platform={platform} variant={variant}>
+      <div className="lab-surface !p-2.5">
+        <p className="text-xs font-medium">
+          {variant === "a"
+            ? "用途最短: 上部はブランドのみ。主操作は下タブ。"
+            : variant === "b"
+              ? "推し活: 登録タブをやや強調。写真余白寄り。"
+              : "ブランド整合: 余白やや広め。タブは等分で穏やか。"}
+        </p>
+        <p className="lab-muted mt-1 text-[10px]">
+          タブ順: ギャラリー → 登録 → 検索 → その他
+        </p>
+        <div
+          className={[
+            "lab-photo mt-2 w-full",
+            variant === "b" ? "aspect-[16/10]" : "aspect-[4/5]",
+            mobile ? "max-h-28" : "max-h-40",
+          ].join(" ")}
+          aria-hidden
+        />
+      </div>
+    </LoggedInShell>
   );
 }
 
@@ -259,10 +323,24 @@ export default function LabMockSurface({
     );
   }
 
+  if (scene === "app-shell") {
+    return (
+      <div data-lab-variant={variant} style={oshiStyle(oshiIndex)}>
+        <AppShellScene
+          variant={variant}
+          platform={pcWide ? "web-pc" : platform}
+        />
+      </div>
+    );
+  }
+
   if (scene === "gallery" || scene === "gallery-detail") {
     return (
       <div data-lab-variant={variant} style={oshiStyle(oshiIndex)}>
-        <LoggedInShell platform={pcWide ? "web-pc" : platform}>
+        <LoggedInShell
+          platform={pcWide ? "web-pc" : platform}
+          variant={variant}
+        >
           <LabGalleryMock
             variant={variant}
             uiState={uiState}
@@ -348,7 +426,10 @@ export default function LabMockSurface({
 
   return (
     <div className="text-sm" style={oshiStyle(oshiIndex)}>
-      <LoggedInShell platform={pcWide ? "web-pc" : platform}>
+      <LoggedInShell
+        platform={pcWide ? "web-pc" : platform}
+        variant={variant}
+      >
         {mainContent}
       </LoggedInShell>
     </div>

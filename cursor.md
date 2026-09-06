@@ -1,5 +1,51 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-06: ゲスト開始（Anonymous）＋本登録ゲート
+
+- `signInAnonymously` → ウィザード UI 可。業務 API は 403 `REGISTRATION_REQUIRED`
+- RLS RESTRICTIVE（`jwt_is_permanent_user`）＋ API `require_permanent_user`
+- Web: `/auth/upgrade`・ゲストバナー・ホーム／ログインの「ゲストではじめる」
+- 設定: 端末のみは `GuestContextNotice`（localOnly）、サーバー必須は `GuestServerGate`。見た目同期はゲストでスキップ
+- **新機能時:** `docs/product/flows/guest.md` のチェックリストを必ず見る
+- Dashboard: Anonymous Sign-Ins **ON 済み**（2026-09-06）
+- 匿名掃除方針: **30日超を月1手動**（公開後に cron 検討）。正本は `docs/WAKE_UP.md`
+
+## 2026-09-06: 退会・全データ削除（account_delete）
+
+- `DELETE /account` + 確認語 `DELETE`。Storage（photos/exports）掃除 → Auth Admin 削除（DB CASCADE）
+- Web: `/settings/delete-account`。`SUPABASE_SECRET_KEY` が API に必要（env-contract / WAKE_UP）
+- プライバシーに削除の権利節を追加。Expo 画面は未実装
+
+## 2026-09-06: 店頭スマホ UX のデザイン正本
+
+- 正本: `docs/design/web-phone-ux.md`（シェル lg・写真 fit・隣スワイプ・フラッシュ／再試行・最近条件）
+- 入口: `DESIGN.md` / `docs/design/README.md`。原則6・motion・decisions も更新
+
+## 2026-09-06: 店頭 UX（フィット／隣／最近）
+
+- `gallery_image_fit`（cover／contain）を display_settings 同期。large は常に contain
+- 詳細: sessionStorage 並びで隣へスワイプ＋前後ボタン
+- 最近使った条件: localStorage 最大8件（ギャラリー＋検索）
+
+## 2026-09-06: 登録・詳細の店頭 UX
+
+- 写真プレビュー（object URL）・続けて登録で収納/カテゴリ/色/通貨引き継ぎ
+- スキャナ全幅寄り・短い失敗文言
+- 詳細写真フルスクリーン（ピンチ / +/-）
+- 短い成功フラッシュ（登録／詳細保存／一括更新）＋オフラインバナー／再試行（`FeedbackProvider` / `NetworkRetryNotice`）
+
+## 2026-09-06: responsive_web（下部タブ）
+
+- スマホ Web は下部タブ（ギャラリー／登録／検索／その他）。ブレークは **`lg`（1024）** — `md` だと横向きでタブが消える
+- 本番シェルは Lab **A** 採用。Lab シーン「スマホシェル」で縦／横比較可
+- 受け入れ: `docs/product/acceptance/responsive_web.md`。E2E: `apps/web/e2e/responsive_web.spec.ts`
+
+## 2026-09-05: 敵対的検証 skill
+
+- 計画・仕様・アーキ・デザイン案の実装前レビューは skill **`adversarial-review`**
+- 設計時セキュリティ（境界・認可・公開面）を含む。差分の脆弱性レビューは Cursor 組み込み `security-review` / `bugbot` のまま
+- カスタムサブエージェントは作らない（`AGENTS.md` 委譲表どおり）
+
 ## 2026-09-04: websockets 版ピン（API pytest）
 
 - `realtime` 2.31+ は `websockets.asyncio` が必要。12 系だと `test_supabase_user_client` が import 失敗する
@@ -214,7 +260,7 @@
 - タグ／収納: カテゴリ・収納に編集 UI（PATCH）。API pytest 追加
 - `theme_settings` を wired（authenticated GRANT + RLS）。DEFAULT=`default`（緑系）
 - API: `GET/PUT /theme-settings`（allowlist）。Web: `/settings/theme`、Header から ThemePicker 撤去
-- 設定ハブ: 見た目／タグ・収納／アカウント（/me・パスワード）／法務。退会は deferred
+- 設定ハブ: 見た目／タグ・収納／アカウント（/me・パスワード）／データ（書き出し・退会）／法務
 - 推し色スウォッチ・ブランド種スケールは後続（Design Lab）
 
 ## 2026-09-01: Wave 5 認証 DoD 締め

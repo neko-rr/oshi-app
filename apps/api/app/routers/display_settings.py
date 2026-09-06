@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import display_settings_service
 
 router = APIRouter(tags=["display-settings"])
@@ -31,6 +31,7 @@ class DisplaySettingsBody(BaseModel):
     gallery_show_name: bool = True
     gallery_show_tags: bool = True
     gallery_show_price: bool = True
+    gallery_image_fit: str = Field(min_length=1, max_length=32)
 
 
 def _err(exc: Exception) -> HTTPException:
@@ -52,7 +53,7 @@ def _err(exc: Exception) -> HTTPException:
 
 @router.get("/display-settings")
 def get_display_settings(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -66,7 +67,7 @@ def get_display_settings(
 @router.put("/display-settings")
 def put_display_settings(
     body: DisplaySettingsBody,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -88,6 +89,7 @@ def put_display_settings(
             gallery_show_name=body.gallery_show_name,
             gallery_show_tags=body.gallery_show_tags,
             gallery_show_price=body.gallery_show_price,
+            gallery_image_fit=body.gallery_image_fit,
         )
     except Exception as exc:
         raise _err(exc) from exc

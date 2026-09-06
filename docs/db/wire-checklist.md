@@ -16,6 +16,7 @@
 
 - [ ] RLS ON（既定）
 - [ ] ポリシー: ユーザー所有は `TO authenticated` + `members_id = auth.uid()`（USING と WITH CHECK）
+- [ ] Anonymous 拒否: `AS RESTRICTIVE` + `public.jwt_is_permanent_user()`（ゲスト機能利用時必須）
 - [ ] マスタは原則 `GRANT SELECT` のみ、またはサーバ経由のみ
 - [ ] **`GRANT` を authenticated に明示**（自動 GRANT は無効化済み）
 - [ ] anon には付けない

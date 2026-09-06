@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS } from "@oshi/shared";
 import { apiFetch } from "@/lib/api";
+import { isAnonymousUser } from "@/lib/authGuest";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type DashboardCharts = {
@@ -68,17 +69,20 @@ export default async function DashboardPage({
     await redirectTo("/auth/login");
   }
   const session = data.session!;
+  const isGuest = isAnonymousUser(session.user);
 
   let charts: DashboardCharts | null = null;
   let loadError: string | null = null;
-  try {
-    charts = await apiFetch<DashboardCharts>(
-      `${API_PATHS.dashboardCharts}?granularity=month`,
-      { accessToken: session.access_token },
-    );
-  } catch (e: unknown) {
-    loadError =
-      e instanceof Error ? e.message : t("loadFailed");
+  if (!isGuest) {
+    try {
+      charts = await apiFetch<DashboardCharts>(
+        `${API_PATHS.dashboardCharts}?granularity=month`,
+        { accessToken: session.access_token },
+      );
+    } catch (e: unknown) {
+      loadError =
+        e instanceof Error ? e.message : t("loadFailed");
+    }
   }
 
   return (
@@ -94,6 +98,18 @@ export default async function DashboardPage({
           {t("home")}
         </Link>
       </div>
+
+      {isGuest ? (
+        <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center">
+          <p className="text-sm text-muted-foreground">{t("emptyGuest")}</p>
+          <Link
+            href="/auth/upgrade"
+            className="mt-3 inline-block text-sm text-primary underline-offset-4 hover:underline"
+          >
+            {t("upgradeLink")}
+          </Link>
+        </div>
+      ) : null}
 
       {loadError ? (
         <p className="text-sm text-destructive">{loadError}</p>

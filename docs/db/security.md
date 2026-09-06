@@ -20,8 +20,9 @@
 1. Web に載せてよいのは **URL + publishable キー** だけ（`security.mdc`）
 2. 業務データは **ユーザー JWT + RLS**（`auth.mdc`）。通常経路で service_role を使わない
 3. ユーザー所有表は `members_id = auth.uid()`
-4. **未連携（schema_ready）の表は Data API から触らせない**（権限なし）。連携するときに明示 GRANT
-5. 新規表はテンプレ `docs/db/new-table-template.sql` に従う
+4. **Anonymous Sign-In** を使う場合は、全 wired 表＋Storage に `is_anonymous` 拒否（RESTRICTIVE / `jwt_is_permanent_user()`）を必須とする。Anonymous は `authenticated` ロールのため、members_id チェックだけでは足りない
+5. **未連携（schema_ready）の表は Data API から触らせない**（権限なし）。連携するときに明示 GRANT
+6. 新規表はテンプレ `docs/db/new-table-template.sql` に従う
 
 ## 表の区分
 

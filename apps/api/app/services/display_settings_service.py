@@ -86,6 +86,8 @@ ALLOWED_REGISTER_START_STEP = frozenset({"barcode", "photo", "confirm"})
 DEFAULT_GALLERY_SHOW_NAME = True
 DEFAULT_GALLERY_SHOW_TAGS = True
 DEFAULT_GALLERY_SHOW_PRICE = True
+DEFAULT_GALLERY_IMAGE_FIT = "cover"
+ALLOWED_GALLERY_IMAGE_FIT = frozenset({"cover", "contain"})
 
 
 @lru_cache(maxsize=1)
@@ -99,7 +101,8 @@ SELECT_COLS = (
     "residence_region,timezone_override,date_format_mode,"
     "currency_code_override,currency_format_mode,"
     "register_start_step,default_storage_location_id,"
-    "gallery_show_name,gallery_show_tags,gallery_show_price"
+    "gallery_show_name,gallery_show_tags,gallery_show_price,"
+    "gallery_image_fit"
 )
 
 
@@ -209,6 +212,7 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
             "gallery_show_name": DEFAULT_GALLERY_SHOW_NAME,
             "gallery_show_tags": DEFAULT_GALLERY_SHOW_TAGS,
             "gallery_show_price": DEFAULT_GALLERY_SHOW_PRICE,
+            "gallery_image_fit": DEFAULT_GALLERY_IMAGE_FIT,
         }
     try:
         text_scale = _normalize_level(int(row.get("text_scale")), field="text_scale")
@@ -299,6 +303,14 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
     gallery_show_price = _gallery_show_from_row(
         row, key="gallery_show_price", default=DEFAULT_GALLERY_SHOW_PRICE
     )
+    try:
+        gallery_image_fit = _normalize_choice(
+            str(row.get("gallery_image_fit") or ""),
+            field="gallery_image_fit",
+            allowed=ALLOWED_GALLERY_IMAGE_FIT,
+        )
+    except ValueError:
+        gallery_image_fit = DEFAULT_GALLERY_IMAGE_FIT
     return {
         "text_scale": text_scale,
         "ui_density": ui_density,
@@ -315,6 +327,7 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
         "gallery_show_name": gallery_show_name,
         "gallery_show_tags": gallery_show_tags,
         "gallery_show_price": gallery_show_price,
+        "gallery_image_fit": gallery_image_fit,
     }
 
 
@@ -351,6 +364,7 @@ def save_display_settings(
     gallery_show_name: bool,
     gallery_show_tags: bool,
     gallery_show_price: bool,
+    gallery_image_fit: str,
 ) -> dict[str, Any]:
     default_storage = _normalize_default_storage_location_id(
         default_storage_location_id
@@ -403,6 +417,11 @@ def save_display_settings(
         "gallery_show_price": _normalize_bool(
             gallery_show_price, field="gallery_show_price"
         ),
+        "gallery_image_fit": _normalize_choice(
+            gallery_image_fit,
+            field="gallery_image_fit",
+            allowed=ALLOWED_GALLERY_IMAGE_FIT,
+        ),
     }
     client = create_user_client(access_token)
     if default_storage is not None:
@@ -430,4 +449,5 @@ def save_display_settings(
         "gallery_show_name": payload["gallery_show_name"],
         "gallery_show_tags": payload["gallery_show_tags"],
         "gallery_show_price": payload["gallery_show_price"],
+        "gallery_image_fit": payload["gallery_image_fit"],
     }

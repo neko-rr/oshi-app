@@ -2,9 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
+import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,7 @@ type Props = {
   currencyCode: string;
   barcode: string;
   memo: string;
+  photoFile: File | null;
   colors: ColorTagItem[];
   categories: CategoryTagItem[];
   storageLocations: StorageLocationItem[];
@@ -33,6 +35,7 @@ type Props = {
   assistHint: string | null;
   assistPhase: "idle" | "running" | "done";
   error: string | null;
+  errorOffline?: boolean;
   loading: boolean;
   onProductName: (v: string) => void;
   onProductGroupName: (v: string) => void;
@@ -48,6 +51,7 @@ type Props = {
   onBack: () => void;
   onSubmit: (e: FormEvent) => void;
   onContinueRegister: () => void;
+  onRetrySubmit?: () => void;
   showContinue: boolean;
 };
 
@@ -59,6 +63,7 @@ export function StepConfirm({
   currencyCode,
   barcode,
   memo,
+  photoFile,
   colors,
   categories,
   storageLocations,
@@ -70,6 +75,7 @@ export function StepConfirm({
   assistHint,
   assistPhase,
   error,
+  errorOffline = false,
   loading,
   onProductName,
   onProductGroupName,
@@ -85,30 +91,63 @@ export function StepConfirm({
   onBack,
   onSubmit,
   onContinueRegister,
+  onRetrySubmit,
   showContinue,
 }: Props) {
   const t = useTranslations("Register.confirm");
+  const tPhoto = useTranslations("Register.photo");
   const tAssist = useTranslations("Register.assist");
   const tCommon = useTranslations("Common");
   const tNav = useTranslations("Nav");
+  const [thumbUrl, setThumbUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setThumbUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(photoFile);
+    setThumbUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photoFile]);
 
   return (
     <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4">
       <div>
         <h2 className="text-lg font-semibold">{t("title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
-        {assistPhase === "running" ? (
+        {assistPhase === "running" && !showContinue ? (
           <p className="mt-2 text-xs text-muted-foreground" role="status">
             {tAssist("applyingSuggestionsHint")}
           </p>
         ) : null}
         {assistHint ? (
-          <p className="mt-2 text-xs text-muted-foreground" role="status">
+          <p
+            className={
+              showContinue
+                ? "mt-2 rounded-md border border-border bg-accent/40 px-3 py-2 text-sm text-foreground"
+                : "mt-2 text-xs text-muted-foreground"
+            }
+            role="status"
+          >
             {assistHint}
           </p>
         ) : null}
       </div>
 
+      {thumbUrl && !showContinue ? (
+        <div className="overflow-hidden rounded-lg border border-border bg-muted">
+          {/* eslint-disable-next-line @next/next/no-img-element -- blob URL */}
+          <img
+            src={thumbUrl}
+            alt={tPhoto("confirmThumbAlt")}
+            className="mx-auto max-h-40 w-full object-contain"
+          />
+        </div>
+      ) : null}
+
+      {!showContinue ? (
+        <>
       <div className="grid gap-2">
         <Label htmlFor="product_name">{t("productName")}</Label>
         <Input
@@ -250,23 +289,39 @@ export function StepConfirm({
         </fieldset>
       ) : null}
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <NetworkRetryNotice
+          message={error}
+          offline={errorOffline}
+          onRetry={onRetrySubmit}
+        />
+      ) : null}
+        </>
+      ) : null}
 
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={loading}>
-          {loading ? tCommon("saving") : t("register")}
-        </Button>
+      <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-3 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         {showContinue ? (
-          <Button type="button" variant="secondary" onClick={onContinueRegister}>
-            {t("continueRegister")}
-          </Button>
-        ) : null}
-        <Button type="button" variant="outline" onClick={onBack}>
-          {tCommon("back")}
-        </Button>
-        <Button asChild type="button" variant="ghost">
-          <Link href="/gallery">{tNav("gallery")}</Link>
-        </Button>
+          <>
+            <Button type="button" onClick={onContinueRegister}>
+              {t("continueRegister")}
+            </Button>
+            <Button asChild type="button" variant="secondary">
+              <Link href="/gallery">{t("gallery")}</Link>
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button type="submit" disabled={loading}>
+              {loading ? tCommon("saving") : t("register")}
+            </Button>
+            <Button type="button" variant="outline" onClick={onBack}>
+              {tCommon("back")}
+            </Button>
+            <Button asChild type="button" variant="ghost">
+              <Link href="/gallery">{tNav("gallery")}</Link>
+            </Button>
+          </>
+        )}
       </div>
     </form>
   );

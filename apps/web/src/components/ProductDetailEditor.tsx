@@ -4,14 +4,17 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { API_PATHS } from "@oshi/shared";
+import { createClient } from "@/lib/client";
+import { useDisplaySettings } from "@/hooks/useDisplaySettings";
+import { findResidenceRegion } from "@/lib/residencePrefs";
+import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
+import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/client";
-import { useDisplaySettings } from "@/hooks/useDisplaySettings";
-import { findResidenceRegion } from "@/lib/residencePrefs";
 
 type ColorTagItem = {
   slot: number;
@@ -61,6 +64,7 @@ export function ProductDetailEditor({
   const t = useTranslations("ProductDetail");
   const tCommon = useTranslations("Common");
   const tGallery = useTranslations("Gallery");
+  const { flashSuccess } = useFeedback();
   const { residenceRegion } = useDisplaySettings();
   const defaultCurrency = findResidenceRegion(residenceRegion).currencyCode;
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
@@ -80,6 +84,7 @@ export function ProductDetailEditor({
   );
   const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [errorOffline, setErrorOffline] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -188,6 +193,7 @@ export function ProductDetailEditor({
     }
     setSaving(true);
     setError(null);
+    setErrorOffline(false);
     try {
       const token = await getToken();
       if (!token) return;
@@ -231,10 +237,16 @@ export function ProductDetailEditor({
         const detail = (await res.text()).slice(0, 160);
         throw new Error(tCommon("updateFailedPrefix", { detail }));
       }
+      flashSuccess(tCommon("savedFlash"));
       router.refresh();
     } catch (err: unknown) {
+      const offline = isLikelyOfflineError(err);
+      setErrorOffline(offline);
       setError(
-        err instanceof Error ? err.message : tCommon("updateFailed"),
+        networkUserMessage(err, {
+          offline: tCommon("offlineHint"),
+          fallback: tCommon("updateFailed"),
+        }),
       );
     } finally {
       setSaving(false);
@@ -417,7 +429,16 @@ export function ProductDetailEditor({
         )}
       </fieldset>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <NetworkRetryNotice
+          message={error}
+          offline={errorOffline}
+          onRetry={() => {
+            const fake = { preventDefault() {} } as FormEvent;
+            void onSave(fake);
+          }}
+        />
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saving || deleting}>

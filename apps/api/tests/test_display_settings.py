@@ -33,6 +33,7 @@ FULL_PREFS = {
     "gallery_show_name": False,
     "gallery_show_tags": True,
     "gallery_show_price": False,
+    "gallery_image_fit": "contain",
 }
 
 BASE_BODY = {
@@ -51,6 +52,7 @@ BASE_BODY = {
     "gallery_show_name": True,
     "gallery_show_tags": True,
     "gallery_show_price": True,
+    "gallery_image_fit": "cover",
 }
 
 
@@ -90,6 +92,7 @@ def test_put_display_settings_saves_prefs() -> None:
         "gallery_show_name": False,
         "gallery_show_tags": False,
         "gallery_show_price": True,
+        "gallery_image_fit": "contain",
     }
     with (
         patch("app.deps.auth.verify_access_token", return_value=USER),
@@ -118,7 +121,39 @@ def test_put_display_settings_saves_prefs() -> None:
     assert mocked.call_args.kwargs["gallery_show_name"] is False
     assert mocked.call_args.kwargs["gallery_show_tags"] is False
     assert mocked.call_args.kwargs["gallery_show_price"] is True
+    assert mocked.call_args.kwargs["gallery_image_fit"] == "contain"
     assert mocked.call_args.kwargs["members_id"] == USER.members_id
+
+
+def test_put_display_settings_rejects_unknown_gallery_image_fit() -> None:
+    with patch("app.deps.auth.verify_access_token", return_value=USER):
+        res = client.put(
+            "/display-settings",
+            headers=AUTH,
+            json={**BASE_BODY, "gallery_image_fit": "zoom"},
+        )
+    assert res.status_code == 400
+    assert res.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_normalize_gallery_image_fit_allowlist() -> None:
+    from app.services import display_settings_service as svc
+    import pytest
+
+    assert (
+        svc._normalize_choice(
+            "contain",
+            field="gallery_image_fit",
+            allowed=svc.ALLOWED_GALLERY_IMAGE_FIT,
+        )
+        == "contain"
+    )
+    with pytest.raises(ValueError, match="gallery_image_fit"):
+        svc._normalize_choice(
+            "zoom",
+            field="gallery_image_fit",
+            allowed=svc.ALLOWED_GALLERY_IMAGE_FIT,
+        )
 
 
 def test_put_display_settings_rejects_out_of_range() -> None:
@@ -178,26 +213,27 @@ def test_put_display_settings_rejects_unknown_date_format_mode() -> None:
     assert res.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-def test_normalize_residence_defaults() -> None:
-    from app.services import display_settings_service as svc
+    def test_normalize_residence_defaults() -> None:
+        from app.services import display_settings_service as svc
 
-    assert svc._row_or_defaults(None) == {
-        "text_scale": 3,
-        "ui_density": 4,
-        "list_sort": "newest",
-        "gallery_layout": "grid",
-        "landing_page": "home",
-        "residence_region": "jp",
-        "timezone_override": None,
-        "date_format_mode": "residence",
-        "currency_code_override": None,
-        "currency_format_mode": "residence",
-        "register_start_step": "barcode",
-        "default_storage_location_id": None,
-        "gallery_show_name": True,
-        "gallery_show_tags": True,
-        "gallery_show_price": True,
-    }
+        assert svc._row_or_defaults(None) == {
+            "text_scale": 3,
+            "ui_density": 4,
+            "list_sort": "newest",
+            "gallery_layout": "grid",
+            "landing_page": "home",
+            "residence_region": "jp",
+            "timezone_override": None,
+            "date_format_mode": "residence",
+            "currency_code_override": None,
+            "currency_format_mode": "residence",
+            "register_start_step": "barcode",
+            "default_storage_location_id": None,
+            "gallery_show_name": True,
+            "gallery_show_tags": True,
+            "gallery_show_price": True,
+            "gallery_image_fit": "cover",
+        }
 
 
 def test_normalize_gallery_show_bool() -> None:

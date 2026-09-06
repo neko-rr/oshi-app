@@ -2,7 +2,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { API_PATHS } from "@oshi/shared";
 import { Button } from "@/components/ui/button";
+import { GuestStartButton } from "@/components/auth/GuestStartButton";
 import { apiFetch } from "@/lib/api";
+import { isAnonymousUser } from "@/lib/authGuest";
 
 type ProductStats = {
   total: number;
@@ -24,16 +26,18 @@ export default async function HomePage({ params }: Props) {
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
   let sessionToken: string | null = null;
+  let isGuest = false;
   if (hasSupabase) {
     const { createClient } = await import("@/lib/server");
     const supabase = await createClient();
     const { data } = await supabase.auth.getSession();
     sessionToken = data.session?.access_token ?? null;
+    isGuest = isAnonymousUser(data.session?.user);
   }
 
   let stats: ProductStats | null = null;
   let statsError: string | null = null;
-  if (sessionToken) {
+  if (sessionToken && !isGuest) {
     try {
       stats = await apiFetch<ProductStats>(API_PATHS.statsProducts, {
         accessToken: sessionToken,
@@ -53,7 +57,7 @@ export default async function HomePage({ params }: Props) {
         {t("tagline")}
       </p>
 
-      {sessionToken ? (
+      {sessionToken && !isGuest ? (
         <div className="rounded-md border border-border bg-card p-4 text-sm text-card-foreground">
           {stats ? (
             <ul className="space-y-1">
@@ -69,27 +73,41 @@ export default async function HomePage({ params }: Props) {
         </div>
       ) : null}
 
+      {isGuest ? (
+        <p className="max-w-md text-sm text-muted-foreground">{t("guestHint")}</p>
+      ) : null}
+
       <div className="flex flex-wrap gap-3">
         {!sessionToken ? (
+          <>
+            <Button asChild>
+              <Link href="/auth/login">{t("login")}</Link>
+            </Button>
+            <GuestStartButton redirectTo="/register" />
+          </>
+        ) : null}
+        {isGuest ? (
           <Button asChild>
-            <Link href="/auth/login">{t("login")}</Link>
+            <Link href="/auth/upgrade">{t("upgrade")}</Link>
           </Button>
         ) : null}
-        <Button asChild variant={sessionToken ? "default" : "secondary"}>
+        <Button asChild variant={sessionToken && !isGuest ? "default" : "secondary"}>
           <Link href="/gallery">{t("gallery")}</Link>
         </Button>
         <Button asChild variant="secondary">
           <Link href="/register">{t("register")}</Link>
         </Button>
-        <Button asChild variant="secondary">
-          <Link href="/search">{t("search")}</Link>
-        </Button>
-        <Button asChild variant="secondary">
-          <Link href="/dashboard">{t("dashboard")}</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/settings">{t("settings")}</Link>
-        </Button>
+        <div className="hidden flex-wrap gap-3 lg:flex">
+          <Button asChild variant="secondary">
+            <Link href="/search">{t("search")}</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/dashboard">{t("dashboard")}</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/settings">{t("settings")}</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

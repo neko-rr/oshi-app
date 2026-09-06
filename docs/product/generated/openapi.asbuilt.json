@@ -1891,6 +1891,54 @@
         }
       }
     },
+    "/account": {
+      "delete": {
+        "tags": [
+          "account"
+        ],
+        "summary": "Delete Account",
+        "operationId": "delete_account_account_delete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeleteBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Delete Account Account Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/stats/products": {
       "get": {
         "tags": [
@@ -1984,6 +2032,21 @@
   },
   "components": {
     "schemas": {
+      "AccountDeleteBody": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Confirmation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "AccountDeleteBody"
+      },
       "BarcodeLookupRequest": {
         "properties": {
           "barcode": {
@@ -2684,6 +2747,11 @@
               }
             ],
             "title": "Email"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "title": "Is Anonymous",
+            "default": false
           }
         },
         "type": "object",

@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import export_service
 
 router = APIRouter(tags=["exports"])
@@ -57,7 +57,7 @@ def _err(exc: Exception) -> HTTPException:
 def create_export(
     body: ExportCreateBody,
     background_tasks: BackgroundTasks,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     kind = (body.kind or "").strip()
@@ -90,7 +90,7 @@ def create_export(
 @router.get("/exports/{export_id}")
 def get_export(
     export_id: str,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -106,7 +106,7 @@ def get_export(
 @router.get("/exports/{export_id}/file")
 def download_export_file(
     export_id: str,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> Response:
     try:

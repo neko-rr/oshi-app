@@ -44,6 +44,7 @@ export type LabUiStateMeta = {
 /** Lab で見比べる画面シーン */
 export type LabSceneId =
   | "home"
+  | "app-shell"
   | "theme-settings"
   | "gallery"
   | "gallery-detail";
@@ -59,6 +60,11 @@ export const LAB_SCENES: readonly LabSceneMeta[] = [
     id: "home",
     label: "ホーム見本",
     hint: "一覧・登録導線の配置比較",
+  },
+  {
+    id: "app-shell",
+    label: "スマホシェル",
+    hint: "下部タブ（ギャラリー／登録／検索／その他）の配置比較",
   },
   {
     id: "gallery",

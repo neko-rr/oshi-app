@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services.dashboard_service import fetch_dashboard_charts
 from app.services.stats_service import get_product_stats
 
@@ -9,7 +9,7 @@ router = APIRouter(tags=["stats"])
 
 @router.get("/stats/products")
 def product_stats(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -27,7 +27,7 @@ def product_stats(
 
 @router.get("/dashboard/charts")
 def dashboard_charts(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
     granularity: str = Query(default="month"),
     daily_limit: int = Query(default=90, ge=1, le=366),

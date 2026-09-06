@@ -11,12 +11,17 @@
 - [x] 写真あり時に Vision 1回で見た目タグ・種類提案を呼べる（LIVE オフ／キー未設定でも落ちない）
 - [x] バーコードで埋まった商品名・価格は Vision で上書きしない（手入力も優先）
 - [x] 購入価格に記録通貨（ISO）を選べる（既定は居住地。価格なしでは保存しない）
-- [x] 登録成功後に「続けて登録」で設定した開始手順に戻れる
+- [x] 登録成功後に「続けて登録」で設定した開始手順に戻れる（主CTA。収納・カテゴリ・色・通貨を引き継ぎ）
 - [x] `/settings/register` で開始手順（barcode / photo / confirm）と「いつも選ぶ収納」を設定できる
 - [x] いつも選ぶ収納あり → 確認画面で選択済み＋チップ先頭。なし → 登録回数順（自動選択なし）
 - [x] バーコード／手動スキップ後に「次からこの手順」の提案が出る（セッション中1回）
 - [x] 楽天 2026 API（applicationId + accessKey）でバーコード／キーワード照合できる（LIVE オフでも落ちない）
+- [x] 写真選択直後にプレビューが見られ、撮り直しできる
+- [x] スキャナが全幅寄りで、横向きでも枠と CTA が被らない
+- [x] 登録成功時に短い成功フラッシュが出る
+- [x] API 失敗時（オフライン／電波弱含む）に再試行導線がある
+- [x] ゲストはウィザード画面を進められるが、写真アップロード・照合・Assist・本保存は本登録ゲートになる
 
-後続（Must 本線外）: 店頭専用購入済み画面、写真ライブプレビュー、一括／CLIP／連続モード。
+後続（Must 本線外）: 店頭専用購入済み画面、一括／CLIP。
 
-関連: `register_flow` / `register_wizard_defaults` / `docs/product/flows/register.md`
+関連: `register_flow` / `register_wizard_defaults` / `guest_onboarding` / `docs/product/flows/register.md` / `docs/product/flows/guest.md`

@@ -9,10 +9,12 @@ import { SteppedPresetSlider } from "@/components/settings/SteppedPresetSlider";
 import { Button } from "@/components/ui/button";
 import {
   GALLERY_CARD_FIELD_IDS,
+  GALLERY_IMAGE_FIT_IDS,
   GALLERY_LAYOUT_IDS,
   LANDING_PAGE_IDS,
   LIST_SORT_IDS,
   type GalleryCardFieldId,
+  type GalleryImageFitId,
   type GalleryLayoutId,
   type LandingPageId,
   type ListSortId,
@@ -105,6 +107,7 @@ export function DisplaySettingsPanel() {
     uiDensity,
     listSort,
     galleryLayout,
+    galleryImageFit,
     landingPage,
     galleryShowName,
     galleryShowTags,
@@ -113,6 +116,7 @@ export function DisplaySettingsPanel() {
     setUiDensity,
     setListSort,
     setGalleryLayout,
+    setGalleryImageFit,
     setLandingPage,
     setGalleryShowName,
     setGalleryShowTags,
@@ -130,6 +134,12 @@ export function DisplaySettingsPanel() {
     id,
     label: t(`galleryLayoutOptions.${id}` as "galleryLayoutOptions.grid"),
     hint: t(`galleryLayoutHints.${id}` as "galleryLayoutHints.grid"),
+  }));
+
+  const galleryImageFitOptions = GALLERY_IMAGE_FIT_IDS.map((id) => ({
+    id,
+    label: t(`galleryImageFitOptions.${id}` as "galleryImageFitOptions.cover"),
+    hint: t(`galleryImageFitHints.${id}` as "galleryImageFitHints.cover"),
   }));
 
   const landingPageOptions = LANDING_PAGE_IDS.map((id) => ({
@@ -182,6 +192,13 @@ export function DisplaySettingsPanel() {
         value={galleryLayout}
         options={galleryLayoutOptions}
         onChange={(id) => setGalleryLayout(id as GalleryLayoutId)}
+      />
+
+      <ChoiceGroup
+        legend={t("galleryImageFit")}
+        value={galleryImageFit}
+        options={galleryImageFitOptions}
+        onChange={(id) => setGalleryImageFit(id as GalleryImageFitId)}
       />
 
       <fieldset className="flex flex-col gap-2">

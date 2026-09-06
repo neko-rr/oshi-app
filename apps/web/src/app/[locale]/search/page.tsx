@@ -2,16 +2,21 @@ import { Link } from "@/i18n/navigation";
 import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS, type ProductListResponse } from "@oshi/shared";
 import { ProductGalleryGrid } from "@/components/ProductGalleryGrid";
+import { GalleryRecentFilters } from "@/components/gallery/GalleryRecentFilters";
 import { ProductSearchForm } from "@/components/ProductSearchForm";
 import { apiFetch } from "@/lib/api";
+import { isAnonymousUser } from "@/lib/authGuest";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
+  DEFAULT_GALLERY_IMAGE_FIT,
   DEFAULT_GALLERY_LAYOUT,
   DEFAULT_LIST_SORT,
   sanitizeGalleryCardFields,
+  sanitizeGalleryImageFit,
   sanitizeGalleryLayout,
   sanitizeListSort,
   type GalleryCardFields,
+  type GalleryImageFitId,
   type GalleryLayoutId,
   type ListSortId,
 } from "@/lib/displayPrefs";
@@ -21,6 +26,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 type DisplayPrefsSlice = {
   list_sort?: string;
   gallery_layout?: string;
+  gallery_image_fit?: string;
   gallery_show_name?: boolean;
   gallery_show_tags?: boolean;
   gallery_show_price?: boolean;
@@ -54,34 +60,39 @@ export default async function SearchPage({
     await redirectTo("/auth/login");
   }
   const session = data.session!;
+  const isGuest = isAnonymousUser(session.user);
 
   let list: ProductListResponse | null = null;
   let loadError: string | null = null;
   let listSort: ListSortId = DEFAULT_LIST_SORT;
   let galleryLayout: GalleryLayoutId = DEFAULT_GALLERY_LAYOUT;
+  let galleryImageFit: GalleryImageFitId = DEFAULT_GALLERY_IMAGE_FIT;
   let cardFields: GalleryCardFields = DEFAULT_GALLERY_CARD_FIELDS;
 
-  try {
-    const prefs = await apiFetch<DisplayPrefsSlice>(
-      API_PATHS.displaySettings,
-      { accessToken: session.access_token },
-    ).catch(() => null);
-    listSort = sanitizeListSort(prefs?.list_sort);
-    galleryLayout = sanitizeGalleryLayout(prefs?.gallery_layout);
-    cardFields = sanitizeGalleryCardFields(prefs);
-  } catch {
-    /* 既定のまま */
-  }
-
-  if (q) {
+  if (!isGuest) {
     try {
-      list = await apiFetch<ProductListResponse>(
-        productsApiPath({ q, sort: listSort, limit: 48 }),
+      const prefs = await apiFetch<DisplayPrefsSlice>(
+        API_PATHS.displaySettings,
         { accessToken: session.access_token },
-      );
-    } catch (e: unknown) {
-      loadError =
-        e instanceof Error ? e.message : t("loadFailed");
+      ).catch(() => null);
+      listSort = sanitizeListSort(prefs?.list_sort);
+      galleryLayout = sanitizeGalleryLayout(prefs?.gallery_layout);
+      galleryImageFit = sanitizeGalleryImageFit(prefs?.gallery_image_fit);
+      cardFields = sanitizeGalleryCardFields(prefs);
+    } catch {
+      /* 既定のまま */
+    }
+
+    if (q) {
+      try {
+        list = await apiFetch<ProductListResponse>(
+          productsApiPath({ q, sort: listSort, limit: 48 }),
+          { accessToken: session.access_token },
+        );
+      } catch (e: unknown) {
+        loadError =
+          e instanceof Error ? e.message : t("loadFailed");
+      }
     }
   }
 
@@ -94,27 +105,49 @@ export default async function SearchPage({
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
 
-      <ProductSearchForm initialQuery={q} />
+      {isGuest ? (
+        <div className="rounded-xl border border-dashed border-border px-4 py-8 text-center">
+          <p className="text-sm text-muted-foreground">{t("emptyGuest")}</p>
+          <Link
+            href="/auth/upgrade"
+            className="mt-3 inline-block text-sm text-primary underline-offset-4 hover:underline"
+          >
+            {t("upgradeLink")}
+          </Link>
+        </div>
+      ) : (
+        <>
+          <ProductSearchForm initialQuery={q} />
 
-      {loadError ? (
-        <p className="text-sm text-destructive">{loadError}</p>
-      ) : null}
+          <GalleryRecentFilters
+            listQuery={q ? { q } : {}}
+            titleKey="search"
+          />
 
-      {!q ? (
-        <p className="text-sm text-muted-foreground">{t("prompt")}</p>
-      ) : null}
+          {loadError ? (
+            <p className="text-sm text-destructive">{loadError}</p>
+          ) : null}
 
-      {q && !loadError && items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {t("noResults", { q })}
-        </p>
-      ) : null}
+          {!q ? (
+            <p className="text-sm text-muted-foreground">{t("prompt")}</p>
+          ) : null}
 
-      <ProductGalleryGrid
-        items={items}
-        layout={galleryLayout}
-        cardFields={cardFields}
-      />
+          {q && !loadError && items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t("noResults", { q })}
+            </p>
+          ) : null}
+
+          <ProductGalleryGrid
+            items={items}
+            listQuery={q ? { q } : {}}
+            layout={galleryLayout}
+            imageFit={galleryImageFit}
+            rememberBrowseOrder
+            cardFields={cardFields}
+          />
+        </>
+      )}
 
       <Link
         href="/gallery"

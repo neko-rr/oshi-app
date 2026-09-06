@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import gallery_view_service
 
 router = APIRouter(tags=["gallery-views"])
@@ -41,7 +41,7 @@ def _err(exc: Exception) -> HTTPException:
 
 @router.get("/gallery-views")
 def list_gallery_views(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -56,7 +56,7 @@ def list_gallery_views(
 @router.post("/gallery-views")
 def create_gallery_view(
     body: GalleryViewCreateBody,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -78,7 +78,7 @@ def create_gallery_view(
 def patch_gallery_view(
     gallery_view_id: int,
     body: GalleryViewRenameBody,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -95,7 +95,7 @@ def patch_gallery_view(
 @router.delete("/gallery-views/{gallery_view_id}")
 def delete_gallery_view(
     gallery_view_id: int,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:

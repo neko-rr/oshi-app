@@ -11,18 +11,22 @@ import {
 } from "react";
 import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
+import { canSyncUserPrefsToServer } from "@/lib/authGuest";
 import {
+  DEFAULT_GALLERY_IMAGE_FIT,
   DEFAULT_GALLERY_LAYOUT,
   DEFAULT_LANDING_PAGE,
   DEFAULT_LIST_SORT,
   DEFAULT_REGISTER_START_STEP,
   sanitizeDefaultStorageLocationId,
   sanitizeGalleryCardFields,
+  sanitizeGalleryImageFit,
   sanitizeGalleryLayout,
   sanitizeGalleryShow,
   sanitizeLandingPage,
   sanitizeListSort,
   sanitizeRegisterStartStep,
+  type GalleryImageFitId,
   type GalleryLayoutId,
   type LandingPageId,
   type ListSortId,
@@ -51,6 +55,7 @@ export type DisplaySettings = {
   ui_density: DisplayLevel;
   list_sort: ListSortId;
   gallery_layout: GalleryLayoutId;
+  gallery_image_fit: GalleryImageFitId;
   landing_page: LandingPageId;
   residence_region: ResidenceRegionId;
   timezone_override: TimezoneId | null;
@@ -77,6 +82,7 @@ export type DisplaySettingsContextValue = {
   uiDensity: DisplayLevel;
   listSort: ListSortId;
   galleryLayout: GalleryLayoutId;
+  galleryImageFit: GalleryImageFitId;
   landingPage: LandingPageId;
   residenceRegion: ResidenceRegionId;
   timezoneOverride: TimezoneId | null;
@@ -87,6 +93,7 @@ export type DisplaySettingsContextValue = {
   setUiDensity: (level: DisplayLevel) => void;
   setListSort: (id: ListSortId) => void;
   setGalleryLayout: (id: GalleryLayoutId) => void;
+  setGalleryImageFit: (id: GalleryImageFitId) => void;
   setLandingPage: (id: LandingPageId) => void;
   setResidenceRegion: (id: ResidenceRegionId) => void;
   setTimezoneOverride: (tz: TimezoneId | null) => void;
@@ -136,6 +143,7 @@ function defaults(): DisplaySettings {
     ui_density: DEFAULT_UI_DENSITY,
     list_sort: DEFAULT_LIST_SORT,
     gallery_layout: DEFAULT_GALLERY_LAYOUT,
+    gallery_image_fit: DEFAULT_GALLERY_IMAGE_FIT,
     landing_page: DEFAULT_LANDING_PAGE,
     residence_region: DEFAULT_RESIDENCE_REGION,
     timezone_override: null,
@@ -156,6 +164,7 @@ function sanitizePrefs(raw: unknown): DisplaySettings {
     ui_density: clampLevel(obj.ui_density, DEFAULT_UI_DENSITY),
     list_sort: sanitizeListSort(obj.list_sort),
     gallery_layout: sanitizeGalleryLayout(obj.gallery_layout),
+    gallery_image_fit: sanitizeGalleryImageFit(obj.gallery_image_fit),
     landing_page: sanitizeLandingPage(obj.landing_page),
     residence_region: sanitizeResidenceRegion(obj.residence_region),
     timezone_override: sanitizeTimezoneOverride(obj.timezone_override),
@@ -256,8 +265,9 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
         const supabase = tryCreateClient();
         if (!supabase) return;
         const session = await supabase.auth.getSession();
+        const user = session.data?.session?.user;
         const token = session.data?.session?.access_token;
-        if (!token) return;
+        if (!token || !canSyncUserPrefsToServer(user)) return;
         await putViaFastAPI(prefs, token);
       } finally {
         setIsSyncing(false);
@@ -275,8 +285,9 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
         const supabase = tryCreateClient();
         if (!supabase) return;
         const session = await supabase.auth.getSession();
+        const user = session.data?.session?.user;
         const token = session.data?.session?.access_token;
-        if (!token) return;
+        if (!token || !canSyncUserPrefsToServer(user)) return;
         const server = await fetchViaFastAPI(token);
         if (server && alive) {
           skipNextSync.current = true;
@@ -313,6 +324,13 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
     setPrefs((prev) => ({
       ...prev,
       gallery_layout: sanitizeGalleryLayout(id),
+    }));
+  }, []);
+
+  const setGalleryImageFit = useCallback((id: GalleryImageFitId) => {
+    setPrefs((prev) => ({
+      ...prev,
+      gallery_image_fit: sanitizeGalleryImageFit(id),
     }));
   }, []);
 
@@ -402,6 +420,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       uiDensity: prefs.ui_density,
       listSort: prefs.list_sort,
       galleryLayout: prefs.gallery_layout,
+      galleryImageFit: prefs.gallery_image_fit,
       landingPage: prefs.landing_page,
       residenceRegion: prefs.residence_region,
       timezoneOverride: prefs.timezone_override,
@@ -417,6 +436,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setUiDensity,
       setListSort,
       setGalleryLayout,
+      setGalleryImageFit,
       setLandingPage,
       setResidenceRegion,
       setTimezoneOverride,
@@ -436,6 +456,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setUiDensity,
       setListSort,
       setGalleryLayout,
+      setGalleryImageFit,
       setLandingPage,
       setResidenceRegion,
       setTimezoneOverride,

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.schemas.products import (
     BulkPatchProductsRequest,
     CreateProductRequest,
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/products", tags=["products"])
 
 @router.get("")
 def list_products(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
     limit: int = Query(default=48, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
@@ -97,7 +97,7 @@ def list_products(
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_product(
     body: CreateProductRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> CreateProductResponse:
     try:
@@ -136,7 +136,7 @@ def create_product(
 @router.patch("/bulk")
 def bulk_patch_products(
     body: BulkPatchProductsRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -164,7 +164,7 @@ def bulk_patch_products(
 @router.get("/{registered_product_id}")
 def get_product(
     registered_product_id: int,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -190,7 +190,7 @@ def get_product(
 def patch_product(
     registered_product_id: int,
     body: PatchProductRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     fields: dict = {}
@@ -246,7 +246,7 @@ def patch_product(
 @router.delete("/{registered_product_id}")
 def delete_product(
     registered_product_id: int,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:

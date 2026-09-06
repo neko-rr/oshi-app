@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-09-04T08:40:30.403150+00:00
+-- generated_at_utc: 2026-09-06T05:57:25.631379+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -119,7 +119,8 @@ CREATE TABLE IF NOT EXISTS public.display_settings (
   default_storage_location_id integer,
   gallery_show_name boolean NOT NULL DEFAULT true,
   gallery_show_tags boolean NOT NULL DEFAULT true,
-  gallery_show_price boolean NOT NULL DEFAULT true
+  gallery_show_price boolean NOT NULL DEFAULT true,
+  gallery_image_fit text NOT NULL DEFAULT 'cover'::text
 );
 
 -- === gallery_view ===

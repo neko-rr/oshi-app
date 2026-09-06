@@ -12,6 +12,7 @@
 | ID | 内容 | 状態（目安） |
 |----|------|--------------|
 | `auth_session` | ログイン・セッション | shipped |
+| `guest_onboarding` | ゲスト開始（Anonymous）＋本登録ゲート | shipped |
 | `register_flow` | 登録ウィザード | shipped |
 | `barcode_capture` | バーコード読取・番号入力 | shipped |
 | `product_lookup` | グッズ情報照合（楽天） | shipped |
@@ -20,6 +21,9 @@
 | `tag_assist` | 見た目タグ・種類提案（Vision 1回） | shipped |
 | `gallery` | 登録グッズ一覧 | shipped |
 | `gallery_card_fields` | カードの名前／タグ／価格表示 ON/OFF | shipped |
+| `gallery_image_fit` | 一覧写真の cover／contain（はみ出し少なめ） | shipped |
+| `gallery_detail_neighbors` | 詳細で隣製品へスワイプ／前後 | shipped |
+| `gallery_recent_filters` | 最近使った検索・絞込（端末履歴） | shipped |
 | `gallery_filters_v2` | 複数チップ＋色絞り込み | shipped |
 | `gallery_sort_ui` | 一覧上の並び（URL＋設定同期） | shipped |
 | `gallery_bulk_storage` | 複数選択で収納一括変更 | shipped |
@@ -34,12 +38,13 @@
 | `privacy_policy` | プライバシーポリシー | shipped |
 | `licenses_notices` | ライセンス・表記 | shipped |
 | `data_export` | 設定からのデータ書き出し（テキスト／写真付き ZIP。再取り込みなし） | shipped |
+| `account_delete` | 退会・全データ削除（Auth＋Storage＋DB CASCADE。即時） | shipped |
 | `theme_colors` | テーマパック（トークン一式切替） | shipped |
 | `oshi_accent` | 推し色2色オーバーレイ（適用はプレミアム想定・無料はプレビュー） | shipped |
 | `display_settings` | 文字サイズ・UI密度（7段階・見た目画面） | shipped |
 | `product_currency_fiat` | 製品ごとの法定通貨記録（表示設定とは分離。換算なし） | shipped |
 | `i18n_web` | 多言語（ja/en・URL `/en`・辞書段階移行） | partial |
-| `responsive_web` | スマホ画面で使える Web | partial |
+| `responsive_web` | スマホ縦横・下部タブ Web | shipped |
 
 ## Phase 2
 
@@ -59,7 +64,6 @@
 | `oshi_room` | 背景にグッズ写真を貼る推し空間 | deferred |
 | `sns_share` | GET 投稿・求譲など SNS 連携 | deferred |
 | `legal_terms` | 利用規約・お問い合わせ・バージョン | deferred |
-| `account_delete` | 全データ削除・退会 | deferred |
 | `premium` | プレミアム移行（推し色の全体適用・保存を含む候補） | deferred |
 | `crypto_nft_assets` | 暗号資産・NFT（法定通貨と別モデル） | deferred |
 
@@ -80,9 +84,10 @@
 /dashboard        ダッシュボード
 /settings         設定（見た目・タグ・収納・データ書き出し・アカウント系）
 /settings/export  データ書き出し（一覧テキスト／写真付き ZIP）
+/settings/delete-account  退会・全データ削除
 /privacy          プライバシーポリシー
 /licenses         ライセンス・表記
-/auth/*           ログイン・登録・パスワード
+/auth/*           ログイン・登録・パスワード・ゲスト本登録（upgrade）
 ```
 
 未実装の「推し部屋」等はルートを勝手に増やさない。`deferred` のまま要求待ち。

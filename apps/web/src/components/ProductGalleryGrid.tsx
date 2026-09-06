@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ProductListItem } from "@oshi/shared";
@@ -8,9 +9,13 @@ import { ProductTagChip } from "@/components/tags/ProductTagChip";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
+  DEFAULT_GALLERY_IMAGE_FIT,
   type GalleryCardFields,
+  type GalleryImageFitId,
   type GalleryLayoutId,
 } from "@/lib/displayPrefs";
+import { writeGalleryBrowseOrder } from "@/lib/galleryBrowseOrder";
+import { resolveGalleryObjectFit } from "@/lib/galleryImageFit";
 import type { GalleryListQuery } from "@/lib/galleryListQuery";
 import { galleryDetailHref } from "@/lib/galleryListQuery";
 import { cn } from "@/lib/utils";
@@ -19,6 +24,9 @@ type Props = {
   items: ProductListItem[];
   listQuery?: GalleryListQuery;
   layout?: GalleryLayoutId;
+  imageFit?: GalleryImageFitId;
+  /** 詳細スワイプ用に並びを記録（GalleryBrowse 外の一覧で使う） */
+  rememberBrowseOrder?: boolean;
   cardFields?: GalleryCardFields;
   selectionMode?: boolean;
   selectedIds?: ReadonlySet<number>;
@@ -107,6 +115,8 @@ export function ProductGalleryGrid({
   items,
   listQuery = {},
   layout = "grid",
+  imageFit = DEFAULT_GALLERY_IMAGE_FIT,
+  rememberBrowseOrder = false,
   cardFields = DEFAULT_GALLERY_CARD_FIELDS,
   selectionMode = false,
   selectedIds,
@@ -118,6 +128,20 @@ export function ProductGalleryGrid({
   const showTags = cardFields.gallery_show_tags;
   const showPrice = cardFields.gallery_show_price;
   const hasText = showName || showTags || showPrice;
+  const objectFit = resolveGalleryObjectFit(layout, imageFit);
+  const imgClass =
+    objectFit === "contain"
+      ? "h-full w-full object-contain"
+      : "h-full w-full object-cover";
+  const imgClassHover =
+    objectFit === "contain"
+      ? "h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+      : "h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]";
+
+  useEffect(() => {
+    if (!rememberBrowseOrder || selectionMode) return;
+    writeGalleryBrowseOrder(items.map((item) => item.registered_product_id));
+  }, [items, rememberBrowseOrder, selectionMode]);
 
   function itemTitle(item: ProductListItem): string {
     return (
@@ -147,7 +171,7 @@ export function ProductGalleryGrid({
                   <img
                     src={item.photo_thumbnail_url}
                     alt=""
-                    className="h-full w-full object-cover"
+                    className={imgClass}
                     loading="lazy"
                   />
                 ) : (
@@ -222,8 +246,8 @@ export function ProductGalleryGrid({
             <div
               className={
                 layout === "large"
-                  ? "aspect-[4/5] bg-muted sm:aspect-[3/4]"
-                  : "aspect-[4/5] bg-muted"
+                  ? "aspect-[4/5] bg-muted landscape:aspect-[16/10] sm:aspect-[3/4] sm:landscape:aspect-[16/10]"
+                  : "aspect-[4/5] bg-muted landscape:aspect-[3/4]"
               }
             >
               {item.photo_thumbnail_url ? (
@@ -231,7 +255,7 @@ export function ProductGalleryGrid({
                 <img
                   src={item.photo_thumbnail_url}
                   alt=""
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                  className={imgClassHover}
                   loading="lazy"
                 />
               ) : (

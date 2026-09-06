@@ -6,7 +6,6 @@ import { Link, useRouter } from "@/i18n/navigation";
 import {
   API_PATHS,
   type CreatePhotoResponse,
-  type CreateProductResponse,
 } from "@oshi/shared";
 import { createClient } from "@/lib/client";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
@@ -14,6 +13,8 @@ import { findResidenceRegion } from "@/lib/residencePrefs";
 import { orderStorageLocationsForRegister } from "@/lib/registerPrefs";
 import type { DecodedBarcode } from "@/lib/barcode/formats";
 import { findOwnedProductsByBarcode } from "@/lib/products/findOwnedByBarcode";
+import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { Button } from "@/components/ui/button";
 import {
   applyAssistToDraft,
@@ -25,6 +26,9 @@ import {
   assistStatusDescriptor,
   resolveAssistMessage,
 } from "./assistMessages";
+import { buildContinueDraft } from "./buildContinueDraft";
+import { RegistrationRequiredDialog } from "@/components/auth/RegistrationRequiredDialog";
+import { isAnonymousUser } from "@/lib/authGuest";
 import {
   StepBarcode,
   type OwnedProductHint,
@@ -47,11 +51,17 @@ function apiBase(): string {
   return base.replace(/\/$/, "");
 }
 
-async function getAccessToken(): Promise<string | null> {
+async function getSessionUser(): Promise<{
+  accessToken: string;
+  isAnonymous: boolean;
+} | null> {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) return null;
-  return data.session.access_token;
+  if (error || !data.session?.access_token) return null;
+  return {
+    accessToken: data.session.access_token,
+    isAnonymous: isAnonymousUser(data.session.user),
+  };
 }
 
 function toAssistSlice(draft: RegisterDraft): AssistDraftSlice {
@@ -81,7 +91,9 @@ export function RegisterWizard() {
   const tAssist = useTranslations("Register.assist");
   const tBarcode = useTranslations("Register.barcode");
   const tConfirm = useTranslations("Register.confirm");
+  const tCommon = useTranslations("Common");
   const tDefaults = useTranslations("RegisterDefaults");
+  const { flashSuccess } = useFeedback();
   const {
     residenceRegion,
     registerStartStep,
@@ -103,11 +115,15 @@ export function RegisterWizard() {
   );
   const [ownedHint, setOwnedHint] = useState<OwnedProductHint | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorOffline, setErrorOffline] = useState(false);
   const [loading, setLoading] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
   const [startNudge, setStartNudge] = useState<"photo" | "confirm" | null>(
     null,
   );
+  const [regGate, setRegGate] = useState<
+    null | "save" | "photo" | "barcode" | "assist" | "generic"
+  >(null);
   const assistAbortRef = useRef<AbortController | null>(null);
   const nudgeShownRef = useRef(false);
   const defaultStorageAppliedRef = useRef(false);
@@ -134,13 +150,29 @@ export function RegisterWizard() {
     setStartNudge(next);
   }
 
+  /** 本登録ユーザーのトークン。ゲストならゲート表示。 */
+  async function requirePermanentToken(
+    reason: "save" | "photo" | "barcode" | "assist" | "generic",
+  ): Promise<string | null> {
+    const session = await getSessionUser();
+    if (!session) {
+      router.push("/auth/login");
+      return null;
+    }
+    if (session.isAnonymous) {
+      setRegGate(reason);
+      return null;
+    }
+    return session.accessToken;
+  }
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const token = await getAccessToken();
-        if (!token || cancelled) return;
-        const headers = { Authorization: `Bearer ${token}` };
+        const session = await getSessionUser();
+        if (!session || session.isAnonymous || cancelled) return;
+        const headers = { Authorization: `Bearer ${session.accessToken}` };
         const [colorRes, catRes, storageRes] = await Promise.all([
           fetch(`${apiBase()}${API_PATHS.colorTags}`, { headers }),
           fetch(`${apiBase()}${API_PATHS.categoryTags}`, { headers }),
@@ -257,7 +289,7 @@ export function RegisterWizard() {
       return;
     }
     try {
-      const token = await getAccessToken();
+      const token = await requirePermanentToken("barcode");
       if (!token) return;
       const items = await findOwnedProductsByBarcode({
         apiBase: apiBase(),
@@ -285,9 +317,8 @@ export function RegisterWizard() {
       return;
     }
     try {
-      const token = await getAccessToken();
+      const token = await requirePermanentToken("barcode");
       if (!token) {
-        router.push("/auth/login");
         return;
       }
       const res = await fetch(`${apiBase()}${API_PATHS.assistBarcodeLookup}`, {
@@ -404,9 +435,9 @@ export function RegisterWizard() {
     setAssistPhase("running");
     setAssistHint(tAssist("applyingSuggestions"));
     try {
-      const token = await getAccessToken();
+      const token = await requirePermanentToken("assist");
       if (!token) {
-        router.push("/auth/login");
+        setAssistPhase("idle");
         return;
       }
       const result = await runAssistPipeline({
@@ -497,33 +528,38 @@ export function RegisterWizard() {
     setAssistHint(null);
     setAssistPhase(registerStartStep === "confirm" ? "done" : "idle");
     setError(null);
+    setErrorOffline(false);
     setJustRegistered(false);
     setStartNudge(null);
-    defaultStorageAppliedRef.current = false;
-    const next = emptyDraft();
-    next.currencyCode = defaultCurrency;
-    if (
-      defaultStorageLocationId != null &&
-      storageLocationsRaw.some(
-        (s) => s.storage_location_id === defaultStorageLocationId,
-      )
-    ) {
-      next.storageLocationId = defaultStorageLocationId;
-      defaultStorageAppliedRef.current = true;
-    }
+    const next = buildContinueDraft(draft, {
+      currencyCode: defaultCurrency,
+      defaultStorageLocationId:
+        defaultStorageLocationId != null &&
+        storageLocationsRaw.some(
+          (s) => s.storage_location_id === defaultStorageLocationId,
+        )
+          ? defaultStorageLocationId
+          : null,
+    });
+    // 既定収納を適用済み扱いにする（確認画面の自動上書きを防ぐ）
+    defaultStorageAppliedRef.current =
+      next.storageLocationId != null &&
+      next.storageLocationId === defaultStorageLocationId;
     setDraft(next);
-    // 続けて登録でも設定の開始手順に従う
     setStep(registerStartStep);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setErrorOffline(false);
     try {
-      const token = await getAccessToken();
+      const token = await requirePermanentToken("save");
       if (!token) {
-        router.push("/auth/login");
         return;
       }
       let photoId: number | null = null;
@@ -581,16 +617,18 @@ export function RegisterWizard() {
           tConfirm("productCreateFailed", { detail: text.slice(0, 160) }),
         );
       }
-      const created = (await productRes.json()) as CreateProductResponse;
+      await productRes.json();
       setJustRegistered(true);
-      setAssistHint(
-        tConfirm("registeredSuccess", {
-          id: created.registered_product_id,
-        }),
-      );
+      setAssistHint(tConfirm("registeredSuccess"));
+      flashSuccess(tCommon("registeredFlash"));
     } catch (err: unknown) {
+      const offline = isLikelyOfflineError(err);
+      setErrorOffline(offline);
       setError(
-        err instanceof Error ? err.message : tConfirm("registerFailed"),
+        networkUserMessage(err, {
+          offline: tCommon("offlineHint"),
+          fallback: tConfirm("registerFailed"),
+        }),
       );
     } finally {
       setLoading(false);
@@ -699,7 +737,7 @@ export function RegisterWizard() {
 
       {step === "photo" ? (
         <StepPhoto
-          fileName={draft.file?.name ?? null}
+          file={draft.file}
           onFileChange={(file) => patchDraft({ file })}
           onNext={() => goConfirmFromPhoto()}
           onSkip={() => goConfirmFromPhoto({ clearPhoto: true })}
@@ -716,6 +754,7 @@ export function RegisterWizard() {
           currencyCode={draft.currencyCode || defaultCurrency}
           barcode={draft.barcode}
           memo={draft.memo}
+          photoFile={draft.file}
           colors={colors}
           categories={categories}
           storageLocations={storageLocations}
@@ -727,8 +766,15 @@ export function RegisterWizard() {
           assistHint={assistHint}
           assistPhase={assistPhase}
           error={error}
+          errorOffline={errorOffline}
           loading={loading}
           showContinue={justRegistered}
+          onRetrySubmit={() => {
+            const fake = {
+              preventDefault() {},
+            } as FormEvent;
+            void onSubmit(fake);
+          }}
           onProductName={(v) =>
             setDraft((prev) => ({
               ...prev,
@@ -796,6 +842,11 @@ export function RegisterWizard() {
           onContinueRegister={resetForContinue}
         />
       ) : null}
+      <RegistrationRequiredDialog
+        open={regGate != null}
+        reason={regGate ?? "generic"}
+        onClose={() => setRegGate(null)}
+      />
     </div>
   );
 }

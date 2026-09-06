@@ -18,6 +18,7 @@ def health() -> dict[str, str]:
 class MeResponse(BaseModel):
     members_id: str
     email: str | None = None
+    is_anonymous: bool = False
 
 
 router_me = APIRouter(tags=["me"])
@@ -25,7 +26,11 @@ router_me = APIRouter(tags=["me"])
 
 @router_me.get("/me", response_model=MeResponse)
 def me(user: AuthenticatedUser = Depends(get_current_user)) -> MeResponse:
-    return MeResponse(members_id=user.members_id, email=user.email)
+    return MeResponse(
+        members_id=user.members_id,
+        email=user.email,
+        is_anonymous=user.is_anonymous,
+    )
 
 
 def unauthorized_payload(detail: object) -> JSONResponse:

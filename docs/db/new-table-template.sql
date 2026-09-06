@@ -27,6 +27,15 @@ create policy example_item_self_all
   using ( (select auth.uid()) = members_id )
   with check ( (select auth.uid()) = members_id );
 
+-- Anonymous Sign-In 利用時は必須（authenticated ロール対策）
+create policy example_item_reject_anonymous
+  on public.example_item
+  as restrictive
+  for all
+  to authenticated
+  using ( public.jwt_is_permanent_user() )
+  with check ( public.jwt_is_permanent_user() );
+
 create index example_item_members_id_idx on public.example_item (members_id);
 */
 

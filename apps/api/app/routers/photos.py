@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services.photo_service import create_photo_for_member
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -10,7 +10,7 @@ _MAX_BYTES = 10 * 1024 * 1024
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def upload_photo(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
     file: UploadFile = File(...),
 ) -> dict:

@@ -65,6 +65,7 @@ Phase 2・モバイル本番・deferred は要求に応じて。ARCHIVE / Dash �
 | **デザイン要望・pending・inbox 反映** | **`design-feedback`** |
 | **a11y・コントラスト（公式 WebFetch）** | **`design-a11y`** |
 | **Expo / モバイルデザイン契約** | **`design-mobile`** |
+| **計画・仕様・アーキ・デザイン案の敵対的検証（設計時セキュ含む）** | **`adversarial-review`** |
 | 認証・公開面変更後 | `secure-change-checklist` |
 | 実装前 | `tdd-workflow` |
 | 変更後検証 | `post-change-verify` |
@@ -83,6 +84,7 @@ Phase 2・モバイル本番・deferred は要求に応じて。ARCHIVE / Dash �
 | `design-a11y`（公式 WebFetch） | **可 → Task(generalPurpose / explore)** | 取得・要約のみ。採用判断は親 |
 | docs/db・product 横断調査 | **可 → Task(explore)** | 読み取り調査 |
 | PR 前のセキュリティ／差分レビュー | **可 → 組み込み `security-review` / `bugbot`** | 重複 skill を作るな |
+| `adversarial-review` | **批判文のみ可 → Task(generalPurpose)** | 仕様・アーキ・採用判断は親。設計時セキュは可、差分セキュは組み込み |
 | `tdd-workflow` | **不可** | Red→実装の本体は親 |
 | `official-docs-first` | **判断は親** | Fetch だけ Task 可。結論は親 |
 | `secure-change-checklist` | **不可** | 親の diff・変更意図が必要 |

@@ -50,7 +50,7 @@
 | `SUPABASE_PUBLISHABLE_KEY` | **必須** | 公開可だがサーバー env で管理 | 同上 | 同上 | ユーザー JWT + RLS 経路 |
 | `SUPABASE_JWKS_URL` | 任意 | — | 同上 | 同上 | 未設定時は `{SUPABASE_URL}/auth/v1/.well-known/jwks.json` |
 | `CORS_ORIGINS` | 本番は **必須** | — | 未設定時 localhost 既定 | **本番 Web オリジンのみ**（カンマ区切り） | 開発用 localhost を本番に残すな |
-| `SUPABASE_SECRET_KEY` | **置かない推奨** | 秘密 | 例にあるが **現行コード未使用** | バッチ専用のときだけ | 通常 API 経路に使うな |
+| `SUPABASE_SECRET_KEY` | **退会 API に必須** | 秘密 | ローカル `.env` | Render Dashboard | **通常 CRUD には使うな**。`DELETE /account`（Storage 掃除 + Auth Admin `delete_user`）専用。Web/CF 禁止 |
 | `SUPABASE_JWT_SECRET` | **禁止（検証に使わない）** | 秘密 | 設定しても **無視** | 設定するな | JWKS のみ |
 | `DATABASE_URL` / `SUPABASE_DB_URL` | 任意 | 秘密 | docs 生成スクリプト用 | アプリ実行には不要 | Git・CF 禁止 |
 | `IO_INTELLIGENCE_API_KEY` | 任意 | 秘密 | Assist オン時 | 同上 | `IO_LIVE_CALLS=1` のとき実呼出 |

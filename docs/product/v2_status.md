@@ -13,18 +13,16 @@ Dash → **Next.js Web + FastAPI + Supabase** への移行状況。
 |----|------|
 | 基盤（Auth / JWKS / RLS / Storage photos） | 完了 |
 | Must 本線 Web | **ほぼ完了（shipped 中心）** |
-| Must 磨き | responsive が partial |
+| Must 磨き | responsive 完了（下部タブ） |
 | Phase 2 | dashboard 入口のみ。他は planned |
 | Later | deferred（要求待ち。推し色の課金適用は `premium`） |
 | Expo モバイル | 枠・デザイン契約のみ（機能未） |
 
 ## Must の残り（意図的に partial）
 
-| ID | 残りの内容 |
-|----|------------|
-| `responsive_web` | 小画面ナビ等の磨き（使えるが体系監査は未） |
+（Must 磨きの `responsive_web` は完了。登録の写真プレビュー・連続導線・スキャナ片手・詳細拡大も実装済み。）
 
-登録の「店頭専用画面」「写真ライブプレビュー」「一括 / CLIP / 連続モード」は **Must 本線外の後続**（flows に未実装として記載）。
+登録の「店頭専用画面」「一括 / CLIP」は **Must 本線外の後続**（flows に未実装として記載）。
 
 ## やらないこと（この時点）
 

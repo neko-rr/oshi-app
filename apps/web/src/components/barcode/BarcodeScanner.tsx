@@ -20,7 +20,7 @@ type Props = {
 
 /**
  * ライブ読取 + 画像アップロード。
- * 将来の「購入済み判定」画面からも同じコンポーネントを使う前提。
+ * 店頭片手: 映像全幅寄り・横向きで CTA が被らない・短い失敗文言。
  */
 export function BarcodeScanner({ onDetected, disabled }: Props) {
   const t = useTranslations("Register.scanner");
@@ -119,21 +119,18 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="overflow-hidden rounded-md border border-border bg-muted">
+      <div className="-mx-1 overflow-hidden rounded-md border border-border bg-muted sm:mx-0">
         <video
           ref={videoRef}
-          className="aspect-video w-full object-cover"
+          className="aspect-video min-h-[12rem] w-full object-cover landscape:max-h-[min(42vh,20rem)] landscape:min-h-0"
           playsInline
           muted
           autoPlay
         />
       </div>
 
-      {engineNote ? (
-        <p className="text-xs text-muted-foreground">{engineNote}</p>
-      ) : null}
       {error ? (
-        <p className="text-xs text-destructive" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
@@ -169,6 +166,13 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
           onChange={(e) => void onUploadChange(e.target.files?.[0] ?? null)}
         />
       </div>
+
+      {engineNote ? (
+        <details className="text-xs text-muted-foreground">
+          <summary className="cursor-pointer">{t("engineDetails")}</summary>
+          <p className="mt-1">{engineNote}</p>
+        </details>
+      ) : null}
     </div>
   );
 }

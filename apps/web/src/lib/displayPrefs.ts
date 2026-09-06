@@ -2,6 +2,7 @@
 
 export type ListSortId = "newest" | "name" | "created_at";
 export type GalleryLayoutId = "grid" | "large" | "list";
+export type GalleryImageFitId = "cover" | "contain";
 export type LandingPageId = "home" | "gallery" | "register";
 export type RegisterStartStepId = "barcode" | "photo" | "confirm";
 /** カードに載せる項目。将来はここへ id を足す */
@@ -9,6 +10,7 @@ export type GalleryCardFieldId = "name" | "tags" | "price";
 
 export const DEFAULT_LIST_SORT: ListSortId = "newest";
 export const DEFAULT_GALLERY_LAYOUT: GalleryLayoutId = "grid";
+export const DEFAULT_GALLERY_IMAGE_FIT: GalleryImageFitId = "cover";
 export const DEFAULT_LANDING_PAGE: LandingPageId = "home";
 export const DEFAULT_REGISTER_START_STEP: RegisterStartStepId = "barcode";
 export const DEFAULT_GALLERY_SHOW = true;
@@ -23,6 +25,11 @@ export const GALLERY_LAYOUT_IDS: readonly GalleryLayoutId[] = [
   "grid",
   "large",
   "list",
+] as const;
+
+export const GALLERY_IMAGE_FIT_IDS: readonly GalleryImageFitId[] = [
+  "cover",
+  "contain",
 ] as const;
 
 export const GALLERY_CARD_FIELD_IDS: readonly GalleryCardFieldId[] = [
@@ -77,6 +84,11 @@ export function sanitizeListSort(raw: unknown): ListSortId {
 export function sanitizeGalleryLayout(raw: unknown): GalleryLayoutId {
   if (raw === "grid" || raw === "large" || raw === "list") return raw;
   return DEFAULT_GALLERY_LAYOUT;
+}
+
+export function sanitizeGalleryImageFit(raw: unknown): GalleryImageFitId {
+  if (raw === "cover" || raw === "contain") return raw;
+  return DEFAULT_GALLERY_IMAGE_FIT;
 }
 
 export function sanitizeLandingPage(raw: unknown): LandingPageId {
