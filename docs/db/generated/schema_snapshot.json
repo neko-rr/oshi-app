@@ -543,6 +543,12 @@
           "type": "boolean",
           "not_null": true,
           "default": "true"
+        },
+        {
+          "column": "gallery_image_fit",
+          "type": "text",
+          "not_null": true,
+          "default": "'cover'::text"
         }
       ]
     },
@@ -2575,6 +2581,11 @@
       "table_name": "display_settings",
       "constraint_name": "display_settings_gallery_layout_check",
       "definition": "CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_gallery_image_fit_check",
+      "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
     },
     {
       "table_name": "display_settings",

@@ -7,17 +7,22 @@ import {
 } from "@oshi/shared";
 import { GalleryBrowse } from "@/components/gallery/GalleryBrowse";
 import { GalleryFilterChips } from "@/components/gallery/GalleryFilterChips";
+import { GalleryFiltersDisclosure } from "@/components/gallery/GalleryFiltersDisclosure";
+import { GalleryRecentFilters } from "@/components/gallery/GalleryRecentFilters";
 import { GallerySavedViewsBar } from "@/components/gallery/GallerySavedViewsBar";
 import { ProductSearchForm } from "@/components/ProductSearchForm";
 import { apiFetch } from "@/lib/api";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
+  DEFAULT_GALLERY_IMAGE_FIT,
   DEFAULT_GALLERY_LAYOUT,
   DEFAULT_LIST_SORT,
   sanitizeGalleryCardFields,
+  sanitizeGalleryImageFit,
   sanitizeGalleryLayout,
   sanitizeListSort,
   type GalleryCardFields,
+  type GalleryImageFitId,
   type GalleryLayoutId,
   type ListSortId,
 } from "@/lib/displayPrefs";
@@ -30,6 +35,7 @@ import {
 } from "@/lib/galleryListQuery";
 import type { GalleryViewListResponse } from "@/lib/galleryViewQuery";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { isAnonymousUser } from "@/lib/authGuest";
 
 type CategoryTagItem = {
   category_tag_id: number;
@@ -53,6 +59,7 @@ type ColorTagItem = {
 type DisplayPrefsSlice = {
   list_sort?: string;
   gallery_layout?: string;
+  gallery_image_fit?: string;
   gallery_show_name?: boolean;
   gallery_show_tags?: boolean;
   gallery_show_price?: boolean;
@@ -107,6 +114,7 @@ export default async function GalleryPage({
     await redirectTo("/auth/login");
   }
   const session = data.session!;
+  const isGuest = isAnonymousUser(session.user);
 
   let list: ProductListResponse | null = null;
   let categories: CategoryTagItem[] = [];
@@ -116,9 +124,18 @@ export default async function GalleryPage({
   let loadError: string | null = null;
   let listSort: ListSortId = DEFAULT_LIST_SORT;
   let galleryLayout: GalleryLayoutId = DEFAULT_GALLERY_LAYOUT;
+  let galleryImageFit: GalleryImageFitId = DEFAULT_GALLERY_IMAGE_FIT;
   let cardFields: GalleryCardFields = DEFAULT_GALLERY_CARD_FIELDS;
 
-  if (!hasApi) {
+  if (isGuest) {
+    list = {
+      items: [],
+      members_id: session.user.id,
+      limit: PAGE_LIMIT,
+      offset: 0,
+      has_more: false,
+    };
+  } else if (!hasApi) {
     loadError = t("apiBaseMissing");
   } else {
     try {
@@ -129,6 +146,7 @@ export default async function GalleryPage({
       ).catch(() => null);
       listSort = sanitizeListSort(prefs?.list_sort ?? listQuery.sort);
       galleryLayout = sanitizeGalleryLayout(prefs?.gallery_layout);
+      galleryImageFit = sanitizeGalleryImageFit(prefs?.gallery_image_fit);
       cardFields = sanitizeGalleryCardFields(prefs);
       const effectiveQuery = {
         ...listQuery,
@@ -205,31 +223,51 @@ export default async function GalleryPage({
         }}
       />
 
-      <GallerySavedViewsBar
+      <GalleryRecentFilters
         listQuery={browseQuery}
-        effectiveSort={browseQuery.sort ?? DEFAULT_LIST_SORT}
-        initialViews={savedViews}
+        labelNames={{
+          categories: new Map(
+            categories.map((c) => [c.category_tag_id, c.category_tag_name]),
+          ),
+          storage: new Map(
+            storageLocations.map((s) => [
+              s.storage_location_id,
+              s.storage_location_name,
+            ]),
+          ),
+          colors: new Map(
+            colorTags.map((c) => [c.slot, c.color_tag_name]),
+          ),
+        }}
       />
 
-      <GalleryFilterChips
-        listQuery={browseQuery}
-        effectiveSort={browseQuery.sort ?? DEFAULT_LIST_SORT}
-        categories={categories.map((c) => ({
-          id: c.category_tag_id,
-          name: c.category_tag_name,
-        }))}
-        storageLocations={storageLocations.map((s) => ({
-          id: s.storage_location_id,
-          name: s.storage_location_name,
-        }))}
-        colorTags={colorTags
-          .filter((c) => (c.color_tag_name || "").trim().length > 0)
-          .map((c) => ({
-            slot: c.slot,
-            name: c.color_tag_name,
-            color: c.color_tag_color,
+      <GalleryFiltersDisclosure>
+        <GallerySavedViewsBar
+          listQuery={browseQuery}
+          effectiveSort={browseQuery.sort ?? DEFAULT_LIST_SORT}
+          initialViews={savedViews}
+        />
+
+        <GalleryFilterChips
+          listQuery={browseQuery}
+          effectiveSort={browseQuery.sort ?? DEFAULT_LIST_SORT}
+          categories={categories.map((c) => ({
+            id: c.category_tag_id,
+            name: c.category_tag_name,
           }))}
-      />
+          storageLocations={storageLocations.map((s) => ({
+            id: s.storage_location_id,
+            name: s.storage_location_name,
+          }))}
+          colorTags={colorTags
+            .filter((c) => (c.color_tag_name || "").trim().length > 0)
+            .map((c) => ({
+              slot: c.slot,
+              name: c.color_tag_name,
+              color: c.color_tag_color,
+            }))}
+        />
+      </GalleryFiltersDisclosure>
 
       {sp.registered ? (
         <p className="rounded-xl bg-accent/40 px-3 py-2 text-sm text-foreground">
@@ -246,9 +284,20 @@ export default async function GalleryPage({
       {!loadError && items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center">
           <p className="text-sm text-muted-foreground">
-            {hasFilters ? t("emptyFiltered") : t("empty")}
+            {isGuest
+              ? t("emptyGuest")
+              : hasFilters
+                ? t("emptyFiltered")
+                : t("empty")}
           </p>
-          {hasFilters ? (
+          {isGuest ? (
+            <Link
+              href="/auth/upgrade"
+              className="mt-3 inline-block text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {t("upgradeLink")}
+            </Link>
+          ) : hasFilters ? (
             <Link
               href={galleryListHref(withClearedFilters(browseQuery))}
               className="mt-3 inline-block text-sm text-primary underline-offset-4 hover:underline"
@@ -274,6 +323,7 @@ export default async function GalleryPage({
           limit={PAGE_LIMIT}
           listQuery={browseQuery}
           galleryLayout={galleryLayout}
+          galleryImageFit={galleryImageFit}
           cardFields={cardFields}
           storageOptions={storageLocations.map((s) => ({
             id: s.storage_location_id,

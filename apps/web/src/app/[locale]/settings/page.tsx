@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/client";
 
@@ -14,6 +15,10 @@ export default function SettingsPage() {
   const [ready, setReady] = useState(false);
 
   const hubSections = [
+    {
+      title: t("sectionExplore"),
+      links: [{ href: "/dashboard", label: t("dashboard") }],
+    },
     {
       title: t("appearance"),
       links: [{ href: "/settings/theme", label: t("appearanceHint") }],
@@ -39,7 +44,10 @@ export default function SettingsPage() {
     },
     {
       title: t("sectionData"),
-      links: [{ href: "/settings/export", label: t("dataExport") }],
+      links: [
+        { href: "/settings/export", label: t("dataExport") },
+        { href: "/settings/delete-account", label: t("deleteAccount") },
+      ],
     },
     {
       title: t("sectionLegal"),
@@ -79,6 +87,8 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
+
+      <GuestContextNotice variant="localOnly" />
 
       {hubSections.map((section) => (
         <section key={section.title} className="flex flex-col gap-2">

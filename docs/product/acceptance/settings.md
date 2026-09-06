@@ -10,13 +10,14 @@
 - [x] 文字・密度は `GET/PUT /display-settings`（`text_scale` / `ui_density`、1〜7）に保存できる（未ログイン時は localStorage）
 - [x] 同じ見た目画面で一覧の並び既定（`list_sort`: newest / name / created_at）、ギャラリー表示（`gallery_layout`: grid / large / list）、ログイン後の着地（`landing_page`: home / gallery / register）を選べる
 - [x] 同じ見た目画面でカードに載せる情報（名前／タグ／価格）を独立スイッチで切替できる（`gallery_show_name` / `gallery_show_tags` / `gallery_show_price`、既定 ON）
+- [x] 同じ見た目画面で写真のはみ出し（`gallery_image_fit`: cover／contain。「はみ出し少なめ」）を選べる（大きめ表示は常に contain。端末間同期）
 - [x] ギャラリー・検索は並び既定と表示モードとカード表示項目を反映する。ログイン成功後は着地へ遷移する
 - [x] `/settings/theme` で表示言語（ja / en）を切り替えられる（URL: 日本語は無印、英語は `/en`。next-intl）
 - [x] `/settings/theme` で居住地（大陸別・検索付き）と日時・金額の個別上書き（IANA TZ・日付形式・表示通貨・金額書き方）を設定でき、登録日・購入価格などが居住地ローカルで表示される（金額は換算なし）
 - [x] 設定・タグ・収納・見た目・アカウント／法務の表示文言は `messages/ja.json`（正本）と `en.json` 経由（`useTranslations` / `getTranslations`）
 - [x] アカウント情報（`/me`）・パスワード変更（`/auth/update-password`）へ行ける
 - [x] データはログインユーザーに閉じる（JWT + RLS）
-- [ ] 退会・全削除（`account_delete` は deferred）
+- [x] `/settings/delete-account` から退会・全データ削除できる（`account_delete`。確認語 `DELETE`・即時。Storage 掃除後に Auth 削除、DB は CASCADE）
 - [x] `/settings/export` から一覧テキスト（JSON＋CSV）と写真付き ZIP を書き出せる（`data_export`。再取り込みなし。署名 URL は含めない）
 - [x] 推し色スウォッチ UI（テーマパックとは別。メイン＋サブの2色。文字色は自動で AA 確保。無料はプレビューのみ・適用／保存はプレミアム想定の entitlement）
 - [x] タグ・収納アイコンは Lucide slug + ピッカー（`lucide_icon_picker.json`）
@@ -24,5 +25,6 @@
 - [x] 初期プリセット（slot 1–6）は「非表示」で dismiss し、再表示できる
 - [x] ギャラリー一覧・詳細でカテゴリ／収納アイコンをチップ表示
 - [x] `/settings/register` で登録の始め方と「いつも選ぶ収納」を設定でき、登録ウィザードに反映される（`register_start_step` / `default_storage_location_id`）
+- [x] ゲストは見た目・登録既定を端末のみ変更でき、画面上で本登録案内が出る。タグ・収納・書き出しは本登録ゲート（操作 UI 非表示）
 
-関連: `color_tags` / `category_tags` / `storage_locations` / `theme_colors` / `oshi_accent` / `display_settings` / `register_wizard_defaults` / `gallery_card_fields`
+関連: `color_tags` / `category_tags` / `storage_locations` / `theme_colors` / `oshi_accent` / `display_settings` / `register_wizard_defaults` / `gallery_card_fields` / `gallery_image_fit` / `guest_onboarding` / `docs/product/flows/guest.md`

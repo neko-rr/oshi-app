@@ -20,6 +20,7 @@ class AuthenticatedUser:
 
     members_id: str
     email: str | None = None
+    is_anonymous: bool = False
 
 
 def verify_access_token(token: str) -> AuthenticatedUser:
@@ -69,9 +70,17 @@ def verify_access_token(token: str) -> AuthenticatedUser:
             detail={"code": "UNAUTHORIZED", "message": "sub がありません"},
         )
     email = payload.get("email")
+    raw_anon = payload.get("is_anonymous")
+    if isinstance(raw_anon, bool):
+        is_anonymous = raw_anon
+    elif isinstance(raw_anon, str):
+        is_anonymous = raw_anon.strip().lower() in {"true", "1"}
+    else:
+        is_anonymous = False
     return AuthenticatedUser(
         members_id=sub,
         email=email if isinstance(email, str) else None,
+        is_anonymous=is_anonymous,
     )
 
 
@@ -91,3 +100,18 @@ def get_current_user(
     token: str = Depends(get_access_token),
 ) -> AuthenticatedUser:
     return verify_access_token(token)
+
+
+def require_permanent_user(
+    user: AuthenticatedUser = Depends(get_current_user),
+) -> AuthenticatedUser:
+    """ゲスト（is_anonymous）は業務 API 不可。本登録へ誘導する 403。"""
+    if user.is_anonymous:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "REGISTRATION_REQUIRED",
+                "message": "本登録が必要です",
+            },
+        )
+    return user

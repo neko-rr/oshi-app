@@ -20,5 +20,9 @@
 - [x] 購入価格があればカードに金額表示（記録通貨優先、なければ表示設定。換算なし）
 - [x] カードの名前／タグ／価格は設定で独立 ON/OFF（`gallery_show_*`、既定すべて ON）。名前 OFF 時もリンクの a11y 名は維持
 - [x] ギャラリー内検索（`q`）が一覧の DoD として使える（`/search` 全面刷新は不要）
+- [x] 一括更新成功時に短い成功フラッシュが出る
+- [x] 一括更新・もっと見る失敗時（オフライン／電波弱含む）に再試行導線がある
+- [x] 写真フィットを選べる（枠いっぱい／はみ出し少なめ。大きめ表示は常に全体表示）。端末間で同期
+- [x] 最近使った検索・絞込条件をチップから再適用できる（端末ローカル履歴）
 
-関連: `gallery` / `gallery_card_fields` / `gallery_filters_v2` / `gallery_sort_ui` / `gallery_bulk_storage` / `gallery_bulk_category` / `gallery_selection_scope` / `gallery_saved_views`
+関連: `gallery` / `gallery_card_fields` / `gallery_filters_v2` / `gallery_sort_ui` / `gallery_bulk_storage` / `gallery_bulk_category` / `gallery_selection_scope` / `gallery_saved_views` / `gallery_image_fit` / `gallery_recent_filters` / `gallery_detail_neighbors`

@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
 import { isPresetSlot } from "@/lib/tagPresets";
+import { GuestServerGate } from "@/components/auth/GuestServerGate";
 
 type StorageLocationItem = {
   storage_location_id: number;
@@ -284,6 +285,7 @@ export default function StorageLocationsSettingsPage() {
   }
 
   return (
+    <GuestServerGate title={t("title")}>
     <div className="stack-density-lg">
       <div>
         <Link
@@ -438,5 +440,6 @@ export default function StorageLocationsSettingsPage() {
         </Button>
       </form>
     </div>
+    </GuestServerGate>
   );
 }

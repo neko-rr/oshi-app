@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T08:40:29Z",
+  "generated_at": "2026-09-06T13:09:36Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -36,6 +36,11 @@
       "path": "/auth/update-password",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/auth/update-password/page.tsx"
+    },
+    {
+      "path": "/auth/upgrade",
+      "kind": "page",
+      "file": "apps/web/src/app/[locale]/auth/upgrade/page.tsx"
     },
     {
       "path": "/dashboard",
@@ -103,6 +108,11 @@
       "file": "apps/web/src/app/[locale]/settings/color-tags/page.tsx"
     },
     {
+      "path": "/settings/delete-account",
+      "kind": "page",
+      "file": "apps/web/src/app/[locale]/settings/delete-account/page.tsx"
+    },
+    {
       "path": "/settings/export",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/settings/export/page.tsx"
@@ -129,6 +139,12 @@
     }
   ],
   "api_routes": [
+    {
+      "method": "DELETE",
+      "path": "/account",
+      "file": "apps/api/app/routers/account.py",
+      "router_var": "router"
+    },
     {
       "method": "POST",
       "path": "/assist/barcode/keyword",
@@ -452,6 +468,10 @@
       "path": "/exports"
     },
     {
+      "key": "account",
+      "path": "/account"
+    },
+    {
       "key": "statsProducts",
       "path": "/stats/products"
     },
@@ -477,6 +497,10 @@
     }
   ],
   "services": [
+    {
+      "name": "account_delete_service",
+      "file": "apps/api/app/services/account_delete_service.py"
+    },
     {
       "name": "barcode_lookup_service",
       "file": "apps/api/app/services/barcode_lookup_service.py"
@@ -536,19 +560,9 @@
   ],
   "gaps": [
     {
-      "id": "register_flow",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/register/page.tsx"
-    },
-    {
       "id": "gallery",
       "kind": "missing_file",
       "detail": "evidence が無い: apps/web/src/app/gallery/page.tsx"
-    },
-    {
-      "id": "product_detail",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/gallery/[registered_product_id]/page.tsx"
     },
     {
       "id": "storage_locations",
@@ -596,5 +610,5 @@
       "detail": "evidence が無い: apps/web/src/app/me/page.tsx"
     }
   ],
-  "feature_count": 42
+  "feature_count": 46
 }

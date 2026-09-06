@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_current_user
+from app.deps.auth import AuthenticatedUser, require_permanent_user
 from app.services.barcode_lookup_service import lookup_by_barcode, lookup_by_keyword
 from app.services.io_intelligence_service import describe_image
 from app.services.tag_extraction_service import extract_tags
@@ -38,7 +38,7 @@ class KeywordLookupRequest(BaseModel):
 @router.post("/vision/describe")
 def assist_describe_image(
     body: DescribeImageRequest,
-    _user: AuthenticatedUser = Depends(get_current_user),
+    _user: AuthenticatedUser = Depends(require_permanent_user),
 ) -> dict:
     """Vision 説明（キー未設定・LIVE 無効時は soft status）。"""
     return describe_image(body.image_source, raw_base64=body.raw_base64)
@@ -47,7 +47,7 @@ def assist_describe_image(
 @router.post("/tags/extract")
 def assist_extract_tags(
     body: ExtractTagsRequest,
-    _user: AuthenticatedUser = Depends(get_current_user),
+    _user: AuthenticatedUser = Depends(require_permanent_user),
 ) -> dict:
     """タグ抽出（同上）。"""
     return extract_tags(
@@ -60,7 +60,7 @@ def assist_extract_tags(
 @router.post("/barcode/lookup")
 def assist_barcode_lookup(
     body: BarcodeLookupRequest,
-    _user: AuthenticatedUser = Depends(get_current_user),
+    _user: AuthenticatedUser = Depends(require_permanent_user),
 ) -> dict:
     """楽天バーコード検索（同上）。"""
     return lookup_by_barcode(body.barcode)
@@ -69,7 +69,7 @@ def assist_barcode_lookup(
 @router.post("/barcode/keyword")
 def assist_keyword_lookup(
     body: KeywordLookupRequest,
-    _user: AuthenticatedUser = Depends(get_current_user),
+    _user: AuthenticatedUser = Depends(require_permanent_user),
 ) -> dict:
     """楽天キーワード検索（同上）。"""
     return lookup_by_keyword(body.keyword)

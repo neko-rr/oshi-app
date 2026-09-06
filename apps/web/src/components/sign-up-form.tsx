@@ -2,10 +2,11 @@
 
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/client'
+import { isAnonymousUser } from '@/lib/authGuest'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -27,6 +28,21 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (data.session && isAnonymousUser(data.session.user)) {
+        router.replace('/auth/upgrade')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()

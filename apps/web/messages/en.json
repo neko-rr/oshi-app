@@ -1,4 +1,41 @@
 {
+  "Guest": {
+    "startAsGuest": "Continue as guest",
+    "starting": "Starting…",
+    "startError": "Could not start as guest. Check that Anonymous Sign-In is enabled.",
+    "banner": "You are browsing as a guest. Full registration is required to save data or use the API.",
+    "goUpgrade": "Create an account",
+    "gateTitle": "Registration required",
+    "gateGeneric": "This action requires a full account.",
+    "gateSave": "Register an account to save products.",
+    "gatePhoto": "Register an account to upload photos.",
+    "gateBarcode": "Register an account to look up barcodes.",
+    "gateAssist": "Register an account to use assist features.",
+    "gateClose": "Close",
+    "noticeLocalOnly": "As a guest, appearance settings are saved on this device only. Create an account to sync across devices.",
+    "noticeServerRequired": "This screen (tags, export, analytics, etc.) requires a full account."
+  },
+  "GuestUpgrade": {
+    "metaTitle": "Create account | oshi-app",
+    "title": "Create your account",
+    "description": "Link an email to this guest session so you can save your data.",
+    "loading": "Loading…",
+    "backHome": "Home",
+    "email": "Email",
+    "sendVerify": "Send verification email",
+    "sending": "Sending…",
+    "checkEmail": "We sent a verification email to {email}. Open the link, then continue.",
+    "checkEmailHint": "After verifying, use the button below to set a password.",
+    "verifiedContinue": "I verified — set password",
+    "password": "Password",
+    "passwordRepeat": "Confirm password",
+    "setPassword": "Set password and finish",
+    "saving": "Saving…",
+    "passwordMismatch": "Passwords do not match",
+    "verifyFirst": "Please verify your email first",
+    "emailTaken": "This email is already registered. Please log in.",
+    "goLogin": "Go to log in"
+  },
   "Common": {
     "loading": "Loading…",
     "saving": "Saving…",
@@ -43,10 +80,17 @@
     "presetBadge": "Default",
     "skip": "Skip",
     "next": "Next",
-    "home": "Home"
+    "home": "Home",
+    "retry": "Retry",
+    "savedFlash": "Saved",
+    "registeredFlash": "Registered",
+    "bulkUpdatedFlash": "Bulk update done",
+    "offlineHint": "No connection. Check signal or Wi‑Fi, then retry.",
+    "offlineBanner": "You are offline. Retry when connected."
   },
   "Nav": {
     "ariaMain": "Main",
+    "ariaTabs": "Main tabs",
     "home": "Home",
     "homeShort": "Home",
     "gallery": "Gallery",
@@ -59,6 +103,7 @@
     "dashboardShort": "Stats",
     "settings": "Settings",
     "settingsShort": "Settings",
+    "more": "More",
     "login": "Log in",
     "logout": "Log out",
     "loggingOut": "Signing out…"
@@ -75,6 +120,8 @@
     "statsBarcodes": "Unique barcodes: {count}",
     "statsUnavailable": "Stats unavailable",
     "login": "Log in",
+    "guestHint": "You can explore as a guest. Saving requires a full account.",
+    "upgrade": "Create account",
     "gallery": "Gallery",
     "register": "Register",
     "search": "Search",
@@ -91,6 +138,7 @@
     "submitting": "Signing in…",
     "signUpPrompt": "Don't have an account?",
     "signUp": "Sign up",
+    "guestHint": "You can also start as a guest first.",
     "genericError": "Something went wrong"
   },
   "Appearance": {
@@ -290,6 +338,7 @@
     "uiDensityHint": "Line spacing and padding change together",
     "listSort": "List sort",
     "galleryLayout": "Gallery layout",
+    "galleryImageFit": "Photo crop",
     "galleryCardFields": "Card details",
     "galleryCardFieldsHint": "What to show on each card. Photo-only is fine too.",
     "galleryCardFieldOptions": {
@@ -329,6 +378,14 @@
       "large": "Larger photos",
       "list": "More info per row"
     },
+    "galleryImageFitOptions": {
+      "cover": "Fill frame",
+      "contain": "Show full photo"
+    },
+    "galleryImageFitHints": {
+      "cover": "Crop to fill (landscape photos may lose top/bottom)",
+      "contain": "See the whole photo (letterboxing OK). Large layout always uses this"
+    },
     "landingPageOptions": {
       "home": "Home",
       "gallery": "Gallery",
@@ -365,8 +422,10 @@
     "yellow-dark": "Yellow (dark)"
   },
   "SettingsIndex": {
-    "title": "Settings",
-    "intro": "Appearance, register flow, tags, storage, data, and account",
+    "title": "More",
+    "intro": "Stats, appearance, register flow, tags, storage, data, account, and legal",
+    "sectionExplore": "Explore",
+    "dashboard": "Dashboard",
     "appearance": "Appearance",
     "appearanceHint": "Theme, oshi colors, text size, density, language, residence",
     "sectionRegister": "Register",
@@ -380,6 +439,7 @@
     "changePassword": "Change password",
     "sectionData": "Data",
     "dataExport": "Export your data",
+    "deleteAccount": "Delete account & data",
     "sectionLegal": "Legal",
     "privacy": "Privacy policy",
     "licenses": "Licenses & notices",
@@ -409,6 +469,26 @@
     "errorFailed": "Export failed. Please try again later.",
     "errorTimeout": "Preparing took too long. If you have many items, try the list-only export.",
     "errorGeneric": "Export failed. Check your connection and try again."
+  },
+  "DeleteAccount": {
+    "title": "Delete account & data",
+    "intro": "This permanently deletes your account and all registered data. This cannot be undone.",
+    "loading": "Loading…",
+    "back": "Back to settings",
+    "warningTitle": "Everything will be deleted",
+    "warningBody": "The following are removed and cannot be restored with the same account.",
+    "warningItemData": "Registered merch, tags, storage, and settings",
+    "warningItemPhotos": "Uploaded photos and export files",
+    "warningItemAuth": "Your sign-in account (email, etc.)",
+    "warningItemImmediate": "No grace period (immediate deletion)",
+    "exportHint": "Export a copy first via <link>Export your data</link> if you need it.",
+    "confirmLabel": "Type DELETE to confirm",
+    "confirmHint": "Only the uppercase word DELETE is accepted.",
+    "submit": "Delete account and all data",
+    "working": "Deleting…",
+    "errorUnauthorized": "Your session expired. Please sign in again.",
+    "errorUnavailable": "Account deletion is temporarily unavailable. Please try again later.",
+    "errorGeneric": "Deletion failed. Check your connection and try again."
   },
   "RegisterDefaults": {
     "title": "Register defaults",
@@ -510,7 +590,10 @@
       "title": "Step 2 — Front photo",
       "intro": "On mobile, the camera opens. On desktop, you can pick a file. Registration works without a photo.",
       "label": "Front photo (capture or upload)",
-      "selected": "Selected: {name}"
+      "selected": "Selected: {name}",
+      "previewAlt": "Preview of the selected front photo",
+      "retake": "Retake",
+      "confirmThumbAlt": "Photo to register"
     },
     "confirm": {
       "title": "Step 6 — Review and register",
@@ -530,20 +613,21 @@
       "register": "Register",
       "continueRegister": "Register another",
       "gallery": "Go to gallery",
-      "registeredSuccess": "Registered (ID: {id}). Register another or go to the gallery.",
+      "registeredSuccess": "Saved. You can register the next item.",
       "registerFailed": "Registration failed",
       "photoUploadFailed": "Photo upload failed: {detail}",
       "productCreateFailed": "Product registration failed: {detail}"
     },
     "scanner": {
-      "engineNative": "Using native barcode detection",
-      "engineZxing": "Using compatibility mode (ZXing)",
-      "cameraUnsupported": "Camera is not available in this browser. Use manual entry or an image.",
-      "cameraStartFailed": "Could not start the camera. Allow permission or use manual entry / image.",
-      "imageDecodeFailed": "Could not read a barcode from the image. Try another image or manual entry.",
+      "engineNative": "Native scanner",
+      "engineZxing": "Compat scanner (ZXing)",
+      "cameraUnsupported": "Camera unavailable here. Use number entry or an image.",
+      "cameraStartFailed": "Could not start camera. Check permission or use number entry.",
+      "imageDecodeFailed": "Could not read barcode from image. Try another or number entry.",
       "startCamera": "Scan with camera",
       "stopCamera": "Stop camera",
-      "uploadLabel": "Upload barcode image"
+      "uploadLabel": "Upload barcode image",
+      "engineDetails": "Scanner engine"
     }
   },
   "TagPresets": {
@@ -575,6 +659,7 @@
     "titleFallback": "Gallery",
     "subtitle": "Open photos and connect your oshi memories",
     "registerCta": "Register",
+    "filtersToggle": "Filters, sort & saved views",
     "registeredBanner": "Registered product #{id}.",
     "supabaseMissing": "Set Supabase NEXT_PUBLIC_* env vars to show the list.",
     "homeLink": "Home",
@@ -582,6 +667,7 @@
     "listLoadFailed": "Failed to load products (check API / Supabase settings)",
     "emptyFiltered": "No products match your filters.",
     "empty": "No products yet. Add one from Register.",
+    "emptyGuest": "Guests cannot save products yet. Create an account to keep them in your gallery.",
     "clearFilters": "Clear filters",
     "filterSummaryLabel": "Active filters: ",
     "filterSummarySep": " · ",
@@ -590,6 +676,7 @@
     "filterSummaryStorage": "Storage {count}",
     "filterSummaryColor": "Color {count}",
     "registerLink": "Register a product",
+    "upgradeLink": "Create an account",
     "loadMore": "Load more",
     "category": "Category",
     "storage": "Storage",
@@ -622,12 +709,24 @@
     "bulkPickCategoryHint": "Set category",
     "bulkNoStorage": "No storage",
     "bulkNoCategory": "No category",
+    "recentFilters": "Recent filters",
+    "recentFiltersClear": "Clear history",
+    "recentFiltersEmpty": "No recent filters yet",
     "noImage": "No image",
     "productFallback": "Product #{id}"
   },
   "ProductDetail": {
     "back": "← Gallery",
     "photoAlt": "Product photo",
+    "lightboxTitle": "Enlarge photo",
+    "openLightbox": "Open photo fullscreen",
+    "tapToExpand": "Tap to enlarge",
+    "closeLightbox": "Close",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "prevProduct": "Previous product",
+    "nextProduct": "Next product",
+    "neighborNav": "Nearby products",
     "registeredAt": "Registered: {date}",
     "registeredAtPrefix": "Registered:",
     "registeredAtUnknown": "Registration date unknown",
@@ -669,7 +768,10 @@
     "toGallery": "Back to gallery",
     "formLabel": "Search products",
     "formPlaceholder": "Name, category, storage",
-    "formSubmit": "Search"
+    "formSubmit": "Search",
+    "recentTitle": "Recent searches & filters",
+    "emptyGuest": "Guests cannot search saved products. Create an account to search your collection.",
+    "upgradeLink": "Create an account"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -682,7 +784,9 @@
     "categoryTags": "Category tags (category_tags)",
     "storageLocations": "Storage locations (storage_locations)",
     "colorTags": "Color tags (color_tags)",
-    "meta": "Meta (meta)"
+    "meta": "Meta (meta)",
+    "emptyGuest": "Guests cannot view analytics. Create an account to use the dashboard.",
+    "upgradeLink": "Create an account"
   },
   "ForgotPassword": {
     "successTitle": "Check your email",
@@ -744,7 +848,7 @@
     "metaTitle": "Privacy policy | oshi-app",
     "metaDescription": "Privacy practices for oshi-app",
     "title": "Privacy policy",
-    "lastUpdated": "Last updated: 2026-09-01",
+    "lastUpdated": "Last updated: 2026-09-06",
     "overviewTitle": "Overview",
     "overviewBody": "oshi-app (the \"Service\") is a web app for registering and organizing merch for your oshi. This page explains what information we handle and why.",
     "collectTitle": "Information we collect",
@@ -758,6 +862,9 @@
     "photosBody": "We do <strong>not</strong> retain uploaded photos externally for third-party model <strong>retraining or dataset building</strong>. Assist features (such as image description) depend on your actions; external assist success is never required to save your data.",
     "isolationTitle": "Data isolation",
     "isolationBody": "Each user's data is isolated by signed-in user (JWT <code>members_id</code>) and is not visible to other users (Row Level Security).",
+    "deleteTitle": "Account and data deletion",
+    "deleteBody": "From Settings → Delete account & data, you can immediately delete your account and registered data (including photos and export files). Deletion cannot be undone. Export anything you need beforehand. (EN draft — legal review pending.)",
+    "deleteLink": "Go to account deletion",
     "contactTitle": "Contact",
     "contactBody": "For questions about this policy, contact the app operator. (Contact details will be added when we publish more broadly.)",
     "linkLicenses": "Licenses & notices",

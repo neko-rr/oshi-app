@@ -1,11 +1,19 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-export default function Footer() {
+type FooterProps = {
+  className?: string;
+};
+
+export default function Footer({ className }: FooterProps) {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="mt-10 w-full bg-background">
+    <footer
+      className={["mt-10 w-full bg-background", className].filter(Boolean).join(" ")}
+    >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4 py-6 text-center text-sm text-foreground">
         <nav
           aria-label={t("aria")}

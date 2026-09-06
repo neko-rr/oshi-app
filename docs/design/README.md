@@ -27,6 +27,7 @@
 | [oshi-accents.md](oshi-accents.md) | テーマ色／推し色（カラータグとの違い） | **手** |
 | [compare-workflow.md](compare-workflow.md) | 3案並列・端末切替の手順 | **手** |
 | [motion.md](motion.md) | 動き・フィードバック（短い有用反応／長い遊びは本線外） | **手** |
+| [web-phone-ux.md](web-phone-ux.md) | スマホ Web・店頭 UX の横断ルール（シェル／写真／隣／通信） | **手** |
 | [a11y.md](a11y.md) | アクセシビリティ要約（最新は公式 WebFetch） | **手** |
 | [feedback/README.md](feedback/README.md) | 要望 inbox → pending → 採用 | **手** |
 | [feedback/inbox.md](feedback/inbox.md) | 走り書きメモ | **手** |
@@ -49,10 +50,11 @@ as-built（自動）: [generated/gaps.md](generated/gaps.md) ← `pnpm generate:
 1. [principles.md](principles.md) … 雰囲気を何で作るか  
 2. [themes.md](themes.md) … テーマ＝トークン一式  
 3. [oshi-accents.md](oshi-accents.md) … カラータグとの違い  
-4. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
-5. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
-6. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
-7. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
+4. [web-phone-ux.md](web-phone-ux.md) … スマホ Web・店頭で壊してはいけない操作  
+5. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
+6. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
+7. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
+8. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
 
 ## フィードバック（pending でよい）
 

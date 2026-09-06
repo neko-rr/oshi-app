@@ -4,12 +4,15 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { DataExportPanel } from "@/components/settings/DataExportPanel";
+import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
 import { createClient } from "@/lib/client";
+import { useIsAnonymous } from "@/hooks/useIsAnonymous";
 
 export default function DataExportSettingsPage() {
   const t = useTranslations("DataExport");
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const isAnonymous = useIsAnonymous();
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +52,8 @@ export default function DataExportSettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
 
-      <DataExportPanel />
+      <GuestContextNotice variant="serverRequired" />
+      {isAnonymous === true ? null : <DataExportPanel />}
     </div>
   );
 }

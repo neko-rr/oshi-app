@@ -16,6 +16,7 @@
 | `display_settings` | `display_settings_date_format_mode_check` | `CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))` |
 | `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
 | `display_settings` | `display_settings_gallery_layout_check` | `CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))` |
+| `display_settings` | `display_settings_gallery_image_fit_check` | `CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))` |
 | `display_settings` | `display_settings_landing_page_check` | `CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))` |
 | `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
 | `gallery_view` | `gallery_view_color_tag_slots_check` | `CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))` |

@@ -17,6 +17,7 @@ export const API_PATHS = {
   displaySettings: "/display-settings",
   galleryViews: "/gallery-views",
   exports: "/exports",
+  account: "/account",
   statsProducts: "/stats/products",
   dashboardCharts: "/dashboard/charts",
   assistVisionDescribe: "/assist/vision/describe",
@@ -28,6 +29,7 @@ export const API_PATHS = {
 export type MeResponse = {
   members_id: string;
   email: string | null;
+  is_anonymous?: boolean;
 };
 
 export type HealthResponse = {

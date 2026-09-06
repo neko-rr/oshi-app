@@ -81,7 +81,7 @@ export function StepBarcode({
         ) : null}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-2 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <Button
           type="button"
           disabled={lookingUp || !barcode.trim()}

@@ -44,7 +44,8 @@ def test_me_returns_members_id_when_token_valid() -> None:
     data = res.json()
     assert data["members_id"] == user.members_id
     assert data["email"] == user.email
+    assert data.get("is_anonymous") is False
     # 秘密・トークン類をレスポンスに載せない
     assert "access_token" not in data
     assert "token" not in data
-    assert set(data.keys()) <= {"members_id", "email"}
+    assert set(data.keys()) <= {"members_id", "email", "is_anonymous"}

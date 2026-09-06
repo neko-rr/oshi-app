@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-09-04T08:40:30Z`
+生成時刻 (UTC): `2026-09-06T05:57:25Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -12,18 +12,18 @@
 |----|------|--------|
 | `/auth/login` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
 | `/dashboard` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
-| `/register` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
-| `/settings` | lab_not_fully_adopted | status=`not_started` lab_variant=None |
+| `/register` | lab_not_fully_adopted | status=`partial` lab_variant='a' |
 
 ## Lab 採用状況（meta）
 
 | Path | status | lab_variant | notes |
 |------|--------|-------------|-------|
+| `/ (shell)` | `adopted` | 'a' | A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持 |
 | `/gallery` | `adopted` | 'b' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
-| `/gallery/[registered_product_id]` | `adopted` | 'b' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る |
-| `/register` | `not_started` | None |  |
+| `/gallery/[registered_product_id]` | `adopted` | 'b' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る。フルスクリーン拡大追加 |
+| `/register` | `partial` | 'a' | 写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き） |
 | `/dashboard` | `not_started` | None |  |
-| `/settings` | `not_started` | None | ハブ本体。テーマは /settings/theme |
+| `/settings` | `adopted` | 'a' | その他ハブ: 分析・設定・ログアウト・法務。下部タブ「その他」の着地 |
 | `/settings/theme` | `adopted` | 'b' | B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保 |
 | `/auth/login` | `not_started` | None |  |
 

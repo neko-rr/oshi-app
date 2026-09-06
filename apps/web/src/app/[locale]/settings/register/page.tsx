@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { RegisterDefaultsPanel } from "@/components/settings/RegisterDefaultsPanel";
+import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
 import { createClient } from "@/lib/client";
 
 export default function RegisterSettingsPage() {
@@ -49,6 +50,7 @@ export default function RegisterSettingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
 
+      <GuestContextNotice variant="localOnly" />
       <RegisterDefaultsPanel />
     </div>
   );

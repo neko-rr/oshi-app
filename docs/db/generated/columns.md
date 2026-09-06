@@ -129,6 +129,7 @@
 | ギャラリー名前表示 | `gallery_show_name` | `boolean` | NO | `true` |
 | ギャラリータグ表示 | `gallery_show_tags` | `boolean` | NO | `true` |
 | ギャラリー価格表示 | `gallery_show_price` | `boolean` | NO | `true` |
+| ギャラリー画像フィット | `gallery_image_fit` | `text` | NO | `'cover'::text` |
 
 ## `gallery_view`（ギャラリー保存ビュー）
 

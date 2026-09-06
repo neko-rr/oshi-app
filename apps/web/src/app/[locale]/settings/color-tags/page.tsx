@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
+import { GuestServerGate } from "@/components/auth/GuestServerGate";
 
 type ColorTagItem = {
   slot: number;
@@ -159,6 +160,7 @@ export default function ColorTagsSettingsPage() {
   }
 
   return (
+    <GuestServerGate title={t("title")}>
     <div className="stack-density-lg">
       <div>
         <Link
@@ -230,5 +232,6 @@ export default function ColorTagsSettingsPage() {
         </form>
       )}
     </div>
+    </GuestServerGate>
   );
 }

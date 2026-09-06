@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
@@ -10,6 +10,13 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "oshi-app",
   description: "推し活グッズ管理（Next.js + FastAPI）",
+};
+
+/** ノッチ端末でもタブ余白を取れるようにする */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 /** localStorage の見た目設定を初回描画前に html へ載せ、チラつきを抑える */

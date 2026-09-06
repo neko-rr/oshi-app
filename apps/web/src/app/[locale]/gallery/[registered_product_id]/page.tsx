@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS, type ProductTagSummary } from "@oshi/shared";
 import { ProductDetailEditor } from "@/components/ProductDetailEditor";
+import { ProductDetailHero } from "@/components/gallery/ProductDetailHero";
+import { ProductDetailNeighborNav } from "@/components/gallery/ProductDetailNeighborNav";
 import { FormattedAppDate } from "@/components/format/FormattedAppDate";
 import { FormattedAppMoney } from "@/components/format/FormattedAppMoney";
 import { ProductTagChip } from "@/components/tags/ProductTagChip";
@@ -93,7 +95,9 @@ export default async function GalleryDetailPage({
   }
 
   const imageUrl =
-    detail?.photo_high_resolution_url || detail?.photo_thumbnail_url;
+    detail?.photo_high_resolution_url ||
+    detail?.photo_thumbnail_url ||
+    null;
 
   return (
     <div className="stack-density">
@@ -104,28 +108,22 @@ export default async function GalleryDetailPage({
         {t("back")}
       </Link>
 
+      <ProductDetailNeighborNav
+        registeredProductId={id}
+        listQuery={listQuery}
+      />
+
       {loadError ? (
         <p className="text-sm text-destructive">{loadError}</p>
       ) : null}
 
       {detail ? (
         <>
-          <div className="overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-border">
-            <div className="aspect-[4/5] max-h-[min(70vh,36rem)] bg-muted sm:aspect-[16/10] sm:max-h-[28rem]">
-              {imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt={detail.product_name?.trim() || t("photoAlt")}
-                  className="h-full w-full object-contain"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  {tGallery("noImage")}
-                </div>
-              )}
-            </div>
-          </div>
+          <ProductDetailHero
+            imageUrl={imageUrl}
+            alt={detail.product_name?.trim() || t("photoAlt")}
+            emptyLabel={tGallery("noImage")}
+          />
 
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">

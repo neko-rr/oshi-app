@@ -88,10 +88,10 @@ export default function LabDeviceFrame({
             className="grid grid-cols-4 gap-1 border-t border-zinc-700 bg-zinc-900 px-1 py-2 text-center text-[9px] text-zinc-400"
             aria-label="アプリ想定のタブ（見本）"
           >
-            <span className="text-[var(--lab-primary)]">ホーム</span>
-            <span>ギャラリー</span>
+            <span className="text-[var(--lab-primary)]">ギャラリー</span>
             <span>登録</span>
-            <span>設定</span>
+            <span>検索</span>
+            <span>その他</span>
           </nav>
         ) : null}
       </div>

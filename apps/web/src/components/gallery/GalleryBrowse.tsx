@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { API_PATHS, type ProductListItem, type ProductListResponse } from "@oshi/shared";
@@ -10,11 +10,15 @@ import {
   type BulkTagOption,
 } from "@/components/gallery/GalleryBulkBar";
 import { ProductGalleryGrid } from "@/components/ProductGalleryGrid";
+import { useFeedback } from "@/components/feedback/FeedbackProvider";
+import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/client";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
+  DEFAULT_GALLERY_IMAGE_FIT,
   type GalleryCardFields,
+  type GalleryImageFitId,
   type GalleryLayoutId,
 } from "@/lib/displayPrefs";
 import type { GalleryListQuery } from "@/lib/galleryListQuery";
@@ -23,6 +27,9 @@ import {
   productsApiPath,
 } from "@/lib/galleryListQuery";
 import {
+  writeGalleryBrowseOrder,
+} from "@/lib/galleryBrowseOrder";
+import {
   GALLERY_BULK_MAX,
   exitSelectionViewState,
   filterItemsBySelection,
@@ -30,6 +37,7 @@ import {
   selectionFromIds,
   withPageSelected,
 } from "@/lib/gallerySelection";
+import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
 
 type Props = {
   initialItems: ProductListItem[];
@@ -37,6 +45,7 @@ type Props = {
   limit: number;
   listQuery: GalleryListQuery;
   galleryLayout?: GalleryLayoutId;
+  galleryImageFit?: GalleryImageFitId;
   cardFields?: GalleryCardFields;
   storageOptions?: BulkTagOption[];
   categoryOptions?: BulkTagOption[];
@@ -48,6 +57,7 @@ export function GalleryBrowse({
   limit,
   listQuery,
   galleryLayout = "grid",
+  galleryImageFit = DEFAULT_GALLERY_IMAGE_FIT,
   cardFields = DEFAULT_GALLERY_CARD_FIELDS,
   storageOptions = [],
   categoryOptions = [],
@@ -55,11 +65,13 @@ export function GalleryBrowse({
   const t = useTranslations("Gallery");
   const tCommon = useTranslations("Common");
   const router = useRouter();
+  const { flashSuccess } = useFeedback();
   const [items, setItems] = useState(initialItems);
   const [offset, setOffset] = useState(listQuery.offset ?? 0);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorOffline, setErrorOffline] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
@@ -68,6 +80,12 @@ export function GalleryBrowse({
   const [picking, setPicking] = useState<BulkPickKind | null>(null);
   const [saving, setSaving] = useState(false);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [bulkErrorOffline, setBulkErrorOffline] = useState(false);
+  const lastBulkBodyRef = useRef<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    writeGalleryBrowseOrder(items.map((item) => item.registered_product_id));
+  }, [items]);
 
   const pageIds = items.map((item) => item.registered_product_id);
   const pageFullySelected = isPageFullySelected(selectedIds, pageIds);
@@ -166,8 +184,10 @@ export function GalleryBrowse({
 
   async function applyBulkPatch(body: Record<string, unknown>) {
     if (selectedIds.size === 0) return;
+    lastBulkBodyRef.current = body;
     setSaving(true);
     setBulkError(null);
+    setBulkErrorOffline(false);
     try {
       const supabase = createClient();
       const { data, error: sessionError } = await supabase.auth.getSession();
@@ -199,11 +219,17 @@ export function GalleryBrowse({
           tCommon("fetchFailedStatus", { status: String(res.status) }),
         );
       }
+      flashSuccess(tCommon("bulkUpdatedFlash"));
       exitSelectMode();
       router.refresh();
     } catch (e: unknown) {
+      const offline = isLikelyOfflineError(e);
+      setBulkErrorOffline(offline);
       setBulkError(
-        e instanceof Error ? e.message : tCommon("fetchFailed"),
+        networkUserMessage(e, {
+          offline: tCommon("offlineHint"),
+          fallback: tCommon("fetchFailed"),
+        }),
       );
     } finally {
       setSaving(false);
@@ -214,6 +240,7 @@ export function GalleryBrowse({
   async function loadMore() {
     setLoading(true);
     setError(null);
+    setErrorOffline(false);
     try {
       const supabase = createClient();
       const { data, error: sessionError } = await supabase.auth.getSession();
@@ -247,8 +274,13 @@ export function GalleryBrowse({
       setOffset(nextOffset);
       setHasMore(Boolean(body.has_more));
     } catch (e: unknown) {
+      const offline = isLikelyOfflineError(e);
+      setErrorOffline(offline);
       setError(
-        e instanceof Error ? e.message : tCommon("fetchFailed"),
+        networkUserMessage(e, {
+          offline: tCommon("offlineHint"),
+          fallback: tCommon("fetchFailed"),
+        }),
       );
     } finally {
       setLoading(false);
@@ -256,7 +288,14 @@ export function GalleryBrowse({
   }
 
   return (
-    <div className="stack-density">
+    <div
+      className={[
+        "stack-density",
+        selectionMode
+          ? "pb-[calc(8rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
+          : "",
+      ].join(" ")}
+    >
       {selectionMode ? (
         <GalleryBulkBar
           selectedCount={selectedIds.size}
@@ -271,6 +310,7 @@ export function GalleryBrowse({
           picking={picking}
           saving={saving}
           error={bulkError}
+          errorOffline={bulkErrorOffline}
           onSelectAllPage={selectAllPage}
           onSelectFiltered={() => void selectFilteredResults()}
           onToggleShowSelectedOnly={() =>
@@ -298,6 +338,10 @@ export function GalleryBrowse({
             setSelectionTruncated(false);
           }}
           onExitSelectMode={exitSelectMode}
+          onRetryError={() => {
+            const body = lastBulkBodyRef.current;
+            if (body) void applyBulkPatch(body);
+          }}
         />
       ) : (
         <div>
@@ -316,6 +360,7 @@ export function GalleryBrowse({
         items={displayItems}
         listQuery={listQuery}
         layout={galleryLayout}
+        imageFit={galleryImageFit}
         cardFields={cardFields}
         selectionMode={selectionMode}
         selectedIds={selectedIds}
@@ -327,9 +372,11 @@ export function GalleryBrowse({
         </p>
       ) : null}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
+        <NetworkRetryNotice
+          message={error}
+          offline={errorOffline}
+          onRetry={() => void loadMore()}
+        />
       ) : null}
       {hasMore && !showSelectedOnly ? (
         <div className="flex justify-center">

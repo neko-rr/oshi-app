@@ -1,8 +1,7 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AppChrome from "@/components/layout/AppChrome";
 import { DocumentLang } from "@/components/layout/DocumentLang";
 import { AppPreferencesRoot } from "@/components/layout/AppPreferencesRoot";
 import { routing } from "@/i18n/routing";
@@ -29,11 +28,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <NextIntlClientProvider locale={locale} messages={messages}>
       <DocumentLang locale={locale} />
       <AppPreferencesRoot>
-        <Header />
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-density-main">
-          {children}
-        </main>
-        <Footer />
+        <AppChrome>{children}</AppChrome>
       </AppPreferencesRoot>
     </NextIntlClientProvider>
   );

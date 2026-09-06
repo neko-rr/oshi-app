@@ -13,5 +13,6 @@
 | [dashboard.md](dashboard.md) | ダッシュボード |
 | [privacy.md](privacy.md) | プライバシーポリシー |
 | [licenses.md](licenses.md) | OSS／外部サービスの表記 |
+| [responsive_web.md](responsive_web.md) | スマホ縦横・下部タブ・その他ハブ |
 
 満たしたら対応機能の `feature_status` を上げる（語彙は `meta/status_vocabulary.md`）。

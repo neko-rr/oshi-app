@@ -8,6 +8,7 @@ import { DisplaySettingsPanel } from "@/components/settings/DisplaySettingsPanel
 import { LocaleSwitcher } from "@/components/settings/LocaleSwitcher";
 import { OshiAccentPanel } from "@/components/settings/OshiAccentPanel";
 import { ResidenceSettingsPanel } from "@/components/settings/ResidenceSettingsPanel";
+import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
 import { createClient } from "@/lib/client";
 
 export default function AppearanceSettingsPage() {
@@ -52,6 +53,8 @@ export default function AppearanceSettingsPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
       </div>
+
+      <GuestContextNotice variant="localOnly" />
 
       <section className="stack-density">
         <h2 className="text-lg font-semibold tracking-tight">

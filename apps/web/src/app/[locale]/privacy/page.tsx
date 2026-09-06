@@ -72,6 +72,19 @@ export default async function PrivacyPage({
       </section>
 
       <section className="space-y-2">
+        <h2 className="text-lg font-semibold">{t("deleteTitle")}</h2>
+        <p>{t("deleteBody")}</p>
+        <p>
+          <Link
+            href="/settings/delete-account"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            {t("deleteLink")}
+          </Link>
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">{t("contactTitle")}</h2>
         <p>{t("contactBody")}</p>
       </section>

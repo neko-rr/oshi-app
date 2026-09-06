@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import theme_service
 
 router = APIRouter(tags=["theme-settings"])
@@ -32,7 +32,7 @@ def _err(exc: Exception) -> HTTPException:
 
 @router.get("/theme-settings")
 def get_theme_settings(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -47,7 +47,7 @@ def get_theme_settings(
 @router.put("/theme-settings")
 def put_theme_settings(
     body: ThemeSettingsBody,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:

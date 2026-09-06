@@ -3,6 +3,13 @@
   "updated_note": "Lab 案の本番採用状態。エージェントが承認後に更新。語彙は design-adoption skill。",
   "screens": [
     {
+      "path": "/ (shell)",
+      "lab_variant": "a",
+      "status": "adopted",
+      "notes_ja": "A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持",
+      "updated_at": "2026-09-06"
+    },
+    {
       "path": "/gallery",
       "lab_variant": "b",
       "status": "adopted",
@@ -13,15 +20,15 @@
       "path": "/gallery/[registered_product_id]",
       "lab_variant": "b",
       "status": "adopted",
-      "notes_ja": "B: ヒーロー写真＋details で編集。一覧クエリ付き戻る",
-      "updated_at": "2026-09-02"
+      "notes_ja": "B: ヒーロー写真＋details で編集。一覧クエリ付き戻る。フルスクリーン拡大追加",
+      "updated_at": "2026-09-06"
     },
     {
       "path": "/register",
-      "lab_variant": null,
-      "status": "not_started",
-      "notes_ja": "",
-      "updated_at": null
+      "lab_variant": "a",
+      "status": "partial",
+      "notes_ja": "写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き）",
+      "updated_at": "2026-09-06"
     },
     {
       "path": "/dashboard",
@@ -32,10 +39,10 @@
     },
     {
       "path": "/settings",
-      "lab_variant": null,
-      "status": "not_started",
-      "notes_ja": "ハブ本体。テーマは /settings/theme",
-      "updated_at": null
+      "lab_variant": "a",
+      "status": "adopted",
+      "notes_ja": "その他ハブ: 分析・設定・ログアウト・法務。下部タブ「その他」の着地",
+      "updated_at": "2026-09-06"
     },
     {
       "path": "/settings/theme",

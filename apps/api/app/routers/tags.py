@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from app.deps.auth import AuthenticatedUser, get_access_token, get_current_user
+from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import tag_service
 
 router = APIRouter(tags=["tags"])
@@ -66,7 +66,7 @@ def _err(exc: Exception) -> HTTPException:
 
 @router.get("/color-tags")
 def get_color_tags(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -81,7 +81,7 @@ def get_color_tags(
 @router.put("/color-tags")
 def put_color_tags(
     body: ColorTagsSaveRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -97,7 +97,7 @@ def put_color_tags(
 
 @router.get("/category-tags")
 def get_category_tags(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -112,7 +112,7 @@ def get_category_tags(
 @router.put("/category-tags/order")
 def put_category_tags_order(
     body: TagOrderRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -129,7 +129,7 @@ def put_category_tags_order(
 @router.post("/category-tags/restore-preset")
 def post_restore_category_preset(
     body: RestorePresetRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -146,7 +146,7 @@ def post_restore_category_preset(
 @router.post("/category-tags", status_code=status.HTTP_201_CREATED)
 def post_category_tag(
     body: CategoryCreate,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -166,7 +166,7 @@ def post_category_tag(
 def patch_category_tag(
     category_tag_id: int,
     body: CategoryUpdate,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -186,7 +186,7 @@ def patch_category_tag(
 @router.delete("/category-tags/{category_tag_id}")
 def remove_category_tag(
     category_tag_id: int,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -202,7 +202,7 @@ def remove_category_tag(
 
 @router.get("/storage-locations")
 def get_storage_locations(
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -217,7 +217,7 @@ def get_storage_locations(
 @router.put("/storage-locations/order")
 def put_storage_locations_order(
     body: TagOrderRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -234,7 +234,7 @@ def put_storage_locations_order(
 @router.post("/storage-locations/restore-preset")
 def post_restore_storage_preset(
     body: RestorePresetRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -251,7 +251,7 @@ def post_restore_storage_preset(
 @router.post("/storage-locations", status_code=status.HTTP_201_CREATED)
 def post_storage_location(
     body: StorageLocationCreate,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -270,7 +270,7 @@ def post_storage_location(
 def patch_storage_location(
     storage_location_id: int,
     body: StorageLocationUpdate,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:
@@ -289,7 +289,7 @@ def patch_storage_location(
 @router.delete("/storage-locations/{storage_location_id}")
 def remove_storage_location(
     storage_location_id: int,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(require_permanent_user),
     access_token: str = Depends(get_access_token),
 ) -> dict:
     try:

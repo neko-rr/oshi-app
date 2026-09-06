@@ -30,16 +30,25 @@
     {
       "id": "responsive_web",
       "phase": "must",
-      "status": "partial",
+      "status": "shipped",
       "title_ja": "スマホ対応 Web",
       "evidence_paths": [
         "apps/web/src/components/layout/Header.tsx",
-        "apps/web/src/app"
+        "apps/web/src/components/layout/BottomTabBar.tsx",
+        "apps/web/src/components/layout/AppChrome.tsx",
+        "apps/web/src/app/[locale]/layout.tsx",
+        "docs/product/acceptance/responsive_web.md",
+        "apps/web/e2e/responsive_web.spec.ts"
       ],
       "expected_web_paths": [
-        "/"
+        "/",
+        "/gallery",
+        "/register",
+        "/search",
+        "/settings"
       ],
-      "expected_api_paths": []
+      "expected_api_paths": [],
+      "notes": "下部タブ Lab A 採用。縦横・その他ハブ・横長写真 aspect。"
     },
     {
       "id": "i18n_web",
@@ -253,8 +262,11 @@
       "status": "shipped",
       "title_ja": "登録フロー",
       "evidence_paths": [
-        "apps/web/src/app/register/page.tsx",
+        "apps/web/src/app/[locale]/register/page.tsx",
         "apps/web/src/components/register/RegisterWizard.tsx",
+        "apps/web/src/components/register/StepPhoto.tsx",
+        "apps/web/src/components/register/buildContinueDraft.ts",
+        "apps/web/src/components/barcode/BarcodeScanner.tsx",
         "apps/web/src/components/register/assist/runAssistPipeline.ts",
         "docs/product/flows/register.md",
         "docs/product/acceptance/register.md"
@@ -266,7 +278,8 @@
         "/products",
         "/photos",
         "/assist/vision/describe"
-      ]
+      ],
+      "notes": "写真プレビュー・続けて登録で収納/カテゴリ/色/通貨引き継ぎ・スキャナ片手配置"
     },
     {
       "id": "gallery",
@@ -308,6 +321,67 @@
         "/display-settings"
       ],
       "notes": "gallery_show_name / gallery_show_tags / gallery_show_price。既定 ON。名前 OFF 時も a11y 名は維持。"
+    },
+    {
+      "id": "gallery_image_fit",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー写真フィット（はみ出し少なめ）",
+      "evidence_paths": [
+        "supabase/migrations/20260906150000_gallery_image_fit.sql",
+        "apps/api/app/services/display_settings_service.py",
+        "apps/web/src/lib/galleryImageFit.ts",
+        "apps/web/src/components/ProductGalleryGrid.tsx",
+        "apps/web/src/components/settings/DisplaySettingsPanel.tsx",
+        "docs/product/acceptance/gallery.md",
+        "docs/product/acceptance/settings.md"
+      ],
+      "expected_web_paths": [
+        "/settings/theme",
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/display-settings"
+      ],
+      "notes": "gallery_image_fit cover|contain。large レイアウトは常に contain。端末間同期。"
+    },
+    {
+      "id": "gallery_detail_neighbors",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "詳細の隣製品ナビ（スワイプ）",
+      "evidence_paths": [
+        "apps/web/src/lib/galleryBrowseOrder.ts",
+        "apps/web/src/components/gallery/ProductDetailNeighborNav.tsx",
+        "apps/web/src/app/[locale]/gallery/[registered_product_id]/page.tsx",
+        "docs/product/acceptance/product_detail.md",
+        "docs/product/flows/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery/[registered_product_id]"
+      ],
+      "expected_api_paths": [],
+      "notes": "sessionStorage の一覧並び。前後ボタン・スワイプ・矢印キー。ライトボックス中はスキップ。"
+    },
+    {
+      "id": "gallery_recent_filters",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "最近使った検索・絞込条件",
+      "evidence_paths": [
+        "apps/web/src/lib/galleryRecentQueries.ts",
+        "apps/web/src/components/gallery/GalleryRecentFilters.tsx",
+        "apps/web/src/app/[locale]/gallery/page.tsx",
+        "apps/web/src/app/[locale]/search/page.tsx",
+        "docs/product/acceptance/gallery.md",
+        "docs/product/acceptance/search.md"
+      ],
+      "expected_web_paths": [
+        "/gallery",
+        "/search"
+      ],
+      "expected_api_paths": [],
+      "notes": "localStorage 最大8件。保存ビューとは別。"
     },
     {
       "id": "gallery_filters_v2",
@@ -434,8 +508,10 @@
       "status": "shipped",
       "title_ja": "製品詳細",
       "evidence_paths": [
-        "apps/web/src/app/gallery/[registered_product_id]/page.tsx",
+        "apps/web/src/app/[locale]/gallery/[registered_product_id]/page.tsx",
         "apps/web/src/components/ProductDetailEditor.tsx",
+        "apps/web/src/components/gallery/ProductDetailHero.tsx",
+        "apps/web/src/components/gallery/ProductPhotoLightbox.tsx",
         "docs/product/acceptance/product_detail.md"
       ],
       "expected_web_paths": [
@@ -443,7 +519,8 @@
       ],
       "expected_api_paths": [
         "/products/{registered_product_id}"
-      ]
+      ],
+      "notes": "ヒーロー写真フルスクリーン拡大（ピンチ / +/-）。隣製品ナビ（スワイプ／前後）"
     },
     {
       "id": "storage_locations",
@@ -646,14 +723,23 @@
     },
     {
       "id": "account_delete",
-      "phase": "later",
-      "status": "deferred",
+      "phase": "must",
+      "status": "shipped",
       "title_ja": "データ削除・退会",
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/api/app/routers/account.py",
+        "apps/api/app/services/account_delete_service.py",
+        "apps/api/app/infra/supabase_admin.py",
+        "apps/web/src/app/[locale]/settings/delete-account/page.tsx",
+        "apps/web/src/components/settings/DeleteAccountPanel.tsx",
+        "docs/product/flows/account_delete.md"
+      ],
       "expected_web_paths": [
         "/settings/delete-account"
       ],
-      "expected_api_paths": []
+      "expected_api_paths": [
+        "/account"
+      ]
     },
     {
       "id": "premium",
@@ -700,6 +786,27 @@
       "expected_web_paths": [],
       "expected_api_paths": [],
       "notes": "法定通貨枠に押し込めない。別モデル。Must 本線ではやらない。"
+    },
+    {
+      "id": "guest_onboarding",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ゲスト開始と本登録ゲート",
+      "evidence_paths": [
+        "docs/product/flows/guest.md",
+        "apps/api/app/deps/auth.py",
+        "apps/web/src/app/[locale]/auth/upgrade/page.tsx",
+        "apps/web/src/components/auth/GuestStartButton.tsx",
+        "apps/web/src/components/auth/RegistrationRequiredDialog.tsx",
+        "supabase/migrations/20260906200000_reject_anonymous_rls.sql"
+      ],
+      "expected_web_paths": [
+        "/auth/upgrade"
+      ],
+      "expected_api_paths": [
+        "/me"
+      ],
+      "notes": "Anonymous Sign-In。業務 API/RLS は is_anonymous 拒否。退会はゲスト可。"
     },
     {
       "id": "auth_session",

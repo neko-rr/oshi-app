@@ -22,6 +22,7 @@ import {
   landingPath,
   sanitizeLandingPage,
 } from "@/lib/displayPrefs";
+import { GuestStartButton } from "@/components/auth/GuestStartButton";
 
 function apiBase(): string {
   return (
@@ -131,6 +132,16 @@ export function LoginForm({
               >
                 {t("signUp")}
               </Link>
+            </div>
+            <div className="mt-4 border-t border-border pt-4">
+              <p className="mb-2 text-center text-sm text-muted-foreground">
+                {t("guestHint")}
+              </p>
+              <GuestStartButton
+                className="flex w-full flex-col items-stretch"
+                redirectTo="/register"
+                variant="outline"
+              />
             </div>
           </form>
         </CardContent>

@@ -1,4 +1,41 @@
 {
+  "Guest": {
+    "startAsGuest": "ゲストではじめる",
+    "starting": "開始中…",
+    "startError": "ゲスト開始に失敗しました。Anonymous Sign-In が有効か確認してください。",
+    "banner": "ゲスト中です。保存や API 利用には本登録が必要です。",
+    "goUpgrade": "本登録する",
+    "gateTitle": "本登録が必要です",
+    "gateGeneric": "この操作には本登録が必要です。",
+    "gateSave": "製品を保存するには本登録が必要です。",
+    "gatePhoto": "写真をアップロードするには本登録が必要です。",
+    "gateBarcode": "バーコード照合には本登録が必要です。",
+    "gateAssist": "アシスト機能には本登録が必要です。",
+    "gateClose": "閉じる",
+    "noticeLocalOnly": "ゲスト中の見た目・表示設定はこの端末にだけ保存されます。本登録すると端末間で同期できます。",
+    "noticeServerRequired": "この画面の操作（タグ・書き出し・分析など）には本登録が必要です。"
+  },
+  "GuestUpgrade": {
+    "metaTitle": "本登録 | oshi-app",
+    "title": "本登録",
+    "description": "ゲストのままメールを紐づけて、データを保存できるようにします。",
+    "loading": "読み込み中…",
+    "backHome": "ホームへ",
+    "email": "メールアドレス",
+    "sendVerify": "確認メールを送る",
+    "sending": "送信中…",
+    "checkEmail": "{email} に確認メールを送りました。リンクを開いてから続行してください。",
+    "checkEmailHint": "メール確認後、下のボタンでパスワード設定へ進めます。",
+    "verifiedContinue": "確認したのでパスワードを設定する",
+    "password": "パスワード",
+    "passwordRepeat": "パスワード（確認）",
+    "setPassword": "パスワードを設定して完了",
+    "saving": "保存中…",
+    "passwordMismatch": "パスワードが一致しません",
+    "verifyFirst": "先にメール確認を完了してください",
+    "emailTaken": "このメールは既に登録されています。ログインしてください。",
+    "goLogin": "ログインへ"
+  },
   "Common": {
     "loading": "読み込み中…",
     "saving": "保存中…",
@@ -43,10 +80,17 @@
     "presetBadge": "初期",
     "skip": "スキップ",
     "next": "次へ",
-    "home": "ホーム"
+    "home": "ホーム",
+    "retry": "再試行",
+    "savedFlash": "保存しました",
+    "registeredFlash": "登録しました",
+    "bulkUpdatedFlash": "一括更新しました",
+    "offlineHint": "通信できません。電波やWi‑Fiを確認して再試行してください。",
+    "offlineBanner": "オフラインです。接続が戻ったら再試行できます。"
   },
   "Nav": {
     "ariaMain": "メイン",
+    "ariaTabs": "メイン（タブ）",
     "home": "ホーム",
     "homeShort": "Home",
     "gallery": "ギャラリー",
@@ -59,6 +103,7 @@
     "dashboardShort": "分析",
     "settings": "設定",
     "settingsShort": "設定",
+    "more": "その他",
     "login": "ログイン",
     "logout": "ログアウト",
     "loggingOut": "ログアウト中…"
@@ -75,6 +120,8 @@
     "statsBarcodes": "ユニークバーコード: {count}",
     "statsUnavailable": "統計を表示できません",
     "login": "ログイン",
+    "guestHint": "ゲストでも画面を触れます。保存には本登録が必要です。",
+    "upgrade": "本登録する",
     "gallery": "ギャラリー",
     "register": "登録",
     "search": "検索",
@@ -91,6 +138,7 @@
     "submitting": "ログイン中…",
     "signUpPrompt": "アカウントをお持ちでない方",
     "signUp": "新規登録",
+    "guestHint": "まずはゲストではじめることもできます。",
     "genericError": "エラーが発生しました"
   },
   "Appearance": {
@@ -290,6 +338,7 @@
     "uiDensityHint": "行間・余白がまとめて変わります",
     "listSort": "一覧の並び",
     "galleryLayout": "ギャラリー表示",
+    "galleryImageFit": "写真のはみ出し",
     "galleryCardFields": "カードに表示",
     "galleryCardFieldsHint": "カードに載せる情報。写真だけの表示もできます",
     "galleryCardFieldOptions": {
@@ -329,6 +378,14 @@
       "large": "写真を大きく",
       "list": "情報多めの行表示"
     },
+    "galleryImageFitOptions": {
+      "cover": "枠いっぱい",
+      "contain": "はみ出し少なめ"
+    },
+    "galleryImageFitHints": {
+      "cover": "枠に合わせて切る（横長は上下が切れやすい）",
+      "contain": "写真全体が見える（余白が出ることがある）。大きめ表示は常にこちら"
+    },
     "landingPageOptions": {
       "home": "ホーム",
       "gallery": "ギャラリー",
@@ -365,8 +422,10 @@
     "yellow-dark": "イエロー（暗）"
   },
   "SettingsIndex": {
-    "title": "設定",
-    "intro": "見た目・登録・タグ・収納・データ・アカウント",
+    "title": "その他",
+    "intro": "分析・見た目・登録・タグ・収納・データ・アカウント・法務",
+    "sectionExplore": "みる・分析",
+    "dashboard": "ダッシュボード",
     "appearance": "見た目",
     "appearanceHint": "テーマ・推し色・文字サイズ・密度・言語・居住地",
     "sectionRegister": "登録",
@@ -380,6 +439,7 @@
     "changePassword": "パスワード変更",
     "sectionData": "データ",
     "dataExport": "データの書き出し",
+    "deleteAccount": "退会・データ削除",
     "sectionLegal": "法務",
     "privacy": "プライバシーポリシー",
     "licenses": "ライセンス・表記",
@@ -409,6 +469,26 @@
     "errorFailed": "書き出しに失敗しました。時間をおいて再度お試しください。",
     "errorTimeout": "準備に時間がかかりすぎました。件数が多い場合は一覧書き出しをご利用ください。",
     "errorGeneric": "書き出しに失敗しました。通信状況を確認して再度お試しください。"
+  },
+  "DeleteAccount": {
+    "title": "退会・データ削除",
+    "intro": "アカウントと登録データをすべて削除します。この操作は取り消せません。",
+    "loading": "読み込み中…",
+    "back": "設定へ戻る",
+    "warningTitle": "完全に削除されます",
+    "warningBody": "次のものがすべて消え、同じアカウントでは復元できません。",
+    "warningItemData": "登録したグッズ・タグ・収納・設定",
+    "warningItemPhotos": "アップロードした写真と書き出しファイル",
+    "warningItemAuth": "ログイン用のアカウント（メール等）",
+    "warningItemImmediate": "猶予期間はありません（即時削除）",
+    "exportHint": "必要なデータは先に <link>データの書き出し</link> で手元に残してください。",
+    "confirmLabel": "確認のため DELETE と入力",
+    "confirmHint": "半角大文字の DELETE のみ有効です。",
+    "submit": "退会してすべて削除する",
+    "working": "削除しています…",
+    "errorUnauthorized": "ログインの有効期限が切れています。再度ログインしてください。",
+    "errorUnavailable": "退会機能が一時的に使えません。時間をおいて再度お試しください。",
+    "errorGeneric": "退会に失敗しました。通信状況を確認して再度お試しください。"
   },
   "RegisterDefaults": {
     "title": "登録の進め方",
@@ -510,7 +590,10 @@
       "title": "手順 2 — 正面写真",
       "intro": "スマホではカメラが開きます。PC ではファイル選択もできます。なくても登録できます。",
       "label": "正面写真（撮影またはアップロード）",
-      "selected": "選択中: {name}"
+      "selected": "選択中: {name}",
+      "previewAlt": "選択した正面写真のプレビュー",
+      "retake": "撮り直し",
+      "confirmThumbAlt": "登録する写真"
     },
     "confirm": {
       "title": "手順 6 — 確認と本登録",
@@ -530,20 +613,21 @@
       "register": "登録する",
       "continueRegister": "続けて登録",
       "gallery": "ギャラリーへ",
-      "registeredSuccess": "登録しました（ID: {id}）。続けて登録するかギャラリーへ進めます。",
+      "registeredSuccess": "登録しました。続けて次のグッズへ進めます。",
       "registerFailed": "登録に失敗しました",
       "photoUploadFailed": "写真アップロード失敗: {detail}",
       "productCreateFailed": "製品登録失敗: {detail}"
     },
     "scanner": {
-      "engineNative": "ネイティブ読取を使用します",
-      "engineZxing": "互換モード（ZXing）で読取します",
-      "cameraUnsupported": "このブラウザではカメラを使えません。番号入力か画像を使ってください。",
-      "cameraStartFailed": "カメラを開始できませんでした。権限を許可するか、番号入力・画像を使ってください。",
-      "imageDecodeFailed": "画像からバーコードを読めませんでした。別の画像か番号入力を試してください。",
+      "engineNative": "ネイティブ読取",
+      "engineZxing": "互換読取（ZXing）",
+      "cameraUnsupported": "このブラウザではカメラ不可。番号入力か画像を使ってください。",
+      "cameraStartFailed": "カメラを開始できません。権限か番号入力を試してください。",
+      "imageDecodeFailed": "画像から読めません。別画像か番号入力を試してください。",
       "startCamera": "カメラで読取",
       "stopCamera": "カメラを止める",
-      "uploadLabel": "バーコード画像をアップロード"
+      "uploadLabel": "バーコード画像をアップロード",
+      "engineDetails": "読取エンジン"
     }
   },
   "TagPresets": {
@@ -575,6 +659,7 @@
     "titleFallback": "ギャラリー",
     "subtitle": "写真をひらいて、推しの記憶をつなぐ",
     "registerCta": "登録する",
+    "filtersToggle": "絞り込み・並び・保存ビュー",
     "registeredBanner": "製品 #{id} を登録しました。",
     "supabaseMissing": "Supabase の NEXT_PUBLIC_* を設定すると一覧を表示できます。",
     "homeLink": "ホームへ",
@@ -582,6 +667,7 @@
     "listLoadFailed": "製品一覧の取得に失敗しました（API / Supabase 設定を確認）",
     "emptyFiltered": "条件に一致する製品はありません。",
     "empty": "まだ製品がありません。登録から追加できます。",
+    "emptyGuest": "ゲスト中は製品を保存できません。本登録するとギャラリーに残せます。",
     "clearFilters": "条件をクリア",
     "filterSummaryLabel": "いまの条件: ",
     "filterSummarySep": "・",
@@ -590,6 +676,7 @@
     "filterSummaryStorage": "収納{count}",
     "filterSummaryColor": "色{count}",
     "registerLink": "製品を登録する",
+    "upgradeLink": "本登録する",
     "loadMore": "もっと見る",
     "category": "カテゴリ",
     "storage": "収納",
@@ -622,12 +709,24 @@
     "bulkPickCategoryHint": "付け直すカテゴリ",
     "bulkNoStorage": "収納なし",
     "bulkNoCategory": "カテゴリなし",
+    "recentFilters": "最近使った条件",
+    "recentFiltersClear": "履歴を消す",
+    "recentFiltersEmpty": "まだ履歴はありません",
     "noImage": "画像なし",
     "productFallback": "製品 #{id}"
   },
   "ProductDetail": {
     "back": "← ギャラリー",
     "photoAlt": "製品写真",
+    "lightboxTitle": "写真を拡大",
+    "openLightbox": "写真を拡大表示",
+    "tapToExpand": "タップで拡大",
+    "closeLightbox": "閉じる",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "prevProduct": "前の製品",
+    "nextProduct": "次の製品",
+    "neighborNav": "隣の製品へ",
     "registeredAt": "登録日: {date}",
     "registeredAtPrefix": "登録日:",
     "registeredAtUnknown": "登録日不明",
@@ -669,7 +768,10 @@
     "toGallery": "ギャラリー一覧へ",
     "formLabel": "製品を検索",
     "formPlaceholder": "名前・カテゴリ・収納場所",
-    "formSubmit": "検索"
+    "formSubmit": "検索",
+    "recentTitle": "最近の検索・条件",
+    "emptyGuest": "ゲスト中は自分の製品を検索できません。本登録すると検索できます。",
+    "upgradeLink": "本登録する"
   },
   "Dashboard": {
     "title": "ダッシュボード",
@@ -682,7 +784,9 @@
     "categoryTags": "カテゴリータグ (category_tags)",
     "storageLocations": "収納場所 (storage_locations)",
     "colorTags": "カラータグ (color_tags)",
-    "meta": "メタ (meta)"
+    "meta": "メタ (meta)",
+    "emptyGuest": "ゲスト中は集計を表示できません。本登録するとダッシュボードが使えます。",
+    "upgradeLink": "本登録する"
   },
   "ForgotPassword": {
     "successTitle": "メールを確認してください",
@@ -744,7 +848,7 @@
     "metaTitle": "プライバシーポリシー | oshi-app",
     "metaDescription": "oshi-app のプライバシー方針",
     "title": "プライバシーポリシー",
-    "lastUpdated": "最終更新: 2026-09-01",
+    "lastUpdated": "最終更新: 2026-09-06",
     "overviewTitle": "概要",
     "overviewBody": "oshi-app（以下「本サービス」）は、推し活グッズの登録・整理を目的とした Web アプリです。本ページでは、取り扱う情報と利用目的を説明します。",
     "collectTitle": "取得する情報",
@@ -758,6 +862,9 @@
     "photosBody": "アップロードされた写真を、第三者の機械学習モデルの<strong>再学習・データセット化の目的で外部に残す実装は行いません</strong>。アシスト機能（画像説明など）を利用する場合でも、本保存は利用者の操作に依存し、外部アシストの成功を必須にしません。",
     "isolationTitle": "データの分離",
     "isolationBody": "各利用者のデータはログインユーザー（JWT の <code>members_id</code>）単位で分離され、他の利用者からは見えません（Row Level Security）。",
+    "deleteTitle": "退会・データの削除",
+    "deleteBody": "設定の「退会・データ削除」から、アカウントと登録データ（写真・書き出しファイルを含む）を即時に削除できます。削除後の復元はできません。必要なデータは事前に書き出してください。",
+    "deleteLink": "退会・データ削除へ",
     "contactTitle": "お問い合わせ",
     "contactBody": "本方針に関するお問い合わせは、アプリ運営者までご連絡ください。（連絡先の詳細は今後の公開時に追記します。）",
     "linkLicenses": "ライセンス・表記",

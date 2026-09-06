@@ -9,8 +9,9 @@
 | 1 | **UI/UX・配置・部品** — shadcn ベース、Lab で3案比較 |
 | 2 | **色** — テーマでセマンティック変数 **一式**を切替（[todo-app](https://github.com/neko-rr/todo-app) 方式）。既定は緑系 `default`。画面に hex 直書き禁止 |
 | 3 | **動き** — 短い有用な反応は残す。長い演出・本線の遊び尽くしはしない（[motion.md](docs/design/motion.md)） |
-| 4 | **蓄積** — 要望は **pending 可** → 採用分だけ docs にルール化 |
-| 5 | **a11y** — WCAG 2.2 AA 目標。最新は公式を WebFetch（skill `design-a11y`） |
+| 4 | **スマホ Web（店頭）** — 下部タブ・写真 fit・隣スワイプ・短い成功／再試行（[web-phone-ux.md](docs/design/web-phone-ux.md)） |
+| 5 | **蓄積** — 要望は **pending 可** → 採用分だけ docs にルール化 |
+| 6 | **a11y** — WCAG 2.2 AA 目標。最新は公式を WebFetch（skill `design-a11y`） |
 
 **カラータグ（製品ラベル）とテーマ色は別。** カラータグ枠数は勝手に変えない。  
 「primary/ring だけ差し替え」は **誤り**（正は [themes.md](docs/design/themes.md)）。
@@ -21,11 +22,12 @@
 2. 原則 → [principles.md](docs/design/principles.md)  
 3. テーマ → [themes.md](docs/design/themes.md)  
 4. 動き → [motion.md](docs/design/motion.md)  
-5. 部品 → [components.md](docs/design/components.md) / アイコン → [icons.md](docs/design/icons.md)  
-6. カラータグ境界 → [oshi-accents.md](docs/design/oshi-accents.md)  
-7. 比較 → [compare-workflow.md](docs/design/compare-workflow.md)  
-8. **要望・未決** → [feedback/README.md](docs/design/feedback/README.md)  
-9. **a11y** → [a11y.md](docs/design/a11y.md)  
+5. スマホ Web（店頭） → [web-phone-ux.md](docs/design/web-phone-ux.md)  
+6. 部品 → [components.md](docs/design/components.md) / アイコン → [icons.md](docs/design/icons.md)  
+7. カラータグ境界 → [oshi-accents.md](docs/design/oshi-accents.md)  
+8. 比較 → [compare-workflow.md](docs/design/compare-workflow.md)  
+9. **要望・未決** → [feedback/README.md](docs/design/feedback/README.md)  
+10. **a11y** → [a11y.md](docs/design/a11y.md)  
 
 ## 開発者向け
 
