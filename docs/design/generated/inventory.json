@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T05:57:25Z",
+  "generated_at": "2026-09-08T22:36:11Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -62,6 +62,16 @@
       "is_dev": false
     },
     {
+      "path": "/auth/upgrade",
+      "file": "apps/web/src/app/[locale]/auth/upgrade/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
       "path": "/dashboard",
       "file": "apps/web/src/app/[locale]/dashboard/page.tsx",
       "has_hex_ui": false,
@@ -74,6 +84,16 @@
     {
       "path": "/dev/design-lab",
       "file": "apps/web/src/app/[locale]/dev/design-lab/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": true
+    },
+    {
+      "path": "/dev/design-lab/theme-colors",
+      "file": "apps/web/src/app/[locale]/dev/design-lab/theme-colors/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
@@ -184,6 +204,16 @@
     {
       "path": "/settings/color-tags",
       "file": "apps/web/src/app/[locale]/settings/color-tags/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/settings/delete-account",
+      "file": "apps/web/src/app/[locale]/settings/delete-account/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,
