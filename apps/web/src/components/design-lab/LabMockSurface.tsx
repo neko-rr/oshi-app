@@ -8,10 +8,16 @@ import {
   type LabUiState,
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
+import {
+  findLabThemePack,
+  labThemePackRootStyle,
+  LAB_THEME_PACKS,
+} from "@/components/design-lab/lab-theme-packs";
 import { bestButtonForeground } from "@/components/design-lab/lab-contrast";
 import LabBottomTabMock from "@/components/design-lab/LabBottomTabMock";
 import LabGalleryMock from "@/components/design-lab/LabGalleryMock";
 import LabThemeSettingsMock from "@/components/design-lab/LabThemeSettingsMock";
+import { LabUiCallout } from "@/components/design-lab/LabUiCallout";
 
 type LabMockSurfaceProps = {
   variant: LabVariantId;
@@ -21,6 +27,11 @@ type LabMockSurfaceProps = {
   oshiIndex?: number;
   onOshiIndexChange?: (index: number) => void;
   scene?: LabSceneId;
+  /** 既存テーマパック ID（LAB_THEME_PACKS） */
+  themePackId?: string;
+  onThemePackIdChange?: (id: string) => void;
+  /** 案内 UI 部品の会話用番号 */
+  showUiCallouts?: boolean;
 };
 
 const MOCK_ITEMS = [
@@ -36,48 +47,59 @@ const MOCK_ITEMS = [
 function LoggedInShell({
   platform,
   variant = "a",
+  showUiCallouts = false,
   children,
 }: {
   platform: LabPlatformId;
   variant?: LabVariantId;
+  showUiCallouts?: boolean;
   children: ReactNode;
 }) {
   const mobile = platform !== "web-pc";
   const headerPad =
     variant === "c" ? "!py-3" : variant === "b" ? "!py-2.5" : "!py-2";
+  const show = showUiCallouts;
 
   return (
     <div className="flex min-h-0 flex-col">
       <header className={`lab-surface ${headerPad}`}>
         {mobile ? (
           <div className="flex items-center justify-between gap-2">
-            <p
-              className={
-                variant === "c"
-                  ? "text-base font-bold tracking-tight"
-                  : "text-sm font-bold tracking-tight"
-              }
-            >
-              oshi-app
-            </p>
-            <span className="lab-muted text-[10px]">ログアウト</span>
+            <LabUiCallout id="header_brand" show={show}>
+              <p
+                className={
+                  variant === "c"
+                    ? "text-base font-bold tracking-tight"
+                    : "text-sm font-bold tracking-tight"
+                }
+              >
+                oshi-app
+              </p>
+            </LabUiCallout>
+            <LabUiCallout id="header_logout" show={show}>
+              <span className="lab-muted text-[10px]">ログアウト</span>
+            </LabUiCallout>
           </div>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-bold tracking-tight">oshi-app</p>
-            <nav
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]"
-              aria-label="ログイン後ナビ（見本）"
-            >
-              <span className="lab-muted">ホーム</span>
-              <span className="font-medium text-[var(--lab-primary)]">
-                ギャラリー
-              </span>
-              <span className="lab-muted">登録</span>
-              <span className="lab-muted">検索</span>
-              <span className="lab-muted">ダッシュボード</span>
-              <span className="lab-muted">設定</span>
-            </nav>
+            <LabUiCallout id="header_brand" show={show}>
+              <p className="text-sm font-bold tracking-tight">oshi-app</p>
+            </LabUiCallout>
+            <LabUiCallout id="header_nav" show={show}>
+              <nav
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]"
+                aria-label="ログイン後ナビ（見本）"
+              >
+                <span className="lab-muted">ホーム</span>
+                <span className="font-medium text-[var(--lab-primary)]">
+                  ギャラリー
+                </span>
+                <span className="lab-muted">登録</span>
+                <span className="lab-muted">検索</span>
+                <span className="lab-muted">ダッシュボード</span>
+                <span className="lab-muted">設定</span>
+              </nav>
+            </LabUiCallout>
           </div>
         )}
       </header>
@@ -92,7 +114,9 @@ function LoggedInShell({
       >
         {children}
       </div>
-      {mobile ? <LabBottomTabMock variant={variant} /> : null}
+      {mobile ? (
+        <LabBottomTabMock variant={variant} showUiCallouts={show} />
+      ) : null}
     </div>
   );
 }
@@ -101,33 +125,41 @@ function LoggedInShell({
 function AppShellScene({
   variant,
   platform,
+  showUiCallouts = false,
 }: {
   variant: LabVariantId;
   platform: LabPlatformId;
+  showUiCallouts?: boolean;
 }) {
   const mobile = platform !== "web-pc";
   return (
-    <LoggedInShell platform={platform} variant={variant}>
-      <div className="lab-surface !p-2.5">
-        <p className="text-xs font-medium">
-          {variant === "a"
-            ? "用途最短: 上部はブランドのみ。主操作は下タブ。"
-            : variant === "b"
-              ? "推し活: 登録タブをやや強調。写真余白寄り。"
-              : "ブランド整合: 余白やや広め。タブは等分で穏やか。"}
-        </p>
-        <p className="lab-muted mt-1 text-[10px]">
-          タブ順: ギャラリー → 登録 → 検索 → その他
-        </p>
-        <div
-          className={[
-            "lab-photo mt-2 w-full",
-            variant === "b" ? "aspect-[16/10]" : "aspect-[4/5]",
-            mobile ? "max-h-28" : "max-h-40",
-          ].join(" ")}
-          aria-hidden
-        />
-      </div>
+    <LoggedInShell
+      platform={platform}
+      variant={variant}
+      showUiCallouts={showUiCallouts}
+    >
+      <LabUiCallout id="shell_body" show={showUiCallouts}>
+        <div className="lab-surface !p-2.5">
+          <p className="text-xs font-medium">
+            {variant === "a"
+              ? "用途最短: 上部はブランドのみ。主操作は下タブ。"
+              : variant === "b"
+                ? "推し活: 登録タブをやや強調。写真余白寄り。"
+                : "ブランド整合: 余白やや広め。タブは等分で穏やか。"}
+          </p>
+          <p className="lab-muted mt-1 text-[10px]">
+            タブ順: ギャラリー → 登録 → 検索 → その他
+          </p>
+          <div
+            className={[
+              "lab-photo mt-2 w-full",
+              variant === "b" ? "aspect-[16/10]" : "aspect-[4/5]",
+              mobile ? "max-h-28" : "max-h-40",
+            ].join(" ")}
+            aria-hidden
+          />
+        </div>
+      </LabUiCallout>
     </LoggedInShell>
   );
 }
@@ -191,35 +223,41 @@ function OshiPicker({
   oshiIndex,
   onChange,
   showSaveHint,
+  showUiCallouts = false,
 }: {
   oshiIndex: number;
   onChange: (i: number) => void;
   showSaveHint?: boolean;
+  showUiCallouts?: boolean;
 }) {
   return (
-    <div className="lab-surface flex flex-col gap-2">
-      <p className="text-xs font-medium">推し色</p>
-      <p className="lab-muted text-xs">
-        選ぶとボタン色がすぐ変わります（全案共通）
-      </p>
-      <div className="flex flex-wrap items-center gap-2 pt-1">
-        {LAB_OSHI_SWATCHES.map((s, i) => (
-          <button
-            key={s.cssVar}
-            type="button"
-            aria-label={`推し色 ${s.label}`}
-            aria-pressed={oshiIndex === i}
-            className="lab-swatch"
-            data-active={oshiIndex === i}
-            style={{ background: `var(${s.cssVar})` }}
-            onClick={() => onChange(i)}
-          />
-        ))}
+    <LabUiCallout id="oshi_picker" show={showUiCallouts}>
+      <div className="lab-surface flex flex-col gap-2">
+        <p className="text-xs font-medium">推し色</p>
+        <p className="lab-muted text-xs">
+          選ぶとボタン色がすぐ変わります（全案共通）
+        </p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          {LAB_OSHI_SWATCHES.map((s, i) => (
+            <button
+              key={s.cssVar}
+              type="button"
+              aria-label={`推し色 ${s.label}`}
+              aria-pressed={oshiIndex === i}
+              className="lab-swatch"
+              data-active={oshiIndex === i}
+              style={{ background: `var(${s.cssVar})` }}
+              onClick={() => onChange(i)}
+            />
+          ))}
+        </div>
+        {showSaveHint ? (
+          <p className="lab-muted text-[10px]">
+            本番では保存同期あり。Lab は即時プレビュー。
+          </p>
+        ) : null}
       </div>
-      {showSaveHint ? (
-        <p className="lab-muted text-[10px]">本番では保存同期あり。Lab は即時プレビュー。</p>
-      ) : null}
-    </div>
+    </LabUiCallout>
   );
 }
 
@@ -306,6 +344,22 @@ function oshiStyle(oshiIndex: number): CSSProperties {
   };
 }
 
+function themeBaseStyle(themePackId: string): CSSProperties {
+  const pack = findLabThemePack(themePackId) ?? LAB_THEME_PACKS[0]!;
+  return labThemePackRootStyle(pack) as CSSProperties;
+}
+
+/** テーマパック一式＋（home のみ）推し色で primary 上書き */
+function composeLabColorStyle(
+  themePackId: string,
+  oshiIndex: number,
+  applyOshi: boolean,
+): CSSProperties {
+  const base = themeBaseStyle(themePackId);
+  if (!applyOshi) return base;
+  return { ...base, ...oshiStyle(oshiIndex) };
+}
+
 export default function LabMockSurface({
   variant,
   platform = "web-pc",
@@ -314,21 +368,37 @@ export default function LabMockSurface({
   oshiIndex = 0,
   onOshiIndexChange,
   scene = "home",
+  themePackId = "default",
+  onThemePackIdChange,
+  showUiCallouts = false,
 }: LabMockSurfaceProps) {
   if (scene === "theme-settings") {
     return (
       <div data-lab-variant={variant}>
-        <LabThemeSettingsMock variant={variant} uiState={uiState} />
+        <LabThemeSettingsMock
+          variant={variant}
+          uiState={uiState}
+          themeId={themePackId}
+          onThemeIdChange={onThemePackIdChange}
+          showUiCallouts={showUiCallouts}
+        />
       </div>
     );
   }
 
+  const colorStyle = composeLabColorStyle(
+    themePackId,
+    oshiIndex,
+    scene === "home",
+  );
+
   if (scene === "app-shell") {
     return (
-      <div data-lab-variant={variant} style={oshiStyle(oshiIndex)}>
+      <div data-lab-variant={variant} style={colorStyle}>
         <AppShellScene
           variant={variant}
           platform={pcWide ? "web-pc" : platform}
+          showUiCallouts={showUiCallouts}
         />
       </div>
     );
@@ -336,15 +406,17 @@ export default function LabMockSurface({
 
   if (scene === "gallery" || scene === "gallery-detail") {
     return (
-      <div data-lab-variant={variant} style={oshiStyle(oshiIndex)}>
+      <div data-lab-variant={variant} style={colorStyle}>
         <LoggedInShell
           platform={pcWide ? "web-pc" : platform}
           variant={variant}
+          showUiCallouts={showUiCallouts}
         >
           <LabGalleryMock
             variant={variant}
             uiState={uiState}
             mode={scene}
+            showUiCallouts={showUiCallouts}
           />
         </LoggedInShell>
       </div>
@@ -366,48 +438,75 @@ export default function LabMockSurface({
           <>
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="font-semibold">今日やること</p>
-                <p className="lab-muted text-xs">未整理 1 · 登録はすぐ上</p>
+                <LabUiCallout id="home_heading" show={showUiCallouts}>
+                  <p className="font-semibold">今日やること</p>
+                </LabUiCallout>
+                <LabUiCallout id="home_sub" show={showUiCallouts}>
+                  <p className="lab-muted text-xs">未整理 1 · 登録はすぐ上</p>
+                </LabUiCallout>
               </div>
-              <span className="rounded bg-[var(--lab-accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--lab-primary)]">
-                要収納 1
-              </span>
+              <LabUiCallout id="home_badge" show={showUiCallouts}>
+                <span className="rounded bg-[var(--lab-accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--lab-primary)]">
+                  要収納 1
+                </span>
+              </LabUiCallout>
             </div>
-            <button type="button" className="lab-btn-primary w-full sm:max-w-xs">
-              グッズを登録
-            </button>
+            <LabUiCallout id="home_primary" show={showUiCallouts}>
+              <button type="button" className="lab-btn-primary w-full sm:max-w-xs">
+                グッズを登録
+              </button>
+            </LabUiCallout>
           </>
         ) : null}
         {variant === "b" ? (
           <div>
-            <p className="text-lg font-semibold tracking-tight">
-              今日も推し活、いってみよう
-            </p>
-            <p className="lab-muted mt-1 text-xs">写真と推し色で自分らしく。</p>
-            <button
-              type="button"
-              className="lab-btn-primary mt-3 w-full sm:max-w-xs"
-            >
-              くわしく見る
-            </button>
+            <LabUiCallout id="home_heading" show={showUiCallouts}>
+              <p className="text-lg font-semibold tracking-tight">
+                今日も推し活、いってみよう
+              </p>
+            </LabUiCallout>
+            <LabUiCallout id="home_sub" show={showUiCallouts}>
+              <p className="lab-muted mt-1 text-xs">写真と推し色で自分らしく。</p>
+            </LabUiCallout>
+            <LabUiCallout id="home_primary" show={showUiCallouts}>
+              <button
+                type="button"
+                className="lab-btn-primary mt-3 w-full sm:max-w-xs"
+              >
+                くわしく見る
+              </button>
+            </LabUiCallout>
           </div>
         ) : null}
         {variant === "c" ? (
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-base font-semibold">コレクション</p>
-              <p className="lab-muted text-xs">
-                グッズを登録して、収納とデータをつなぎます。
-              </p>
+              <LabUiCallout id="home_heading" show={showUiCallouts}>
+                <p className="text-base font-semibold">コレクション</p>
+              </LabUiCallout>
+              <LabUiCallout id="home_sub" show={showUiCallouts}>
+                <p className="lab-muted text-xs">
+                  グッズを登録して、収納とデータをつなぎます。
+                </p>
+              </LabUiCallout>
             </div>
-            <button type="button" className="lab-btn-primary !min-h-10">
-              登録をはじめる
-            </button>
+            <LabUiCallout id="home_primary" show={showUiCallouts}>
+              <button type="button" className="lab-btn-primary !min-h-10">
+                登録をはじめる
+              </button>
+            </LabUiCallout>
           </div>
         ) : null}
 
-        <GalleryGrid items={items} variant={variant} />
-        <OshiPicker oshiIndex={oshiIndex} onChange={setOshi} showSaveHint />
+        <LabUiCallout id="home_grid" show={showUiCallouts}>
+          <GalleryGrid items={items} variant={variant} />
+        </LabUiCallout>
+        <OshiPicker
+          oshiIndex={oshiIndex}
+          onChange={setOshi}
+          showSaveHint
+          showUiCallouts={showUiCallouts}
+        />
       </div>
     ) : uiState === "success" ? (
       <div className="flex flex-col gap-3">
@@ -415,20 +514,29 @@ export default function LabMockSurface({
         <div className="opacity-70">
           <GalleryGrid items={items.slice(0, 2)} variant={variant} />
         </div>
-        <OshiPicker oshiIndex={oshiIndex} onChange={setOshi} />
+        <OshiPicker
+          oshiIndex={oshiIndex}
+          onChange={setOshi}
+          showUiCallouts={showUiCallouts}
+        />
       </div>
     ) : (
       <div className="flex flex-col gap-3">
         <StateOverlay uiState={uiState} />
-        <OshiPicker oshiIndex={oshiIndex} onChange={setOshi} />
+        <OshiPicker
+          oshiIndex={oshiIndex}
+          onChange={setOshi}
+          showUiCallouts={showUiCallouts}
+        />
       </div>
     );
 
   return (
-    <div className="text-sm" style={oshiStyle(oshiIndex)}>
+    <div className="text-sm" style={colorStyle} data-lab-variant={variant}>
       <LoggedInShell
         platform={pcWide ? "web-pc" : platform}
         variant={variant}
+        showUiCallouts={showUiCallouts}
       >
         {mainContent}
       </LoggedInShell>

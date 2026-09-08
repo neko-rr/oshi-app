@@ -14,6 +14,7 @@ import {
 } from "./auth-path-policy.ts";
 
 assert.equal(isDevOnlyPath("/dev/design-lab"), true);
+assert.equal(isDevOnlyPath("/dev/design-lab/theme-colors"), true);
 assert.equal(isDevOnlyPath("/gallery"), false);
 
 assert.equal(isAlwaysPublicPath("/privacy"), true);

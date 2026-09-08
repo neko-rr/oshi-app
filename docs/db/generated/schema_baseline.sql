@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-09-06T05:57:25.631379+00:00
+-- generated_at_utc: 2026-09-08T22:36:11.511602+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -120,7 +120,9 @@ CREATE TABLE IF NOT EXISTS public.display_settings (
   gallery_show_name boolean NOT NULL DEFAULT true,
   gallery_show_tags boolean NOT NULL DEFAULT true,
   gallery_show_price boolean NOT NULL DEFAULT true,
-  gallery_image_fit text NOT NULL DEFAULT 'cover'::text
+  gallery_image_fit text NOT NULL DEFAULT 'cover'::text,
+  keep_at_hand_count smallint NOT NULL DEFAULT 1,
+  auto_sales_desired boolean NOT NULL DEFAULT false
 );
 
 -- === gallery_view ===
@@ -198,6 +200,21 @@ CREATE TABLE IF NOT EXISTS public.photo (
   photo_high_resolution_url text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
+);
+
+-- === product_external_ref ===
+CREATE TABLE IF NOT EXISTS public.product_external_ref (
+  product_external_ref_id bigint NOT NULL,
+  members_id uuid NOT NULL,
+  registered_product_id integer NOT NULL,
+  source text NOT NULL,
+  external_item_code text,
+  product_url text NOT NULL,
+  shop_name text,
+  label text,
+  is_primary boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
 -- === product_size ===

@@ -1,7 +1,30 @@
 {
   "version": 1,
-  "updated_note": "2026-09-04: data_export shipped（設定から text/media ZIP 書き出し。再取り込みなし）。",
+  "updated_note": "2026-09-07: product_external_ref / 楽天候補UX（登録フィールド本格化）。",
   "features": [
+    {
+      "id": "product_external_ref",
+      "phase": "must",
+      "status": "partial",
+      "title_ja": "外部商品参照（楽天・任意URL）",
+      "evidence_paths": [
+        "docs/product/register_fields.md",
+        "docs/product/flows/register.md",
+        "apps/api/app/services/product_external_ref_service.py",
+        "apps/api/app/services/barcode_lookup_service.py",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "supabase/migrations/20260907120000_create_product_external_ref.sql"
+      ],
+      "expected_web_paths": [
+        "/register"
+      ],
+      "expected_api_paths": [
+        "/products",
+        "/products/{registered_product_id}",
+        "/assist/barcode/lookup"
+      ],
+      "notes": "楽天候補選択時は url/item_code/shop 必須。manual は任意。Amazon 未実装。"
+    },
     {
       "id": "data_export",
       "phase": "must",
@@ -25,7 +48,7 @@
         "/exports/{export_id}",
         "/exports/{export_id}/file"
       ],
-      "notes": "書き出しのみ。text=JSON+CSV、media=写真同梱 ZIP。format_version 付き。account_delete より先。"
+      "notes": "書き出しのみ。text=JSON+CSV、media=写真同梱 ZIP。format_version 付き。product_external_refs 含む。account_delete より先。"
     },
     {
       "id": "responsive_web",
@@ -673,11 +696,28 @@
     {
       "id": "duplicate_exchange",
       "phase": "phase2",
-      "status": "planned",
+      "status": "partial",
       "title_ja": "ダブり・交換OK",
-      "evidence_paths": [],
-      "expected_web_paths": [],
-      "expected_api_paths": []
+      "evidence_paths": [
+        "docs/product/register_fields.md",
+        "docs/product/flows/register.md",
+        "docs/product/acceptance/register.md",
+        "apps/api/app/services/product_service.py",
+        "apps/api/app/routers/products.py",
+        "apps/web/src/components/register/RegisterWizard.tsx",
+        "apps/web/src/components/ProductDetailEditor.tsx",
+        "supabase/migrations/20260907140000_display_settings_duplicate_prefs.sql"
+      ],
+      "expected_web_paths": [
+        "/register",
+        "/settings/register"
+      ],
+      "expected_api_paths": [
+        "/products",
+        "/products/duplicate-hints",
+        "/display-settings"
+      ],
+      "notes": "土台のみ。所持数・交換OK個数・欲しいフラグ・手元数設定・hints。一覧フィルタ／交換画面／CLIPは未。"
     },
     {
       "id": "storage_capacity",

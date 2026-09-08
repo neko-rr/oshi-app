@@ -50,6 +50,49 @@ def test_lookup_by_barcode_missing_access_key_alone(monkeypatch) -> None:
     http_client.assert_not_called()
 
 
+def test_normalize_item_prefers_affiliate_url_and_maps_fields() -> None:
+    """楽天レスポンスを登録推奨用 snake_case に正規化する。"""
+    raw = {
+        "itemName": "缶バッジ",
+        "catchcopy": "限定",
+        "itemPrice": 500,
+        "itemUrl": "https://item.example/plain",
+        "affiliateUrl": "https://item.example/aff",
+        "shopName": "推しショップ",
+        "itemCode": "shop:1234",
+        "genreId": 101240,
+        "mediumImageUrls": [{"imageUrl": "https://img.example/m.jpg"}],
+    }
+    normalized = barcode_lookup_service._normalize_item(raw)
+    assert normalized == {
+        "name": "缶バッジ",
+        "catchcopy": "限定",
+        "price": 500,
+        "product_url": "https://item.example/aff",
+        "shop_name": "推しショップ",
+        "external_item_code": "shop:1234",
+        "image_url": "https://img.example/m.jpg",
+        "genre_id": 101240,
+    }
+
+
+def test_normalize_item_falls_back_to_item_url_without_affiliate() -> None:
+    normalized = barcode_lookup_service._normalize_item(
+        {
+            "itemName": "アクスタ",
+            "itemPrice": 1200,
+            "itemUrl": "https://item.example/plain",
+            "shopName": "店A",
+            "itemCode": "a:1",
+            "mediumImageUrls": ["https://img.example/s.jpg"],
+        }
+    )
+    assert normalized["product_url"] == "https://item.example/plain"
+    assert normalized["image_url"] == "https://img.example/s.jpg"
+    assert "url" not in normalized
+    assert "shop" not in normalized
+
+
 def test_lookup_by_barcode_live_request_shape(monkeypatch) -> None:
     """新ドメイン・accessKey・Origin/Referer を送る形（httpx は mock）。"""
     monkeypatch.setenv("RAKUTEN_APPLICATION_ID", "e5e2671a-b454-4e6f-xxxx-xxxxxxxxxxxx")
@@ -62,7 +105,17 @@ def test_lookup_by_barcode_live_request_shape(monkeypatch) -> None:
     mock_resp = MagicMock()
     mock_resp.status_code = 200
     mock_resp.json.return_value = {
-        "Items": [{"Item": {"itemName": "缶バッジ", "itemPrice": 500}}],
+        "Items": [
+            {
+                "Item": {
+                    "itemName": "缶バッジ",
+                    "itemPrice": 500,
+                    "affiliateUrl": "https://item.example/aff",
+                    "shopName": "推しショップ",
+                    "itemCode": "shop:1234",
+                }
+            }
+        ],
     }
     mock_client = MagicMock()
     mock_client.get.return_value = mock_resp
@@ -74,7 +127,11 @@ def test_lookup_by_barcode_live_request_shape(monkeypatch) -> None:
         result = barcode_lookup_service.lookup_by_barcode("4901234567890")
 
     assert result["status"] == "success"
-    assert result["items"][0]["name"] == "缶バッジ"
+    item = result["items"][0]
+    assert item["name"] == "缶バッジ"
+    assert item["product_url"] == "https://item.example/aff"
+    assert item["shop_name"] == "推しショップ"
+    assert item["external_item_code"] == "shop:1234"
     mock_client.get.assert_called_once()
     args, kwargs = mock_client.get.call_args
     assert args[0] == barcode_lookup_service.RAKUTEN_ENDPOINT

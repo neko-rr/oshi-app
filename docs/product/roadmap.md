@@ -16,6 +16,7 @@
 | `register_flow` | 登録ウィザード | shipped |
 | `barcode_capture` | バーコード読取・番号入力 | shipped |
 | `product_lookup` | グッズ情報照合（楽天） | shipped |
+| `product_external_ref` | 外部商品URL（楽天必須セット＋任意リンク） | partial |
 | `photo_front` | 正面写真の撮影・アップロード | shipped |
 | `vision_assist` | 画像 Vision アシスト | shipped |
 | `tag_assist` | 見た目タグ・種類提案（Vision 1回） | shipped |
@@ -54,7 +55,7 @@
 | `spending` | 推しへの支出の家計簿的集計 | planned |
 | `tag_analytics` | 推し色割合などタグ分析 | planned |
 | `oshi_days` | 推し初めて何日 | planned |
-| `duplicate_exchange` | ダブり・交換 OK 数 | planned |
+| `duplicate_exchange` | ダブり・交換 OK 数 | partial |
 | `storage_capacity` | 規定サイズタグでの収納枚数計算 | planned |
 
 ## Phase 3 / Later

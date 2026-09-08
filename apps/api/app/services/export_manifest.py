@@ -25,6 +25,7 @@ PRODUCT_CORE_KEYS = frozenset(
         "purchase_price",
         "currency_code",
         "purchase_location",
+        "purchase_date",
         "memo",
         "creation_date",
         "updated_date",
@@ -34,6 +35,10 @@ PRODUCT_CORE_KEYS = frozenset(
         "category_tag_name",
         "storage_location_name",
         "color_tag_slots",
+        "registration_quantity",
+        "sales_desired_flag",
+        "sales_desired_quantity",
+        "want_object_flag",
     }
 )
 
@@ -83,6 +88,21 @@ PHOTO_CORE_KEYS = frozenset(
         "photo_thumbnail_path",
         "photo_high_resolution_path",
         "media_path",
+    }
+)
+
+EXTERNAL_REF_CORE_KEYS = frozenset(
+    {
+        "product_external_ref_id",
+        "registered_product_id",
+        "source",
+        "external_item_code",
+        "product_url",
+        "shop_name",
+        "label",
+        "is_primary",
+        "created_at",
+        "updated_at",
     }
 )
 
@@ -158,6 +178,7 @@ def build_manifest(
     product_color_tags: list[dict[str, Any]],
     photos: list[dict[str, Any]],
     include_media_paths: bool,
+    product_external_refs: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     photo_rows: list[dict[str, Any]] = []
     for photo in photos:
@@ -177,6 +198,8 @@ def build_manifest(
             row.pop("media_path", None)
         photo_rows.append(row)
 
+    external_rows = product_external_refs or []
+
     return {
         "format": FORMAT_NAME,
         "format_version": FORMAT_VERSION,
@@ -192,6 +215,9 @@ def build_manifest(
             "products": _wrap_rows(products, core_keys=PRODUCT_CORE_KEYS),
             "product_color_tags": _wrap_rows(
                 product_color_tags, core_keys=PRODUCT_COLOR_CORE_KEYS
+            ),
+            "product_external_refs": _wrap_rows(
+                external_rows, core_keys=EXTERNAL_REF_CORE_KEYS
             ),
             "photos": _wrap_rows(
                 photo_rows, core_keys=PHOTO_CORE_KEYS, rename=PHOTO_RENAME
@@ -287,6 +313,32 @@ def build_csv_files(manifest: dict[str, Any]) -> dict[str, bytes]:
         [
             [c.get("color_tag_id"), c.get("color_tag_name"), c.get("slot"), c.get("color")]
             for c in colors
+        ],
+    )
+    refs = _entity_cores(manifest, "product_external_refs")
+    files["csv/product_external_refs.csv"] = _csv_bytes(
+        [
+            "product_external_ref_id",
+            "registered_product_id",
+            "source",
+            "external_item_code",
+            "product_url",
+            "shop_name",
+            "label",
+            "is_primary",
+        ],
+        [
+            [
+                r.get("product_external_ref_id"),
+                r.get("registered_product_id"),
+                r.get("source"),
+                r.get("external_item_code"),
+                r.get("product_url"),
+                r.get("shop_name"),
+                r.get("label"),
+                r.get("is_primary"),
+            ]
+            for r in refs
         ],
     )
     return files

@@ -20,6 +20,9 @@
     "photo_edit_date": "写真編集日",
     "registered_product": "登録製品",
     "registration_quantity": "登録数量",
+    "keep_at_hand_count": "手元残数",
+    "auto_sales_desired": "余剰交換OK自動",
+    "want_object_flag": "欲しいフラグ",
     "registerable_number": "登録可能数",
     "storage_location_size_horizontal": "収納場所横サイズ",
     "storage_location_size_vertical": "収納場所縦サイズ",
@@ -202,6 +205,20 @@
     "category_tag_ids": "カテゴリタグID一覧",
     "storage_location_ids": "収納場所ID一覧",
     "color_tag_slots": "カラータグスロット一覧",
-    "q": "検索語"
+    "q": "検索語",
+    "product_external_ref": "製品外部参照",
+    "external_ref": "外部参照",
+    "external_item_code": "外部商品コード",
+    "external_item": "外部商品",
+    "product_url": "製品URL",
+    "shop_name": "店舗名",
+    "shop": "店舗",
+    "label": "ラベル",
+    "is_primary": "主フラグ",
+    "primary": "主",
+    "source": "ソース",
+    "rakuten": "楽天",
+    "amazon": "Amazon",
+    "manual": "手動"
   }
 }

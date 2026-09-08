@@ -13,6 +13,8 @@ export const DEFAULT_GALLERY_LAYOUT: GalleryLayoutId = "grid";
 export const DEFAULT_GALLERY_IMAGE_FIT: GalleryImageFitId = "cover";
 export const DEFAULT_LANDING_PAGE: LandingPageId = "home";
 export const DEFAULT_REGISTER_START_STEP: RegisterStartStepId = "barcode";
+export const DEFAULT_KEEP_AT_HAND_COUNT = 1;
+export const DEFAULT_AUTO_SALES_DESIRED = false;
 export const DEFAULT_GALLERY_SHOW = true;
 
 export const LIST_SORT_IDS: readonly ListSortId[] = [
@@ -106,6 +108,17 @@ export function sanitizeDefaultStorageLocationId(raw: unknown): number | null {
   const n = typeof raw === "number" ? raw : Number(raw);
   if (!Number.isInteger(n) || n < 1) return null;
   return n;
+}
+
+export function sanitizeKeepAtHandCount(raw: unknown): number {
+  const n = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isInteger(n) || n < 1 || n > 99) return DEFAULT_KEEP_AT_HAND_COUNT;
+  return n;
+}
+
+export function sanitizeAutoSalesDesired(raw: unknown): boolean {
+  if (typeof raw === "boolean") return raw;
+  return DEFAULT_AUTO_SALES_DESIRED;
 }
 
 /** 未指定・不正は既定 true（現状カードと同じ） */

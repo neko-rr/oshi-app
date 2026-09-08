@@ -16,15 +16,31 @@ function blankDraft(): RegisterDraft {
     file: null,
     productName: "",
     productGroupName: "",
+    worksSeriesName: "",
+    title: "",
     characterName: "",
     purchasePrice: "",
     currencyCode: "",
+    purchaseLocation: "",
+    purchaseDate: "",
     memo: "",
     selectedSlots: new Set(),
     categoryTagId: null,
     storageLocationId: null,
     visualTags: [],
     unmatchedProductType: null,
+    lookupCandidates: [],
+    selectedCandidateIndex: null,
+    rakutenProductUrl: "",
+    rakutenItemCode: "",
+    rakutenShopName: "",
+    manualProductUrl: "",
+    manualUrlLabel: "",
+    registrationQuantity: "1",
+    salesDesired: false,
+    salesDesiredQuantity: "",
+    wantObject: false,
+    salesDesiredUserTouched: false,
     fieldSources: {
       product_name: "empty",
       purchase_price: "empty",
@@ -33,14 +49,17 @@ function blankDraft(): RegisterDraft {
       memo: "empty",
       category_tag_id: "empty",
       color_tag_slots: "empty",
+      purchase_location: "empty",
+      rakuten_ref: "empty",
+      manual_url: "empty",
     },
   };
 }
 
 /**
  * 続けて登録用ドラフト。
- * 残す: 収納・カテゴリ・カラータグ枠・通貨。
- * 消す: 名前／バーコード／写真／メモ／価格／キャラ／グループ／アシスト由来。
+ * 残す: イベント束（作品シリーズ・キャラ・購入日）＋収納・カテゴリ・カラータグ枠・通貨。
+ * 消す: 製品名／グループ／タイトル／バーコード／写真／メモ／価格／購入場所／数量フラグ／URL／アシスト由来。
  */
 export function buildContinueDraft(
   prev: RegisterDraft,
@@ -53,5 +72,34 @@ export function buildContinueDraft(
   next.selectedSlots = new Set(prev.selectedSlots);
   next.storageLocationId =
     prev.storageLocationId ?? defaults.defaultStorageLocationId;
+  next.worksSeriesName = prev.worksSeriesName;
+  next.characterName = prev.characterName;
+  next.purchaseDate = prev.purchaseDate;
   return next;
+}
+
+/**
+ * 確認画面の「全部消す」。イベント束・タグ束をクリア（製品名など他フィールドは残す）。
+ * 登録済みデータは触らない。
+ */
+export function clearEventBundle(
+  prev: RegisterDraft,
+  defaults: ContinueDraftDefaults,
+): RegisterDraft {
+  return {
+    ...prev,
+    worksSeriesName: "",
+    characterName: "",
+    purchaseDate: "",
+    categoryTagId: null,
+    selectedSlots: new Set(),
+    storageLocationId: defaults.defaultStorageLocationId,
+    currencyCode: defaults.currencyCode.trim() || "",
+    fieldSources: {
+      ...prev.fieldSources,
+      character_name: "empty",
+      category_tag_id: "empty",
+      color_tag_slots: "empty",
+    },
+  };
 }

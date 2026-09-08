@@ -32,6 +32,8 @@ class DisplaySettingsBody(BaseModel):
     gallery_show_tags: bool = True
     gallery_show_price: bool = True
     gallery_image_fit: str = Field(min_length=1, max_length=32)
+    keep_at_hand_count: int = Field(default=1, ge=1, le=99)
+    auto_sales_desired: bool = False
 
 
 def _err(exc: Exception) -> HTTPException:
@@ -90,6 +92,8 @@ def put_display_settings(
             gallery_show_tags=body.gallery_show_tags,
             gallery_show_price=body.gallery_show_price,
             gallery_image_fit=body.gallery_image_fit,
+            keep_at_hand_count=body.keep_at_hand_count,
+            auto_sales_desired=body.auto_sales_desired,
         )
     except Exception as exc:
         raise _err(exc) from exc

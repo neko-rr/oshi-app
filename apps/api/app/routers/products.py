@@ -8,6 +8,7 @@ from app.schemas.products import (
     PatchProductRequest,
 )
 from app.services.product_list_filters import parse_positive_id_list
+from app.services.duplicate_hints_service import get_duplicate_hints
 from app.services.product_service import (
     bulk_patch_products_for_member,
     create_product_for_member,
@@ -101,6 +102,9 @@ def create_product(
     access_token: str = Depends(get_access_token),
 ) -> CreateProductResponse:
     try:
+        external_refs = None
+        if body.external_refs is not None:
+            external_refs = [r.model_dump() for r in body.external_refs]
         created = create_product_for_member(
             user.members_id,
             access_token=access_token,
@@ -115,10 +119,17 @@ def create_product(
             purchase_price=body.purchase_price,
             currency_code=body.currency_code,
             purchase_location=body.purchase_location,
+            purchase_date=body.purchase_date,
             memo=body.memo,
             category_tag_id=body.category_tag_id,
             storage_location_id=body.storage_location_id,
             color_tag_slots=body.color_tag_slots,
+            registration_quantity=body.registration_quantity,
+            sales_desired_flag=body.sales_desired_flag,
+            sales_desired_quantity=body.sales_desired_quantity,
+            want_object_flag=body.want_object_flag,
+            sales_desired_user_touched=body.sales_desired_user_touched,
+            external_refs=external_refs,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -158,6 +169,32 @@ def bulk_patch_products(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"code": "INTERNAL_ERROR", "message": "一括更新に失敗しました"},
+        ) from exc
+
+
+@router.get("/duplicate-hints")
+def duplicate_hints(
+    user: AuthenticatedUser = Depends(require_permanent_user),
+    access_token: str = Depends(get_access_token),
+    barcode: str | None = Query(default=None, max_length=64),
+    external_item_code: str | None = Query(default=None, max_length=200),
+) -> dict:
+    try:
+        return get_duplicate_hints(
+            members_id=user.members_id,
+            access_token=access_token,
+            barcode=barcode,
+            external_item_code=external_item_code,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "VALIDATION_ERROR", "message": str(exc)},
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"code": "INTERNAL_ERROR", "message": "所持ヒントの取得に失敗しました"},
         ) from exc
 
 
@@ -204,15 +241,26 @@ def patch_product(
         "purchase_price",
         "currency_code",
         "purchase_location",
+        "purchase_date",
         "memo",
         "barcode_number",
         "category_tag_id",
         "storage_location_id",
+        "registration_quantity",
+        "sales_desired_flag",
+        "sales_desired_quantity",
+        "want_object_flag",
     ):
         if key not in data:
             continue
-        # purchase_price / currency_code は明示 null でクリア可
-        if data[key] is None and key not in ("purchase_price", "currency_code"):
+        # purchase_price / currency_code / purchase_date は明示 null でクリア可
+        if data[key] is None and key not in (
+            "purchase_price",
+            "currency_code",
+            "purchase_date",
+            "sales_desired_quantity",
+            "registration_quantity",
+        ):
             continue
         fields[key] = data[key]
     # 価格クリア時は記録通貨も落とす（ゴミ通貨だけ残さない）
@@ -222,6 +270,15 @@ def patch_product(
         fields["category_tag_id"] = None
     if data.get("clear_storage_location"):
         fields["storage_location_id"] = None
+    if data.get("clear_purchase_date"):
+        fields["purchase_date"] = None
+    external_refs = None
+    if "external_refs" in data:
+        external_refs = (
+            [r.model_dump() for r in body.external_refs]
+            if body.external_refs is not None
+            else []
+        )
     try:
         updated = patch_product_for_member(
             user.members_id,
@@ -229,6 +286,8 @@ def patch_product(
             registered_product_id=registered_product_id,
             fields=fields,
             color_tag_slots=body.color_tag_slots,
+            external_refs=external_refs,
+            sales_desired_user_touched=bool(data.get("sales_desired_user_touched")),
         )
     except ValueError as exc:
         raise HTTPException(

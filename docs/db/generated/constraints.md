@@ -17,6 +17,7 @@
 | `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
 | `display_settings` | `display_settings_gallery_layout_check` | `CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))` |
 | `display_settings` | `display_settings_gallery_image_fit_check` | `CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))` |
+| `display_settings` | `display_settings_keep_at_hand_count_check` | `CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))` |
 | `display_settings` | `display_settings_landing_page_check` | `CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))` |
 | `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
 | `gallery_view` | `gallery_view_color_tag_slots_check` | `CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))` |
@@ -103,6 +104,10 @@
 | `photo` | `idx_photo_member` | `CREATE INDEX idx_photo_member ON public.photo USING btree (members_id)` |
 | `photo` | `idx_photo_theme_color` | `CREATE INDEX idx_photo_theme_color ON public.photo USING btree (photo_theme_color)` |
 | `photo` | `photo_pkey` | `CREATE UNIQUE INDEX photo_pkey ON public.photo USING btree (photo_id)` |
+| `product_external_ref` | `product_external_ref_members_id_idx` | `CREATE INDEX product_external_ref_members_id_idx ON public.product_external_ref USING btree (members_id)` |
+| `product_external_ref` | `product_external_ref_pkey` | `CREATE UNIQUE INDEX product_external_ref_pkey ON public.product_external_ref USING btree (product_external_ref_id)` |
+| `product_external_ref` | `product_external_ref_product_id_idx` | `CREATE INDEX product_external_ref_product_id_idx ON public.product_external_ref USING btree (registered_product_id)` |
+| `product_external_ref` | `product_external_ref_product_source_uidx` | `CREATE UNIQUE INDEX product_external_ref_product_source_uidx ON public.product_external_ref USING btree (registered_product_id, source)` |
 | `product_size` | `idx_product_size_group` | `CREATE INDEX idx_product_size_group ON public.product_size USING btree (product_group_id)` |
 | `product_size` | `product_size_pkey` | `CREATE UNIQUE INDEX product_size_pkey ON public.product_size USING btree (product_size_id)` |
 | `product_type` | `idx_product_type_name` | `CREATE INDEX idx_product_type_name ON public.product_type USING btree (product_group_name)` |

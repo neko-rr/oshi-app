@@ -549,6 +549,18 @@
           "type": "text",
           "not_null": true,
           "default": "'cover'::text"
+        },
+        {
+          "column": "keep_at_hand_count",
+          "type": "smallint",
+          "not_null": true,
+          "default": "1"
+        },
+        {
+          "column": "auto_sales_desired",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
         }
       ]
     },
@@ -902,6 +914,78 @@
           "column": "updated_at",
           "type": "timestamp with time zone",
           "not_null": false,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "product_external_ref",
+      "comment": "登録製品の外部商品参照（楽天必須セット・任意URL・将来Amazon）",
+      "columns": [
+        {
+          "column": "product_external_ref_id",
+          "type": "bigint",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "registered_product_id",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "source",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "external_item_code",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "product_url",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "shop_name",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "label",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "is_primary",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
           "default": "now()"
         }
       ]
@@ -1712,6 +1796,26 @@
       "indexdef": "CREATE UNIQUE INDEX photo_pkey ON public.photo USING btree (photo_id)"
     },
     {
+      "tablename": "product_external_ref",
+      "indexname": "product_external_ref_members_id_idx",
+      "indexdef": "CREATE INDEX product_external_ref_members_id_idx ON public.product_external_ref USING btree (members_id)"
+    },
+    {
+      "tablename": "product_external_ref",
+      "indexname": "product_external_ref_pkey",
+      "indexdef": "CREATE UNIQUE INDEX product_external_ref_pkey ON public.product_external_ref USING btree (product_external_ref_id)"
+    },
+    {
+      "tablename": "product_external_ref",
+      "indexname": "product_external_ref_product_id_idx",
+      "indexdef": "CREATE INDEX product_external_ref_product_id_idx ON public.product_external_ref USING btree (registered_product_id)"
+    },
+    {
+      "tablename": "product_external_ref",
+      "indexname": "product_external_ref_product_source_uidx",
+      "indexdef": "CREATE UNIQUE INDEX product_external_ref_product_source_uidx ON public.product_external_ref USING btree (registered_product_id, source)"
+    },
+    {
       "tablename": "product_size",
       "indexname": "idx_product_size_group",
       "indexdef": "CREATE INDEX idx_product_size_group ON public.product_size USING btree (product_group_id)"
@@ -2004,6 +2108,16 @@
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     },
     {
+      "grantee": "authenticated",
+      "table_name": "product_external_ref",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "product_external_ref",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
       "grantee": "service_role",
       "table_name": "product_size",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
@@ -2147,6 +2261,20 @@
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "product_external_ref",
+      "polname": "product_external_ref_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "product_external_ref",
+      "polname": "product_external_ref_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
     },
     {
       "table_name": "registered_product",
@@ -2586,6 +2714,11 @@
       "table_name": "display_settings",
       "constraint_name": "display_settings_gallery_image_fit_check",
       "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_keep_at_hand_count_check",
+      "definition": "CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))"
     },
     {
       "table_name": "display_settings",

@@ -21,6 +21,7 @@
   "gallery_view": { "ja": "ギャラリー保存ビュー", "status": "wired" },
   "data_export": { "ja": "データ書き出し", "status": "wired" },
   "registered_product_color_tag": { "ja": "登録製品カラータグ", "status": "wired" },
+  "product_external_ref": { "ja": "製品外部参照", "status": "wired" },
   "storage_location_preset_slot_dismissed": { "ja": "収納場所プリセット削除済", "status": "schema_ready" },
   "category_tag_preset_slot_dismissed": { "ja": "カテゴリプリセット削除済", "status": "schema_ready" }
 }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T13:09:36Z",
+  "generated_at": "2026-09-08T22:36:10Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -51,6 +51,11 @@
       "path": "/dev/design-lab",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/dev/design-lab/page.tsx"
+    },
+    {
+      "path": "/dev/design-lab/theme-colors",
+      "kind": "page",
+      "file": "apps/web/src/app/[locale]/dev/design-lab/theme-colors/page.tsx"
     },
     {
       "path": "/gallery/[registered_product_id]",
@@ -326,6 +331,12 @@
       "router_var": "router"
     },
     {
+      "method": "GET",
+      "path": "/products/duplicate-hints",
+      "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
       "method": "DELETE",
       "path": "/products/{registered_product_id}",
       "file": "apps/api/app/routers/products.py",
@@ -414,6 +425,10 @@
     {
       "key": "productsBulk",
       "path": "/products/bulk"
+    },
+    {
+      "key": "productsDuplicateHints",
+      "path": "/products/duplicate-hints"
     },
     {
       "key": "photos",
@@ -514,6 +529,10 @@
       "file": "apps/api/app/services/display_settings_service.py"
     },
     {
+      "name": "duplicate_hints_service",
+      "file": "apps/api/app/services/duplicate_hints_service.py"
+    },
+    {
       "name": "export_service",
       "file": "apps/api/app/services/export_service.py"
     },
@@ -538,8 +557,16 @@
       "file": "apps/api/app/services/product_color_tag_service.py"
     },
     {
+      "name": "product_external_ref_service",
+      "file": "apps/api/app/services/product_external_ref_service.py"
+    },
+    {
       "name": "product_service",
       "file": "apps/api/app/services/product_service.py"
+    },
+    {
+      "name": "rakuten_genre_service",
+      "file": "apps/api/app/services/rakuten_genre_service.py"
     },
     {
       "name": "stats_service",
@@ -610,5 +637,5 @@
       "detail": "evidence が無い: apps/web/src/app/me/page.tsx"
     }
   ],
-  "feature_count": 46
+  "feature_count": 47
 }

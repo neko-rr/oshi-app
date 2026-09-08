@@ -7,7 +7,7 @@
       "name_ja": "楽天市場API（商品検索等）",
       "attribution_required": true,
       "status": "deferred_live_off",
-      "note_ja": "現在 RAKUTEN_LIVE_CALLS=0 のためアプリ上にロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を確認し、該当画面へ実装してから有効化する。",
+      "note_ja": "商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。LIVE オフ時はロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を再確認する。",
       "docs_url": "https://webservice.rakuten.co.jp/"
     },
     {

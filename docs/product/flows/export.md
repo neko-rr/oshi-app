@@ -15,7 +15,8 @@
 2. API が ZIP（`manifest.json` ＋ CSV）を用意する
 3. ダウンロードする
 
-写真は ID／Storage パスのみ。署名 URL は含めない。
+写真は ID／Storage パスのみ。署名 URL は含めない。  
+外部商品参照（`product_external_refs`：楽天／任意URL）は manifest と CSV に含める（再購入用の安定 URL。期限付き署名は含めない）。
 
 ## B: 写真付き（推し整理向け）
 

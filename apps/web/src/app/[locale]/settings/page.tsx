@@ -124,6 +124,14 @@ export default function SettingsPage() {
                 {t("designLab")}
               </Link>
             </li>
+            <li>
+              <Link
+                href="/dev/design-lab/theme-colors"
+                className="block rounded-md border border-dashed border-border bg-card px-4 py-3 text-card-foreground hover:opacity-90"
+              >
+                {t("designLabThemeColors")}
+              </Link>
+            </li>
           </ul>
         </section>
       ) : null}

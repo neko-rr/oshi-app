@@ -10,6 +10,9 @@ export type FieldSources = {
   memo: FieldSource;
   category_tag_id: FieldSource;
   color_tag_slots: FieldSource;
+  purchase_location: FieldSource;
+  rakuten_ref: FieldSource;
+  manual_url: FieldSource;
 };
 
 export type VisionStructured = {
@@ -53,5 +56,8 @@ export function emptyFieldSources(): FieldSources {
     memo: "empty",
     category_tag_id: "empty",
     color_tag_slots: "empty",
+    purchase_location: "empty",
+    rakuten_ref: "empty",
+    manual_url: "empty",
   };
 }

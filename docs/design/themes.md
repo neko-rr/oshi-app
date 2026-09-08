@@ -32,6 +32,8 @@ Dash / Bootswatch 名（`minty` / `quartz` / `morph` 等）は **使わない**�
 テーマパック自体を「`--primary` / `--ring` だけ差し替え」で済ませるのは **誤り**。  
 本番のテーマの正は **本ファイル＋ todo-app 方式のフル・トークンパック**。
 
+**テーマ色の検討用 Lab:** `/dev/design-lab/theme-colors`（シード→スケール・部品見本。[UI Colors](https://uicolors.app/generate/790c1e) に近い確認用。採用後は `colors.css` を人手更新）。
+
 それとは別に、顧客の **推し色（メイン＋サブ）** がパックの上に限定オーバーレイする機能がある。  
 詳細・境界は [oshi-accents.md](oshi-accents.md)。キャンバス `--background` はパック側のまま。
 
