@@ -12,10 +12,12 @@ import { useDisplaySettings } from "@/hooks/useDisplaySettings";
 import { findResidenceRegion } from "@/lib/residencePrefs";
 import { orderStorageLocationsForRegister } from "@/lib/registerPrefs";
 import type { DecodedBarcode } from "@/lib/barcode/formats";
-import { findOwnedProductsByBarcode } from "@/lib/products/findOwnedByBarcode";
+import { fetchDuplicateHints } from "@/lib/products/fetchDuplicateHints";
+import { matchCategoryBySuggestedName } from "@/lib/products/matchCategoryBySuggestedName";
 import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { Button } from "@/components/ui/button";
+import { applyBarcodeCandidateToDraft } from "./assist/applyBarcodeCandidate";
 import {
   applyAssistToDraft,
   matchCategoryId,
@@ -26,7 +28,7 @@ import {
   assistStatusDescriptor,
   resolveAssistMessage,
 } from "./assistMessages";
-import { buildContinueDraft } from "./buildContinueDraft";
+import { buildContinueDraft, clearEventBundle } from "./buildContinueDraft";
 import { RegistrationRequiredDialog } from "@/components/auth/RegistrationRequiredDialog";
 import { isAnonymousUser } from "@/lib/authGuest";
 import {
@@ -99,6 +101,8 @@ export function RegisterWizard() {
     registerStartStep,
     defaultStorageLocationId,
     setRegisterStartStep,
+    keepAtHandCount,
+    autoSalesDesired,
   } = useDisplaySettings();
   const defaultCurrency = findResidenceRegion(residenceRegion).currencyCode;
   const [step, setStep] = useState<WizardStep>(registerStartStep);
@@ -109,6 +113,8 @@ export function RegisterWizard() {
     StorageLocationItem[]
   >([]);
   const [lookingUp, setLookingUp] = useState(false);
+  const [keywordQuery, setKeywordQuery] = useState("");
+  const [keywordLookingUp, setKeywordLookingUp] = useState(false);
   const [assistHint, setAssistHint] = useState<string | null>(null);
   const [assistPhase, setAssistPhase] = useState<"idle" | "running" | "done">(
     () => (registerStartStep === "confirm" ? "done" : "idle"),
@@ -282,28 +288,34 @@ export function RegisterWizard() {
     });
   }
 
-  async function checkOwned(code: string): Promise<void> {
+  async function checkOwned(
+    code: string,
+    itemCode?: string | null,
+  ): Promise<void> {
     const trimmed = code.trim();
-    if (!trimmed) {
+    const item = (itemCode || "").trim();
+    if (!trimmed && !item) {
       setOwnedHint(null);
       return;
     }
     try {
       const token = await requirePermanentToken("barcode");
       if (!token) return;
-      const items = await findOwnedProductsByBarcode({
+      const hints = await fetchDuplicateHints({
         apiBase: apiBase(),
         accessToken: token,
-        barcode: trimmed,
+        barcode: trimmed || null,
+        externalItemCode: item || null,
       });
-      if (items.length === 0) {
+      if (hints.match_count === 0 || !hints.sample) {
         setOwnedHint(null);
         return;
       }
-      const first = items[0];
       setOwnedHint({
-        registered_product_id: first.registered_product_id,
-        product_name: first.product_name,
+        registered_product_id: hints.sample.registered_product_id,
+        product_name: hints.sample.product_name,
+        match_count: hints.match_count,
+        total_quantity: hints.total_quantity,
       });
     } catch {
       setOwnedHint(null);
@@ -339,46 +351,54 @@ export function RegisterWizard() {
       const json = (await res.json()) as BarcodeLookupResponse;
       const status = json.status ?? "";
       if (status === "success" && json.items && json.items.length > 0) {
-        const first = json.items[0];
-        const name = first?.name ? String(first.name) : "";
-        const price =
-          first?.price != null && Number.isFinite(Number(first.price))
-            ? String(first.price)
-            : "";
+        const candidates = json.items.slice(0, 5);
+        const suggestedCat = json.suggested_category_name ?? null;
         setDraft((prev) => {
-          const sources = { ...prev.fieldSources };
-          const nextName =
-            prev.fieldSources.product_name === "user"
-              ? prev.productName
-              : name || prev.productName;
-          const nextPrice =
-            prev.fieldSources.purchase_price === "user"
-              ? prev.purchasePrice
-              : price || prev.purchasePrice;
-          if (name && prev.fieldSources.product_name !== "user") {
-            sources.product_name = "barcode";
-          }
-          if (price && prev.fieldSources.purchase_price !== "user") {
-            sources.purchase_price = "barcode";
+          const applied = applyBarcodeCandidateToDraft(candidates[0]!, prev, 0);
+          let categoryTagId = prev.categoryTagId;
+          let fieldSources = applied.fieldSources;
+          if (
+            suggestedCat &&
+            prev.fieldSources.category_tag_id !== "user" &&
+            (categoryTagId == null ||
+              prev.fieldSources.category_tag_id === "empty" ||
+              prev.fieldSources.category_tag_id === "barcode")
+          ) {
+            const matched = matchCategoryBySuggestedName(
+              suggestedCat,
+              categories,
+            );
+            if (matched != null) {
+              categoryTagId = matched;
+              fieldSources = {
+                ...fieldSources,
+                category_tag_id: "barcode",
+              };
+            }
           }
           return {
             ...prev,
+            ...applied,
+            categoryTagId,
+            fieldSources,
+            lookupCandidates: candidates,
             barcodeNote: formatAssist(
               status,
-              tAssist("successCandidates", { count: json.items!.length }),
+              tAssist("successCandidates", { count: candidates.length }),
             ),
-            productName: nextName,
-            purchasePrice: nextPrice,
-            suggestedName: name,
-            suggestedPrice: price,
-            fieldSources: sources,
           };
         });
+        const itemCode = candidates[0]?.external_item_code ?? null;
+        void checkOwned(trimmed, itemCode);
         setAssistHint(null);
         return;
       }
       const msg = formatAssist(status, json.message);
-      patchDraft({ barcodeNote: msg });
+      patchDraft({
+        barcodeNote: msg,
+        lookupCandidates: [],
+        selectedCandidateIndex: null,
+      });
       setAssistHint(msg);
     } catch {
       patchDraft({
@@ -412,6 +432,74 @@ export function RegisterWizard() {
       setStep("photo");
     } finally {
       setLookingUp(false);
+    }
+  }
+
+  async function onKeywordSearch() {
+    const kw = keywordQuery.trim();
+    if (!kw) return;
+    setKeywordLookingUp(true);
+    try {
+      const token = await requirePermanentToken("assist");
+      if (!token) return;
+      const res = await fetch(`${apiBase()}${API_PATHS.assistBarcodeKeyword}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ keyword: kw }),
+      });
+      if (!res.ok) {
+        setAssistHint(tConfirm("keywordSearchFailed"));
+        return;
+      }
+      const json = (await res.json()) as BarcodeLookupResponse;
+      const status = json.status ?? "";
+      if (status === "success" && json.items && json.items.length > 0) {
+        const candidates = json.items.slice(0, 5);
+        const suggestedCat = json.suggested_category_name ?? null;
+        setDraft((prev) => {
+          const applied = applyBarcodeCandidateToDraft(candidates[0]!, prev, 0);
+          let categoryTagId = prev.categoryTagId;
+          let fieldSources = applied.fieldSources;
+          if (
+            suggestedCat &&
+            prev.fieldSources.category_tag_id !== "user" &&
+            (categoryTagId == null ||
+              prev.fieldSources.category_tag_id === "empty" ||
+              prev.fieldSources.category_tag_id === "barcode")
+          ) {
+            const matched = matchCategoryBySuggestedName(
+              suggestedCat,
+              categories,
+            );
+            if (matched != null) {
+              categoryTagId = matched;
+              fieldSources = {
+                ...fieldSources,
+                category_tag_id: "barcode",
+              };
+            }
+          }
+          return {
+            ...prev,
+            ...applied,
+            categoryTagId,
+            fieldSources,
+            lookupCandidates: candidates,
+          };
+        });
+        const itemCode = candidates[0]?.external_item_code ?? null;
+        void checkOwned(draft.barcode, itemCode);
+        setAssistHint(null);
+        return;
+      }
+      setAssistHint(formatAssist(status, json.message));
+    } catch {
+      setAssistHint(tConfirm("keywordSearchFailed"));
+    } finally {
+      setKeywordLookingUp(false);
     }
   }
 
@@ -552,6 +640,26 @@ export function RegisterWizard() {
     }
   }
 
+  function onClearEventBundle() {
+    const defaults = {
+      currencyCode: defaultCurrency,
+      defaultStorageLocationId:
+        defaultStorageLocationId != null &&
+        storageLocationsRaw.some(
+          (s) => s.storage_location_id === defaultStorageLocationId,
+        )
+          ? defaultStorageLocationId
+          : null,
+    };
+    setDraft((prev) => {
+      const next = clearEventBundle(prev, defaults);
+      defaultStorageAppliedRef.current =
+        next.storageLocationId != null &&
+        next.storageLocationId === defaultStorageLocationId;
+      return next;
+    });
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -588,6 +696,50 @@ export function RegisterWizard() {
       const hasPrice = priceNum != null && Number.isFinite(priceNum);
       const slots = Array.from(draft.selectedSlots).sort((a, b) => a - b);
 
+      let registrationQuantity: number | null = null;
+      const qtyRaw = draft.registrationQuantity.trim();
+      if (qtyRaw) {
+        const q = Number(qtyRaw);
+        if (Number.isInteger(q) && q >= 1) registrationQuantity = q;
+      }
+      const ownedQty = registrationQuantity ?? 1;
+      let salesDesired = draft.salesDesired;
+      let salesDesiredQuantity: number | null = null;
+      const salesQtyRaw = draft.salesDesiredQuantity.trim();
+      if (salesQtyRaw) {
+        const sq = Number(salesQtyRaw);
+        if (Number.isInteger(sq) && sq >= 0) salesDesiredQuantity = sq;
+      }
+      if (!draft.salesDesiredUserTouched && autoSalesDesired) {
+        if (ownedQty > keepAtHandCount) {
+          salesDesired = true;
+          salesDesiredQuantity = ownedQty - keepAtHandCount;
+        }
+      }
+
+      const external_refs: Array<Record<string, unknown>> = [];
+      const rakutenUrl = draft.rakutenProductUrl.trim();
+      const rakutenCode = draft.rakutenItemCode.trim();
+      const rakutenShop = draft.rakutenShopName.trim();
+      if (rakutenUrl && rakutenCode && rakutenShop) {
+        external_refs.push({
+          source: "rakuten",
+          product_url: rakutenUrl,
+          external_item_code: rakutenCode,
+          shop_name: rakutenShop,
+          is_primary: true,
+        });
+      }
+      const manualUrl = draft.manualProductUrl.trim();
+      if (manualUrl) {
+        external_refs.push({
+          source: "manual",
+          product_url: manualUrl,
+          label: draft.manualUrlLabel.trim() || null,
+          is_primary: external_refs.length === 0,
+        });
+      }
+
       const productRes = await fetch(`${apiBase()}${API_PATHS.products}`, {
         method: "POST",
         headers: {
@@ -601,14 +753,24 @@ export function RegisterWizard() {
           memo: draft.memo || null,
           photo_id: photoId,
           product_group_name: draft.productGroupName.trim() || null,
+          works_series_name: draft.worksSeriesName.trim() || null,
+          title: draft.title.trim() || null,
           character_name: draft.characterName.trim() || null,
           purchase_price: hasPrice ? Math.trunc(priceNum) : null,
           currency_code: hasPrice
             ? draft.currencyCode || defaultCurrency
             : null,
+          purchase_location: draft.purchaseLocation.trim() || null,
+          purchase_date: draft.purchaseDate.trim() || null,
+          registration_quantity: registrationQuantity,
+          sales_desired_flag: salesDesired,
+          sales_desired_quantity: salesDesired ? salesDesiredQuantity : 0,
+          want_object_flag: draft.wantObject,
+          sales_desired_user_touched: draft.salesDesiredUserTouched,
           color_tag_slots: slots.length > 0 ? slots : null,
           category_tag_id: draft.categoryTagId,
           storage_location_id: draft.storageLocationId,
+          external_refs: external_refs.length > 0 ? external_refs : null,
         }),
       });
       if (!productRes.ok) {
@@ -749,11 +911,19 @@ export function RegisterWizard() {
         <StepConfirm
           productName={draft.productName}
           productGroupName={draft.productGroupName}
+          worksSeriesName={draft.worksSeriesName}
+          title={draft.title}
           characterName={draft.characterName}
           purchasePrice={draft.purchasePrice}
           currencyCode={draft.currencyCode || defaultCurrency}
+          purchaseLocation={draft.purchaseLocation}
+          purchaseDate={draft.purchaseDate}
           barcode={draft.barcode}
           memo={draft.memo}
+          registrationQuantity={draft.registrationQuantity}
+          salesDesired={draft.salesDesired}
+          salesDesiredQuantity={draft.salesDesiredQuantity}
+          wantObject={draft.wantObject}
           photoFile={draft.file}
           colors={colors}
           categories={categories}
@@ -763,6 +933,15 @@ export function RegisterWizard() {
           selectedSlots={draft.selectedSlots}
           visualTags={draft.visualTags}
           unmatchedProductType={draft.unmatchedProductType}
+          lookupCandidates={draft.lookupCandidates}
+          selectedCandidateIndex={draft.selectedCandidateIndex}
+          rakutenProductUrl={draft.rakutenProductUrl}
+          rakutenItemCode={draft.rakutenItemCode}
+          rakutenShopName={draft.rakutenShopName}
+          manualProductUrl={draft.manualProductUrl}
+          manualUrlLabel={draft.manualUrlLabel}
+          keywordQuery={keywordQuery}
+          keywordLookingUp={keywordLookingUp}
           assistHint={assistHint}
           assistPhase={assistPhase}
           error={error}
@@ -792,6 +971,10 @@ export function RegisterWizard() {
               ),
             }))
           }
+          onWorksSeriesName={(v) =>
+            setDraft((prev) => ({ ...prev, worksSeriesName: v }))
+          }
+          onTitle={(v) => setDraft((prev) => ({ ...prev, title: v }))}
           onCharacterName={(v) =>
             setDraft((prev) => ({
               ...prev,
@@ -813,6 +996,19 @@ export function RegisterWizard() {
               currencyCode: v,
             }))
           }
+          onPurchaseLocation={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              purchaseLocation: v,
+              fieldSources: markUserSource(
+                prev.fieldSources,
+                "purchase_location",
+              ),
+            }))
+          }
+          onPurchaseDate={(v) =>
+            setDraft((prev) => ({ ...prev, purchaseDate: v }))
+          }
           onBarcode={(v) => patchDraft({ barcode: v })}
           onMemo={(v) =>
             setDraft((prev) => ({
@@ -821,6 +1017,50 @@ export function RegisterWizard() {
               fieldSources: markUserSource(prev.fieldSources, "memo"),
             }))
           }
+          onRegistrationQuantity={(v) =>
+            setDraft((prev) => ({ ...prev, registrationQuantity: v }))
+          }
+          onSalesDesired={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              salesDesired: v,
+              salesDesiredUserTouched: true,
+            }))
+          }
+          onSalesDesiredQuantity={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              salesDesiredQuantity: v,
+              salesDesiredUserTouched: true,
+            }))
+          }
+          onWantObject={(v) =>
+            setDraft((prev) => ({ ...prev, wantObject: v }))
+          }
+          onSelectCandidate={(index) =>
+            setDraft((prev) => {
+              const item = prev.lookupCandidates[index];
+              if (!item) return prev;
+              const applied = applyBarcodeCandidateToDraft(item, prev, index);
+              return { ...prev, ...applied };
+            })
+          }
+          onManualProductUrl={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              manualProductUrl: v,
+              fieldSources: markUserSource(prev.fieldSources, "manual_url"),
+            }))
+          }
+          onManualUrlLabel={(v) =>
+            setDraft((prev) => ({
+              ...prev,
+              manualUrlLabel: v,
+              fieldSources: markUserSource(prev.fieldSources, "manual_url"),
+            }))
+          }
+          onKeywordQuery={setKeywordQuery}
+          onKeywordSearch={() => void onKeywordSearch()}
           onCategoryTagId={(id) =>
             setDraft((prev) => ({
               ...prev,
@@ -834,6 +1074,7 @@ export function RegisterWizard() {
           }
           onToggleSlot={toggleSlot}
           onApplyVisualTag={applyVisualTag}
+          onClearEventBundle={onClearEventBundle}
           onBack={() => {
             assistAbortRef.current?.abort();
             setStep("photo");

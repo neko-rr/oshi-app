@@ -31,6 +31,8 @@ ALLOW_HEX_GLOBS = (
     "lib/oshiContrast.ts",
     "lib/oshiContrast.selftest.ts",
     "lib/oshiAccentPrefs.ts",
+    "lib/themeColorScale.ts",
+    "lib/themeColorScale.selftest.ts",
     "components/settings/OshiAccentPanel.tsx",
     # カラータグ / カテゴリ色は製品ラベル用（推し色・UI トークンとは別）
     "app/settings/color-tags/",

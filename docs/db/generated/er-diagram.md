@@ -19,6 +19,7 @@ erDiagram
   member_type["member_type / 会員種別"]
   oshi_accent_settings["oshi_accent_settings / 推し色設定"]
   photo["photo / 写真"]
+  product_external_ref["product_external_ref / 製品外部参照"]
   product_size["product_size / 製品サイズ"]
   product_type["product_type / 製品種別"]
   registered_product["registered_product / 登録製品"]

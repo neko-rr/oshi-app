@@ -29,6 +29,7 @@ def _missing() -> dict[str, Any]:
         "message": "楽天APIの認証情報（applicationId と accessKey）が設定されていません。",
         "source": None,
         "keyword": None,
+        "suggested_category_name": None,
     }
 
 
@@ -54,12 +55,47 @@ def _origin_headers(origin: str) -> dict[str, str]:
     }
 
 
+def _first_image_url(raw: Any) -> str | None:
+    """mediumImageUrls が文字列配列でも {imageUrl} 配列でも先頭を取る。"""
+    if not isinstance(raw, list) or not raw:
+        return None
+    first = raw[0]
+    if isinstance(first, str):
+        cleaned = first.strip()
+        return cleaned or None
+    if isinstance(first, dict):
+        url = first.get("imageUrl") or first.get("image_url")
+        if isinstance(url, str) and url.strip():
+            return url.strip()
+    return None
+
+
 def _normalize_item(item: dict[str, Any]) -> dict[str, Any]:
+    """楽天商品を登録推奨用に正規化（アフィURL優先）。"""
+    affiliate = item.get("affiliateUrl")
+    plain = item.get("itemUrl")
+    product_url = None
+    if isinstance(affiliate, str) and affiliate.strip():
+        product_url = affiliate.strip()
+    elif isinstance(plain, str) and plain.strip():
+        product_url = plain.strip()
+
+    catchcopy = item.get("catchcopy")
+    shop_name = item.get("shopName")
+    item_code = item.get("itemCode")
+    genre_id = item.get("genreId")
+
     return {
         "name": item.get("itemName"),
+        "catchcopy": catchcopy if isinstance(catchcopy, str) else None,
         "price": item.get("itemPrice"),
-        "url": item.get("itemUrl") or item.get("affiliateUrl"),
-        "shop": item.get("shopName"),
+        "product_url": product_url,
+        "shop_name": shop_name.strip() if isinstance(shop_name, str) else None,
+        "external_item_code": (
+            item_code.strip() if isinstance(item_code, str) else None
+        ),
+        "image_url": _first_image_url(item.get("mediumImageUrls")),
+        "genre_id": genre_id if isinstance(genre_id, int) else None,
     }
 
 
@@ -88,6 +124,7 @@ def _call(keyword: str, *, source: str) -> dict[str, Any]:
             "message": "楽天の実呼び出しは無効です（RAKUTEN_LIVE_CALLS=1）。",
             "source": "rakuten",
             "keyword": keyword,
+            "suggested_category_name": None,
         }
 
     params: dict[str, Any] = {
@@ -112,14 +149,24 @@ def _call(keyword: str, *, source: str) -> dict[str, Any]:
                 "message": "楽天API呼び出しに失敗しました。",
                 "source": "rakuten",
                 "keyword": keyword,
+                "suggested_category_name": None,
             }
         data = resp.json() or {}
+        items = _parse_items(data if isinstance(data, dict) else {})
+        suggested = None
+        if items:
+            genre_id = items[0].get("genre_id")
+            if isinstance(genre_id, int):
+                from app.services.rakuten_genre_service import fetch_genre_name
+
+                suggested = fetch_genre_name(genre_id)
         return {
             "status": "success",
-            "items": _parse_items(data if isinstance(data, dict) else {}),
+            "items": items,
             "message": "ok",
             "source": source,
             "keyword": keyword,
+            "suggested_category_name": suggested,
         }
     except Exception:
         logger.exception("楽天例外")
@@ -129,6 +176,7 @@ def _call(keyword: str, *, source: str) -> dict[str, Any]:
             "message": "楽天APIでエラーが発生しました。",
             "source": "rakuten",
             "keyword": keyword,
+            "suggested_category_name": None,
         }
 
 
@@ -141,6 +189,7 @@ def lookup_by_barcode(barcode: str) -> dict[str, Any]:
             "message": "バーコードが空です。",
             "source": None,
             "keyword": None,
+            "suggested_category_name": None,
         }
     return _call(code, source="barcode")
 
@@ -154,5 +203,6 @@ def lookup_by_keyword(keyword: str) -> dict[str, Any]:
             "message": "キーワードが空です。",
             "source": None,
             "keyword": None,
+            "suggested_category_name": None,
         }
     return _call(kw, source="keyword")

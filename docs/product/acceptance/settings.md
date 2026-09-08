@@ -18,7 +18,7 @@
 - [x] アカウント情報（`/me`）・パスワード変更（`/auth/update-password`）へ行ける
 - [x] データはログインユーザーに閉じる（JWT + RLS）
 - [x] `/settings/delete-account` から退会・全データ削除できる（`account_delete`。確認語 `DELETE`・即時。Storage 掃除後に Auth 削除、DB は CASCADE）
-- [x] `/settings/export` から一覧テキスト（JSON＋CSV）と写真付き ZIP を書き出せる（`data_export`。再取り込みなし。署名 URL は含めない）
+- [x] `/settings/export` から一覧テキスト（JSON＋CSV）と写真付き ZIP を書き出せる（`data_export`。再取り込みなし。署名 URL は含めない。`product_external_ref`＝再購入／任意URLを含む）
 - [x] 推し色スウォッチ UI（テーマパックとは別。メイン＋サブの2色。文字色は自動で AA 確保。無料はプレビューのみ・適用／保存はプレミアム想定の entitlement）
 - [x] タグ・収納アイコンは Lucide slug + ピッカー（`lucide_icon_picker.json`）
 - [x] カテゴリ／収納は ↑↓ で並び替え（`display_order` → 登録・詳細の選択肢順）

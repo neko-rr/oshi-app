@@ -39,6 +39,106 @@ def test_split_core_extra_puts_unknown_in_extra() -> None:
     assert "product_name" not in extra
 
 
+def test_manifest_includes_product_external_refs_with_stable_https() -> None:
+    """再購入URLは https でも署名付きでなければ書き出しに含める。"""
+    manifest = build_manifest(
+        kind="text",
+        products=[
+            {
+                "registered_product_id": 9,
+                "product_name": "acrylic",
+                "barcode_number": "490",
+                "memo": None,
+                "purchase_price": 1000,
+                "currency_code": "JPY",
+                "photo_id": 3,
+                "category_tag_id": 1,
+                "storage_location_id": 2,
+                "creation_date": "2026-01-01T00:00:00+00:00",
+            }
+        ],
+        category_tags=[],
+        storage_locations=[],
+        color_tags=[],
+        product_color_tags=[],
+        product_external_refs=[
+            {
+                "product_external_ref_id": 1,
+                "registered_product_id": 9,
+                "source": "rakuten",
+                "external_item_code": "shop:1",
+                "product_url": "https://item.rakuten.co.jp/shop/1/",
+                "shop_name": "推し店",
+                "label": None,
+                "is_primary": True,
+            },
+            {
+                "product_external_ref_id": 2,
+                "registered_product_id": 9,
+                "source": "manual",
+                "external_item_code": None,
+                "product_url": "https://jp.mercari.com/item/m123",
+                "shop_name": None,
+                "label": "メルカリ",
+                "is_primary": False,
+            },
+        ],
+        photos=[],
+        include_media_paths=False,
+    )
+    refs = manifest["entities"]["product_external_refs"]
+    assert len(refs) == 2
+    assert refs[0]["core"]["product_url"].startswith("https://")
+    assert refs[0]["core"]["source"] == "rakuten"
+    assert refs[1]["core"]["label"] == "メルカリ"
+    dumped = json.dumps(manifest)
+    assert "token=" not in dumped
+    assert "/storage/v1/object/sign/" not in dumped
+
+
+def test_text_zip_contains_external_refs_csv() -> None:
+    manifest = build_manifest(
+        kind="text",
+        products=[
+            {
+                "registered_product_id": 1,
+                "product_name": "A",
+                "barcode_number": None,
+                "memo": "x",
+                "purchase_price": None,
+                "currency_code": None,
+                "photo_id": None,
+                "category_tag_id": None,
+                "storage_location_id": None,
+                "creation_date": None,
+            }
+        ],
+        category_tags=[],
+        storage_locations=[],
+        color_tags=[],
+        product_color_tags=[],
+        product_external_refs=[
+            {
+                "product_external_ref_id": 3,
+                "registered_product_id": 1,
+                "source": "manual",
+                "product_url": "https://example.com/item",
+                "label": "memo-link",
+                "is_primary": True,
+            }
+        ],
+        photos=[],
+        include_media_paths=False,
+    )
+    blob = build_export_zip_bytes(manifest=manifest, media_files={})
+    with zipfile.ZipFile(BytesIO(blob)) as zf:
+        names = set(zf.namelist())
+        assert "csv/product_external_refs.csv" in names
+        csv_text = zf.read("csv/product_external_refs.csv").decode("utf-8-sig")
+        assert "https://example.com/item" in csv_text
+        assert "manual" in csv_text
+
+
 def test_manifest_has_version_and_no_signed_urls() -> None:
     manifest = build_manifest(
         kind="text",

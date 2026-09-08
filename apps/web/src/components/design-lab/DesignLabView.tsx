@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import LabAdoptionMemoPanel from "@/components/design-lab/LabAdoptionMemoPanel";
 import LabContrastHint from "@/components/design-lab/LabContrastHint";
 import LabCvdFilters from "@/components/design-lab/LabCvdFilters";
@@ -13,6 +14,12 @@ import {
   labCvdFilterCss,
   type LabCvdModeId,
 } from "@/components/design-lab/lab-cvd";
+import {
+  circledNumber,
+  listSceneUiCallouts,
+  readUiCalloutsVisible,
+  writeUiCalloutsVisible,
+} from "@/components/design-lab/lab-ui-callouts";
 import {
   LAB_OSHI_SWATCHES,
   LAB_PHONE_ORIENTATION_MODES,
@@ -27,6 +34,10 @@ import {
   type LabUiState,
   type LabVariantId,
 } from "@/components/design-lab/lab-meta";
+import {
+  findLabThemePack,
+  LAB_THEME_PACKS,
+} from "@/components/design-lab/lab-theme-packs";
 import {
   LAB_AMBIENTS,
   LAB_TEXT_SCALES,
@@ -43,18 +54,33 @@ export default function DesignLabView() {
   const [expandVariant, setExpandVariant] = useState<LabVariantId>("a");
   const [uiState, setUiState] = useState<LabUiState>("default");
   const [scene, setScene] = useState<LabSceneId>("theme-settings");
+  const [themePackId, setThemePackId] = useState("default");
   const [oshiIndex, setOshiIndex] = useState(0);
   const [cvdMode, setCvdMode] = useState<LabCvdModeId>("none");
   const [showThumbZone, setShowThumbZone] = useState(false);
   const [textScale, setTextScale] = useState<LabTextScaleId>("normal");
   const [ambient, setAmbient] = useState<LabAmbientId>("none");
   const [labPageOrigin, setLabPageOrigin] = useState("");
+  const [showUiCallouts, setShowUiCallouts] = useState(true);
   const isNarrow = platform !== "web-pc";
   const phoneOrientations: LabPhoneOrientationId[] =
     phoneOrientationMode === "both"
       ? ["portrait", "landscape"]
       : [phoneOrientationMode];
+  const themePack =
+    findLabThemePack(themePackId) ?? LAB_THEME_PACKS[0]!;
   const swatch = LAB_OSHI_SWATCHES[oshiIndex] ?? LAB_OSHI_SWATCHES[0];
+  const contrastSwatch = useMemo(
+    () =>
+      scene === "home"
+        ? swatch
+        : {
+            cssVar: "--lab-primary",
+            hex: themePack.primary,
+            label: themePack.label,
+          },
+    [scene, swatch, themePack.label, themePack.primary],
+  );
   const previewFilter = labComposePreviewFilters(
     labCvdFilterCss(cvdMode),
     ambient,
@@ -65,7 +91,16 @@ export default function DesignLabView() {
 
   useEffect(() => {
     setLabPageOrigin(window.location.origin);
+    setShowUiCallouts(readUiCalloutsVisible());
   }, []);
+
+  const toggleUiCallouts = () => {
+    setShowUiCallouts((prev) => {
+      const next = !prev;
+      writeUiCalloutsVisible(next);
+      return next;
+    });
+  };
 
   const openExpand = (variant: LabVariantId = "a") => {
     setExpandVariant(variant);
@@ -76,11 +111,11 @@ export default function DesignLabView() {
     () => (
       <div className="mx-auto grid max-w-[1600px] gap-3 px-4 pb-2 md:grid-cols-3">
         <LabAdoptionMemoPanel />
-        <LabContrastHint swatch={swatch} />
+        <LabContrastHint swatch={contrastSwatch} />
         {labPageOrigin ? <LabMobileQr pageOrigin={labPageOrigin} /> : null}
       </div>
     ),
-    [labPageOrigin, swatch],
+    [labPageOrigin, contrastSwatch],
   );
 
   return (
@@ -111,6 +146,35 @@ export default function DesignLabView() {
               本番ビルドでは 404 · AI推奨は列に出さない
             </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dev/design-lab/theme-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-50"
+            >
+              テーマ色見本スタジオ（常設）
+            </Link>
+            <button
+              type="button"
+              aria-pressed={showUiCallouts}
+              onClick={toggleUiCallouts}
+              className={
+                showUiCallouts
+                  ? "rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
+                  : "rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+              }
+              title="案A/B/C内のUI部品番号を表示／非表示"
+            >
+              UI番号 {showUiCallouts ? "表示中" : "非表示"}
+            </button>
+          </div>
+          {showUiCallouts ? (
+            <p className="max-w-[1600px] text-[11px] leading-relaxed text-zinc-500">
+              案の中の部品番号です。例: 「案Aの⑧の角を丸くして」。いまの画面:{" "}
+              {listSceneUiCallouts(scene)
+                .map((m) => `${circledNumber(m.n)}${m.label}`)
+                .join(" · ")}
+            </p>
+          ) : null}
 
           <div className="flex flex-wrap items-center gap-2">
             <div
@@ -118,7 +182,8 @@ export default function DesignLabView() {
               role="group"
               aria-label="比較する画面"
             >
-              <span className="text-xs font-medium text-zinc-600">画面:</span>
+              <span className="text-xs font-medium text-zinc-600">画面:
+              </span>
               {LAB_SCENES.map((s) => {
                 const active = scene === s.id;
                 return (
@@ -147,7 +212,8 @@ export default function DesignLabView() {
               role="group"
               aria-label="端末プレビュー"
             >
-              <span className="text-xs font-medium text-zinc-600">表示:</span>
+              <span className="text-xs font-medium text-zinc-600">表示:
+              </span>
               {LAB_PLATFORMS.map((p) => {
                 const active = platform === p.id;
                 return (
@@ -176,9 +242,9 @@ export default function DesignLabView() {
               <button
                 type="button"
                 onClick={() => openExpand("a")}
-                className="rounded-full border border-zinc-900 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-900 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-900 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-900 hover:text-white"
               >
-                PC 拡大プレビュー
+              PC 拡大プレビュー
               </button>
             ) : (
               <div
@@ -186,7 +252,8 @@ export default function DesignLabView() {
                 role="group"
                 aria-label="スマホの向き"
               >
-                <span className="text-xs font-medium text-zinc-600">向き:</span>
+                <span className="text-xs font-medium text-zinc-600">向き:
+                </span>
                 {LAB_PHONE_ORIENTATION_MODES.map((m) => {
                   const active = phoneOrientationMode === m.id;
                   return (
@@ -218,7 +285,8 @@ export default function DesignLabView() {
             role="group"
             aria-label="UI状態"
           >
-            <span className="text-xs font-medium text-zinc-600">状態:</span>
+            <span className="text-xs font-medium text-zinc-600">状態:
+            </span>
             {LAB_UI_STATES.map((s) => {
               const active = uiState === s.id;
               return (
@@ -239,13 +307,50 @@ export default function DesignLabView() {
             })}
           </div>
 
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label="既存テーマ（全案共通）"
+          >
+            <span className="text-xs font-medium text-zinc-600">テーマ:
+            </span>
+            {LAB_THEME_PACKS.map((p) => {
+              const active = themePackId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-label={`${p.label}（${p.scheme === "dark" ? "ダーク" : "ライト"}）`}
+                  aria-pressed={active}
+                  title={`${p.label} · ${p.id}`}
+                  onClick={() => setThemePackId(p.id)}
+                  className="size-7 rounded-full border-2 transition-transform"
+                  style={{
+                    backgroundColor: p.swatch,
+                    borderColor: p.scheme === "dark" ? "#fff" : "#171717",
+                    boxShadow: active
+                      ? `0 0 0 2px ${p.primary}, 0 0 0 4px ${p.scheme === "dark" ? "#fff" : "#171717"}`
+                      : p.scheme === "dark"
+                        ? "0 0 0 1px #171717"
+                        : undefined,
+                    transform: active ? "scale(1.08)" : undefined,
+                  }}
+                />
+              );
+            })}
+            <span className="text-[11px] text-zinc-500">
+              {themePack.label}（{themePack.id} · トークン一式を全案に反映）
+            </span>
+          </div>
+
           {scene === "home" ? (
           <div
             className="flex flex-wrap items-center gap-2"
             role="group"
             aria-label="推し色（全案共通）"
           >
-            <span className="text-xs font-medium text-zinc-600">推し色:</span>
+            <span className="text-xs font-medium text-zinc-600">推し色:
+            </span>
             {LAB_OSHI_SWATCHES.map((s, i) => (
               <button
                 key={s.cssVar}
@@ -266,21 +371,18 @@ export default function DesignLabView() {
               />
             ))}
             <span className="text-[11px] text-zinc-500">
-              {swatch.label}（ボタン色に即反映）
+              {swatch.label}（primary 上書き・ホームのみ）
             </span>
           </div>
-          ) : (
-            <p className="text-[11px] text-zinc-500">
-              色設定シーンでは各案内のスウォッチでトークン一式プレビュー。本番採用はチャットで本決定。
-            </p>
-          )}
+          ) : null}
 
           <div
             className="flex flex-wrap items-center gap-2"
             role="group"
             aria-label="色覚プレビュー"
           >
-            <span className="text-xs font-medium text-zinc-600">色覚:</span>
+            <span className="text-xs font-medium text-zinc-600">色覚:
+            </span>
             {LAB_CVD_MODES.map((m) => {
               const active = cvdMode === m.id;
               return (
@@ -310,7 +412,8 @@ export default function DesignLabView() {
             role="group"
             aria-label="UX補助プレビュー"
           >
-            <span className="text-xs font-medium text-zinc-600">UX補助:</span>
+            <span className="text-xs font-medium text-zinc-600">UX補助:
+            </span>
             <button
               type="button"
               aria-pressed={showThumbZone}
@@ -426,7 +529,7 @@ export default function DesignLabView() {
                     id={`lab-variant-${meta.id}`}
                     className="text-sm font-semibold tracking-tight text-zinc-900"
                   >
-                    {meta.title}
+              {meta.title}
                   </h2>
                   <p className="mt-0.5 text-xs text-zinc-600">{meta.subtitle}</p>
                 </div>
@@ -467,8 +570,11 @@ export default function DesignLabView() {
                           platform={platform}
                           uiState={uiState}
                           scene={scene}
+                          themePackId={themePackId}
+                          onThemePackIdChange={setThemePackId}
                           oshiIndex={oshiIndex}
                           onOshiIndexChange={setOshiIndex}
+                          showUiCallouts={showUiCallouts}
                         />
                       </div>
                     </LabDeviceFrame>
@@ -485,8 +591,11 @@ export default function DesignLabView() {
                           platform={platform}
                           uiState={uiState}
                           scene={scene}
+                          themePackId={themePackId}
+                          onThemePackIdChange={setThemePackId}
                           oshiIndex={oshiIndex}
                           onOshiIndexChange={setOshiIndex}
+                          showUiCallouts={showUiCallouts}
                         />
                       </div>
                     </LabDeviceFrame>
@@ -502,8 +611,11 @@ export default function DesignLabView() {
         initialVariant={expandVariant}
         uiState={uiState}
         scene={scene}
+        themePackId={themePackId}
+        onThemePackIdChange={setThemePackId}
         oshiIndex={oshiIndex}
         onOshiIndexChange={setOshiIndex}
+        showUiCallouts={showUiCallouts}
         cvdMode={cvdMode}
         ambient={ambient}
         textScale={textScale}

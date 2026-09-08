@@ -103,6 +103,10 @@
 | `photo` | `idx_photo_member` | `CREATE INDEX idx_photo_member ON public.photo USING btree (members_id)` |
 | `photo` | `idx_photo_theme_color` | `CREATE INDEX idx_photo_theme_color ON public.photo USING btree (photo_theme_color)` |
 | `photo` | `photo_pkey` | `CREATE UNIQUE INDEX photo_pkey ON public.photo USING btree (photo_id)` |
+| `product_external_ref` | `product_external_ref_members_id_idx` | `CREATE INDEX product_external_ref_members_id_idx ON public.product_external_ref USING btree (members_id)` |
+| `product_external_ref` | `product_external_ref_pkey` | `CREATE UNIQUE INDEX product_external_ref_pkey ON public.product_external_ref USING btree (product_external_ref_id)` |
+| `product_external_ref` | `product_external_ref_product_id_idx` | `CREATE INDEX product_external_ref_product_id_idx ON public.product_external_ref USING btree (registered_product_id)` |
+| `product_external_ref` | `product_external_ref_product_source_uidx` | `CREATE UNIQUE INDEX product_external_ref_product_source_uidx ON public.product_external_ref USING btree (registered_product_id, source)` |
 | `product_size` | `idx_product_size_group` | `CREATE INDEX idx_product_size_group ON public.product_size USING btree (product_group_id)` |
 | `product_size` | `product_size_pkey` | `CREATE UNIQUE INDEX product_size_pkey ON public.product_size USING btree (product_size_id)` |
 | `product_type` | `idx_product_type_name` | `CREATE INDEX idx_product_type_name ON public.product_type USING btree (product_group_name)` |

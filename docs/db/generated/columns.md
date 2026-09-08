@@ -130,6 +130,8 @@
 | ギャラリータグ表示 | `gallery_show_tags` | `boolean` | NO | `true` |
 | ギャラリー価格表示 | `gallery_show_price` | `boolean` | NO | `true` |
 | ギャラリー画像フィット | `gallery_image_fit` | `text` | NO | `'cover'::text` |
+| 手元残数 | `keep_at_hand_count` | `smallint` | NO | `1` |
+| 余剰交換OK自動 | `auto_sales_desired` | `boolean` | NO | `false` |
 
 ## `gallery_view`（ギャラリー保存ビュー）
 
@@ -213,6 +215,22 @@
 | 写真高解像度URL | `photo_high_resolution_url` | `text` | YES | |
 | 作成日時 | `created_at` | `timestamp with time zone` | YES | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | YES | `now()` |
+
+## `product_external_ref`（製品外部参照）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| 製品外部参照ID | `product_external_ref_id` | `bigint` | NO | |
+| 会員ID | `members_id` | `uuid` | NO | |
+| 登録製品ID | `registered_product_id` | `integer` | NO | |
+| ソース | `source` | `text` | NO | |
+| 外部商品コード | `external_item_code` | `text` | YES | |
+| 製品URL | `product_url` | `text` | NO | |
+| 店舗名 | `shop_name` | `text` | YES | |
+| ラベル | `label` | `text` | YES | |
+| 主フラグ | `is_primary` | `boolean` | NO | `false` |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
 
 ## `product_size`（製品サイズ）
 

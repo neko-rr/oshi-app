@@ -15,6 +15,15 @@ import {
 } from "@/lib/galleryListQuery";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+type ExternalRef = {
+  source: string;
+  product_url: string;
+  external_item_code?: string | null;
+  shop_name?: string | null;
+  label?: string | null;
+  is_primary?: boolean;
+};
+
 type ProductDetail = {
   registered_product_id: number;
   product_name: string | null;
@@ -33,7 +42,28 @@ type ProductDetail = {
   category_tag?: ProductTagSummary | null;
   storage_location?: ProductTagSummary | null;
   color_tag_slots?: number[];
+  external_refs?: ExternalRef[];
 };
+
+function pickPrimaryExternalRef(
+  refs: ExternalRef[] | undefined,
+): ExternalRef | null {
+  if (!refs || refs.length === 0) return null;
+  const primary = refs.find((r) => r.is_primary && r.product_url?.trim());
+  if (primary) return primary;
+  const first = refs.find((r) => r.product_url?.trim());
+  return first ?? null;
+}
+
+function primaryLinkLabel(
+  ref: ExternalRef,
+  t: (key: string, values?: Record<string, string>) => string,
+): string {
+  if (ref.source === "rakuten") return t("openPrimaryLinkRakuten");
+  const label = ref.label?.trim();
+  if (label) return t("openPrimaryLinkWithLabel", { label });
+  return t("openPrimaryLink");
+}
 
 export default async function GalleryDetailPage({
   params,
@@ -98,6 +128,8 @@ export default async function GalleryDetailPage({
     detail?.photo_high_resolution_url ||
     detail?.photo_thumbnail_url ||
     null;
+  const primaryRef = pickPrimaryExternalRef(detail?.external_refs);
+  const primaryUrl = primaryRef?.product_url?.trim() || null;
 
   return (
     <div className="stack-density">
@@ -209,6 +241,18 @@ export default async function GalleryDetailPage({
             ) : null}
             {detail.memo ? (
               <p className="text-sm whitespace-pre-wrap">{detail.memo}</p>
+            ) : null}
+            {primaryUrl && primaryRef ? (
+              <p className="pt-2">
+                <a
+                  href={primaryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  {primaryLinkLabel(primaryRef, t)}
+                </a>
+              </p>
             ) : null}
           </div>
 

@@ -12,6 +12,20 @@ from app.services.product_service import get_product_for_member
 
 client = TestClient(app)
 
+_DEFAULT_DUP_PREFS = {
+    "keep_at_hand_count": 1,
+    "auto_sales_desired": False,
+}
+
+
+@pytest.fixture(autouse=True)
+def _stub_display_settings_for_create():
+    with patch(
+        "app.services.display_settings_service.get_display_settings",
+        return_value=_DEFAULT_DUP_PREFS,
+    ):
+        yield
+
 
 def test_get_product_requires_members_id() -> None:
     with pytest.raises(ValueError, match="members_id"):

@@ -11,6 +11,7 @@ import {
 } from "@/lib/displayPrefs";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type StorageOption = {
@@ -32,6 +33,10 @@ export function RegisterDefaultsPanel() {
     defaultStorageLocationId,
     setRegisterStartStep,
     setDefaultStorageLocationId,
+    keepAtHandCount,
+    autoSalesDesired,
+    setKeepAtHandCount,
+    setAutoSalesDesired,
   } = useDisplaySettings();
   const [storageItems, setStorageItems] = useState<StorageOption[]>([]);
 
@@ -141,6 +146,42 @@ export function RegisterDefaultsPanel() {
         />
         <p className="text-xs text-muted-foreground">{t("frequencyHint")}</p>
       </div>
+
+      <fieldset className="stack-density">
+        <legend className="text-sm font-medium text-foreground">
+          {t("duplicateTitle")}
+        </legend>
+        <p className="text-sm text-muted-foreground">{t("duplicateHint")}</p>
+        <div className="stack-density-sm">
+          <Label htmlFor="keep-at-hand">{t("keepAtHandLabel")}</Label>
+          <Input
+            id="keep-at-hand"
+            type="number"
+            min={1}
+            max={99}
+            value={keepAtHandCount}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (Number.isInteger(n)) setKeepAtHandCount(n);
+            }}
+          />
+          <p className="text-xs text-muted-foreground">{t("keepAtHandHelp")}</p>
+        </div>
+        <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={autoSalesDesired}
+            onChange={(e) => setAutoSalesDesired(e.target.checked)}
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">{t("autoSalesLabel")}</span>
+            <span className="text-xs text-muted-foreground">
+              {t("autoSalesHelp")}
+            </span>
+          </span>
+        </label>
+      </fieldset>
     </div>
   );
 }

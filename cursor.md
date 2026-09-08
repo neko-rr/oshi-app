@@ -1,5 +1,33 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-07: 登録確認の段階化＋イベント束
+
+- 確認: 必須・照合・タグ常時／Oshi・数量・購入・URL は `<details>`「詳しく」
+- 続けて登録: 作品・キャラ・購入日＋収納・カテゴリ・色・通貨を残す
+- 「全部消す」でイベント束・タグ束をワンタップ解除（確認ダイアログなし）
+
+## 2026-09-07: ダブり土台＋照合・Oshi UI 公開
+
+- 所持数 / 交換OK（個数）/ 欲しいフラグ、作品名・タイトル・購入日を登録・詳細UIへ
+- `display_settings`: `keep_at_hand_count` + `auto_sales_desired`（余剰の自動交換OK）
+- `GET /products/duplicate-hints`（barcode OR external_item_code）
+- 確認画面にキーワード楽天検索。genre_id→Genre Search soft→カテゴリ提案
+- `duplicate_exchange` = partial（交換画面・CLIP は未）
+
+## 2026-09-07: 外部参照の受け入れ・書き出し・詳細開く
+
+- acceptance/register: 候補差し替え・楽天必須セット・任意URL・詳細編集・閲覧の主リンク
+- 書き出し manifest/CSV に `product_external_refs`（安定 https。署名URLは除外のまま）
+- ギャラリー詳細閲覧に `is_primary` ワンタップ開く
+
+## 2026-09-07: グッズ登録フィールド本格化（外部参照）
+
+- 正本: `docs/product/register_fields.md`（Core / Oshi / External / Hidden-legacy）
+- 表 `product_external_ref`（楽天必須セット＋任意 manual URL。将来 amazon）
+- 楽天 normalize: `product_url` / `shop_name` / `external_item_code` / `image_url`
+- 登録確認: 先頭候補プレフィル＋候補リスト差し替え。詳細でも外部リンク編集可
+- Vision 見た目提案は従来どおり（カテゴリ／色／メモ）。legacy 列は DROP しない
+
 ## 2026-09-06: ゲスト開始（Anonymous）＋本登録ゲート
 
 - `signInAnonymously` → ウィザード UI 可。業務 API は 403 `REGISTRATION_REQUIRED`
@@ -39,6 +67,12 @@
 - スマホ Web は下部タブ（ギャラリー／登録／検索／その他）。ブレークは **`lg`（1024）** — `md` だと横向きでタブが消える
 - 本番シェルは Lab **A** 採用。Lab シーン「スマホシェル」で縦／横比較可
 - 受け入れ: `docs/product/acceptance/responsive_web.md`。E2E: `apps/web/e2e/responsive_web.spec.ts`
+
+## 2026-09-07: Design Lab テーマ色見本スタジオ
+
+- 常設: `/dev/design-lab/theme-colors`（UI Colors 風。シード→50–950・部品タブ・AA・色覚）
+- 本番 `colors.css` への自動書き込みはしない。採用は人手
+- 入口: Design Lab ヘッダー / 設定→開発
 
 ## 2026-09-05: 敵対的検証 skill
 

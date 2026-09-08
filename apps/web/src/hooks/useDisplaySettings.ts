@@ -26,6 +26,8 @@ import {
   sanitizeLandingPage,
   sanitizeListSort,
   sanitizeRegisterStartStep,
+  sanitizeKeepAtHandCount,
+  sanitizeAutoSalesDesired,
   type GalleryImageFitId,
   type GalleryLayoutId,
   type LandingPageId,
@@ -67,6 +69,8 @@ export type DisplaySettings = {
   gallery_show_name: boolean;
   gallery_show_tags: boolean;
   gallery_show_price: boolean;
+  keep_at_hand_count: number;
+  auto_sales_desired: boolean;
 };
 
 export const DEFAULT_TEXT_SCALE: DisplayLevel = 3;
@@ -110,6 +114,10 @@ export type DisplaySettingsContextValue = {
   setGalleryShowName: (on: boolean) => void;
   setGalleryShowTags: (on: boolean) => void;
   setGalleryShowPrice: (on: boolean) => void;
+  keepAtHandCount: number;
+  autoSalesDesired: boolean;
+  setKeepAtHandCount: (n: number) => void;
+  setAutoSalesDesired: (on: boolean) => void;
   isSyncing: boolean;
 };
 
@@ -152,6 +160,8 @@ function defaults(): DisplaySettings {
     currency_format_mode: DEFAULT_CURRENCY_FORMAT_MODE,
     register_start_step: DEFAULT_REGISTER_START_STEP,
     default_storage_location_id: null,
+    keep_at_hand_count: 1,
+    auto_sales_desired: false,
     ...sanitizeGalleryCardFields(null),
   };
 }
@@ -177,6 +187,8 @@ function sanitizePrefs(raw: unknown): DisplaySettings {
     default_storage_location_id: sanitizeDefaultStorageLocationId(
       obj.default_storage_location_id,
     ),
+    keep_at_hand_count: sanitizeKeepAtHandCount(obj.keep_at_hand_count),
+    auto_sales_desired: sanitizeAutoSalesDesired(obj.auto_sales_desired),
     ...sanitizeGalleryCardFields(obj),
   };
 }
@@ -414,6 +426,20 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
     }));
   }, []);
 
+  const setKeepAtHandCount = useCallback((n: number) => {
+    setPrefs((prev) => ({
+      ...prev,
+      keep_at_hand_count: sanitizeKeepAtHandCount(n),
+    }));
+  }, []);
+
+  const setAutoSalesDesired = useCallback((on: boolean) => {
+    setPrefs((prev) => ({
+      ...prev,
+      auto_sales_desired: sanitizeAutoSalesDesired(on),
+    }));
+  }, []);
+
   return useMemo(
     () => ({
       textScale: prefs.text_scale,
@@ -432,6 +458,8 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       galleryShowName: prefs.gallery_show_name,
       galleryShowTags: prefs.gallery_show_tags,
       galleryShowPrice: prefs.gallery_show_price,
+      keepAtHandCount: prefs.keep_at_hand_count,
+      autoSalesDesired: prefs.auto_sales_desired,
       setTextScale,
       setUiDensity,
       setListSort,
@@ -448,6 +476,8 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setGalleryShowName,
       setGalleryShowTags,
       setGalleryShowPrice,
+      setKeepAtHandCount,
+      setAutoSalesDesired,
       isSyncing,
     }),
     [
@@ -468,6 +498,8 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setGalleryShowName,
       setGalleryShowTags,
       setGalleryShowPrice,
+      setKeepAtHandCount,
+      setAutoSalesDesired,
       isSyncing,
     ],
   );

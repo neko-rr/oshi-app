@@ -25,10 +25,22 @@ export type StorageLocationItem = {
   last_register_picked_at?: string | null;
 };
 
+export type BarcodeLookupItem = {
+  name?: string | null;
+  catchcopy?: string | null;
+  price?: number | null;
+  product_url?: string | null;
+  shop_name?: string | null;
+  external_item_code?: string | null;
+  image_url?: string | null;
+  genre_id?: number | null;
+};
+
 export type BarcodeLookupResponse = {
   status?: string;
-  items?: Array<{ name?: string | null; price?: number | null }>;
+  items?: BarcodeLookupItem[];
   message?: string;
+  suggested_category_name?: string | null;
 };
 
 export type RegisterDraft = {
@@ -40,16 +52,35 @@ export type RegisterDraft = {
   file: File | null;
   productName: string;
   productGroupName: string;
+  worksSeriesName: string;
+  title: string;
   characterName: string;
   purchasePrice: string;
   /** ISO 4217。価格があるときの記録通貨 */
   currencyCode: string;
+  purchaseLocation: string;
+  purchaseDate: string;
   memo: string;
   selectedSlots: Set<number>;
   categoryTagId: number | null;
   storageLocationId: number | null;
   visualTags: string[];
   unmatchedProductType: string | null;
+  /** 楽天照合候補（最大5） */
+  lookupCandidates: BarcodeLookupItem[];
+  selectedCandidateIndex: number | null;
+  rakutenProductUrl: string;
+  rakutenItemCode: string;
+  rakutenShopName: string;
+  /** メルカリ等の任意URL */
+  manualProductUrl: string;
+  manualUrlLabel: string;
+  registrationQuantity: string;
+  salesDesired: boolean;
+  salesDesiredQuantity: string;
+  wantObject: boolean;
+  /** 交換OK欄をユーザーが触った */
+  salesDesiredUserTouched: boolean;
   fieldSources: FieldSources;
 };
 
@@ -63,15 +94,31 @@ export function emptyDraft(): RegisterDraft {
     file: null,
     productName: "",
     productGroupName: "",
+    worksSeriesName: "",
+    title: "",
     characterName: "",
     purchasePrice: "",
     currencyCode: "",
+    purchaseLocation: "",
+    purchaseDate: "",
     memo: "",
     selectedSlots: new Set(),
     categoryTagId: null,
     storageLocationId: null,
     visualTags: [],
     unmatchedProductType: null,
+    lookupCandidates: [],
+    selectedCandidateIndex: null,
+    rakutenProductUrl: "",
+    rakutenItemCode: "",
+    rakutenShopName: "",
+    manualProductUrl: "",
+    manualUrlLabel: "",
+    registrationQuantity: "1",
+    salesDesired: false,
+    salesDesiredQuantity: "",
+    wantObject: false,
+    salesDesiredUserTouched: false,
     fieldSources: emptyFieldSources(),
   };
 }

@@ -172,7 +172,20 @@ def _collect_snapshot(
     photos = _fetch_all_rows(
         client, "photo", members_id=members_id, order_col="photo_id"
     )
-    for rows in (category_tags, storage_locations, color_tags, product_color_tags, photos):
+    product_external_refs = _fetch_all_rows(
+        client,
+        "product_external_ref",
+        members_id=members_id,
+        order_col="product_external_ref_id",
+    )
+    for rows in (
+        category_tags,
+        storage_locations,
+        color_tags,
+        product_color_tags,
+        photos,
+        product_external_refs,
+    ):
         for row in rows:
             row.pop("members_id", None)
     products = _enrich_products(
@@ -187,6 +200,7 @@ def _collect_snapshot(
         "color_tags": color_tags,
         "products": products,
         "product_color_tags": product_color_tags,
+        "product_external_refs": product_external_refs,
         "photos": photos,
     }
 
@@ -226,6 +240,7 @@ def _build_zip_for_kind(
         storage_locations=snap["storage_locations"],
         color_tags=snap["color_tags"],
         product_color_tags=snap["product_color_tags"],
+        product_external_refs=snap["product_external_refs"],
         photos=snap["photos"],
         include_media_paths=include_media,
     )

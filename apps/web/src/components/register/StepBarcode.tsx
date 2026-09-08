@@ -11,6 +11,8 @@ import type { DecodedBarcode } from "@/lib/barcode/formats";
 export type OwnedProductHint = {
   registered_product_id: number;
   product_name: string | null;
+  match_count: number;
+  total_quantity: number;
 };
 
 type Props = {
@@ -76,6 +78,10 @@ export function StepBarcode({
               {ownedHint.product_name?.trim() ||
                 `#${ownedHint.registered_product_id}`}
             </Link>{" "}
+            {t("ownedCount", {
+              count: ownedHint.match_count,
+              total: ownedHint.total_quantity,
+            })}{" "}
             {t("ownedSuffix")}
           </p>
         ) : null}

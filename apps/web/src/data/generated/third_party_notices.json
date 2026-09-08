@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T05:57:26Z",
+  "generated_at": "2026-09-07T04:19:29Z",
   "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -205,7 +205,7 @@
       "name_ja": "楽天市場API（商品検索等）",
       "attribution_required": true,
       "status": "deferred_live_off",
-      "note_ja": "現在 RAKUTEN_LIVE_CALLS=0 のためアプリ上にロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を確認し、該当画面へ実装してから有効化する。",
+      "note_ja": "商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。LIVE オフ時はロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を再確認する。",
       "docs_url": "https://webservice.rakuten.co.jp/"
     },
     {

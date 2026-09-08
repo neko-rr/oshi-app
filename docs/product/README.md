@@ -12,6 +12,7 @@ DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**
 | [value.md](value.md) | 顧客価値・非交渉 | **手** |
 | [roadmap.md](roadmap.md) | Must / Phase2 / Later | **手** |
 | [v2_status.md](v2_status.md) | v2 移行の要約（ほぼ完了の境界） | **手** |
+| [register_fields.md](register_fields.md) | 登録項目 Core/Oshi/External/Hidden | **手** |
 | [flows/](flows/) | 主要ユーザーフロー | **手** |
 | [acceptance/](acceptance/) | 画面ごとの受け入れ条件（DoD） | **手** |
 | [i18n.md](i18n.md) | Web 多言語（next-intl・`/en`） | **手** |

@@ -248,9 +248,14 @@ def insert_product_row(
     purchase_price: int | None = None,
     currency_code: str | None = None,
     purchase_location: str | None = None,
+    purchase_date: str | None = None,
     memo: str | None = None,
     category_tag_id: int | None = None,
     storage_location_id: int | None = None,
+    registration_quantity: int | None = None,
+    sales_desired_flag: int = 0,
+    sales_desired_quantity: int | None = None,
+    want_object_flag: int = 0,
 ) -> int:
     """registered_product に1行 insert し ID を返す。"""
     client = create_user_client(access_token)
@@ -270,8 +275,8 @@ def insert_product_row(
         "commercial_product_flag": 1,
         "personal_product_flag": 0,
         "digital_product_flag": 0,
-        "sales_desired_flag": 0,
-        "want_object_flag": 0,
+        "sales_desired_flag": sales_desired_flag,
+        "want_object_flag": want_object_flag,
         "freebie_flag": 0,
     }
     if photo_id is not None:
@@ -284,6 +289,12 @@ def insert_product_row(
         payload["category_tag_id"] = category_tag_id
     if storage_location_id is not None:
         payload["storage_location_id"] = storage_location_id
+    if purchase_date is not None:
+        payload["purchase_date"] = purchase_date
+    if registration_quantity is not None:
+        payload["registration_quantity"] = registration_quantity
+    if sales_desired_quantity is not None:
+        payload["sales_desired_quantity"] = sales_desired_quantity
 
     response = (
         client.table("registered_product").insert(payload).execute()
@@ -315,6 +326,11 @@ character_name,
 purchase_price,
 currency_code,
 purchase_location,
+purchase_date,
+registration_quantity,
+sales_desired_flag,
+sales_desired_quantity,
+want_object_flag,
 category_tag_id,
 storage_location_id,
 photo(photo_thumbnail_url,photo_high_resolution_url),
@@ -408,6 +424,82 @@ def delete_product_row(
     client.table("registered_product_color_tag").delete().eq(
         "members_id", members_id
     ).eq("registered_product_id", registered_product_id).execute()
+    # CASCADE でも明示削除（外部参照）
+    client.table("product_external_ref").delete().eq(
+        "members_id", members_id
+    ).eq("registered_product_id", registered_product_id).execute()
     client.table("registered_product").delete().eq(
         "members_id", members_id
     ).eq("registered_product_id", registered_product_id).execute()
+
+
+_EXTERNAL_REF_SELECT = (
+    "product_external_ref_id,source,external_item_code,product_url,"
+    "shop_name,label,is_primary,created_at,updated_at"
+)
+
+
+def fetch_product_external_refs(
+    *,
+    members_id: str,
+    access_token: str,
+    registered_product_id: int,
+) -> list[dict[str, Any]]:
+    client = create_user_client(access_token)
+    response = (
+        client.table("product_external_ref")
+        .select(_EXTERNAL_REF_SELECT)
+        .eq("members_id", members_id)
+        .eq("registered_product_id", registered_product_id)
+        .order("source")
+        .execute()
+    )
+    if getattr(response, "error", None):
+        logger.exception("外部参照の取得に失敗: %s", response.error)
+        raise RuntimeError("外部参照の取得に失敗しました")
+    data = response.data if hasattr(response, "data") else None
+    if not isinstance(data, list):
+        return []
+    return [row for row in data if isinstance(row, dict)]
+
+
+def replace_product_external_refs(
+    *,
+    members_id: str,
+    access_token: str,
+    registered_product_id: int,
+    refs: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """製品の外部参照を全削除して再挿入。"""
+    client = create_user_client(access_token)
+    client.table("product_external_ref").delete().eq(
+        "members_id", members_id
+    ).eq("registered_product_id", registered_product_id).execute()
+    if not refs:
+        return []
+    payload = [
+        {
+            "members_id": members_id,
+            "registered_product_id": registered_product_id,
+            "source": r["source"],
+            "external_item_code": r.get("external_item_code"),
+            "product_url": r["product_url"],
+            "shop_name": r.get("shop_name"),
+            "label": r.get("label"),
+            "is_primary": bool(r.get("is_primary")),
+        }
+        for r in refs
+    ]
+    response = (
+        client.table("product_external_ref")
+        .insert(payload)
+        .select(_EXTERNAL_REF_SELECT)
+        .execute()
+    )
+    if getattr(response, "error", None):
+        logger.error("外部参照 insert error: %s", response.error)
+        raise RuntimeError("外部参照の保存に失敗しました")
+    data = response.data if hasattr(response, "data") else None
+    if not isinstance(data, list):
+        raise RuntimeError("外部参照の保存に失敗しました")
+    return [row for row in data if isinstance(row, dict)]

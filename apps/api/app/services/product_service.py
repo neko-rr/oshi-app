@@ -284,10 +284,17 @@ def create_product_for_member(
     purchase_price: int | None = None,
     currency_code: str | None = None,
     purchase_location: str | None = None,
+    purchase_date: str | None = None,
     memo: str | None = None,
     category_tag_id: int | None = None,
     storage_location_id: int | None = None,
     color_tag_slots: list[int] | None = None,
+    registration_quantity: int | None = None,
+    sales_desired_flag: bool | int | None = None,
+    sales_desired_quantity: int | None = None,
+    want_object_flag: bool | int | None = None,
+    sales_desired_user_touched: bool = False,
+    external_refs: list[dict[str, Any]] | None = None,
     insert_product: Callable[..., int] | None = None,
     record_storage_pick: Callable[..., None] | None = None,
 ) -> dict[str, Any]:
@@ -300,10 +307,33 @@ def create_product_for_member(
     if not name:
         raise ValueError("製品名は必須です")
 
+    from app.services.duplicate_quantity import (
+        apply_auto_sales_desired,
+        normalize_flag_01,
+        normalize_registration_quantity,
+    )
+    from app.services import display_settings_service
+
     # 価格なしでは記録通貨を保存しない
     resolved_currency: str | None = None
     if purchase_price is not None:
         resolved_currency = normalize_currency_code(currency_code)
+
+    qty = normalize_registration_quantity(registration_quantity)
+    prefs = display_settings_service.get_display_settings(
+        members_id=str(members_id).strip(),
+        access_token=str(access_token).strip(),
+    )
+    sales_flag, sales_qty = apply_auto_sales_desired(
+        registration_quantity=qty,
+        sales_desired_flag=sales_desired_flag,
+        sales_desired_quantity=sales_desired_quantity,
+        keep_at_hand_count=int(prefs.get("keep_at_hand_count") or 1),
+        auto_sales_desired=bool(prefs.get("auto_sales_desired")),
+        user_touched_sales=bool(sales_desired_user_touched),
+    )
+    want_flag = normalize_flag_01(want_object_flag, field="want_object_flag")
+    purchase_date_clean = (purchase_date or "").strip() or None
 
     inserter = insert_product
     if inserter is None:
@@ -329,9 +359,14 @@ def create_product_for_member(
             purchase_price=purchase_price,
             currency_code=resolved_currency,
             purchase_location=(purchase_location or "").strip() or None,
+            purchase_date=purchase_date_clean,
             memo=(memo or "").strip() or None,
             category_tag_id=category_tag_id,
             storage_location_id=storage_location_id,
+            registration_quantity=qty,
+            sales_desired_flag=sales_flag,
+            sales_desired_quantity=sales_qty,
+            want_object_flag=want_flag,
         )
     except RuntimeError as exc:
         if str(exc) == "supabase_not_configured":
@@ -355,6 +390,18 @@ def create_product_for_member(
             access_token=token,
             registered_product_id=new_id,
             slots=color_tag_slots,
+        )
+
+    if external_refs is not None:
+        from app.services.product_external_ref_service import (
+            replace_external_refs_for_product,
+        )
+
+        replace_external_refs_for_product(
+            members_id=mid,
+            access_token=token,
+            registered_product_id=new_id,
+            refs=external_refs,
         )
 
     # 登録ウィザード向け「よく使う収納」カウンタ（詳細 PATCH では増やさない）
@@ -387,6 +434,8 @@ def patch_product_for_member(
     registered_product_id: int,
     fields: dict[str, Any],
     color_tag_slots: list[int] | None = None,
+    external_refs: list[dict[str, Any]] | None = None,
+    sales_desired_user_touched: bool = False,
 ) -> dict[str, Any] | None:
     """製品更新。存在しなければ None。"""
     if not members_id or not str(members_id).strip():
@@ -399,12 +448,79 @@ def patch_product_for_member(
     if existing is None:
         return None
     from app.infra.supabase_user import patch_product_row
+    from app.services.duplicate_quantity import (
+        apply_auto_sales_desired,
+        normalize_flag_01,
+        normalize_registration_quantity,
+        normalize_sales_desired_quantity,
+        sales_desired_looks_untouched,
+    )
+    from app.services import display_settings_service
 
     patch_fields = dict(fields)
     if "currency_code" in patch_fields:
         patch_fields["currency_code"] = normalize_currency_code(
             patch_fields.get("currency_code")
         )
+    if "registration_quantity" in patch_fields:
+        patch_fields["registration_quantity"] = normalize_registration_quantity(
+            patch_fields.get("registration_quantity")
+        )
+    if "sales_desired_flag" in patch_fields:
+        patch_fields["sales_desired_flag"] = normalize_flag_01(
+            patch_fields.get("sales_desired_flag"), field="sales_desired_flag"
+        )
+    if "sales_desired_quantity" in patch_fields:
+        patch_fields["sales_desired_quantity"] = normalize_sales_desired_quantity(
+            patch_fields.get("sales_desired_quantity")
+        )
+    if "want_object_flag" in patch_fields:
+        patch_fields["want_object_flag"] = normalize_flag_01(
+            patch_fields.get("want_object_flag"), field="want_object_flag"
+        )
+    if "purchase_date" in patch_fields and patch_fields["purchase_date"] is not None:
+        cleaned = str(patch_fields["purchase_date"]).strip()
+        patch_fields["purchase_date"] = cleaned or None
+
+    sales_keys_in_patch = (
+        "sales_desired_flag" in patch_fields
+        or "sales_desired_quantity" in patch_fields
+    )
+    should_try_auto = (
+        not sales_desired_user_touched
+        and not sales_keys_in_patch
+        and (
+            "registration_quantity" in patch_fields
+            or sales_desired_looks_untouched(
+                sales_desired_flag=existing.get("sales_desired_flag"),
+                sales_desired_quantity=existing.get("sales_desired_quantity"),
+            )
+        )
+    )
+    if should_try_auto and sales_desired_looks_untouched(
+        sales_desired_flag=existing.get("sales_desired_flag"),
+        sales_desired_quantity=existing.get("sales_desired_quantity"),
+    ):
+        prefs = display_settings_service.get_display_settings(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+        )
+        qty = patch_fields.get(
+            "registration_quantity", existing.get("registration_quantity")
+        )
+        if isinstance(qty, int) or qty is None:
+            flag, sq = apply_auto_sales_desired(
+                registration_quantity=qty if isinstance(qty, int) else None,
+                sales_desired_flag=None,
+                sales_desired_quantity=None,
+                keep_at_hand_count=int(prefs.get("keep_at_hand_count") or 1),
+                auto_sales_desired=bool(prefs.get("auto_sales_desired")),
+                user_touched_sales=False,
+            )
+            patch_fields["sales_desired_flag"] = flag
+            if sq is not None:
+                patch_fields["sales_desired_quantity"] = sq
+
     if patch_fields:
         patch_product_row(
             members_id=str(members_id).strip(),
@@ -420,6 +536,17 @@ def patch_product_for_member(
             access_token=str(access_token).strip(),
             registered_product_id=registered_product_id,
             slots=color_tag_slots,
+        )
+    if external_refs is not None:
+        from app.services.product_external_ref_service import (
+            replace_external_refs_for_product,
+        )
+
+        replace_external_refs_for_product(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            registered_product_id=registered_product_id,
+            refs=external_refs,
         )
     return get_product_for_member(
         members_id,
@@ -614,6 +741,11 @@ def normalize_product_detail(row: dict[str, Any]) -> dict[str, Any]:
         "purchase_price": row.get("purchase_price"),
         "currency_code": row.get("currency_code"),
         "purchase_location": row.get("purchase_location"),
+        "purchase_date": row.get("purchase_date"),
+        "registration_quantity": row.get("registration_quantity"),
+        "sales_desired_flag": row.get("sales_desired_flag"),
+        "sales_desired_quantity": row.get("sales_desired_quantity"),
+        "want_object_flag": row.get("want_object_flag"),
         "category_tag_id": row.get("category_tag_id"),
         "storage_location_id": row.get("storage_location_id"),
         "category_tag": _tag_summary_from_embed(
@@ -703,4 +835,17 @@ def get_product_for_member(
         detail["color_tag_slots"] = slots_map.get(registered_product_id, [])
     except Exception:
         detail["color_tag_slots"] = []
+    try:
+        from app.services.product_external_ref_service import (
+            list_external_refs_for_product,
+        )
+
+        detail["external_refs"] = list_external_refs_for_product(
+            members_id=str(members_id).strip(),
+            access_token=token,
+            registered_product_id=registered_product_id,
+        )
+    except Exception:
+        logger.exception("外部参照の取得に失敗")
+        detail["external_refs"] = []
     return detail

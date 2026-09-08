@@ -323,6 +323,80 @@
         ]
       }
     },
+    "/products/duplicate-hints": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Duplicate Hints",
+        "operationId": "duplicate_hints_products_duplicate_hints_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "barcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Barcode"
+            }
+          },
+          {
+            "name": "external_item_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "External Item Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Duplicate Hints Products Duplicate Hints Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/{registered_product_id}": {
       "get": {
         "tags": [
@@ -2333,6 +2407,18 @@
             ],
             "title": "Purchase Location"
           },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date"
+          },
           "memo": {
             "anyOf": [
               {
@@ -2379,6 +2465,79 @@
               }
             ],
             "title": "Color Tag Slots"
+          },
+          "registration_quantity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Quantity"
+          },
+          "sales_desired_flag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Desired Flag"
+          },
+          "sales_desired_quantity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Desired Quantity"
+          },
+          "want_object_flag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Want Object Flag"
+          },
+          "sales_desired_user_touched": {
+            "type": "boolean",
+            "title": "Sales Desired User Touched",
+            "default": false
+          },
+          "external_refs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalRefInput"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Refs"
           }
         },
         "type": "object",
@@ -2564,6 +2723,24 @@
             "type": "boolean",
             "title": "Gallery Show Price",
             "default": true
+          },
+          "gallery_image_fit": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Gallery Image Fit"
+          },
+          "keep_at_hand_count": {
+            "type": "integer",
+            "maximum": 99.0,
+            "minimum": 1.0,
+            "title": "Keep At Hand Count",
+            "default": 1
+          },
+          "auto_sales_desired": {
+            "type": "boolean",
+            "title": "Auto Sales Desired",
+            "default": false
           }
         },
         "type": "object",
@@ -2576,7 +2753,8 @@
           "residence_region",
           "date_format_mode",
           "currency_format_mode",
-          "register_start_step"
+          "register_start_step",
+          "gallery_image_fit"
         ],
         "title": "DisplaySettingsBody"
       },
@@ -2593,6 +2771,70 @@
           "kind"
         ],
         "title": "ExportCreateBody"
+      },
+      "ExternalRefInput": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "product_url": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Product Url"
+          },
+          "external_item_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Item Code"
+          },
+          "shop_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shop Name"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "product_url"
+        ],
+        "title": "ExternalRefInput",
+        "description": "製品に紐づく外部参照（楽天・任意URL）。"
       },
       "ExtractTagsRequest": {
         "properties": {
@@ -2914,6 +3156,18 @@
             ],
             "title": "Purchase Location"
           },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date"
+          },
           "memo": {
             "anyOf": [
               {
@@ -2958,6 +3212,65 @@
             ],
             "title": "Storage Location Id"
           },
+          "registration_quantity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Quantity"
+          },
+          "sales_desired_flag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Desired Flag"
+          },
+          "sales_desired_quantity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Desired Quantity"
+          },
+          "want_object_flag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Want Object Flag"
+          },
+          "sales_desired_user_touched": {
+            "type": "boolean",
+            "title": "Sales Desired User Touched",
+            "default": false
+          },
           "clear_category_tag": {
             "type": "boolean",
             "title": "Clear Category Tag",
@@ -2966,6 +3279,11 @@
           "clear_storage_location": {
             "type": "boolean",
             "title": "Clear Storage Location",
+            "default": false
+          },
+          "clear_purchase_date": {
+            "type": "boolean",
+            "title": "Clear Purchase Date",
             "default": false
           },
           "color_tag_slots": {
@@ -2981,6 +3299,20 @@
               }
             ],
             "title": "Color Tag Slots"
+          },
+          "external_refs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalRefInput"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Refs"
           }
         },
         "type": "object",

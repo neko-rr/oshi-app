@@ -3,7 +3,7 @@
 
 コード・SQL は英語物理名。**このファイルは意味の説明用**（自動生成）。
 
-生成日時(UTC): `2026-09-06 05:57:25Z`
+生成日時(UTC): `2026-09-07 07:51:50Z`
 
 ## 使い方
 
@@ -141,7 +141,7 @@
 ## 表示設定（`display_settings`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 20
+- **列数:** 22
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -165,6 +165,8 @@
 | ギャラリータグ表示 | `gallery_show_tags` | `boolean` |  |
 | ギャラリー価格表示 | `gallery_show_price` | `boolean` |  |
 | ギャラリー画像フィット | `gallery_image_fit` | `text` |  |
+| 手元残数 | `keep_at_hand_count` | `smallint` |  |
+| 余剰交換OK自動 | `auto_sales_desired` | `boolean` |  |
 
 ## ギャラリー保存ビュー（`gallery_view`）
 
@@ -264,6 +266,25 @@
 | 写真編集日 | `photo_edit_date` | `timestamp with time zone` | 日付 |
 | 写真サムネイルURL | `photo_thumbnail_url` | `text` | URL またはパス |
 | 写真高解像度URL | `photo_high_resolution_url` | `text` | URL またはパス |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+
+## 製品外部参照（`product_external_ref`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 11
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| 製品外部参照ID | `product_external_ref_id` | `bigint` | 識別子または外部キー |
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| 登録製品ID | `registered_product_id` | `integer` | 識別子または外部キー |
+| ソース | `source` | `text` |  |
+| 外部商品コード | `external_item_code` | `text` |  |
+| 製品URL | `product_url` | `text` | URL またはパス |
+| 店舗名 | `shop_name` | `text` |  |
+| ラベル | `label` | `text` |  |
+| 主フラグ | `is_primary` | `boolean` |  |
 | 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 | 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 

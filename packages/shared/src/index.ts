@@ -4,6 +4,7 @@ export const API_PATHS = {
   me: "/me",
   products: "/products",
   productsBulk: "/products/bulk",
+  productsDuplicateHints: "/products/duplicate-hints",
   photos: "/photos",
   colorTags: "/color-tags",
   categoryTags: "/category-tags",

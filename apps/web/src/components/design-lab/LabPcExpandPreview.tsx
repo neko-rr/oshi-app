@@ -35,8 +35,11 @@ type LabPcExpandPreviewProps = {
   initialVariant?: LabVariantId;
   uiState?: LabUiState;
   scene?: LabSceneId;
+  themePackId?: string;
+  onThemePackIdChange?: (id: string) => void;
   oshiIndex?: number;
   onOshiIndexChange?: (index: number) => void;
+  showUiCallouts?: boolean;
   cvdMode?: LabCvdModeId;
   ambient?: LabAmbientId;
   textScale?: LabTextScaleId;
@@ -51,8 +54,11 @@ export default function LabPcExpandPreview({
   initialVariant = "a",
   uiState = "default",
   scene = "home",
+  themePackId = "default",
+  onThemePackIdChange,
   oshiIndex = 0,
   onOshiIndexChange,
+  showUiCallouts = false,
   cvdMode = "none",
   ambient = "none",
   textScale = "normal",
@@ -245,8 +251,11 @@ export default function LabPcExpandPreview({
                   pcWide
                   uiState={uiState}
                   scene={scene}
+                  themePackId={themePackId}
+                  onThemePackIdChange={onThemePackIdChange}
                   oshiIndex={oshiIndex}
                   onOshiIndexChange={onOshiIndexChange}
+                  showUiCallouts={showUiCallouts}
                 />
               </div>
             </div>

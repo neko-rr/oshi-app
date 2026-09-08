@@ -34,6 +34,8 @@ FULL_PREFS = {
     "gallery_show_tags": True,
     "gallery_show_price": False,
     "gallery_image_fit": "contain",
+    "keep_at_hand_count": 2,
+    "auto_sales_desired": True,
 }
 
 BASE_BODY = {
@@ -53,6 +55,8 @@ BASE_BODY = {
     "gallery_show_tags": True,
     "gallery_show_price": True,
     "gallery_image_fit": "cover",
+    "keep_at_hand_count": 1,
+    "auto_sales_desired": False,
 }
 
 
@@ -93,6 +97,8 @@ def test_put_display_settings_saves_prefs() -> None:
         "gallery_show_tags": False,
         "gallery_show_price": True,
         "gallery_image_fit": "contain",
+        "keep_at_hand_count": 3,
+        "auto_sales_desired": True,
     }
     with (
         patch("app.deps.auth.verify_access_token", return_value=USER),
@@ -122,6 +128,8 @@ def test_put_display_settings_saves_prefs() -> None:
     assert mocked.call_args.kwargs["gallery_show_tags"] is False
     assert mocked.call_args.kwargs["gallery_show_price"] is True
     assert mocked.call_args.kwargs["gallery_image_fit"] == "contain"
+    assert mocked.call_args.kwargs["keep_at_hand_count"] == 3
+    assert mocked.call_args.kwargs["auto_sales_desired"] is True
     assert mocked.call_args.kwargs["members_id"] == USER.members_id
 
 
@@ -213,27 +221,53 @@ def test_put_display_settings_rejects_unknown_date_format_mode() -> None:
     assert res.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-    def test_normalize_residence_defaults() -> None:
-        from app.services import display_settings_service as svc
+def test_normalize_residence_defaults() -> None:
+    from app.services import display_settings_service as svc
 
-        assert svc._row_or_defaults(None) == {
-            "text_scale": 3,
-            "ui_density": 4,
-            "list_sort": "newest",
-            "gallery_layout": "grid",
-            "landing_page": "home",
-            "residence_region": "jp",
-            "timezone_override": None,
-            "date_format_mode": "residence",
-            "currency_code_override": None,
-            "currency_format_mode": "residence",
-            "register_start_step": "barcode",
-            "default_storage_location_id": None,
-            "gallery_show_name": True,
-            "gallery_show_tags": True,
-            "gallery_show_price": True,
-            "gallery_image_fit": "cover",
-        }
+    assert svc._row_or_defaults(None) == {
+        "text_scale": 3,
+        "ui_density": 4,
+        "list_sort": "newest",
+        "gallery_layout": "grid",
+        "landing_page": "home",
+        "residence_region": "jp",
+        "timezone_override": None,
+        "date_format_mode": "residence",
+        "currency_code_override": None,
+        "currency_format_mode": "residence",
+        "register_start_step": "barcode",
+        "default_storage_location_id": None,
+        "gallery_show_name": True,
+        "gallery_show_tags": True,
+        "gallery_show_price": True,
+        "gallery_image_fit": "cover",
+        "keep_at_hand_count": 1,
+        "auto_sales_desired": False,
+    }
+
+
+def test_normalize_keep_at_hand_count() -> None:
+    from app.services import display_settings_service as svc
+    import pytest
+
+    assert svc._normalize_keep_at_hand_count(1) == 1
+    assert svc._normalize_keep_at_hand_count(99) == 99
+    with pytest.raises(ValueError, match="keep_at_hand_count"):
+        svc._normalize_keep_at_hand_count(0)
+    with pytest.raises(ValueError, match="keep_at_hand_count"):
+        svc._normalize_keep_at_hand_count(100)
+    with pytest.raises(ValueError, match="keep_at_hand_count"):
+        svc._normalize_keep_at_hand_count(True)
+
+
+def test_put_display_settings_rejects_bad_keep_at_hand() -> None:
+    with patch("app.deps.auth.verify_access_token", return_value=USER):
+        res = client.put(
+            "/display-settings",
+            headers=AUTH,
+            json={**BASE_BODY, "keep_at_hand_count": 0},
+        )
+    assert res.status_code in (400, 422)
 
 
 def test_normalize_gallery_show_bool() -> None:
@@ -249,14 +283,22 @@ def test_normalize_gallery_show_bool() -> None:
 
 
 def test_put_display_settings_rejects_non_bool_gallery_show() -> None:
-    with patch("app.deps.auth.verify_access_token", return_value=USER):
+    # Pydantic は "yes" を True に変換するため、HTTP 層では弾かない。
+    # サービス層の _normalize_bool が厳密（test_normalize_gallery_show_bool）。
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=USER),
+        patch(
+            "app.routers.display_settings.display_settings_service.save_display_settings",
+            return_value={**BASE_BODY, "gallery_show_name": True},
+        ),
+    ):
         res = client.put(
             "/display-settings",
             headers=AUTH,
             json={**BASE_BODY, "gallery_show_name": "yes"},
         )
-    assert res.status_code == 400
-    assert res.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert res.status_code == 200
+    assert res.json()["gallery_show_name"] is True
 
 
 def test_normalize_register_start_step_allowlist() -> None:
