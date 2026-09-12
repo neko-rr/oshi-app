@@ -37,8 +37,10 @@
 | `NEXT_PUBLIC_API_BASE_URL` | **必須** | 公開可 | 開発は `http://127.0.0.1:8000` | **HTTPS の Render URL** | 末尾スラッシュなし推奨 |
 | `NEXT_PUBLIC_BASE_URL` | 任意 | 公開可 | 任意 | 本番 Web のオリジン | リダイレクト組み立て用 |
 | `AUTH_GATE_BYPASS` | 任意（開発のみ） | **非公開** | `.env.local` のみ | **置くな** | `=1` かつ非本番のときだけ、Supabase 未設定でも**業務ルート**を通す。通常は未設定。`/dev`（Design Lab）は非本番なら未ログイン可（別途） |
+| `NEXT_PUBLIC_E2E_AUTH_STUB_ENABLED` | 任意（**register-e2e のみ**） | 公開可だが **本番禁止** | テスト時のみ `1` | **置くな** | クライアントが Cookie `oshi_e2e_auth` を認証スタブとして読む。通常 CI の `next build` には付けない |
+| `E2E_AUTH_STUB_ENABLED` | 任意（**register-e2e のみ**） | **非公開** | テスト時のみ `1` | **置くな** | middleware が stub Cookie で保護ルートを通す。CF / Render 禁止 |
 
-**CF に置いてはいけない例:** `SUPABASE_SECRET_KEY` / `SUPABASE_JWT_SECRET` / `DATABASE_URL` / `IO_*` / `AUTH_GATE_BYPASS` / あらゆる `*_SECRET*`。
+**CF に置いてはいけない例:** `SUPABASE_SECRET_KEY` / `SUPABASE_JWT_SECRET` / `DATABASE_URL` / `IO_*` / `AUTH_GATE_BYPASS` / `E2E_AUTH_STUB_ENABLED` / `NEXT_PUBLIC_E2E_AUTH_STUB_ENABLED` / あらゆる `*_SECRET*`。
 
 ---
 

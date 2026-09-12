@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/client";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { getClientE2eStubSession } from "@/lib/e2eAuthStub";
 
 /** セッションの is_anonymous を購読（ゲストバナー等用）。 */
 export function useIsAnonymous(): boolean | null {
   const [value, setValue] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const stub = getClientE2eStubSession();
+    if (stub) {
+      setValue(stub.isAnonymous);
+      return;
+    }
     const supabase = createClient();
     let cancelled = false;
 

@@ -31,6 +31,7 @@ import {
 import { buildContinueDraft, clearEventBundle } from "./buildContinueDraft";
 import { RegistrationRequiredDialog } from "@/components/auth/RegistrationRequiredDialog";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { getClientE2eStubSession } from "@/lib/e2eAuthStub";
 import {
   StepBarcode,
   type OwnedProductHint,
@@ -57,6 +58,8 @@ async function getSessionUser(): Promise<{
   accessToken: string;
   isAnonymous: boolean;
 } | null> {
+  const stub = getClientE2eStubSession();
+  if (stub) return stub;
   const supabase = createClient();
   const { data, error } = await supabase.auth.getSession();
   if (error || !data.session?.access_token) return null;

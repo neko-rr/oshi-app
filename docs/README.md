@@ -62,7 +62,7 @@
 | `db/storage.md` / `db/backup-restore.md` / `db/constraints-notes.md` |
 | `db/er-overview.md` / `db/schema-catalog.md` / `db/new-table-template.sql` |
 | `db/meta/README.md` |
-| `product/README.md` / `product/value.md` / `product/roadmap.md` |
+| `product/README.md` / `product/value.md` / `product/roadmap.md` / `product/register_e2e.md` |
 | `product/flows/register.md` |
 | `product/acceptance/**`（各 DoD と README） |
 | `product/meta/README.md` / `product/meta/status_vocabulary.md` |
