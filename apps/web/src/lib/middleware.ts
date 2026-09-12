@@ -7,6 +7,11 @@ import {
   stripLocalePrefix,
   withLocalePrefix,
 } from "@/lib/auth-path-policy";
+import {
+  E2E_AUTH_COOKIE,
+  isE2eAuthStubServerEnabled,
+  parseE2eAuthRole,
+} from "@/lib/e2eAuthStub";
 
 /** ローカル骨格用。本番では無効。AUTH_GATE_BYPASS=1 のときのみ認証ゲートを緩める */
 function authGateBypassAllowed(): boolean {
@@ -29,6 +34,22 @@ export async function updateSession(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = withLocalePrefix(locale, "/");
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // CI / ローカル E2E のみ。JWKS へは行かない（偽 URL での起動ハング防止）。
+  if (isE2eAuthStubServerEnabled()) {
+    const stubRole = parseE2eAuthRole(
+      request.cookies.get(E2E_AUTH_COOKIE)?.value,
+    );
+    if (stubRole) {
+      return supabaseResponse;
+    }
+    if (!allowsAnonymousWhenNotProduction(path)) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = withLocalePrefix(locale, "/auth/login");
+      return NextResponse.redirect(redirectUrl);
+    }
+    return supabaseResponse;
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

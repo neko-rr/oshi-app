@@ -34,7 +34,9 @@ env/
 *.tsbuildinfo
 packages/*/dist/
 apps/web/test-results/
+apps/web/test-results-register/
 apps/web/playwright-report/
+apps/web/playwright-report-register/
 apps/web/blob-report/
 
 # IDE / OS

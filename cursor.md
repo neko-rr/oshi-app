@@ -1,5 +1,12 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-09-11: 登録自動テスト（合成フィクスチャ）
+
+- 正本: `docs/product/register_e2e.md`
+- L1: `pnpm test:register-contract`（ZXing。実写は Git に入れない）
+- L2: `pnpm test:register-e2e`（ゲストゲート + 本登録 stub。Secrets なし）
+- `NEXT_PUBLIC_E2E_AUTH_STUB_ENABLED` / `E2E_AUTH_STUB_ENABLED` は **register-e2e 専用。CF 禁止**
+
 ## 2026-09-07: 登録確認の段階化＋イベント束
 
 - 確認: 必須・照合・タグ常時／Oshi・数量・購入・URL は `<details>`「詳しく」

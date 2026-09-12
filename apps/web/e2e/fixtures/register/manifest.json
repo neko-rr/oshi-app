@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "unreadable_image": "unreadable.png",
+  "cases": [
+    {
+      "id": "cross_ref_a_b",
+      "barcode_image": "barcode_product_a.png",
+      "expected_barcode": "4901234567894",
+      "barcode_format": "qr_code",
+      "front_image": "front_product_b.png",
+      "notes": "barcode=製品A（合成QR） / front=製品B（単色PNG）。参照ずれ検知用"
+    }
+  ]
+}

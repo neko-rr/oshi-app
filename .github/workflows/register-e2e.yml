@@ -1,0 +1,69 @@
+# 登録ウィザード E2E（合成フィクスチャ + API mock + 認証 stub）
+# 実 IO / 楽天 / テストアカウント Secrets は使わない。
+name: Register E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: register-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder
+  NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+  NEXT_PUBLIC_E2E_AUTH_STUB_ENABLED: "1"
+  E2E_AUTH_STUB_ENABLED: "1"
+  PLAYWRIGHT_SKIP_WEBSERVER: "1"
+  PLAYWRIGHT_PORT: "3000"
+  PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+
+jobs:
+  register-e2e:
+    name: register-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build shared + web (stub-enabled artifact; not production CF)
+        run: |
+          pnpm build:shared
+          pnpm build:web
+      - name: Install Playwright Chromium
+        run: pnpm -C apps/web exec playwright install chromium --with-deps
+      - name: Start Next and run register E2E
+        run: |
+          pnpm -C apps/web start &
+          for i in $(seq 1 60); do
+            if curl -sf "http://127.0.0.1:3000" >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          pnpm test:register-e2e
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: register-e2e-report
+          path: |
+            apps/web/playwright-report-register/**
+            apps/web/test-results-register/**
+          if-no-files-found: warn
+          retention-days: 7
