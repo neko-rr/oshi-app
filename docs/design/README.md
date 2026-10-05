@@ -1,6 +1,8 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
 # デザイン（エージェント・人間の入口）
 
+**製品ブランド:** Oshihaven（公式 https://oshihaven.com）。作者・マスコット IP は風ねこ / Kaze Neko。
+
 **更新区分の凡例（全体）:** [docs/README.md](../README.md)  
 見た目・UI/UX・テーマ色の **正本はここ**（`docs/db` / `docs/product` と同列）。  
 旧 Dash の DESIGN / Bootswatch 計画は **ARCHIVE**（`.cursor/plans/archive/`）。新規設計の正にしない。
@@ -19,9 +21,12 @@
 
 | ファイル | 役割 | 更新 |
 |----------|------|------|
-| [principles.md](principles.md) | 原則・トーン・Do/Don't | **手** |
-| [tokens.md](tokens.md) | 色・字・余白・角・影の考え方 | **手** |
+| [principles.md](principles.md) | 原則・トーン・階層・感情予算・トーン強度・Do/Don't | **手** |
+| [voice.md](voice.md) | コピー／空状態／プライバシー（大人の推し活） | **手** |
+| [tokens.md](tokens.md) | 色・字・余白・角・影・質感の考え方 | **手** |
 | [brand-palette.md](brand-palette.md) | ブランド既定色の種（初学者向け） | **手** |
+| [mascots.md](mascots.md) | アプリマスコット（選択・ファイル／優先度） | **手** |
+| [mascot-asset-brief.md](mascot-asset-brief.md) | マスコットブランド。画風正はくらげ（jelly-nuance）×庇護欲 | **手** |
 | [components.md](components.md) | 部品の使い方（shadcn） | **手** |
 | [themes.md](themes.md) | テーマ（トークン一式・todo-app 方式） | **手** |
 | [oshi-accents.md](oshi-accents.md) | テーマ色／推し色（カラータグとの違い） | **手** |
@@ -34,6 +39,7 @@
 | [feedback/decisions.md](feedback/decisions.md) | 決定ログ（accepted のみ） | **手** |
 | [icons.md](icons.md) | lucide 採用一覧・ライセンス（表は sync 生成） | **手**（AUTO 外） |
 | [meta/icons.json](meta/icons.json) | 採用 lucide **正本** | **エージェント** |
+| [meta/mascots.json](meta/mascots.json) | マスコット候補・ポーズ・URL（**ドラフト**） | **エージェント** |
 | [meta/tokens.json](meta/tokens.json) | セマンティック名 **正本**（check のみ） | **エージェント** |
 | [meta/design_adoption.json](meta/design_adoption.json) | Lab → 本番採用状態 | **エージェント** |
 | [meta/README.md](meta/README.md) | meta JSON の説明 | **手** |
@@ -47,14 +53,15 @@ as-built（自動）: [generated/gaps.md](generated/gaps.md) ← `pnpm generate:
 
 ## 読む順（あなた向け）
 
-1. [principles.md](principles.md) … 雰囲気を何で作るか  
-2. [themes.md](themes.md) … テーマ＝トークン一式  
-3. [oshi-accents.md](oshi-accents.md) … カラータグとの違い  
-4. [web-phone-ux.md](web-phone-ux.md) … スマホ Web・店頭で壊してはいけない操作  
-5. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
-6. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
-7. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
-8. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
+1. [principles.md](principles.md) … 雰囲気・階層・感情予算・トーン強度  
+2. [voice.md](voice.md) … コピー・空状態・シェアしない前提  
+3. [themes.md](themes.md) … テーマ＝トークン一式  
+4. [oshi-accents.md](oshi-accents.md) … カラータグとの違い  
+5. [web-phone-ux.md](web-phone-ux.md) … スマホ Web・店頭で壊してはいけない操作  
+6. [compare-workflow.md](compare-workflow.md) … 見た目を変えるときの手順（詳細は `design-lab`）  
+7. [brand-palette.md](brand-palette.md) … `#9f606c` とは何か（詳細スケールは後回し）  
+8. [feedback/README.md](feedback/README.md) … 気になることは **pending でよい**  
+9. [a11y.md](a11y.md) … コントラスト・フォーカス（最新は skill `design-a11y`）
 
 ## フィードバック（pending でよい）
 

@@ -24,7 +24,7 @@ STATE_DIR = ROOT / ".cursor" / "hooks.local"
 STATE_PATH = STATE_DIR / "agent_session.json"
 
 # セッション冒頭用（短く固定。毎回 AGENTS.md 全文を読まない）
-SESSION_CONTEXT = """[oshi-app / session]
+SESSION_CONTEXT = """[Oshihaven / session]
 絶対: 秘密を出さない。Auth は Supabase。API は JWKS のみ。members_id = JWT sub。業務は apps/api/services。
 品質: 振る舞い変更は TDD。変更後は skill post-change-verify（API pytest / Web lint+tsc）。
 着手前: Auth・DB・デプロイは skill official-docs-first。

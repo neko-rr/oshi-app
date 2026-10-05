@@ -1,9 +1,12 @@
 /**
  * 一覧→詳細の並びを sessionStorage に保持し、隣製品を解決する。
  * 実行: node --experimental-strip-types --test apps/web/src/lib/galleryBrowseOrder.test.ts
+ *
+ * キー接頭辞は `LOCAL_STORAGE_PREFIX`（brand.ts）と同じ `oshihaven:`。
+ * このファイルは node テストから直接読まれるため brand を import しない。
  */
 
-export const GALLERY_BROWSE_ORDER_KEY = "oshiapp:galleryBrowseOrder";
+export const GALLERY_BROWSE_ORDER_KEY = "oshihaven:galleryBrowseOrder";
 
 export type GalleryBrowseOrder = {
   ids: number[];

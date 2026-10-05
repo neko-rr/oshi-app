@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type FooterProps = {
   className?: string;
@@ -32,7 +33,7 @@ export default function Footer({ className }: FooterProps) {
             {t("licenses")}
           </Link>
         </nav>
-        <p>© oshi-app</p>
+        <p>© {PRODUCT_NAME}</p>
       </div>
     </footer>
   );

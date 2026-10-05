@@ -57,6 +57,16 @@
 
 混同して片方を消したり「最近」をサーバー必須にしない。
 
+## 店頭・屋外での見え方
+
+棚前・明るい店内を想定する（[a11y.md](a11y.md) の低輝度／屋外ヒントと併用）。
+
+| Do | Don't |
+|----|-------|
+| 写真判別と主CTAのコントラストを優先 | 薄い文字や弱いボーダーだけに頼る |
+| トーン「落ち着き」でも操作が読めること | 店頭向けにマスコット常駐で画面を埋める |
+| 文字サイズ設定・ブラウザ拡大を妨げない | 固定 px の小さい字で詰める |
+
 ## エージェント向け Do / Don't
 
 | Do | Don't |
@@ -65,11 +75,14 @@
 | 横長写真を切る変更の前に contain／large ルールを確認 | 一覧を全部 cover 固定に戻す |
 | 成功は短いフラッシュ、失敗は再試行導線 | 成功ダイアログや長い祝福を本線に足す |
 | 隣スワイプとライトボックス操作を分離する | 拡大中も製品遷移する |
+| コピーは [voice.md](voice.md)（煽らない） | 店頭向けに絵文字だらけの案内 |
 
 ## 関連
 
 - 原則: [principles.md](principles.md)  
+- ボイス: [voice.md](voice.md)  
 - 動き: [motion.md](motion.md)  
+- a11y: [a11y.md](a11y.md)  
 - 決定ログ: [feedback/decisions.md](feedback/decisions.md)  
 - 製品: `docs/product/acceptance/responsive_web.md` / `flows/gallery.md`  
 - Expo: skill `design-mobile`  

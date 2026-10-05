@@ -53,7 +53,7 @@ def test_build_payload_sorts_and_includes_services() -> None:
     assert payload["generated_at"] == "2026-09-01T00:00:00Z"
     assert [p["name"] for p in payload["packages"]] == ["aaa", "zzz"]
     assert payload["services"][0]["id"] == "rakuten"
-    assert "oshi-app" in payload["app_notice_ja"]
+    assert "Oshihaven" in payload["app_notice_ja"]
 
 
 def test_render_markdown_contains_table_and_services() -> None:

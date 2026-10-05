@@ -32,6 +32,225 @@
         ".cursor/skills/design-lab/SKILL.md"
       ],
       "lab_ref": null
+    },
+    {
+      "id": "fb-003",
+      "status": "accepted",
+      "created_at": "2026-09-15",
+      "source": "user",
+      "area": "brand/mascots",
+      "request_ja": "アプリマスコットをユーザーが選べるようにする（既定は風ねこ。候補: ねこ／いぬ／シマエナガ／くらげ／幸せの青い鳥）。ローディング・404・空状態・短い祝福に使う。",
+      "agent_note": "2026-09-16 人承認。候補・ポーズ・既定(kaze_neko)・public 配置を正式化。表現形式（PNGイラスト vs テーマ連動SVG）は fb-004。実装・DB は別タスク。",
+      "target_docs": [
+        "mascots.md",
+        "meta/mascots.json",
+        "themes.md"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-004",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascots-asset-format",
+      "request_ja": "二層（顔はPNG、小物はテーマ連動SVG）。イラストは子供っぽくなく、LOFT文房具のような愛嬌ある気品。ローディングはキャラ特性の動き（例: 猫がボールを追う）。",
+      "agent_note": "2026-09-16 採用。待ちUIはparts（完成絵禁止）。風ねこ parts 配置済。既定は fb-007 で kaze_neko に更新（none は選択可）。コンポーネント実装は別承認。",
+      "target_docs": [
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-005",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "principles/form-type-tone",
+      "request_ja": "30代推し活調査に基づき、形・質感・タイポ（中庸の角丸／紙・ガラス感／見出しと本文の役割）を DESIGN 正本で統一。トーン強度は「落ち着き／推し活フル」で手動本線・時間曜日自動は任意。",
+      "agent_note": "2026-09-16 人承認（推奨パッケージ）。方針 docs 反映。設定UIは fb-006。",
+      "target_docs": [
+        "principles.md",
+        "tokens.md",
+        "icons.md",
+        "DESIGN.md",
+        "README.md"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-006",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "settings/tone-intensity-mode",
+      "request_ja": "設定でトーン強度（落ち着き／推し活フル）の手動切替と、任意の時間・曜日スケジュール自動切替を実装する。",
+      "agent_note": "2026-09-16 人採用。方針は principles 済み。実装は別承認（design-change / product-spec-sync）。スケジュール既定オフ・手動優先。「隠し」禁止。",
+      "target_docs": [
+        "principles.md",
+        "tokens.md",
+        "themes.md"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-007",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascots-default",
+      "request_ja": "マスコット既定は風ねこ。キャラ無し（none）の通常UIも選択可能にする。",
+      "agent_note": "2026-09-16 人承認。fb-004 の default=none を上書き。default_mascot_id=kaze_neko。none は選択オプションとして残す。",
+      "target_docs": [
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-008",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascots-all-selectable",
+      "request_ja": "フォルダ内のマスコットを全部選べるようにする。プラスでマスコット無し（普通のUI）。風ねこ scenes（idle/not_found/celebrate/loading_01-03）を正本化。",
+      "agent_note": "2026-09-16 採用。catalog 全 selectable。設定UIは端末保存。サーバー同期・Spinner配線は未着手。",
+      "target_docs": [
+        "mascots.md",
+        "meta/mascots.json",
+        "themes.md"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-009",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-adult-chic",
+      "request_ja": "マスコット制作の指針をデザイン文書に。今後キャラ追加の正にする。子供っぽさを排し、ブランド意識した大人の女性向けお洒落かわいいを目指す。",
+      "agent_note": "2026-09-16 正本化。mascot-asset-brief.md（ブランド・不合格例・新規手順・プロンプト）。mascots.md からリンク。style_contract 強化。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "principles.md",
+        "meta/mascots.json",
+        "README.md"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-010",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "design/voice-hierarchy-agent-rules",
+      "request_ja": "20〜30代推し活向けで A〜B（ボイス・空状態・感情予算・プライバシ・階層・バッジ予算・推し語・トーン強度差分・店頭見え）をデザイン正本化し、エージェント強制は design.mdc に載せる。",
+      "agent_note": "2026-09-16 反映。voice.md 新設。principles/components/web-phone/a11y/DESIGN/README/design.mdc 更新。",
+      "target_docs": [
+        "voice.md",
+        "principles.md",
+        "components.md",
+        "web-phone-ux.md",
+        "a11y.md",
+        "DESIGN.md",
+        "README.md",
+        ".cursor/rules/design.mdc"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-011",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-midori-style",
+      "request_ja": "マスコット画風は MIDORI 系大人手帳シール／大人文具で合っているので brief に正本化。画風は採用、シート密度は非採用。",
+      "agent_note": "2026-09-16 反映。mascot-asset-brief に画風マスター節・プロンプト更新。市販シールの複製禁止。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-012",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-baby-face-ok",
+      "request_ja": "画風が子供みたいなのが嫌。キャラクター自体は愛らしい幼児顔で良い。意図の区別を brief に直す。",
+      "agent_note": "2026-09-16 訂正。顔=幼児顔可。画風=MIDORI大人文具。『目を小さく』『大人顔に』は誤指示として撤回。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-013",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-protective-cute",
+      "request_ja": "20・30代に庇護欲をそそるキャラクターを、大人可愛いお洒落な画風にしてほしい。それが意図の本体。",
+      "agent_note": "2026-09-16 北極星を庇護欲×大人お洒落画風に更新。プロンプト・合格文・style_contract を同期。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "principles.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-014",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-midori-rollout",
+      "request_ja": "庇護欲×MIDORI画風を他キャラに展開。くらげだけは現行のまま（相当良い）。",
+      "agent_note": "2026-09-16 反映。7体の scenes P0（idle/loading/not_found/celebrate）を差し替え。jellyfish は触らない。brief に展開状態を追記。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-015",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-jellyfish-nuance",
+      "request_ja": "くらげ雰囲気のテスト（三毛・風ねこ）をOK。くらげ以外も同雰囲気で作成し、デザイン文書に正本化する。旧 cat/dog は使わないので削除。",
+      "agent_note": "2026-09-16 反映。画風マスター=jellyfish idle。7体 P0＋風ねこ loading_01–03 を jelly-nuance で差し替え。brief/mascots/principles/mascots.json 更新。cat/dog フォルダ削除済。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "principles.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
+    },
+    {
+      "id": "fb-016",
+      "status": "accepted",
+      "created_at": "2026-09-16",
+      "source": "user",
+      "area": "brand/mascot-kit-adult-folders",
+      "request_ja": "キャラ別フォルダに分け、猫・犬・風ねこもこねこ／おとなの2系統を同雰囲気で。三毛をハチマツ（ハチワレ）にしない（三毛猫）。",
+      "agent_note": "2026-09-16 反映。<character>/{kit|adult}/scenes。おとな三毛を白黒茶で再生成。catalog/docs 更新。",
+      "target_docs": [
+        "mascot-asset-brief.md",
+        "mascots.md",
+        "meta/mascots.json"
+      ],
+      "lab_ref": null
     }
   ]
 }

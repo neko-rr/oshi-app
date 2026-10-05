@@ -6,11 +6,12 @@ import { routing } from "@/i18n/routing";
 const handleI18nRouting = createMiddleware(routing);
 
 /**
+ * Next.js 16 は入口を proxy と呼ぶ（Node ランタイム）。
  * 1) 認証・Cookie 更新（locale 除去した論理パスで判定）
  * 2) next-intl の locale ルーティング
  * 認証 Redirect の Cookie を i18n レスポンスへ引き継ぐ。
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const authResponse = await updateSession(request);
 
   // 未ログイン Redirect や /dev 遮断はそのまま返す
@@ -20,10 +21,10 @@ export async function middleware(request: NextRequest) {
 
   const i18nResponse = handleI18nRouting(request);
 
-  // Supabase が付けた Cookie を i18n 応答へコピー
-  authResponse.cookies.getAll().forEach((cookie) => {
-    i18nResponse.cookies.set(cookie.name, cookie.value);
-  });
+  // Set-Cookie 全文をコピー（HttpOnly / Secure / SameSite を落とさない）
+  for (const line of authResponse.headers.getSetCookie()) {
+    i18nResponse.headers.append("Set-Cookie", line);
+  }
 
   return i18nResponse;
 }

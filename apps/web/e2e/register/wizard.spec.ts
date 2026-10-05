@@ -43,7 +43,7 @@ async function openRegisterAs(
   );
   await page.addInitScript(() => {
     localStorage.setItem(
-      "oshiapp:displaySettings",
+      "oshihaven:displaySettings",
       JSON.stringify({ register_start_step: "barcode" }),
     );
   });

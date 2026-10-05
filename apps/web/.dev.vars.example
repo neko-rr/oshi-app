@@ -1,0 +1,5 @@
+# wrangler ローカル用。実値は git に入れない。
+NEXTJS_ENV=development
+# NEXT_PUBLIC_SUPABASE_URL=
+# NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+# NEXT_PUBLIC_API_BASE_URL=

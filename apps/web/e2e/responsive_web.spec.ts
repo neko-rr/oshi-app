@@ -19,11 +19,12 @@ test.describe("responsive_web shell", () => {
       tabs.getByRole("link", { name: /登録|Register/i }),
     ).toBeVisible();
     await expect(
-      tabs.getByRole("link", { name: /検索|Search/i }),
-    ).toBeVisible();
-    await expect(
       tabs.getByRole("link", { name: /その他|More/i }),
     ).toBeVisible();
+    // 検索はギャラリー内。独立タブは置かない
+    await expect(
+      tabs.getByRole("link", { name: /検索|Search/i }),
+    ).toHaveCount(0);
   });
 
   test("auth login hides bottom tabs", async ({ page }) => {

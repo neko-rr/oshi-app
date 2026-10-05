@@ -18,6 +18,7 @@ import LabBottomTabMock from "@/components/design-lab/LabBottomTabMock";
 import LabGalleryMock from "@/components/design-lab/LabGalleryMock";
 import LabThemeSettingsMock from "@/components/design-lab/LabThemeSettingsMock";
 import { LabUiCallout } from "@/components/design-lab/LabUiCallout";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type LabMockSurfaceProps = {
   variant: LabVariantId;
@@ -73,7 +74,7 @@ function LoggedInShell({
                     : "text-sm font-bold tracking-tight"
                 }
               >
-                oshi-app
+                {PRODUCT_NAME}
               </p>
             </LabUiCallout>
             <LabUiCallout id="header_logout" show={show}>
@@ -83,7 +84,7 @@ function LoggedInShell({
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-2">
             <LabUiCallout id="header_brand" show={show}>
-              <p className="text-sm font-bold tracking-tight">oshi-app</p>
+              <p className="text-sm font-bold tracking-tight">{PRODUCT_NAME}</p>
             </LabUiCallout>
             <LabUiCallout id="header_nav" show={show}>
               <nav

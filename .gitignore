@@ -18,6 +18,8 @@ dist/
 dist-ssr/
 build/
 .next/
+.open-next/
+.dev.vars
 .turbo/
 out/
 coverage/

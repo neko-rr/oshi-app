@@ -5,8 +5,9 @@
  */
 
 import type { LabSceneId } from "@/components/design-lab/lab-meta";
+import { LOCAL_STORAGE_PREFIX } from "@/lib/brand";
 
-export const LAB_UI_CALLOUT_STORAGE_KEY = "oshiapp:design-lab:ui-callouts";
+export const LAB_UI_CALLOUT_STORAGE_KEY = `${LOCAL_STORAGE_PREFIX}design-lab:ui-callouts`;
 
 export type LabUiCalloutId =
   | "back"

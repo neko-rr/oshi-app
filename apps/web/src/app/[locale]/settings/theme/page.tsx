@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import ThemePicker from "@/components/ui/ThemePicker";
 import { DisplaySettingsPanel } from "@/components/settings/DisplaySettingsPanel";
 import { LocaleSwitcher } from "@/components/settings/LocaleSwitcher";
+import { MascotPickerPanel } from "@/components/settings/MascotPickerPanel";
 import { OshiAccentPanel } from "@/components/settings/OshiAccentPanel";
 import { ResidenceSettingsPanel } from "@/components/settings/ResidenceSettingsPanel";
 import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
@@ -62,6 +63,14 @@ export default function AppearanceSettingsPage() {
         </h2>
         <p className="text-sm text-muted-foreground">{t("themeHint")}</p>
         <ThemePicker />
+      </section>
+
+      <section className="stack-density">
+        <h2 className="text-lg font-semibold tracking-tight">
+          {t("mascotTitle")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("mascotHint")}</p>
+        <MascotPickerPanel />
       </section>
 
       <details className="group rounded-2xl border border-dashed border-border bg-muted/20 open:bg-muted/30">

@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-09-11T05:01:51Z",
-  "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
+  "generated_at": "2026-10-05T11:50:36Z",
+  "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
+    {
+      "name": "@opennextjs/cloudflare",
+      "version": "1.20.7",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/opennextjs/opennextjs-cloudflare"
+    },
     {
       "name": "@radix-ui/react-avatar",
       "version": "1.2.6",
@@ -67,14 +74,14 @@
     },
     {
       "name": "next",
-      "version": "15.5.7",
+      "version": "16.3.8",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://nextjs.org"
     },
     {
       "name": "next-intl",
-      "version": "4.0.0",
+      "version": "4.14.8",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://next-intl.dev"
@@ -95,14 +102,14 @@
     },
     {
       "name": "react",
-      "version": "19.2.8",
+      "version": "19.3.0",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://react.dev/"
     },
     {
       "name": "react-dom",
-      "version": "19.2.8",
+      "version": "19.3.0",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://react.dev/"

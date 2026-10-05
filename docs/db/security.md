@@ -1,7 +1,7 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
 # DB・API セキュリティ（初学者向け）
 
-このアプリ（oshi_app）のデータを守る考え方です。  
+このアプリ（Oshihaven／技術リポジトリ名 oshi_app）のデータを守る考え方です。  
 公式の二段構え: [Securing your API](https://supabase.com/docs/guides/api/securing-your-api) / [Product security](https://supabase.com/docs/guides/security/product-security)
 
 ## たとえ話

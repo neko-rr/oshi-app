@@ -6,7 +6,6 @@ import { LabUiCallout } from "@/components/design-lab/LabUiCallout";
 const TABS = [
   { id: "gallery", label: "ギャラリー" },
   { id: "register", label: "登録" },
-  { id: "search", label: "検索" },
   { id: "more", label: "その他" },
 ] as const;
 
@@ -34,7 +33,7 @@ export default function LabBottomTabMock({
   return (
     <LabUiCallout id="bottom_tabs" show={showUiCallouts}>
       <nav
-        className={`grid grid-cols-4 gap-0.5 border-t border-[var(--lab-border)] bg-[var(--lab-surface)] px-1 ${pad}`}
+        className={`grid grid-cols-3 gap-0.5 border-t border-[var(--lab-border)] bg-[var(--lab-surface)] px-1 ${pad}`}
         aria-label="下部タブ（見本）"
       >
         {TABS.map((tab) => {

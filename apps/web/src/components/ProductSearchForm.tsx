@@ -10,10 +10,8 @@ import type { GalleryListQuery } from "@/lib/galleryListQuery";
 import { galleryListHref } from "@/lib/galleryListQuery";
 
 type Props = {
-  /** 検索送信先（既定 /search） */
-  actionPath?: string;
   initialQuery?: string;
-  /** ギャラリー時: 他の絞込・並びを維持 */
+  /** 他の絞込・並びを維持してギャラリーへ */
   preserveFilters?: Pick<
     GalleryListQuery,
     | "category_tag_ids"
@@ -24,7 +22,6 @@ type Props = {
 };
 
 export function ProductSearchForm({
-  actionPath = "/search",
   initialQuery = "",
   preserveFilters,
 }: Props) {
@@ -35,22 +32,15 @@ export function ProductSearchForm({
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = q.trim();
-    if (actionPath === "/gallery") {
-      router.push(
-        galleryListHref({
-          ...(trimmed ? { q: trimmed } : {}),
-          category_tag_ids: preserveFilters?.category_tag_ids,
-          storage_location_ids: preserveFilters?.storage_location_ids,
-          color_tag_slots: preserveFilters?.color_tag_slots,
-          sort: preserveFilters?.sort,
-        }),
-      );
-      return;
-    }
-    const url = trimmed
-      ? `${actionPath}?q=${encodeURIComponent(trimmed)}`
-      : actionPath;
-    router.push(url);
+    router.push(
+      galleryListHref({
+        ...(trimmed ? { q: trimmed } : {}),
+        category_tag_ids: preserveFilters?.category_tag_ids,
+        storage_location_ids: preserveFilters?.storage_location_ids,
+        color_tag_slots: preserveFilters?.color_tag_slots,
+        sort: preserveFilters?.sort,
+      }),
+    );
   }
 
   return (

@@ -1,6 +1,8 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
 # docs/（文書の入口・更新区分）
 
+**製品:** Oshihaven（公式 https://oshihaven.com）。作者・マスコット IP は風ねこ / Kaze Neko。
+
 **迷ったらこのページだけ見る。**  
 人が直してよいのは「更新: **手**」だけ。`generated/` は触らない。
 

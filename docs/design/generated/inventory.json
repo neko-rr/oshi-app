@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08T22:36:11Z",
+  "generated_at": "2026-10-05T11:51:56Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -182,16 +182,6 @@
       "is_dev": false
     },
     {
-      "path": "/search",
-      "file": "apps/web/src/app/[locale]/search/page.tsx",
-      "has_hex_ui": false,
-      "hex_line_count": 0,
-      "uses_lib_icons": false,
-      "lucide_direct": false,
-      "raw_button": false,
-      "is_dev": false
-    },
-    {
       "path": "/settings/category-tags",
       "file": "apps/web/src/app/[locale]/settings/category-tags/page.tsx",
       "has_hex_ui": false,
@@ -297,8 +287,8 @@
         "path": "/ (shell)",
         "lab_variant": "a",
         "status": "adopted",
-        "notes_ja": "A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持",
-        "updated_at": "2026-09-06"
+        "notes_ja": "A: 下部タブ3（ギャラリー／登録／その他）・スリムHeader・lg+トップナビ。検索はギャラリー内。認証/devはタブ無し。横向きでもタブ維持",
+        "updated_at": "2026-09-16"
       },
       {
         "path": "/gallery",

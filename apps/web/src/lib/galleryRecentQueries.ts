@@ -1,9 +1,12 @@
 /**
  * 最近使ったギャラリー／検索条件（端末 localStorage）。
  * 実行: node --experimental-strip-types --test apps/web/src/lib/galleryRecentQueries.test.ts
+ *
+ * キー接頭辞は `LOCAL_STORAGE_PREFIX`（brand.ts）と同じ `oshihaven:`。
+ * このファイルは node テストから直接読まれるため brand を import しない。
  */
 
-export const GALLERY_RECENT_QUERIES_KEY = "oshiapp:galleryRecentQueries";
+export const GALLERY_RECENT_QUERIES_KEY = "oshihaven:galleryRecentQueries";
 export const GALLERY_RECENT_MAX = 8;
 
 export type GalleryRecentQuery = {

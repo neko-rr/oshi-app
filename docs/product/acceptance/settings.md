@@ -11,7 +11,7 @@
 - [x] 同じ見た目画面で一覧の並び既定（`list_sort`: newest / name / created_at）、ギャラリー表示（`gallery_layout`: grid / large / list）、ログイン後の着地（`landing_page`: home / gallery / register）を選べる
 - [x] 同じ見た目画面でカードに載せる情報（名前／タグ／価格）を独立スイッチで切替できる（`gallery_show_name` / `gallery_show_tags` / `gallery_show_price`、既定 ON）
 - [x] 同じ見た目画面で写真のはみ出し（`gallery_image_fit`: cover／contain。「はみ出し少なめ」）を選べる（大きめ表示は常に contain。端末間同期）
-- [x] ギャラリー・検索は並び既定と表示モードとカード表示項目を反映する。ログイン成功後は着地へ遷移する
+- [x] ギャラリーは並び既定と表示モードとカード表示項目を反映する。ログイン成功後は着地へ遷移する
 - [x] `/settings/theme` で表示言語（ja / en）を切り替えられる（URL: 日本語は無印、英語は `/en`。next-intl）
 - [x] `/settings/theme` で居住地（大陸別・検索付き）と日時・金額の個別上書き（IANA TZ・日付形式・表示通貨・金額書き方）を設定でき、登録日・購入価格などが居住地ローカルで表示される（金額は換算なし）
 - [x] 設定・タグ・収納・見た目・アカウント／法務の表示文言は `messages/ja.json`（正本）と `en.json` 経由（`useTranslations` / `getTranslations`）

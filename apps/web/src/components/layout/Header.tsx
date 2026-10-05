@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HeaderAuthActions } from "@/components/layout/HeaderAuthActions";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type HeaderProps = {
   /**
@@ -17,7 +18,6 @@ export default function Header({ compactNav = true }: HeaderProps) {
   const nav = [
     { href: "/", label: t("home"), short: t("homeShort") },
     { href: "/gallery", label: t("gallery"), short: t("galleryShort") },
-    { href: "/search", label: t("search"), short: t("searchShort") },
     { href: "/register", label: t("register"), short: t("registerShort") },
     { href: "/dashboard", label: t("dashboard"), short: t("dashboardShort") },
     { href: "/settings", label: t("settings"), short: t("settingsShort") },
@@ -33,7 +33,7 @@ export default function Header({ compactNav = true }: HeaderProps) {
           href="/"
           className="shrink-0 text-lg font-bold hover:opacity-80 sm:text-xl"
         >
-          oshi-app
+          {PRODUCT_NAME}
         </Link>
         {/* デスクトップ: 従来どおり横ナビ */}
         <nav

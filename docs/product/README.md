@@ -1,6 +1,8 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
 # 製品仕様（エージェント・人間の入口）
 
+**製品:** Oshihaven（公式 https://oshihaven.com）。作者・マスコット IP は風ねこ / Kaze Neko。
+
 **更新区分の凡例（全体）:** [docs/README.md](../README.md)  
 製品の「やりたいこと」と「いまコードにあること」を分ける。  
 DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**

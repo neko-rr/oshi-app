@@ -2,13 +2,13 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-09-08T22:36:11Z`
+生成時刻 (UTC): `2026-10-05T11:51:56Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 
 | Path | status | lab_variant | updated_at | notes |
 |------|--------|-------------|------------|-------|
-| `/ (shell)` | `adopted` | 'a' | '2026-09-06' | A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持 |
+| `/ (shell)` | `adopted` | 'a' | '2026-09-16' | A: 下部タブ3（ギャラリー／登録／その他）・スリムHeader・lg+トップナビ。検索はギャラリー内。認証/devはタブ無し。横向きでもタブ維持 |
 | `/gallery` | `adopted` | 'b' | '2026-09-02' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
 | `/gallery/[registered_product_id]` | `adopted` | 'b' | '2026-09-06' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る。フルスクリーン拡大追加 |
 | `/register` | `partial` | 'a' | '2026-09-06' | 写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き） |

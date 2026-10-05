@@ -9,6 +9,7 @@ import type {
 import { LAB_PHONE_FRAME_SIZE } from "@/components/design-lab/lab-meta";
 import type { LabTextScaleId } from "@/components/design-lab/lab-ux-preview";
 import { LAB_TEXT_SCALES } from "@/components/design-lab/lab-ux-preview";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type LabDeviceFrameProps = {
   platform: LabPlatformId;
@@ -59,7 +60,7 @@ export default function LabDeviceFrame({
         {isApp ? (
           <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 text-[10px] text-zinc-300">
             <span>9:41</span>
-            <span className="font-medium tracking-wide">oshi-app</span>
+            <span className="font-medium tracking-wide">{PRODUCT_NAME}</span>
             <span aria-hidden>●●</span>
           </div>
         ) : (
@@ -85,12 +86,11 @@ export default function LabDeviceFrame({
         </div>
         {isApp ? (
           <nav
-            className="grid grid-cols-4 gap-1 border-t border-zinc-700 bg-zinc-900 px-1 py-2 text-center text-[9px] text-zinc-400"
+            className="grid grid-cols-3 gap-1 border-t border-zinc-700 bg-zinc-900 px-1 py-2 text-center text-[9px] text-zinc-400"
             aria-label="アプリ想定のタブ（見本）"
           >
             <span className="text-[var(--lab-primary)]">ギャラリー</span>
             <span>登録</span>
-            <span>検索</span>
             <span>その他</span>
           </nav>
         ) : null}

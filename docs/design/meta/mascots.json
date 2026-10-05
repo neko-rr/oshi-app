@@ -1,0 +1,161 @@
+{
+  "version": 8,
+  "status": "jelly_nuance_kit_adult",
+  "updated_note": "2026-09-16: 画風マスター=jellyfish。猫・犬・風ねこは character/{kit|adult}/。三毛は白黒茶必須（ハチワレ禁止）。旧 cat/dog 削除。",
+  "default_mascot_id": "kaze_neko",
+  "asset_root_url": "/brand/mascots",
+  "shared_parts_url": "/brand/mascots/_shared/parts",
+  "legacy_map": { "cat": "calico", "dog": "shiba" },
+  "selection": {
+    "none": {
+      "name_ja": "指定なし（通常UI）",
+      "assets": false
+    }
+  },
+  "style_contract_ja": [
+    "北極星: 20・30代の庇護欲をそそる愛らしいキャラ × くらげと同質の大人お洒落画風",
+    "画風の正本参照: jellyfish/scenes/idle.png（jelly-nuance）。差し替え禁止",
+    "猫・犬・風ねこは kit（こねこ）/ adult（おとな）の2系統。フォルダは <character>/{kit|adult}/scenes/",
+    "三毛（calico）は白＋黒＋茶の三色必須。ハチワレ／タキシード（白黒のみ）は不合格",
+    "毛・羽根は半透明直コピー禁止。にじみ＋紙粒でくらげ感を出す",
+    "キッズアニメ／ガチャ／キーホルダー禁止。詳細は mascot-asset-brief.md"
+  ],
+  "items": [
+    {
+      "id": "kaze_neko",
+      "name_ja": "風ねこ（こねこ）",
+      "character_folder": "kaze_neko",
+      "age_line": "kit",
+      "signature": "yarn_ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "kaze_neko_adult",
+      "name_ja": "風ねこ（おとな）",
+      "character_folder": "kaze_neko",
+      "age_line": "adult",
+      "signature": "yarn_ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "calico",
+      "name_ja": "三毛猫（こねこ）",
+      "character_folder": "calico",
+      "age_line": "kit",
+      "signature": "bell",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "calico_adult",
+      "name_ja": "三毛猫（おとな）",
+      "character_folder": "calico",
+      "age_line": "adult",
+      "signature": "bell",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "scottish_fold",
+      "name_ja": "スコ（こねこ）",
+      "character_folder": "scottish_fold",
+      "age_line": "kit",
+      "signature": "yarn_ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "scottish_fold_adult",
+      "name_ja": "スコ（おとな）",
+      "character_folder": "scottish_fold",
+      "age_line": "adult",
+      "signature": "yarn_ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "shiba",
+      "name_ja": "柴犬（こねこ）",
+      "character_folder": "shiba",
+      "age_line": "kit",
+      "signature": "ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "shiba_adult",
+      "name_ja": "柴犬（おとな）",
+      "character_folder": "shiba",
+      "age_line": "adult",
+      "signature": "ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "pomeranian",
+      "name_ja": "ポメ（こねこ）",
+      "character_folder": "pomeranian",
+      "age_line": "kit",
+      "signature": "ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "pomeranian_adult",
+      "name_ja": "ポメ（おとな）",
+      "character_folder": "pomeranian",
+      "age_line": "adult",
+      "signature": "ball",
+      "done": "paw",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "shimaenaga",
+      "name_ja": "シマエナガ",
+      "character_folder": "shimaenaga",
+      "age_line": "single",
+      "signature": "seed",
+      "done": "fluff",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "jellyfish",
+      "name_ja": "くらげ",
+      "character_folder": "jellyfish",
+      "age_line": "single",
+      "signature": "bubble",
+      "done": "bubble_pop",
+      "parts_ready": true,
+      "scenes_ready": true
+    },
+    {
+      "id": "bluebird",
+      "name_ja": "幸せの青い鳥",
+      "character_folder": "bluebird",
+      "age_line": "single",
+      "signature": "feather",
+      "done": "letter",
+      "parts_ready": true,
+      "scenes_ready": true
+    }
+  ],
+  "out_of_scope_ja": [
+    "おとな版専用 parts の分離",
+    "真の透過PNG化の厳密仕上げ",
+    "スピナー本番配線",
+    "サーバー保存"
+  ]
+}

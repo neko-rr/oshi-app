@@ -88,6 +88,7 @@ def test_manifest_includes_product_external_refs_with_stable_https() -> None:
     )
     refs = manifest["entities"]["product_external_refs"]
     assert len(refs) == 2
+    assert manifest["app"] == "oshihaven"
     assert refs[0]["core"]["product_url"].startswith("https://")
     assert refs[0]["core"]["source"] == "rakuten"
     assert refs[1]["core"]["label"] == "メルカリ"

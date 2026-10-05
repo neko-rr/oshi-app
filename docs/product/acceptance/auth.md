@@ -9,7 +9,7 @@
 - [x] ゲストは `/auth/upgrade` で同一 user にメール本登録できる
 - [x] ゲストの業務 API 呼び出しは 403 `REGISTRATION_REQUIRED`（退会は可）
 - [x] ゲストは設定の端末のみ項目で「本登録で同期」案内（`GuestContextNotice` localOnly）、サーバー必須画面では操作 UI を隠し案内（`GuestServerGate` / export）
-- [x] ゲストはギャラリー・検索・ダッシュボードで生エラーではなく本登録 CTA を見る
+- [x] ゲストはギャラリー・ダッシュボードで生エラーではなく本登録 CTA を見る
 - [x] ログアウトできる（ヘッダー・設定・/me）
 - [x] 秘密・JWT を画面やログに出さない
 

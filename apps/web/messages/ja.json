@@ -16,7 +16,7 @@
     "noticeServerRequired": "この画面の操作（タグ・書き出し・分析など）には本登録が必要です。"
   },
   "GuestUpgrade": {
-    "metaTitle": "本登録 | oshi-app",
+    "metaTitle": "本登録 | Oshihaven",
     "title": "本登録",
     "description": "ゲストのままメールを紐づけて、データを保存できるようにします。",
     "loading": "読み込み中…",
@@ -95,8 +95,6 @@
     "homeShort": "Home",
     "gallery": "ギャラリー",
     "galleryShort": "一覧",
-    "search": "検索",
-    "searchShort": "検索",
     "register": "登録",
     "registerShort": "登録",
     "dashboard": "ダッシュボード",
@@ -114,7 +112,7 @@
     "licenses": "ライセンス・表記"
   },
   "HomePage": {
-    "tagline": "推し活グッズを登録・整理するアプリです。",
+    "tagline": "グッズの場所がわかる。実物とデータをつなぐ管理アプリです。",
     "statsProducts": "登録製品: {count}",
     "statsPhotos": "写真あり: {count}",
     "statsBarcodes": "ユニークバーコード: {count}",
@@ -124,7 +122,6 @@
     "upgrade": "本登録する",
     "gallery": "ギャラリー",
     "register": "登録",
-    "search": "検索",
     "dashboard": "ダッシュボード",
     "settings": "設定"
   },
@@ -147,6 +144,8 @@
     "intro": "テーマで基本の見た目を決め、推し色はボタンなどのアクセントに重ねられます。文字の大きさ・密度・言語・日時もここで変えられます。",
     "themeTitle": "テーマ（基本の見た目）",
     "themeHint": "背景・文字・全体の雰囲気がまとめて変わります。既定は緑です。枠の黒／白でライトとダークが分かります。",
+    "mascotTitle": "マスコット",
+    "mascotHint": "空状態や待ち表示の顔です。既定は風ねこ。無しを選ぶと普通の UI になります。",
     "oshiTitle": "推し色（アクセント）",
     "oshiHint": "テーマの上に重ねる色です。開くと見本の中で試せます。",
     "oshiPremiumBadge": "プレミアム",
@@ -162,6 +161,12 @@
     "langJa": "日本語",
     "langEn": "English",
     "loading": "読み込み中…"
+  },
+  "MascotSettings": {
+    "legend": "マスコットを選ぶ",
+    "none": "無し（普通のUI）",
+    "nonePreview": "キャラなし",
+    "localHint": "この端末に保存されます。アカウント同期はまだです。"
   },
   "OshiAccent": {
     "premiumBadge": "プレミアム",
@@ -427,7 +432,7 @@
     "sectionExplore": "みる・分析",
     "dashboard": "ダッシュボード",
     "appearance": "見た目",
-    "appearanceHint": "テーマ・推し色・文字サイズ・密度・言語・居住地",
+    "appearanceHint": "テーマ・推し色・マスコット・文字サイズ・密度・言語・居住地",
     "sectionRegister": "登録",
     "registerDefaults": "登録の進め方",
     "sectionTags": "タグ・収納",
@@ -817,12 +822,6 @@
     "noneLabel": "未設定"
   },
   "Search": {
-    "title": "検索",
-    "intro": "製品名・カテゴリ・収納場所で絞り込みます（自分のデータのみ）。",
-    "prompt": "キーワードを入力して検索してください。",
-    "noResults": "「{q}」に一致する製品はありません。",
-    "loadFailed": "検索結果の取得に失敗しました",
-    "toGallery": "ギャラリー一覧へ",
     "formLabel": "製品を検索",
     "formPlaceholder": "名前・カテゴリ・収納場所",
     "formSubmit": "検索",
@@ -902,12 +901,12 @@
     "toSettings": "設定へ"
   },
   "Privacy": {
-    "metaTitle": "プライバシーポリシー | oshi-app",
-    "metaDescription": "oshi-app のプライバシー方針",
+    "metaTitle": "プライバシーポリシー | Oshihaven",
+    "metaDescription": "Oshihaven のプライバシー方針",
     "title": "プライバシーポリシー",
     "lastUpdated": "最終更新: 2026-09-06",
     "overviewTitle": "概要",
-    "overviewBody": "oshi-app（以下「本サービス」）は、推し活グッズの登録・整理を目的とした Web アプリです。本ページでは、取り扱う情報と利用目的を説明します。",
+    "overviewBody": "Oshihaven（以下「本サービス」）は、推し活グッズの登録・整理を目的とした Web アプリです。本ページでは、取り扱う情報と利用目的を説明します。公式サイト: https://oshihaven.com",
     "collectTitle": "取得する情報",
     "collectItemAccount": "アカウント情報（メールアドレス等。認証は Supabase Auth）",
     "collectItemGoods": "登録したグッズ情報・タグ・収納場所・メモ",
@@ -928,7 +927,7 @@
     "linkHome": "ホームへ戻る"
   },
   "Licenses": {
-    "metaTitle": "ライセンス・表記 | oshi-app",
+    "metaTitle": "ライセンス・表記 | Oshihaven",
     "metaDescription": "オープンソース依存と外部サービスの表示メモ",
     "title": "ライセンス・表記",
     "generatedAt": "依存一覧の生成時刻 (UTC): {generatedAt}",

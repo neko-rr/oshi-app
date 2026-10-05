@@ -35,7 +35,10 @@ export function ProductDetailNeighborNav({
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const neighborsRef = useRef(neighbors);
-  neighborsRef.current = neighbors;
+
+  useEffect(() => {
+    neighborsRef.current = neighbors;
+  }, [neighbors]);
 
   useEffect(() => {
     setNeighbors(

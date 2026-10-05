@@ -37,6 +37,17 @@ Dash / Bootswatch 名（`minty` / `quartz` / `morph` 等）は **使わない**�
 それとは別に、顧客の **推し色（メイン＋サブ）** がパックの上に限定オーバーレイする機能がある。  
 詳細・境界は [oshi-accents.md](oshi-accents.md)。キャンバス `--background` はパック側のまま。
 
+## トーン強度・マスコット（見た目設定の別軸）
+
+テーマパック切替とは別に、見た目設定（`/settings/theme`）で扱う予定の軸:
+
+| 軸 | 内容 | 正本 |
+|----|------|------|
+| トーン強度 | **落ち着き**／**推し活フル**（手動本線。時間・曜日自動は任意・既定オフ） | [principles.md](principles.md)（fb-006 accepted） |
+| マスコット | 既定 **風ねこ**。全候補＋`none`（キャラ無し通常 UI）を選択可 | [mascots.md](mascots.md) · `/settings/theme` |
+
+色トークン一式の切替ロジックとは混ぜない。強度・マスコットは装飾量の制御。
+
 ## 関連
 
 - トークン名検査: [tokens.md](tokens.md) / `meta/tokens.json`
