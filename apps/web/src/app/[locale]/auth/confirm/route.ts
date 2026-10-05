@@ -2,15 +2,14 @@
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
 
+import { sanitizeAuthRedirectPath } from "@/lib/authRedirect";
 import { createClient } from "@/lib/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const _next = searchParams.get("next");
-  // 相対パスのみ許可（オープンリダイレクト防止）。locale 付きも可
-  const next = _next?.startsWith("/") ? _next : "/";
+  const next = sanitizeAuthRedirectPath(searchParams.get("next"));
 
   if (token_hash && type) {
     const supabase = await createClient();

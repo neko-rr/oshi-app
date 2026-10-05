@@ -18,9 +18,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Link } from '@/i18n/navigation'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const t = useTranslations('SignUp')
+  const tOauth = useTranslations('AuthOAuth')
   const tCommon = useTranslations('Common')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -80,7 +82,13 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
           <CardTitle className="text-2xl">{t('title')}</CardTitle>
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-6">
+          <GoogleSignInButton next="/" />
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {tOauth('or')}
+            <span className="h-px flex-1 bg-border" />
+          </div>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">

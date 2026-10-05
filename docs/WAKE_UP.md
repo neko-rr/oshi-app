@@ -29,14 +29,18 @@ AI がローカルに置けない・**人間が Dashboard でやる作業**。
 - **JWT Signing Keys**（非対称）を有効化 → JWKS の `keys` が空でないこと  
   `https://<project>.supabase.co/auth/v1/.well-known/jwks.json`
 - Authentication → URL Configuration  
-  - Site URL: ローカルなら `http://127.0.0.1:3000`  
-  - Redirect: `http://127.0.0.1:3000/auth/confirm` など  
+  - Site URL: 本番 `https://oshihaven.com`。ローカルなら `http://127.0.0.1:3000`  
+  - Redirect: `https://oshihaven.com/auth/confirm`、`https://oshihaven.com/auth/callback`  
+    （ローカルは `http://127.0.0.1:3000/auth/confirm` と `/auth/callback`）  
 - **Anonymous Sign-Ins（ゲスト開始）を ON**  
   - Authentication → Providers → Anonymous（**2026-09-06 有効化済み**）  
   - **先に** RLS の `*_reject_anonymous` / `jwt_is_permanent_user()` がライブに入っていること（migration `20260906200000_reject_anonymous_rls`）  
-  - 有効化後、ホームの「ゲストではじめる」が動く  
+  - 有効化後、ログイン画面の「ゲストではじめる」が動く  
   - 一般公開時は CAPTCHA / Turnstile を検討（匿名ユーザー肥大防止）  
-- （任意）Google Provider ON
+- **Google Provider を ON**（ログイン／新規登録の「Google で続ける」）  
+  - Client ID / Secret は Dashboard のみ（Git に書かない）  
+  - Google Cloud の承認済みリダイレクト URI は **Supabase** の `https://<project>.supabase.co/auth/v1/callback`  
+  - Authorized JavaScript origins に `https://oshihaven.com`（開発は `http://127.0.0.1:3000`）
 - **公開前**: Auth の漏洩パスワード保護（Have I Been Pwned）  
   - **Pro プラン以上が必要**（2026-08 時点・無料では不可）  
   - 一般公開・有料プラン移行時に有効化を検討  

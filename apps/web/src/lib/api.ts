@@ -1,4 +1,6 @@
-/** FastAPI への呼び出し。access_token を Bearer で付与する。 */
+/** FastAPI への呼び出し。access_token を Bearer で付与する。
+ * cache は no-store。Workers は他リクエストの Response ストリームを読めない。
+ */
 export async function apiFetch<T>(
   path: string,
   options: RequestInit & { accessToken?: string } = {},
@@ -10,6 +12,7 @@ export async function apiFetch<T>(
   const { accessToken, headers, ...rest } = options;
   const res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
     ...rest,
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),

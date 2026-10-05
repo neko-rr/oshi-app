@@ -1,7 +1,12 @@
 {
-  "generated_at": "2026-10-05T11:50:37Z",
+  "generated_at": "2026-10-05T13:01:56Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
+    {
+      "path": "/auth/callback",
+      "kind": "route",
+      "file": "apps/web/src/app/[locale]/auth/callback/route.ts"
+    },
     {
       "path": "/auth/confirm",
       "kind": "route",
@@ -615,16 +620,6 @@
       "id": "dashboard",
       "kind": "missing_file",
       "detail": "evidence が無い: apps/web/src/app/dashboard/page.tsx"
-    },
-    {
-      "id": "auth_session",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/auth/login/page.tsx"
-    },
-    {
-      "id": "auth_session",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/me/page.tsx"
     }
   ],
   "feature_count": 47

@@ -8,30 +8,24 @@ import BottomTabBar from "@/components/layout/BottomTabBar";
 import { FeedbackProvider } from "@/components/feedback/FeedbackProvider";
 import { OfflineBanner } from "@/components/feedback/OfflineBanner";
 import { GuestBanner } from "@/components/auth/GuestBanner";
+import { useHasSession } from "@/hooks/useHasSession";
+import { shouldHideBottomTabs } from "@/lib/appChromePolicy";
 
 type AppChromeProps = {
   children: ReactNode;
 };
-
-/** 認証・開発 Lab では下部タブを出さない */
-function shouldHideBottomTabs(pathname: string): boolean {
-  return (
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/dev") ||
-    pathname === "/auth"
-  );
-}
 
 /**
  * ロケール配下の共通シェル。幅と経路で Header / 下部タブを切替。
  */
 export default function AppChrome({ children }: AppChromeProps) {
   const pathname = usePathname();
-  const hideTabs = shouldHideBottomTabs(pathname);
+  const signedIn = useHasSession() === true;
+  const hideTabs = shouldHideBottomTabs(pathname, signedIn);
 
   return (
     <FeedbackProvider>
-      <Header compactNav={!hideTabs} />
+      <Header compactNav={!hideTabs} signedIn={signedIn} />
       <GuestBanner />
       <OfflineBanner />
       <main

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HeaderAuthActions } from "@/components/layout/HeaderAuthActions";
 import { PRODUCT_NAME } from "@/lib/brand";
+import { shouldShowAppChromeNav } from "@/lib/appChromePolicy";
 
 type HeaderProps = {
   /**
@@ -11,10 +12,16 @@ type HeaderProps = {
    * 認証画面などタブ無しのときは false で上部に主要リンクも出す。
    */
   compactNav?: boolean;
+  /** セッションがあるときだけギャラリー等を出す */
+  signedIn?: boolean;
 };
 
-export default function Header({ compactNav = true }: HeaderProps) {
+export default function Header({
+  compactNav = true,
+  signedIn = false,
+}: HeaderProps) {
   const t = useTranslations("Nav");
+  const showAppNav = shouldShowAppChromeNav(signedIn);
   const nav = [
     { href: "/", label: t("home"), short: t("homeShort") },
     { href: "/gallery", label: t("gallery"), short: t("galleryShort") },
@@ -22,6 +29,7 @@ export default function Header({ compactNav = true }: HeaderProps) {
     { href: "/dashboard", label: t("dashboard"), short: t("dashboardShort") },
     { href: "/settings", label: t("settings"), short: t("settingsShort") },
   ] as const;
+  const visibleNav = showAppNav ? nav : [];
 
   return (
     <header
@@ -40,7 +48,7 @@ export default function Header({ compactNav = true }: HeaderProps) {
           className="hidden items-center gap-x-3 text-sm lg:flex"
           aria-label={t("ariaMain")}
         >
-          {nav.map((item) => (
+          {visibleNav.map((item) => (
             <Link key={item.href} href={item.href} className="hover:underline">
               {item.label}
             </Link>
@@ -54,7 +62,7 @@ export default function Header({ compactNav = true }: HeaderProps) {
               className="flex max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1"
               aria-label={t("ariaMain")}
             >
-              {nav.map((item) => (
+              {visibleNav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

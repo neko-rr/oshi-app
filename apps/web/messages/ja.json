@@ -127,7 +127,7 @@
   },
   "LoginForm": {
     "title": "ログイン",
-    "description": "メールアドレスとパスワードでログインできます。",
+    "description": "Google、メールとパスワード、またはゲストではじめられます。",
     "email": "メールアドレス",
     "password": "パスワード",
     "forgot": "パスワードを忘れた場合",
@@ -137,6 +137,12 @@
     "signUp": "新規登録",
     "guestHint": "まずはゲストではじめることもできます。",
     "genericError": "エラーが発生しました"
+  },
+  "AuthOAuth": {
+    "continueWithGoogle": "Google で続ける",
+    "continuing": "Google へ移動中…",
+    "or": "または",
+    "error": "Google ログインを開始できませんでした"
   },
   "Appearance": {
     "back": "← 設定",
@@ -859,7 +865,7 @@
   },
   "SignUp": {
     "title": "新規登録",
-    "description": "新しいアカウントを作成します",
+    "description": "Google またはメールでアカウントを作成します",
     "email": "メールアドレス",
     "emailPlaceholder": "m@example.com",
     "password": "パスワード",

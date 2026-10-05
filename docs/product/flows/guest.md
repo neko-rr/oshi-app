@@ -7,7 +7,7 @@
 
 ## 入口
 
-ホーム／ログインの「ゲストではじめる」→ Supabase `signInAnonymously()`
+ホーム（未ログイン）は「ログイン」のみ。`/auth/login` の「ゲストではじめる」→ Supabase `signInAnonymously()`。開始後にギャラリー／登録などを出す。
 
 ## ゲスト中にできること
 

@@ -23,6 +23,7 @@ import {
   sanitizeLandingPage,
 } from "@/lib/displayPrefs";
 import { GuestStartButton } from "@/components/auth/GuestStartButton";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 function apiBase(): string {
   return (
@@ -36,12 +37,14 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const t = useTranslations("LoginForm");
+  const tOauth = useTranslations("AuthOAuth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { landingPage } = useDisplaySettings();
+  const destAfterAuth = landingPath(landingPage);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +59,7 @@ export function LoginForm({
       });
       if (signError) throw signError;
 
-      let dest = landingPath(landingPage);
+      let dest = destAfterAuth;
       try {
         const session = await supabase.auth.getSession();
         const token = session.data.session?.access_token;
@@ -87,7 +90,13 @@ export function LoginForm({
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-6">
+          <GoogleSignInButton next={destAfterAuth} />
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {tOauth("or")}
+            <span className="h-px flex-1 bg-border" />
+          </div>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
@@ -133,17 +142,22 @@ export function LoginForm({
                 {t("signUp")}
               </Link>
             </div>
-            <div className="mt-4 border-t border-border pt-4">
-              <p className="mb-2 text-center text-sm text-muted-foreground">
-                {t("guestHint")}
-              </p>
-              <GuestStartButton
-                className="flex w-full flex-col items-stretch"
-                redirectTo="/register"
-                variant="outline"
-              />
-            </div>
           </form>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {tOauth("or")}
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <div>
+            <p className="mb-2 text-center text-sm text-muted-foreground">
+              {t("guestHint")}
+            </p>
+            <GuestStartButton
+              className="flex w-full flex-col items-stretch"
+              redirectTo="/register"
+              variant="outline"
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
