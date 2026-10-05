@@ -127,7 +127,7 @@
   },
   "LoginForm": {
     "title": "Log in",
-    "description": "Sign in with your email and password.",
+    "description": "Continue with Google, email and password, or as a guest.",
     "email": "Email",
     "password": "Password",
     "forgot": "Forgot password?",
@@ -137,6 +137,12 @@
     "signUp": "Sign up",
     "guestHint": "You can also start as a guest first.",
     "genericError": "Something went wrong"
+  },
+  "AuthOAuth": {
+    "continueWithGoogle": "Continue with Google",
+    "continuing": "Continuing to Google…",
+    "or": "or",
+    "error": "Could not start Google sign-in"
   },
   "Appearance": {
     "back": "← Settings",
@@ -859,7 +865,7 @@
   },
   "SignUp": {
     "title": "Sign up",
-    "description": "Create a new account",
+    "description": "Create an account with Google or email",
     "email": "Email",
     "emailPlaceholder": "m@example.com",
     "password": "Password",

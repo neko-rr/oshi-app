@@ -24,6 +24,7 @@ assert.equal(isAlwaysPublicPath("/gallery"), false);
 assert.equal(allowsAnonymousWhenNotProduction("/dev/design-lab"), true);
 assert.equal(allowsAnonymousWhenNotProduction("/gallery"), false);
 assert.equal(allowsAnonymousWhenNotProduction("/auth/login"), true);
+assert.equal(allowsAnonymousWhenNotProduction("/auth/callback"), true);
 
 assert.equal(shouldBlockDevPathInProduction("/dev/design-lab", true), true);
 assert.equal(shouldBlockDevPathInProduction("/dev/design-lab", false), false);

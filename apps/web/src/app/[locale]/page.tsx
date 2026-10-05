@@ -2,7 +2,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { API_PATHS } from "@oshi/shared";
 import { Button } from "@/components/ui/button";
-import { GuestStartButton } from "@/components/auth/GuestStartButton";
 import { apiFetch } from "@/lib/api";
 import { isAnonymousUser } from "@/lib/authGuest";
 import { PRODUCT_NAME } from "@/lib/brand";
@@ -80,32 +79,35 @@ export default async function HomePage({ params }: Props) {
 
       <div className="flex flex-wrap gap-3">
         {!sessionToken ? (
-          <>
-            <Button asChild>
-              <Link href="/auth/login">{t("login")}</Link>
-            </Button>
-            <GuestStartButton redirectTo="/register" />
-          </>
-        ) : null}
-        {isGuest ? (
           <Button asChild>
-            <Link href="/auth/upgrade">{t("upgrade")}</Link>
+            <Link href="/auth/login">{t("login")}</Link>
           </Button>
-        ) : null}
-        <Button asChild variant={sessionToken && !isGuest ? "default" : "secondary"}>
-          <Link href="/gallery">{t("gallery")}</Link>
-        </Button>
-        <Button asChild variant="secondary">
-          <Link href="/register">{t("register")}</Link>
-        </Button>
-        <div className="hidden flex-wrap gap-3 lg:flex">
-          <Button asChild variant="secondary">
-            <Link href="/dashboard">{t("dashboard")}</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/settings">{t("settings")}</Link>
-          </Button>
-        </div>
+        ) : (
+          <>
+            {isGuest ? (
+              <Button asChild>
+                <Link href="/auth/upgrade">{t("upgrade")}</Link>
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              variant={sessionToken && !isGuest ? "default" : "secondary"}
+            >
+              <Link href="/gallery">{t("gallery")}</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/register">{t("register")}</Link>
+            </Button>
+            <div className="hidden flex-wrap gap-3 lg:flex">
+              <Button asChild variant="secondary">
+                <Link href="/dashboard">{t("dashboard")}</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/settings">{t("settings")}</Link>
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

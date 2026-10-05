@@ -853,15 +853,17 @@
       "status": "shipped",
       "title_ja": "認証セッション",
       "evidence_paths": [
-        "apps/web/src/app/auth/login/page.tsx",
-        "apps/web/src/app/me/page.tsx",
+        "apps/web/src/app/[locale]/auth/login/page.tsx",
+        "apps/web/src/app/[locale]/auth/callback/route.ts",
+        "apps/web/src/app/[locale]/me/page.tsx",
         "apps/web/src/components/logout-button.tsx",
         "apps/web/src/lib/middleware.ts",
         "docs/product/acceptance/auth.md"
       ],
       "expected_web_paths": [
         "/auth/login",
-        "/auth/sign-up"
+        "/auth/sign-up",
+        "/auth/callback"
       ],
       "expected_api_paths": [
         "/me"

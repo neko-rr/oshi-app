@@ -45,6 +45,7 @@ export function GuestStartButton({
       <Button
         type="button"
         variant={variant}
+        className="w-full"
         disabled={busy}
         onClick={() => void onClick()}
       >

@@ -87,7 +87,7 @@
 /settings/delete-account  退会・全データ削除
 /privacy          プライバシーポリシー
 /licenses         ライセンス・表記
-/auth/*           ログイン・登録・パスワード・ゲスト本登録（upgrade）
+/auth/*           ログイン（Google・メール・ゲスト）・登録・パスワード・ゲスト本登録（upgrade）
 ```
 
 未実装の「推し部屋」等はルートを勝手に増やさない。`deferred` のまま要求待ち。

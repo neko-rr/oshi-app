@@ -642,7 +642,7 @@
 
 ### 起きてからユーザー作業
 
-1. Supabase Dashboard: Redirect URLs（Next `/auth/confirm`）
+1. Supabase Dashboard: Redirect URLs（`/auth/confirm` と `/auth/callback`）
 2. `apps/web/.env.local` と `apps/api/.env` に実キー（Git 不可）
 3. Render に `apps/api` Dockerfile デプロイ
 4. Google OAuth が必要なら Provider 設定（auth.md）
