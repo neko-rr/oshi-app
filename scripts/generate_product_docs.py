@@ -312,7 +312,7 @@ def build_static_openapi(api_routes: list[dict[str, str]]) -> dict[str, Any]:
     return {
         "openapi": "3.0.3",
         "info": {
-            "title": "oshi-app API (as-built)",
+            "title": "Oshihaven API (as-built)",
             "version": "generated",
             "description": "静的抽出または FastAPI openapi()。手編集禁止。",
         },

@@ -13,8 +13,9 @@ import {
   tryResolveOshiColors,
   type ResolvedOshiColors,
 } from "@/lib/oshiContrast";
+import { LOCAL_STORAGE_PREFIX } from "@/lib/brand";
 
-export const OSHI_ACCENT_LOCAL_KEY = "oshiapp:oshiAccentDraft";
+export const OSHI_ACCENT_LOCAL_KEY = `${LOCAL_STORAGE_PREFIX}oshiAccentDraft`;
 export const MAX_OSHI_PRESETS = 3;
 
 export type OshiAccentPreset = {

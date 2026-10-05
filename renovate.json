@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "description": "公開から3日未満の版は取り込まれない。マージは人が行う。",
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 9am on monday"],
+  "automerge": false,
+  "rebaseWhen": "conflicted",
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBehaviour": "timestamp-required",
+  "internalChecksFilter": "strict",
+  "prCreation": "not-pending",
+  "enabledManagers": ["npm", "pip_requirements", "github-actions", "dockerfile"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "minimumReleaseAge": "3 days",
+    "automerge": false
+  },
+  "packageRules": [
+    {
+      "description": "全更新を自動マージしない",
+      "matchPackageNames": ["*"],
+      "automerge": false
+    },
+    {
+      "description": "パッチとマイナーは1本のPRにまとめる",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "minor and patch",
+      "groupSlug": "minor-patch"
+    },
+    {
+      "description": "Next.js のメジャーは関連パッケージだけを1本にする",
+      "matchPackageNames": ["next", "eslint-config-next"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "next major"
+    }
+  ]
+}

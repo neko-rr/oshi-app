@@ -1,5 +1,5 @@
 <!-- 更新: 手 — 人が書いて直す。凡例: docs/README.md -->
-# DB 命名規則（oshi_app）
+# DB 命名規則（Oshihaven / oshi_app）
 
 アプリの識別子・JSON・SQL に使う英語物理名の法則。  
 **日本語はアプリでは使わない。** 人間向けの読み下しは生成物 `docs/db/generated/schema_guide.md`（`term_glossary` から自動）。

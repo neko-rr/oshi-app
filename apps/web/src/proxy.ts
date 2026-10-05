@@ -6,11 +6,12 @@ import { routing } from "@/i18n/routing";
 const handleI18nRouting = createMiddleware(routing);
 
 /**
+ * Next.js 16 は入口を proxy と呼ぶ（Node ランタイム）。
  * 1) 認証・Cookie 更新（locale 除去した論理パスで判定）
  * 2) next-intl の locale ルーティング
  * 認証 Redirect の Cookie を i18n レスポンスへ引き継ぐ。
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const authResponse = await updateSession(request);
 
   // 未ログイン Redirect や /dev 遮断はそのまま返す

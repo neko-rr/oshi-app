@@ -7,6 +7,16 @@
 正本の画面文言は常に [`apps/web/messages/ja.json`](../../apps/web/messages/ja.json)。  
 同期手順: skill **`i18n-web-sync`** / キー検査: `python scripts/check_i18n_message_keys.py`
 
+## ブランド（固定）
+
+| JA / 表記 | EN | メモ |
+|-----------|-----|------|
+| Oshihaven | Oshihaven | 製品名。日英ともローマ字。`oshi-app` は技術名のみ |
+| https://oshihaven.com | https://oshihaven.com | 公式 URL |
+| 風ねこ | Kaze Neko | 作者・マスコット IP（製品名にしない） |
+
+ストア例: `Oshihaven – Merch & storage` / `Oshihaven – グッズの場所がわかる`
+
 ## 推奨訳
 
 | JA | EN（推奨） | メモ |

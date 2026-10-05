@@ -213,7 +213,6 @@ export default async function GalleryPage({
       </div>
 
       <ProductSearchForm
-        actionPath="/gallery"
         initialQuery={listQuery.q ?? ""}
         preserveFilters={{
           category_tag_ids: listQuery.category_tag_ids,

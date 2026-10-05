@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## 正本（この順）
 
-1. `docs/design/` — 原則・テーマ色・動き・a11y・比較手順（**手**）
+1. `docs/design/` — 原則・ボイス・テーマ色・動き・a11y・比較手順（**手**）
 2. `DESIGN.md` — 薄い入口のみ
 3. `apps/web/src/styles/colors.css` / `tailwind-theme.css` — 実装トークン（[todo-app](https://github.com/neko-rr/todo-app) 方式）
 4. `apps/web/src/components/ui/` — shadcn 部品
@@ -19,12 +19,21 @@ alwaysApply: false
 
 ## 命令
 
-- UI/UX・動きでブランド雰囲気を作れ。色の決め打ち（全面ピンク等）で「女性向け」にするな。
+- **対象は20〜30代の大人の推し活。** 子供向け・ちび・デコかわいい UI／コピーにするな。詳細: `principles.md` / `voice.md` / `mascot-asset-brief.md`。
+- **マスコット画風**は `jellyfish/scenes/idle.png` が正（jelly-nuance）。くらげを差し替えるな。毛ものは半透明直コピー禁止（brief の転写ルール）。
+- UI/UX・動きでブランド雰囲気を作れ。色の決め打ち（全面ピンク等）やハート・絵文字の多用で「女性向け」にするな。
+- **情報階層:** 写真／グッズ → 名前・タグ → メタ → クロム（ナビ・マスコット）。マスコットで写真を潰すな。
+- **コピー**は `docs/design/voice.md` に従え。幼児語・煽り・空状態の羞恥表現を新設するな。推し語をナビや主ラベルに常駐させるな。
+- **絵文字を UI アイコン代わりにするな。** ボタン／タブ／見出しに絵文字を並べるな。
+- **SNS共有・公開を本線の主CTAとして勝手に足すな**（自分用管理が先。voice.md）。
+- **感情演出の予算**（`principles.md`）: マスコット／祝福は感情点・スポットのみ。本線に常時パーティクル・毎回祝福を出すな。
+- **トーン強度**（落ち着き／推し活フル）の案でも本線機能を隠すな。「隠しモード」という命名をするな。
 - モーションは `docs/design/motion.md` に従う: **短い有用な反応は残す**。長い演出・本線の遊びたっぷり常時 UI は作るな。アプリ内「動きオフ」トグルは今は足すな（OS `prefers-reduced-motion` は追従）。
 - デザイン案は **配置・部品が先**、色の割り当ては次。用途最適案からテーマ色を外すな（C と同系の色使いで配置を最適化せよ）。
 - 顧客のテーマ色は **`data-theme` でセマンティック変数一式を切替**（背景・文字・カード・primary 等すべて）。`--primary` / `--ring` だけ差し替えは **誤り**。正は `themes.md`。
 - 部品・画面に hex／色名を直書きするな。`bg-primary` 等のセマンティック名のみ。
 - **カラータグ（製品ラベル）とテーマ色を統合するな。** カラータグ枠数を勝手に変えるな。
+- チップ／バッジは `components.md` の予算を超えてデコ増殖させるな。
 - 部品は [shadcn/ui](https://ui.shadcn.com/) を正とする。
 - 見た目の大きな変更は skill **`design-lab`** → 人の本決定 → skill **`design-adoption`**（画面単位）で本番反映。
 - 要望・違和感は skill **`design-feedback`**（pending 可。勝手に accepted / 本番反映するな）。

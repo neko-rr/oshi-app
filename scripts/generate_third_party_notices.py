@@ -39,7 +39,7 @@ HEADER_MD = (
 )
 
 APP_NOTICE_JA = (
-    "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。"
+    "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。"
     "本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。"
 )
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08T22:36:10Z",
+  "generated_at": "2026-09-24T14:44:43Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -96,11 +96,6 @@
       "path": "/register",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/register/page.tsx"
-    },
-    {
-      "path": "/search",
-      "kind": "page",
-      "file": "apps/web/src/app/[locale]/search/page.tsx"
     },
     {
       "path": "/settings/category-tags",
@@ -587,11 +582,6 @@
   ],
   "gaps": [
     {
-      "id": "gallery",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/gallery/page.tsx"
-    },
-    {
       "id": "storage_locations",
       "kind": "missing_file",
       "detail": "evidence が無い: apps/web/src/app/settings/storage-locations/page.tsx"
@@ -605,11 +595,6 @@
       "id": "color_tags",
       "kind": "missing_file",
       "detail": "evidence が無い: apps/web/src/app/settings/color-tags/page.tsx"
-    },
-    {
-      "id": "search",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/search/page.tsx"
     },
     {
       "id": "privacy_policy",

@@ -23,6 +23,7 @@ description: >-
 |----|------|
 | 入口 | `docs/design/README.md` |
 | 原則 | `docs/design/principles.md` |
+| ボイス・コピー | `docs/design/voice.md` |
 | シェル | `docs/design/themes.md`（テーマ＝トークン一式） |
 | 推し色・境界 | `docs/design/oshi-accents.md` |
 | 動き | `docs/design/motion.md` |
@@ -39,14 +40,15 @@ description: >-
 
 ## 着手前
 
-1. `docs/design/principles.md` を読む（雰囲気は UI/UX・動き。配置が先・色は次）
-2. skill **`design-feedback`** で `feedback_items.json` の **pending** を確認（accepted 以外を本番反映しない）
-3. 色の話なら `themes.md`（トークン一式）と `oshi-accents.md`（カラータグ分離）を確認
-4. 大きな見た目変更なら **`design-lab`**（実装3案＋端末切替＋スコア。A からテーマ色を外さない）
-5. Lab 本決定後の画面反映は **`design-adoption`**（一括禁止）
-6. 色・フォーカス・モーションなら **`design-a11y`**（公式 WebFetch）
-7. ARCHIVE（Dash DESIGN）を正にしない
-8. 振る舞い変更を伴うなら `tdd-workflow`
+1. `docs/design/principles.md` を読む（雰囲気は UI/UX・動き。配置が先・色は次。階層・感情予算）
+2. 文言・空状態・シェア導線なら `docs/design/voice.md`
+3. skill **`design-feedback`** で `feedback_items.json` の **pending** を確認（accepted 以外を本番反映しない）
+4. 色の話なら `themes.md`（トークン一式）と `oshi-accents.md`（カラータグ分離）を確認
+5. 大きな見た目変更なら **`design-lab`**（実装3案＋端末切替＋スコア。A からテーマ色を外さない）
+6. Lab 本決定後の画面反映は **`design-adoption`**（一括禁止）
+7. 色・フォーカス・モーションなら **`design-a11y`**（公式 WebFetch）
+8. ARCHIVE（Dash DESIGN）を正にしない
+9. 振る舞い変更を伴うなら `tdd-workflow`
 
 ## 実行手順
 

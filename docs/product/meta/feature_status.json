@@ -67,11 +67,10 @@
         "/",
         "/gallery",
         "/register",
-        "/search",
         "/settings"
       ],
       "expected_api_paths": [],
-      "notes": "下部タブ Lab A 採用。縦横・その他ハブ・横長写真 aspect。"
+      "notes": "下部タブ Lab A 採用（3タブ: ギャラリー／登録／その他。検索はギャラリー内）。縦横・その他ハブ・横長写真 aspect。"
     },
     {
       "id": "i18n_web",
@@ -310,7 +309,7 @@
       "status": "shipped",
       "title_ja": "ギャラリー一覧",
       "evidence_paths": [
-        "apps/web/src/app/gallery/page.tsx",
+        "apps/web/src/app/[locale]/gallery/page.tsx",
         "docs/product/acceptance/gallery.md",
         "docs/product/flows/gallery.md"
       ],
@@ -395,16 +394,14 @@
         "apps/web/src/lib/galleryRecentQueries.ts",
         "apps/web/src/components/gallery/GalleryRecentFilters.tsx",
         "apps/web/src/app/[locale]/gallery/page.tsx",
-        "apps/web/src/app/[locale]/search/page.tsx",
         "docs/product/acceptance/gallery.md",
         "docs/product/acceptance/search.md"
       ],
       "expected_web_paths": [
-        "/gallery",
-        "/search"
+        "/gallery"
       ],
       "expected_api_paths": [],
-      "notes": "localStorage 最大8件。保存ビューとは別。"
+      "notes": "localStorage 最大8件。保存ビューとは別。ギャラリー上で完結。"
     },
     {
       "id": "gallery_filters_v2",
@@ -603,19 +600,21 @@
       "id": "search",
       "phase": "must",
       "status": "shipped",
-      "title_ja": "検索",
+      "title_ja": "キーワード検索（ギャラリー内）",
       "evidence_paths": [
-        "apps/web/src/app/search/page.tsx",
+        "apps/web/src/app/[locale]/gallery/page.tsx",
         "apps/web/src/components/ProductSearchForm.tsx",
         "apps/api/app/services/product_service.py",
-        "docs/product/acceptance/search.md"
+        "docs/product/acceptance/search.md",
+        "docs/product/acceptance/gallery.md"
       ],
       "expected_web_paths": [
-        "/search"
+        "/gallery"
       ],
       "expected_api_paths": [
         "/products"
-      ]
+      ],
+      "notes": "独立 /search は置かない。q はギャラリー URL。GET /products?q= が API 正。"
     },
     {
       "id": "privacy_policy",

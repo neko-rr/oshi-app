@@ -68,7 +68,14 @@ NEXT_FIXED = {
     "template.tsx",
     "default.tsx",
     "middleware.ts",
+    "proxy.ts",
     "globals.css",
+    "icon.tsx",
+    "apple-icon.tsx",
+    "robots.ts",
+    "manifest.ts",
+    "opengraph-image.tsx",
+    "twitter-image.tsx",
 }
 
 

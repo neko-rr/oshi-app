@@ -11,7 +11,7 @@
 
 ## ゲスト中にできること
 
-- ホーム・空のギャラリー／検索／設定シェルの閲覧
+- ホーム・空のギャラリー／設定シェルの閲覧
 - 登録ウィザードの画面操作・端末内下書き
 - カメラ UI・ローカル写真プレビュー（アップロードなし）
 - 見た目・表示・登録既定の **端末内** 変更（サーバー同期なし）
@@ -39,7 +39,7 @@
 |------|----------|----------|
 | 端末のみで足りる設定 | 画面に `GuestContextNotice`（`localOnly`） | `/settings`・`/settings/theme`・`/settings/register` |
 | サーバー CRUD / 書き出し / 集計 | `GuestServerGate` または同等の案内＋操作 UI 非表示 | タグ・収納・export・dashboard |
-| 一覧・検索など空状態 | ゲスト向け文言＋`/auth/upgrade` リンク | gallery・search |
+| 一覧など空状態 | ゲスト向け文言＋`/auth/upgrade` リンク | gallery |
 | 操作ボタン（保存・アップロード等） | `RegistrationRequiredDialog` 等でゲート | RegisterWizard |
 | API / RLS | `require_permanent_user` ＋（DB なら）Anonymous 拒否 | 業務ルータ |
 | 見た目系の同期 | ゲストは API GET/PUT をスキップ（`canSyncUserPrefsToServer`） | `useTheme` / `useDisplaySettings` |

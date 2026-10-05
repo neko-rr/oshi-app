@@ -12,6 +12,7 @@ import {
 import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
 import { canSyncUserPrefsToServer } from "@/lib/authGuest";
+import { DISPLAY_SETTINGS_LOCAL_KEY } from "@/lib/brand";
 import {
   DEFAULT_GALLERY_IMAGE_FIT,
   DEFAULT_GALLERY_LAYOUT,
@@ -76,7 +77,7 @@ export type DisplaySettings = {
 export const DEFAULT_TEXT_SCALE: DisplayLevel = 3;
 export const DEFAULT_UI_DENSITY: DisplayLevel = 4;
 
-const LOCAL_KEY = "oshiapp:displaySettings";
+const LOCAL_KEY = DISPLAY_SETTINGS_LOCAL_KEY;
 const SYNC_DEBOUNCE_MS = 800;
 const MIN_LEVEL = 1;
 const MAX_LEVEL = 7;

@@ -34,6 +34,8 @@ ALLOW_HEX_GLOBS = (
     "lib/themeColorScale.ts",
     "lib/themeColorScale.selftest.ts",
     "components/settings/OshiAccentPanel.tsx",
+    # 仮アイコン色（画像生成は CSS 変数を使えない）
+    "lib/brand.ts",
     # カラータグ / カテゴリ色は製品ラベル用（推し色・UI トークンとは別）
     "app/settings/color-tags/",
     "app/settings/category-tags/",

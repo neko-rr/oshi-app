@@ -1,3 +1,5 @@
+import { LOCAL_STORAGE_PREFIX } from "@/lib/brand";
+
 export type LabVariantId = "a" | "b" | "c";
 
 /** Lab の端末プレビュー（Web PC / Web モバイル / ネイティブアプリ想定） */
@@ -184,4 +186,4 @@ export const LAB_OSHI_SWATCHES: readonly LabOshiSwatch[] = [
 /** @deprecated LAB_OSHI_SWATCHES を使う */
 export const LAB_OSHI_SWATCH_VARS = LAB_OSHI_SWATCHES.map((s) => s.cssVar);
 
-export const LAB_ADOPTION_STORAGE_KEY = "oshiapp:design-lab:adoption";
+export const LAB_ADOPTION_STORAGE_KEY = `${LOCAL_STORAGE_PREFIX}design-lab:adoption`;

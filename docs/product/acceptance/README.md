@@ -8,6 +8,7 @@
 | [auth.md](auth.md) | ログイン・サインアップ |
 | [register.md](register.md) | 製品登録 |
 | [gallery.md](gallery.md) | 一覧 |
+| [search.md](search.md) | キーワード検索（ギャラリー内） |
 | [product_detail.md](product_detail.md) | 詳細 |
 | [settings.md](settings.md) | タグ・収納設定 |
 | [dashboard.md](dashboard.md) | ダッシュボード |

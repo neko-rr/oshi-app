@@ -134,6 +134,9 @@ assert.equal(buildGalleryListSearch({ sort: "name" }), "v=1&sort=name");
 assert.ok(
   buildGalleryListSearch({ category_tag_ids: [1, 2] }).startsWith("v=1&"),
 );
+// キーワード検索はギャラリー URL に載せる（独立 /search は置かない）
+assert.ok(buildGalleryListSearch({ q: "foo" }).includes("q=foo"));
+assert.ok(buildGalleryListSearch({ q: "foo" }).startsWith("v=1&"));
 assert.equal(parseGalleryQueryVersion(undefined), 1);
 assert.equal(parseGalleryQueryVersion("1"), 1);
 assert.equal(parseGalleryQueryVersion("9"), 1);

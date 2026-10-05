@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import DesignLabView from "@/components/design-lab/DesignLabView";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 export const metadata = {
-  title: "Design Lab · oshi-app",
+  title: `Design Lab · ${PRODUCT_NAME}`,
   robots: { index: false, follow: false },
 };
 

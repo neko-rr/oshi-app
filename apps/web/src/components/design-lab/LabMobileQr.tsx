@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "oshiapp:design-lab:mobile-origin";
+import { LOCAL_STORAGE_PREFIX } from "@/lib/brand";
+
+const STORAGE_KEY = `${LOCAL_STORAGE_PREFIX}design-lab:mobile-origin`;
 const LAB_PATH = "/dev/design-lab";
 
 function isLoopbackHost(hostname: string): boolean {

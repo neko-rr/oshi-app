@@ -1,5 +1,7 @@
 # 共同開発メモ（短い）
 
+**製品:** Oshihaven（https://oshihaven.com）
+
 1. 入口: [AGENTS.md](AGENTS.md) → [.cursor/rules/README.md](.cursor/rules/README.md)（Skill の Task 委譲表も AGENTS）
 2. セットアップ・起動・テスト: [README.md](README.md)
 3. **docs の手/自動の見分け:** [docs/README.md](docs/README.md)

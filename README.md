@@ -1,6 +1,9 @@
-# oshi-app（Next.js + FastAPI monorepo）
+# Oshihaven（oshi-app monorepo）
 
-推し活グッズ管理。**共同作業・別セッションの入口は [AGENTS.md](AGENTS.md)**。
+**Oshihaven** — 推し活グッズ管理。公式: [https://oshihaven.com](https://oshihaven.com)  
+（リポジトリ／パッケージの技術名は従来どおり `oshi-app`）
+
+**共同作業・別セッションの入口は [AGENTS.md](AGENTS.md)**。
 
 **v2 移行:** Must 本線はほぼ完了（登録・一覧・設定・認証・楽天）。要約は [docs/product/v2_status.md](docs/product/v2_status.md)。  
 残りはレスポンシブ／推し色磨き、Phase 2、モバイル本番、Later（deferred）。

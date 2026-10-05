@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Ellipsis, Images, Plus, Search } from "@/lib/icons";
+import { Ellipsis, Images, Plus } from "@/lib/icons";
 import type { LucideIcon } from "@/lib/icons";
 
 type TabItem = {
-  href: "/gallery" | "/register" | "/search" | "/settings";
-  labelKey: "gallery" | "register" | "search" | "more";
+  href: "/gallery" | "/register" | "/settings";
+  labelKey: "gallery" | "register" | "more";
   Icon: LucideIcon;
   match: (pathname: string) => boolean;
 };
@@ -24,12 +24,6 @@ const TABS: readonly TabItem[] = [
     labelKey: "register",
     Icon: Plus,
     match: (p) => p === "/register" || p.startsWith("/register/"),
-  },
-  {
-    href: "/search",
-    labelKey: "search",
-    Icon: Search,
-    match: (p) => p === "/search" || p.startsWith("/search/"),
   },
   {
     href: "/settings",
@@ -49,7 +43,7 @@ const TABS: readonly TabItem[] = [
 
 /**
  * スマホ幅の本線ナビ（親指ゾーン）。lg 以上は非表示（横向きスマホ幅でもタブ維持）。
- * Lab A（用途最適）: 4等分・アイコン＋短いラベル。横向きはラベル非表示。
+ * ギャラリー／登録／その他の3タブ。検索はギャラリー内。
  */
 export default function BottomTabBar() {
   const t = useTranslations("Nav");
@@ -61,7 +55,7 @@ export default function BottomTabBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label={t("ariaTabs")}
     >
-      <ul className="mx-auto grid max-w-3xl grid-cols-4 gap-0 px-1 py-1 landscape:py-0.5">
+      <ul className="mx-auto grid max-w-3xl grid-cols-3 gap-0 px-1 py-1 landscape:py-0.5">
         {TABS.map((tab) => {
           const active = tab.match(pathname);
           const Icon = tab.Icon;

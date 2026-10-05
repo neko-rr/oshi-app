@@ -2,7 +2,9 @@
 # 起きてからの ToDo（クラウド / 秘密）
 
 AI がローカルに置けない・**人間が Dashboard でやる作業**。  
-日々の開発入口は [README.md](../README.md) / [AGENTS.md](../AGENTS.md)。
+日々の開発入口は [README.md](../README.md) / [AGENTS.md](../AGENTS.md)。  
+**製品:** Oshihaven（公式 https://oshihaven.com）。  
+公開するまで `apps/web/src/lib/brand.ts` の `SITE_INDEXABLE` は **false**（検索に出さない）。
 
 ## 1. 環境変数（Git に入れない）
 
@@ -74,13 +76,73 @@ where is_anonymous is true
 
 関連フロー: [docs/product/flows/guest.md](product/flows/guest.md)
 
-## 3. デプロイ想定
+## 3. 依存の更新（Renovate）
 
-- **API**: Render（`apps/api`）— env は Dashboard のみ。ヘルス `/health`
-- **Web**: Cloudflare Pages 等 — `.cursor/rules/deploy.mdc`
+設定: リポジトリ直下の `renovate.json`。公開から **3日未満** の版は PR にしない。自動マージはしない。週次（月曜朝・日本時間）。対象は pnpm / Python requirements / GitHub Actions / API の Dockerfile。
+
+pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
+
+- [ ] [Renovate GitHub App](https://github.com/apps/renovate) を **このリポジトリだけ** にインストールし、出る「Configure Renovate」PR をマージする
+- [ ] GitHub の Dependabot **alerts（通知）** はオンでよい
+- [ ] Dependabot の **version updates / security updates はオフ**（セキュリティ更新が待ち時間を飛ばすため。更新 PR は Renovate だけ）
+
+## 4. デプロイ想定
+
+- **API**: Render（Docker）— env は Dashboard のみ。ヘルス `/health`
+- **Web**: Cloudflare **Workers** + OpenNext（静的 Pages ではない。`apps/web/wrangler.jsonc`）
 - **キー一覧**: [deploy/env-contract.md](deploy/env-contract.md)
 
-## 4. ローカル起動
+### Render（このリポジトリ）
+
+プロトタイプの Flask 起動のままリポジトリだけ差し替えない。
+
+| 項目 | 設定 |
+|------|------|
+| Source | **この** GitHub リポジトリ（プロトタイプではない） |
+| Language | Docker |
+| Dockerfile Path | `apps/api/Dockerfile` |
+| Root Directory | **空**（ビルド文脈はリポジトリルート） |
+| Docker Command | 空（イメージの CMD を使う） |
+| Health Check Path | `/health` |
+
+環境変数は [env-contract.md](deploy/env-contract.md) の Render 列。`CORS_ORIGINS` は本番 Web オリジンのみ。`SUPABASE_JWT_SECRET` は置かない。
+
+### Cloudflare（このリポジトリ）
+
+静的エクスポートや旧 next-on-pages は使わない。Next.js 16 App Router + Cookie セッション。
+
+公式の vinext は 2026-10-05 時点で互換 **91%**。`next-intl` は部分対応（クライアントで intl context 欠落の既知問題）。本番の ja/en と Cookie セッションを守るため、当面の Workers 載せは **OpenNext**（`@opennextjs/cloudflare`）。vinext へは intl が安定してから。
+
+| 項目 | 設定 |
+|------|------|
+| 製品 | **Workers**（Pages の静的サイトではない） |
+| Source | **この** GitHub リポジトリ |
+| Root Directory | **空**（pnpm workspace。`apps/web` だけ切ると `@oshi/shared` が壊れる） |
+| Build | `pnpm install && pnpm build:shared && pnpm -C apps/web run cf:build` |
+| Deploy | `pnpm -C apps/web exec wrangler deploy` |
+| Worker 名 | `oshihaven`（`wrangler.jsonc` と一致） |
+| カスタムドメイン | `oshihaven.com`（www は本番オリジンに寄せる） |
+| 検索 | 公開まで `SITE_INDEXABLE=false` のまま（コード）。CF 側で index を強制しない |
+
+環境変数は [env-contract.md](deploy/env-contract.md) の Cloudflare 列のみ。
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_API_BASE_URL` = Render の **HTTPS**（末尾スラッシュなし）
+- 任意: `NEXT_PUBLIC_BASE_URL=https://oshihaven.com`
+
+`SUPABASE_SECRET_KEY` / JWT 秘密 / `AUTH_GATE_BYPASS` / E2E stub は置かない。
+
+ドメインを Cloudflare に載せる（人が Dashboard でやる）:
+
+1. Cloudflare にゾーン `oshihaven.com` を追加し、レジストラの NS を Cloudflare にする
+2. Worker にカスタムドメイン `oshihaven.com` を付ける（Render には付けない）
+3. Supabase Auth の Site URL / Redirect に `https://oshihaven.com` を追加
+4. Render の `CORS_ORIGINS=https://oshihaven.com`
+
+ローカルの OpenNext 変換は Windows 非保証。本番ビルドは Cloudflare CI（Linux）で行う。
+
+## 5. ローカル起動
 
 ```powershell
 # 先に apps/api/.venv を作成（README 参照）
@@ -88,7 +150,7 @@ pnpm dev:api
 pnpm dev:web
 ```
 
-## 5. 移管状況
+## 6. 移管状況
 
 コア（認証・製品・写真・タグ・統計・ダッシュボード・assist 設計）は移管済み。  
 登録ウィザード（1→2→6）・検索・プライバシーページは Web で利用可。  

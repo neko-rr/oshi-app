@@ -6,6 +6,7 @@
 | ファイル | 役割 | 更新 |
 |----------|------|------|
 | [icons.json](icons.json) | 採用 lucide 一覧（**正本**） | **エージェント**（承認後） |
+| [mascots.json](mascots.json) | マスコット候補・ポーズ・静的 URL。スタイル契約は `style_contract_ja`（詳細は [mascot-asset-brief.md](../mascot-asset-brief.md)） | **エージェント**（設計承認後） |
 | [tokens.json](tokens.json) | セマンティック・トークン名（**正本・check のみ**） | **エージェント**（承認後） |
 | [design_adoption.json](design_adoption.json) | Lab 案の本番採用状態 | **エージェント**（承認後） |
 | [feedback_items.json](feedback_items.json) | フィードバック ID → status / 要望 / 反映先 | **エージェント**（承認後） |

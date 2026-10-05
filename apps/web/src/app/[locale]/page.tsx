@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { GuestStartButton } from "@/components/auth/GuestStartButton";
 import { apiFetch } from "@/lib/api";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type ProductStats = {
   total: number;
@@ -51,7 +52,7 @@ export default async function HomePage({ params }: Props) {
   return (
     <div className="stack-density-lg justify-center py-10">
       <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-        oshi-app
+        {PRODUCT_NAME}
       </h1>
       <p className="max-w-md text-base leading-relaxed text-muted-foreground">
         {t("tagline")}
@@ -98,9 +99,6 @@ export default async function HomePage({ params }: Props) {
           <Link href="/register">{t("register")}</Link>
         </Button>
         <div className="hidden flex-wrap gap-3 lg:flex">
-          <Button asChild variant="secondary">
-            <Link href="/search">{t("search")}</Link>
-          </Button>
           <Button asChild variant="secondary">
             <Link href="/dashboard">{t("dashboard")}</Link>
           </Button>

@@ -23,7 +23,7 @@ from app.routers.account import router as account_router
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title="oshi-app API", version="0.1.0")
+    application = FastAPI(title="Oshihaven API", version="0.1.0")
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,

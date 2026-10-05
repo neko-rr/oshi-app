@@ -6,8 +6,8 @@
       "path": "/ (shell)",
       "lab_variant": "a",
       "status": "adopted",
-      "notes_ja": "A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持",
-      "updated_at": "2026-09-06"
+      "notes_ja": "A: 下部タブ3（ギャラリー／登録／その他）・スリムHeader・lg+トップナビ。検索はギャラリー内。認証/devはタブ無し。横向きでもタブ維持",
+      "updated_at": "2026-09-16"
     },
     {
       "path": "/gallery",

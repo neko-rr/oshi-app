@@ -1,5 +1,30 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-10-05: Next.js 16 と Cloudflare
+
+- Web は **Next.js 16.3.8**。入口は `apps/web/src/proxy.ts`
+- vinext check は 91%。`next-intl` が部分対応のため、本番載せは当面 OpenNext
+- Cloudflare Worker 名 `oshihaven`。Dashboard の env は `NEXT_PUBLIC_*` のみ
+
+## 2026-09-24: 製品ブランド Oshihaven
+
+- **製品名:** Oshihaven（日英ともこの表記）
+- **公式 URL:** https://oshihaven.com（取得済み）
+- Render API: Dockerfile Path `apps/api/Dockerfile`、Root Directory は空。ヘルス `/health`
+- **IP / マスコット:** 風ねこ / Kaze Neko（製品名と分離。SUZURI 等は IP 名義）
+- **技術名:** リポジトリ・npm 名は当面 `oshi-app` のまま
+- **localStorage 接頭辞:** `oshihaven:`（旧 `oshiapp:` は読まない。テストユーザーのみのため移行なし）
+- 表示定数: `apps/web/src/lib/brand.ts`
+- **未公開:** `SITE_INDEXABLE = false`（検索に出さない）。公開日に `true`
+- **仮アイコン:** `src/app/icon.tsx` と `apple-icon.tsx`。本番絵は同名の png に差し替えて tsx を消す
+- **アプリのリンク:** `https://oshihaven.com/...`（`apps/mobile/README.md`）
+
+## 2026-09-16: 検索はギャラリーに統合
+
+- 独立 `/search`・検索タブを削除（未公開のためリダイレクトなし）
+- キーワード検索はギャラリー内 `q` + `GET /products?q=`
+- 下部タブは ギャラリー／登録／その他 の3つ
+
 ## 2026-09-11: 登録自動テスト（合成フィクスチャ）
 
 - 正本: `docs/product/register_e2e.md`
@@ -327,7 +352,7 @@
 - 認証ゲート: Supabase 未設定時は保護ルートを通さない（`AUTH_GATE_BYPASS=1` かつ非本番のみ例外）
 - `/privacy` 公開、`/dev/*` は本番リダイレクト
 - 登録ウィザード 1→2→6（楽天 LIVE なし・soft fail）
-- 検索: `GET /products?q=` + `/search` / ギャラリー内検索
+- 検索: `GET /products?q=` + ギャラリー内検索（独立 `/search` は廃止・未公開のためリダイレクトなし）
 - 楽天 LIVE 連携は引き続きオフ前提
 
 ## 2026-08-31: Lab セーフエリア線は未実装（後回し）

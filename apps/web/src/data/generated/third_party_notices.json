@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-11T05:01:51Z",
-  "app_notice_ja": "oshi-app 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
+  "generated_at": "2026-09-24T14:44:37Z",
+  "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
       "name": "@radix-ui/react-avatar",

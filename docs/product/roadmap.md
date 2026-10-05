@@ -35,7 +35,7 @@
 | `storage_locations` | 収納場所タグ | shipped |
 | `category_tags` | カテゴリタグ設定 | shipped |
 | `color_tags` | カラータグ設定 | shipped |
-| `search` | 検索 | shipped |
+| `search` | キーワード検索（ギャラリー内。独立 `/search` なし） | shipped |
 | `privacy_policy` | プライバシーポリシー | shipped |
 | `licenses_notices` | ライセンス・表記 | shipped |
 | `data_export` | 設定からのデータ書き出し（テキスト／写真付き ZIP。再取り込みなし） | shipped |
@@ -79,9 +79,8 @@
 ```text
 /                 ホーム（導線）
 /register         登録
-/gallery          一覧
+/gallery          一覧（キーワード検索・絞込含む）
 /gallery/[id]     詳細
-/search           検索
 /dashboard        ダッシュボード
 /settings         設定（見た目・タグ・収納・データ書き出し・アカウント系）
 /settings/export  データ書き出し（一覧テキスト／写真付き ZIP）

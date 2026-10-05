@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-09-08T22:36:11Z`
+生成時刻 (UTC): `2026-09-16T03:32:44Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -18,7 +18,7 @@
 
 | Path | status | lab_variant | notes |
 |------|--------|-------------|-------|
-| `/ (shell)` | `adopted` | 'a' | A: 下部タブ4・スリムHeader・lg+トップナビ。認証/devはタブ無し。横向きでもタブ維持 |
+| `/ (shell)` | `adopted` | 'a' | A: 下部タブ3（ギャラリー／登録／その他）・スリムHeader・lg+トップナビ。検索はギャラリー内。認証/devはタブ無し。横向きでもタブ維持 |
 | `/gallery` | `adopted` | 'b' | B: 写真主役・チップ絞込・もっと見る・詳細は編集折りたたみ。戻るは一覧クエリ復元 |
 | `/gallery/[registered_product_id]` | `adopted` | 'b' | B: ヒーロー写真＋details で編集。一覧クエリ付き戻る。フルスクリーン拡大追加 |
 | `/register` | `partial` | 'a' | 写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き） |
@@ -29,7 +29,7 @@
 
 ## page.tsx 要約
 
-- 本番 page 数: 25
+- 本番 page 数: 24
 - `@/lib/icons` 使用: 0
 - lucide 直 import: 0
 - UI hex 疑い: 0

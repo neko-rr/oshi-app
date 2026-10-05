@@ -16,7 +16,7 @@
     "noticeServerRequired": "This screen (tags, export, analytics, etc.) requires a full account."
   },
   "GuestUpgrade": {
-    "metaTitle": "Create account | oshi-app",
+    "metaTitle": "Create account | Oshihaven",
     "title": "Create your account",
     "description": "Link an email to this guest session so you can save your data.",
     "loading": "Loading…",
@@ -95,8 +95,6 @@
     "homeShort": "Home",
     "gallery": "Gallery",
     "galleryShort": "List",
-    "search": "Search",
-    "searchShort": "Search",
     "register": "Register",
     "registerShort": "Add",
     "dashboard": "Dashboard",
@@ -114,7 +112,7 @@
     "licenses": "Licenses & notices"
   },
   "HomePage": {
-    "tagline": "Register and organize merch for your oshi.",
+    "tagline": "Find where your merch is. Connect physical storage with your collection.",
     "statsProducts": "Products: {count}",
     "statsPhotos": "With photos: {count}",
     "statsBarcodes": "Unique barcodes: {count}",
@@ -124,7 +122,6 @@
     "upgrade": "Create account",
     "gallery": "Gallery",
     "register": "Register",
-    "search": "Search",
     "dashboard": "Dashboard",
     "settings": "Settings"
   },
@@ -147,6 +144,8 @@
     "intro": "Choose a theme for the overall look. Oshi colors add accents on top. Also set text size, density, language, and dates.",
     "themeTitle": "Theme (base look)",
     "themeHint": "Background, text, and overall mood change together. Default is green. Frame contrast shows light vs dark.",
+    "mascotTitle": "Mascot",
+    "mascotHint": "Face for empty and waiting states. Default is Kaze Neko. Choose none for plain UI.",
     "oshiTitle": "Oshi colors (accent)",
     "oshiHint": "Colors layered on the theme. Expand to try them in the sample.",
     "oshiPremiumBadge": "Premium",
@@ -162,6 +161,12 @@
     "langJa": "日本語",
     "langEn": "English",
     "loading": "Loading…"
+  },
+  "MascotSettings": {
+    "legend": "Choose a mascot",
+    "none": "None (plain UI)",
+    "nonePreview": "No character",
+    "localHint": "Saved on this device. Account sync is not ready yet."
   },
   "OshiAccent": {
     "premiumBadge": "Premium",
@@ -427,7 +432,7 @@
     "sectionExplore": "Explore",
     "dashboard": "Dashboard",
     "appearance": "Appearance",
-    "appearanceHint": "Theme, oshi colors, text size, density, language, residence",
+    "appearanceHint": "Theme, oshi colors, mascot, text size, density, language, residence",
     "sectionRegister": "Register",
     "registerDefaults": "Register defaults",
     "sectionTags": "Tags & storage",
@@ -817,12 +822,6 @@
     "noneLabel": "None"
   },
   "Search": {
-    "title": "Search",
-    "intro": "Filter by product name, category, or storage (your data only).",
-    "prompt": "Enter a keyword to search.",
-    "noResults": "No products match \"{q}\".",
-    "loadFailed": "Failed to load search results",
-    "toGallery": "Back to gallery",
     "formLabel": "Search products",
     "formPlaceholder": "Name, category, storage",
     "formSubmit": "Search",
@@ -902,12 +901,12 @@
     "toSettings": "Settings"
   },
   "Privacy": {
-    "metaTitle": "Privacy policy | oshi-app",
-    "metaDescription": "Privacy practices for oshi-app",
+    "metaTitle": "Privacy policy | Oshihaven",
+    "metaDescription": "Privacy practices for Oshihaven",
     "title": "Privacy policy",
     "lastUpdated": "Last updated: 2026-09-06",
     "overviewTitle": "Overview",
-    "overviewBody": "oshi-app (the \"Service\") is a web app for registering and organizing merch for your oshi. This page explains what information we handle and why.",
+    "overviewBody": "Oshihaven (the \"Service\") is a web app for registering and organizing merch for your oshi. This page explains what information we handle and why. Official site: https://oshihaven.com",
     "collectTitle": "Information we collect",
     "collectItemAccount": "Account information (such as email; authentication via Supabase Auth)",
     "collectItemGoods": "Registered merch data, tags, storage locations, and notes",
@@ -928,7 +927,7 @@
     "linkHome": "Back to home"
   },
   "Licenses": {
-    "metaTitle": "Licenses & notices | oshi-app",
+    "metaTitle": "Licenses & notices | Oshihaven",
     "metaDescription": "Open-source dependencies and third-party service notices",
     "title": "Licenses & notices",
     "generatedAt": "Generated at (UTC): {generatedAt}",

@@ -30,7 +30,7 @@ src/lib/
   client.ts              # ブラウザ用 Supabase
   server.ts              # サーバ用 Supabase
   middleware.ts          # セッション更新ロジック
-src/middleware.ts        # Next middleware 入口
+src/proxy.ts             # Next 16 の入口（旧 middleware）
 src/styles/              # colors.css / theme（todo-app 寄せ）
 ```
 

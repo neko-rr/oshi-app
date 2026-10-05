@@ -25,6 +25,7 @@ import {
   type LabAmbientId,
   type LabTextScaleId,
 } from "@/components/design-lab/lab-ux-preview";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 const MIN_WIDTH = 768;
 const PRESETS = [768, 1024, 1280, 1440] as const;
@@ -231,7 +232,7 @@ export default function LabPcExpandPreview({
               <span className="size-2 rounded-full bg-zinc-300" aria-hidden />
               <span className="size-2 rounded-full bg-zinc-300" aria-hidden />
               <span className="ml-2 flex-1 truncate rounded bg-[var(--lab-accent-soft)] px-2 py-1 text-[11px] lab-muted">
-                oshi-app · {meta.title} · {widthPx}px
+                {PRODUCT_NAME} · {meta.title} · {widthPx}px
               </span>
             </div>
             <div className="border-b border-[var(--lab-border)] px-4 py-2 text-xs lab-muted">

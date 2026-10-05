@@ -205,7 +205,7 @@ def build_manifest(
         "format_version": FORMAT_VERSION,
         "kind": kind,
         "exported_at": datetime.now(timezone.utc).isoformat(),
-        "app": "oshi_app",
+        "app": "oshihaven",
         "entities": {
             "category_tags": _wrap_rows(category_tags, core_keys=CATEGORY_CORE_KEYS),
             "storage_locations": _wrap_rows(

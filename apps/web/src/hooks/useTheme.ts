@@ -12,6 +12,7 @@ import {
 import { API_PATHS } from "@oshi/shared";
 import { createClient } from "@/lib/client";
 import { canSyncUserPrefsToServer } from "@/lib/authGuest";
+import { THEME_LOCAL_KEY } from "@/lib/brand";
 import {
   DEFAULT_THEME_ID,
   THEME_IDS,
@@ -22,7 +23,7 @@ import {
 export type ThemeId = string;
 export { DEFAULT_THEME_ID, THEME_OPTIONS };
 
-const LOCAL_KEY = "oshiapp:themeId";
+const LOCAL_KEY = THEME_LOCAL_KEY;
 const SYNC_DEBOUNCE_MS = 800;
 
 const ALLOWED = new Set<string>(THEME_IDS);
