@@ -21,10 +21,10 @@ export async function proxy(request: NextRequest) {
 
   const i18nResponse = handleI18nRouting(request);
 
-  // Supabase が付けた Cookie を i18n 応答へコピー
-  authResponse.cookies.getAll().forEach((cookie) => {
-    i18nResponse.cookies.set(cookie.name, cookie.value);
-  });
+  // Set-Cookie 全文をコピー（HttpOnly / Secure / SameSite を落とさない）
+  for (const line of authResponse.headers.getSetCookie()) {
+    i18nResponse.headers.append("Set-Cookie", line);
+  }
 
   return i18nResponse;
 }
