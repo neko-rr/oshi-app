@@ -120,7 +120,7 @@ pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
 | Root Directory | **空**（pnpm workspace。`apps/web` だけ切ると `@oshi/shared` が壊れる） |
 | Build | `pnpm install && pnpm build:shared && pnpm -C apps/web run cf:build` |
 | Deploy | `pnpm -C apps/web exec wrangler deploy` |
-| Worker 名 | `oshihaven`（`wrangler.jsonc` と一致） |
+| Worker 名 | `oshi-app`（Dashboard の接続名。`wrangler.jsonc` と一致。製品名 Oshihaven とは別） |
 | カスタムドメイン | `oshihaven.com`（www は本番オリジンに寄せる） |
 | 検索 | 公開まで `SITE_INDEXABLE=false` のまま（コード）。CF 側で index を強制しない |
 

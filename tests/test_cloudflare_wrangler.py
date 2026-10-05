@@ -22,12 +22,17 @@ def _load_jsonc(path: Path) -> dict:
 
 
 def test_wrangler_is_opennext_worker_for_oshihaven() -> None:
+    """CF 接続名は oshi-app。製品名 Oshihaven とは別。"""
     data = _load_jsonc(WRANGLER)
-    assert data["name"] == "oshihaven"
+    assert data["name"] == "oshi-app"
     assert data["main"] == ".open-next/worker.js"
     assert "nodejs_compat" in data["compatibility_flags"]
     assert "global_fetch_strictly_public" in data["compatibility_flags"]
     assert data["assets"]["directory"] == ".open-next/assets"
+    self_ref = next(
+        s for s in data["services"] if s["binding"] == "WORKER_SELF_REFERENCE"
+    )
+    assert self_ref["service"] == "oshi-app"
     vars_ = data.get("vars") or {}
     assert "SUPABASE_SECRET_KEY" not in vars_
     assert "SUPABASE_JWT_SECRET" not in vars_
