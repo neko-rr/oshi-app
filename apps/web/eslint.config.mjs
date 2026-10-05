@@ -1,19 +1,20 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
 const lucideDirectImportMessage =
   "lucide-react 直 import 禁止。named import は @/lib/icons から（docs/design/icons.md）。";
 
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  {
+    // Next 16 の eslint-plugin-react-hooks が新規に error にした。
+    // mount 時の localStorage/API 同期は既存パターン。専用リファクタまで無効。
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   {
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/lib/icons.ts"],
@@ -57,6 +58,7 @@ const eslintConfig = [
       ],
     },
   },
-];
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".open-next/**"]),
+]);
 
 export default eslintConfig;

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T14:44:43Z",
+  "generated_at": "2026-10-05T11:50:37Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -581,6 +581,11 @@
     }
   ],
   "gaps": [
+    {
+      "id": "i18n_web",
+      "kind": "missing_file",
+      "detail": "evidence が無い: apps/web/src/middleware.ts"
+    },
     {
       "id": "storage_locations",
       "kind": "missing_file",

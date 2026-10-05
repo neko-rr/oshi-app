@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-09-24T14:44:37Z`
+生成時刻 (UTC): `2026-10-05T11:50:36Z`
 
 ## アプリ本体
 
@@ -14,6 +14,7 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 
 | 名前 | 版 | ライセンス | 系統 |
 |------|----|------------|------|
+| @opennextjs/cloudflare | 1.20.7 | MIT | npm |
 | @radix-ui/react-avatar | 1.2.6 | MIT | npm |
 | @radix-ui/react-label | 2.1.15 | MIT | npm |
 | @radix-ui/react-slot | 1.3.3 | MIT | npm |
@@ -23,12 +24,12 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 | class-variance-authority | 0.7.1 | Apache-2.0 | npm |
 | clsx | 2.1.1 | MIT | npm |
 | lucide-react | 1.31.0 | ISC | npm |
-| next | 15.5.7 | MIT | npm |
-| next-intl | 4.0.0 | MIT | npm |
+| next | 16.3.8 | MIT | npm |
+| next-intl | 4.14.8 | MIT | npm |
 | qrcode | 1.5.4 | MIT | npm |
 | radix-ui | 1.6.7 | MIT | npm |
-| react | 19.2.8 | MIT | npm |
-| react-dom | 19.2.8 | MIT | npm |
+| react | 19.3.0 | MIT | npm |
+| react-dom | 19.3.0 | MIT | npm |
 | tailwind-merge | 3.6.0 | MIT | npm |
 | tw-animate-css | 1.4.0 | MIT | npm |
 | fastapi | >=0.115.0 | UNKNOWN | pip |

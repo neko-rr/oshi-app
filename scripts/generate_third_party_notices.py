@@ -248,24 +248,39 @@ def parse_requirements_names(text: str) -> list[str]:
     return [row["name"] for row in parse_requirements_rows(text)]
 
 
-def parse_requirements_rows(text: str) -> list[dict[str, str]]:
+def parse_requirements_rows(
+    text: str, *, base_dir: Path | None = None
+) -> list[dict[str, str]]:
     """requirements.txt から名前と版制約を決定的に抽出（CI/OS 差分を避ける）。"""
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
-    for line in text.splitlines():
-        raw = line.strip()
-        if not raw or raw.startswith("#") or raw.startswith("-"):
-            continue
-        base = raw.split(";", 1)[0].strip()
-        name = re.split(r"[<>=!~\[]", base, maxsplit=1)[0].strip()
-        if not name or not _REQ_NAME_RE.match(name):
-            continue
-        key = name.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        constraint = base[len(name) :].strip()
-        rows.append({"name": name, "constraint": constraint})
+
+    def _add_from(body: str, include_dir: Path | None) -> None:
+        for line in body.splitlines():
+            raw = line.strip()
+            if not raw or raw.startswith("#"):
+                continue
+            if raw.startswith("-r ") or raw.startswith("--requirement "):
+                if include_dir is None:
+                    continue
+                inc = raw.split(None, 1)[1].strip()
+                nested_path = (include_dir / inc).resolve()
+                _add_from(nested_path.read_text(encoding="utf-8"), nested_path.parent)
+                continue
+            if raw.startswith("-"):
+                continue
+            base = raw.split(";", 1)[0].strip()
+            name = re.split(r"[<>=!~\[]", base, maxsplit=1)[0].strip()
+            if not name or not _REQ_NAME_RE.match(name):
+                continue
+            key = name.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            constraint = base[len(name) :].strip()
+            rows.append({"name": name, "constraint": constraint})
+
+    _add_from(text, base_dir)
     return rows
 
 
@@ -273,7 +288,10 @@ def collect_pip_packages() -> list[dict[str, Any]]:
     if not PIP_REQUIREMENTS.is_file():
         return []
     rows: list[dict[str, Any]] = []
-    for item in parse_requirements_rows(PIP_REQUIREMENTS.read_text(encoding="utf-8")):
+    for item in parse_requirements_rows(
+        PIP_REQUIREMENTS.read_text(encoding="utf-8"),
+        base_dir=PIP_REQUIREMENTS.parent,
+    ):
         name = item["name"]
         # テスト専用は一覧から外す（実行時配布物ではない）
         if name.lower() in {"pytest", "pytest-asyncio"}:
