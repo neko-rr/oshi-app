@@ -33,6 +33,9 @@ def test_wrangler_is_opennext_worker_for_oshihaven() -> None:
         s for s in data["services"] if s["binding"] == "WORKER_SELF_REFERENCE"
     )
     assert self_ref["service"] == "oshi-app"
+    # workers.dev を切ると Version URL も死に、プレビューが空ページになる
+    assert data.get("workers_dev") is True
+    assert data.get("preview_urls") is True
     vars_ = data.get("vars") or {}
     assert "SUPABASE_SECRET_KEY" not in vars_
     assert "SUPABASE_JWT_SECRET" not in vars_
