@@ -12,6 +12,7 @@ import { ChevronDown } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 export type SearchableSelectOption = {
   value: string;
@@ -63,7 +64,7 @@ export function SearchableSelect({
 
   useEffect(() => {
     if (!open) return;
-    setHighlight(0);
+    return runAfterTick(() => setHighlight(0));
   }, [query, open]);
 
   useEffect(() => {

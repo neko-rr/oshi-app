@@ -123,9 +123,10 @@ pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
 | Source | **この** GitHub リポジトリ |
 | Root Directory | **空**（pnpm workspace。`apps/web` だけ切ると `@oshi/shared` が壊れる） |
 | Build | `pnpm install && pnpm build:shared && pnpm -C apps/web run cf:build` |
-| Deploy | `pnpm -C apps/web exec wrangler deploy` |
+| Deploy | `pnpm -C apps/web exec wrangler deploy`（本番ブランチ） |
+| Preview | `pnpm -C apps/web exec wrangler preview`（本番以外のブランチ。[Worker Previews](https://developers.cloudflare.com/workers/previews/)） |
 | Worker 名 | `oshi-app`（Dashboard の接続名。`wrangler.jsonc` と一致。製品名 Oshihaven とは別） |
-| プレビュー | ブランチは `wrangler versions upload`。見る URL はログの Version Preview。**設定 → ドメイン** で workers.dev と Version URLs を有効にする（切ると空ページ） |
+| プレビューの見方 | Worker 概要の **プロダクション** ドロップダウン。空なら Preview コマンドが `versions upload` のまま |
 | カスタムドメイン | `oshihaven.com`（www は本番オリジンに寄せる） |
 | 検索 | 公開まで `SITE_INDEXABLE=false` のまま（コード）。CF 側で index を強制しない |
 
@@ -137,6 +138,8 @@ pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
 - 任意: `NEXT_PUBLIC_BASE_URL=https://oshihaven.com`
 
 `SUPABASE_SECRET_KEY` / JWT 秘密 / `AUTH_GATE_BYPASS` / E2E stub は置かない。
+
+**人が Dashboard で合わせる:** Settings → Build の Preview command を上表どおり `wrangler preview` にする（いま `versions upload` だと公式プレビュー一覧に出ない）。
 
 ドメインを Cloudflare に載せる（人が Dashboard でやる）:
 

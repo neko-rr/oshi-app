@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { X } from "@/lib/icons";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type Props = {
   src: string;
@@ -40,16 +41,19 @@ export default function ProductPhotoLightbox({
   const pinchStart = useRef<{ dist: number; scale: number } | null>(null);
   const lastTap = useRef(0);
 
-  useEffect(() => {
-    setReduceMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  }, []);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        setReduceMotion(
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        );
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (!open) {
-      setScale(1);
-      return;
+      return runAfterTick(() => setScale(1));
     }
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {

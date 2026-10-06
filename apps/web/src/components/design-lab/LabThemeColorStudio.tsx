@@ -26,6 +26,7 @@ import {
   type ThemePreviewScheme,
 } from "@/lib/themeColorScale";
 import { normalizeHex } from "@/lib/oshiContrast";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type PreviewTabId =
   | "components"
@@ -704,18 +705,22 @@ export default function LabThemeColorStudio() {
     setSeedInput(next);
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const theme = params.get("theme");
-    const q = params.get("seed");
-    if (theme) {
-      const found = findLabThemePack(theme);
-      if (found) applyCatalog(found);
-    } else if (q) {
-      applyExploreSeed(q);
-    }
-    setUrlReady(true);
-  }, [applyCatalog, applyExploreSeed]);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        const params = new URLSearchParams(window.location.search);
+        const theme = params.get("theme");
+        const q = params.get("seed");
+        if (theme) {
+          const found = findLabThemePack(theme);
+          if (found) applyCatalog(found);
+        } else if (q) {
+          applyExploreSeed(q);
+        }
+        setUrlReady(true);
+      }),
+    [applyCatalog, applyExploreSeed],
+  );
 
   useEffect(() => {
     if (!urlReady) return;

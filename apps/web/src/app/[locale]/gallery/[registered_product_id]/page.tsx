@@ -101,19 +101,20 @@ export default async function GalleryDetailPage({
   }
 
   const { createClient } = await import("@/lib/server");
+  const { loadServerAuth } = await import("@/lib/serverAuth");
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) {
+  const auth = await loadServerAuth(supabase);
+  if (!auth) {
     await redirectTo("/auth/login");
   }
-  const session = data.session!;
+  const { accessToken } = auth!;
 
   let detail: ProductDetail | null = null;
   let loadError: string | null = null;
   try {
     detail = await apiFetch<ProductDetail>(
       `${API_PATHS.products}/${id}`,
-      { accessToken: session.access_token },
+      { accessToken },
     );
   } catch (e: unknown) {
     loadError =

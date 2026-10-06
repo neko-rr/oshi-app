@@ -12,6 +12,7 @@ import {
   tryResolveOshiColors,
 } from "@/lib/oshiContrast";
 import { cn } from "@/lib/utils";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 function SwatchRow({
   label,
@@ -27,9 +28,9 @@ function SwatchRow({
   const t = useTranslations("OshiAccent");
   const [hexText, setHexText] = useState(value);
 
-  useEffect(() => {
+  useEffect(() => runAfterTick(() => {
     setHexText(value);
-  }, [value]);
+  }), [value]);
 
   const commitHex = (raw: string) => {
     try {

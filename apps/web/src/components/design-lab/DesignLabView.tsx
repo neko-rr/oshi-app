@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { runAfterTick } from "@/lib/runAfterTick";
 import LabAdoptionMemoPanel from "@/components/design-lab/LabAdoptionMemoPanel";
 import LabContrastHint from "@/components/design-lab/LabContrastHint";
 import LabCvdFilters from "@/components/design-lab/LabCvdFilters";
@@ -89,10 +90,14 @@ export default function DesignLabView() {
   const ambientMeta = LAB_AMBIENTS.find((a) => a.id === ambient);
   const textMeta = LAB_TEXT_SCALES.find((t) => t.id === textScale);
 
-  useEffect(() => {
-    setLabPageOrigin(window.location.origin);
-    setShowUiCallouts(readUiCalloutsVisible());
-  }, []);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        setLabPageOrigin(window.location.origin);
+        setShowUiCallouts(readUiCalloutsVisible());
+      }),
+    [],
+  );
 
   const toggleUiCallouts = () => {
     setShowUiCallouts((prev) => {

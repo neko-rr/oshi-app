@@ -63,13 +63,14 @@ export default async function DashboardPage({
   }
 
   const { createClient } = await import("@/lib/server");
+  const { loadServerAuth } = await import("@/lib/serverAuth");
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) {
+  const auth = await loadServerAuth(supabase);
+  if (!auth) {
     await redirectTo("/auth/login");
   }
-  const session = data.session!;
-  const isGuest = isAnonymousUser(session.user);
+  const { user, accessToken } = auth!;
+  const isGuest = isAnonymousUser(user);
 
   let charts: DashboardCharts | null = null;
   let loadError: string | null = null;
@@ -77,7 +78,7 @@ export default async function DashboardPage({
     try {
       charts = await apiFetch<DashboardCharts>(
         `${API_PATHS.dashboardCharts}?granularity=month`,
-        { accessToken: session.access_token },
+        { accessToken },
       );
     } catch (e: unknown) {
       loadError =

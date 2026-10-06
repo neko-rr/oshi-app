@@ -108,13 +108,14 @@ export default async function GalleryPage({
   }
 
   const { createClient } = await import("@/lib/server");
+  const { loadServerAuth } = await import("@/lib/serverAuth");
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) {
+  const auth = await loadServerAuth(supabase);
+  if (!auth) {
     await redirectTo("/auth/login");
   }
-  const session = data.session!;
-  const isGuest = isAnonymousUser(session.user);
+  const { user, accessToken } = auth!;
+  const isGuest = isAnonymousUser(user);
 
   let list: ProductListResponse | null = null;
   let categories: CategoryTagItem[] = [];
@@ -130,7 +131,7 @@ export default async function GalleryPage({
   if (isGuest) {
     list = {
       items: [],
-      members_id: session.user.id,
+      members_id: user.id,
       limit: PAGE_LIMIT,
       offset: 0,
       has_more: false,
@@ -139,7 +140,7 @@ export default async function GalleryPage({
     loadError = t("apiBaseMissing");
   } else {
     try {
-      const token = session.access_token;
+      const token = accessToken;
       const prefs = await apiFetch<DisplayPrefsSlice>(
         API_PATHS.displaySettings,
         { accessToken: token },

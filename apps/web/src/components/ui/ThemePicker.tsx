@@ -6,6 +6,7 @@ import { THEME_OPTIONS, useTheme } from "@/hooks/useTheme";
 import { themeSwatchRimClass } from "@/lib/themes/catalog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 /** getComputedStyle の rgb/rgba（カンマ区切り・空白区切り）を #rrggbb に */
 function cssColorToHex(raw: string): string | null {
@@ -47,8 +48,10 @@ function useThemeSampleFgHexes(themeId: string) {
       cssColorToHex(getComputedStyle(probe).color) ?? "#------";
 
     document.body.removeChild(probe);
-    setMainFg(main);
-    setSoftFg(soft);
+    return runAfterTick(() => {
+      setMainFg(main);
+      setSoftFg(soft);
+    });
   }, [themeId]);
 
   return { mainFg, softFg };

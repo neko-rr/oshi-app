@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
+import { runAfterTick } from "@/lib/runAfterTick";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { Button } from "@/components/ui/button";
@@ -166,12 +167,14 @@ export function StepConfirm({
 
   useEffect(() => {
     if (!photoFile) {
-      setThumbUrl(null);
-      return;
+      return runAfterTick(() => setThumbUrl(null));
     }
     const url = URL.createObjectURL(photoFile);
-    setThumbUrl(url);
-    return () => URL.revokeObjectURL(url);
+    const cancel = runAfterTick(() => setThumbUrl(url));
+    return () => {
+      cancel();
+      URL.revokeObjectURL(url);
+    };
   }, [photoFile]);
 
   return (
