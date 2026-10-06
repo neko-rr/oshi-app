@@ -561,6 +561,12 @@
           "type": "boolean",
           "not_null": true,
           "default": "false"
+        },
+        {
+          "column": "font_pack",
+          "type": "text",
+          "not_null": true,
+          "default": "'clean'::text"
         }
       ]
     },
@@ -1736,6 +1742,21 @@
       "indexdef": "CREATE UNIQUE INDEX currency_unit_pkey ON public.currency_unit USING btree (currency_unit_id)"
     },
     {
+      "tablename": "data_export",
+      "indexname": "data_export_members_id_idx",
+      "indexdef": "CREATE INDEX data_export_members_id_idx ON public.data_export USING btree (members_id)"
+    },
+    {
+      "tablename": "data_export",
+      "indexname": "data_export_members_status_idx",
+      "indexdef": "CREATE INDEX data_export_members_status_idx ON public.data_export USING btree (members_id, status) WHERE (status = ANY (ARRAY['pending'::text, 'running'::text]))"
+    },
+    {
+      "tablename": "data_export",
+      "indexname": "data_export_pkey",
+      "indexdef": "CREATE UNIQUE INDEX data_export_pkey ON public.data_export USING btree (data_export_id)"
+    },
+    {
       "tablename": "display_settings",
       "indexname": "display_settings_members_id_idx",
       "indexdef": "CREATE INDEX display_settings_members_id_idx ON public.display_settings USING btree (members_id)"
@@ -1779,6 +1800,16 @@
       "tablename": "member_type",
       "indexname": "member_type_pkey",
       "indexdef": "CREATE UNIQUE INDEX member_type_pkey ON public.member_type USING btree (members_type_name)"
+    },
+    {
+      "tablename": "oshi_accent_settings",
+      "indexname": "oshi_accent_settings_members_id_idx",
+      "indexdef": "CREATE INDEX oshi_accent_settings_members_id_idx ON public.oshi_accent_settings USING btree (members_id)"
+    },
+    {
+      "tablename": "oshi_accent_settings",
+      "indexname": "oshi_accent_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)"
     },
     {
       "tablename": "photo",
@@ -1999,16 +2030,6 @@
       "tablename": "works_series",
       "indexname": "works_series_works_series_name_key",
       "indexdef": "CREATE UNIQUE INDEX works_series_works_series_name_key ON public.works_series USING btree (works_series_name)"
-    },
-    {
-      "tablename": "oshi_accent_settings",
-      "indexname": "oshi_accent_settings_pkey",
-      "indexdef": "CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)"
-    },
-    {
-      "tablename": "oshi_accent_settings",
-      "indexname": "oshi_accent_settings_members_id_idx",
-      "indexdef": "CREATE INDEX oshi_accent_settings_members_id_idx ON public.oshi_accent_settings USING btree (members_id)"
     }
   ],
   "grants": [
@@ -2064,6 +2085,16 @@
     },
     {
       "grantee": "authenticated",
+      "table_name": "data_export",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "data_export",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
       "table_name": "display_settings",
       "privs": "DELETE,INSERT,SELECT,UPDATE"
     },
@@ -2095,6 +2126,16 @@
     {
       "grantee": "service_role",
       "table_name": "member_type",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "oshi_accent_settings",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "oshi_accent_settings",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     },
     {
@@ -2186,25 +2227,29 @@
       "grantee": "service_role",
       "table_name": "works_series",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
-    },
-    {
-      "grantee": "authenticated",
-      "table_name": "oshi_accent_settings",
-      "privs": "DELETE,INSERT,SELECT,UPDATE"
-    },
-    {
-      "grantee": "service_role",
-      "table_name": "oshi_accent_settings",
-      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     }
   ],
   "policies": [
+    {
+      "table_name": "category_tag",
+      "polname": "category_tag_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
     {
       "table_name": "category_tag",
       "polname": "category_tag_self_all",
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "category_tag_preset_slot_dismissed",
+      "polname": "category_tag_preset_slot_dismissed_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "category_tag_preset_slot_dismissed",
@@ -2215,10 +2260,38 @@
     },
     {
       "table_name": "color_tag",
+      "polname": "color_tag_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "color_tag",
       "polname": "color_tag_self_all",
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "data_export",
+      "polname": "data_export_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "data_export",
+      "polname": "data_export_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
+    },
+    {
+      "table_name": "display_settings",
+      "polname": "display_settings_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "display_settings",
@@ -2229,10 +2302,24 @@
     },
     {
       "table_name": "gallery_view",
+      "polname": "gallery_view_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "gallery_view",
       "polname": "gallery_view_self_all",
       "polcmd": "*",
       "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
       "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
+    },
+    {
+      "table_name": "member",
+      "polname": "member_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "member",
@@ -2254,6 +2341,27 @@
       "polcmd": "w",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "polname": "oshi_accent_settings_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "polname": "oshi_accent_settings_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
+    },
+    {
+      "table_name": "photo",
+      "polname": "photo_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "photo",
@@ -2278,10 +2386,24 @@
     },
     {
       "table_name": "registered_product",
+      "polname": "registered_product_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "registered_product",
       "polname": "registered_product_self_all",
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "polname": "registered_product_color_tag_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "registered_product_color_tag",
@@ -2313,10 +2435,24 @@
     },
     {
       "table_name": "storage_location",
+      "polname": "storage_location_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "storage_location",
       "polname": "storage_location_self_all",
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
+    },
+    {
+      "table_name": "storage_location_preset_slot_dismissed",
+      "polname": "storage_location_preset_slot_dismissed_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
     },
     {
       "table_name": "storage_location_preset_slot_dismissed",
@@ -2327,17 +2463,17 @@
     },
     {
       "table_name": "theme_settings",
+      "polname": "theme_settings_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "theme_settings",
       "polname": "theme_settings_self_all",
       "polcmd": "*",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": "(auth.uid() = members_id)"
-    },
-    {
-      "table_name": "oshi_accent_settings",
-      "polname": "oshi_accent_settings_self_all",
-      "polcmd": "*",
-      "using_expr": "((SELECT auth.uid()) = members_id)",
-      "with_check": "((SELECT auth.uid()) = members_id)"
     }
   ],
   "fks": [
@@ -2359,6 +2495,22 @@
     },
     {
       "table_name": "character",
+      "constraint_name": "character_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "character",
+      "constraint_name": "character_hair_color_fkey",
+      "column_name": "hair_color",
+      "foreign_table": "color",
+      "foreign_column": "color_group_id",
+      "definition": "FOREIGN KEY (hair_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "character",
       "constraint_name": "character_eye_color_fkey",
       "column_name": "eye_color",
       "foreign_table": "color",
@@ -2375,14 +2527,6 @@
     },
     {
       "table_name": "character",
-      "constraint_name": "character_hair_color_fkey",
-      "column_name": "hair_color",
-      "foreign_table": "color",
-      "foreign_column": "color_group_id",
-      "definition": "FOREIGN KEY (hair_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "character",
       "constraint_name": "character_works_id_fkey",
       "column_name": "work_id",
       "foreign_table": "work",
@@ -2390,16 +2534,24 @@
       "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE CASCADE"
     },
     {
-      "table_name": "character",
-      "constraint_name": "character_works_series_id_fkey",
-      "column_name": "works_series_id",
-      "foreign_table": "works_series",
-      "foreign_column": "works_series_id",
-      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE CASCADE"
-    },
-    {
       "table_name": "color_tag",
       "constraint_name": "color_tag_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "data_export",
+      "constraint_name": "data_export_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_members_id_fkey",
       "column_name": "members_id",
       "foreign_table": null,
       "foreign_column": null,
@@ -2412,14 +2564,6 @@
       "foreign_table": "storage_location",
       "foreign_column": "storage_location_id",
       "definition": "FOREIGN KEY (default_storage_location_id) REFERENCES storage_location(storage_location_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_members_id_fkey",
-      "column_name": "members_id",
-      "foreign_table": null,
-      "foreign_column": null,
-      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
       "table_name": "gallery_view",
@@ -2446,6 +2590,14 @@
       "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
       "table_name": "photo",
       "constraint_name": "photo_members_id_fkey",
       "column_name": "members_id",
@@ -2462,68 +2614,28 @@
       "definition": "FOREIGN KEY (photo_theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL"
     },
     {
-      "table_name": "product_size",
-      "constraint_name": "product_regulations_size_product_group_id_fkey",
-      "column_name": "product_group_id",
-      "foreign_table": "product_type",
-      "foreign_column": "product_group_id",
-      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
+      "table_name": "product_external_ref",
+      "constraint_name": "product_external_ref_registered_product_id_fkey",
+      "column_name": "registered_product_id",
+      "foreign_table": "registered_product",
+      "foreign_column": "registered_product_id",
+      "definition": "FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE"
     },
     {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_product_group_id_fkey",
-      "column_name": "product_group_id",
-      "foreign_table": "product_type",
-      "foreign_column": "product_group_id",
-      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_members_id_fkey",
+      "table_name": "product_external_ref",
+      "constraint_name": "product_external_ref_members_id_fkey",
       "column_name": "members_id",
       "foreign_table": null,
       "foreign_column": null,
       "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_photo_id_fkey",
-      "column_name": "photo_id",
-      "foreign_table": "photo",
-      "foreign_column": "photo_id",
-      "definition": "FOREIGN KEY (photo_id) REFERENCES photo(photo_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_works_series_id_fkey",
-      "column_name": "works_series_id",
-      "foreign_table": "works_series",
-      "foreign_column": "works_series_id",
-      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_works_id_fkey",
-      "column_name": "work_id",
-      "foreign_table": "work",
-      "foreign_column": "work_id",
-      "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_character_id_fkey",
-      "column_name": "character_id",
-      "foreign_table": "character",
-      "foreign_column": "character_id",
-      "definition": "FOREIGN KEY (character_id) REFERENCES \"character\"(character_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "registered_product",
-      "constraint_name": "registration_product_information_copyright_company_id_fkey",
-      "column_name": "copyright_company_id",
-      "foreign_table": "copyright_company",
-      "foreign_column": "copyright_company_id",
-      "definition": "FOREIGN KEY (copyright_company_id) REFERENCES copyright_company(copyright_company_id) ON DELETE SET NULL"
+      "table_name": "product_size",
+      "constraint_name": "product_regulations_size_product_group_id_fkey",
+      "column_name": "product_group_id",
+      "foreign_table": "product_type",
+      "foreign_column": "product_group_id",
+      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
     },
     {
       "table_name": "registered_product",
@@ -2566,11 +2678,83 @@
       "definition": "FOREIGN KEY (currency_unit_id) REFERENCES currency_unit(currency_unit_id) ON DELETE SET NULL"
     },
     {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_product_group_id_fkey",
+      "column_name": "product_group_id",
+      "foreign_table": "product_type",
+      "foreign_column": "product_group_id",
+      "definition": "FOREIGN KEY (product_group_id) REFERENCES product_type(product_group_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_character_id_fkey",
+      "column_name": "character_id",
+      "foreign_table": "character",
+      "foreign_column": "character_id",
+      "definition": "FOREIGN KEY (character_id) REFERENCES \"character\"(character_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_works_id_fkey",
+      "column_name": "work_id",
+      "foreign_table": "work",
+      "foreign_column": "work_id",
+      "definition": "FOREIGN KEY (work_id) REFERENCES work(work_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_works_series_id_fkey",
+      "column_name": "works_series_id",
+      "foreign_table": "works_series",
+      "foreign_column": "works_series_id",
+      "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_photo_id_fkey",
+      "column_name": "photo_id",
+      "foreign_table": "photo",
+      "foreign_column": "photo_id",
+      "definition": "FOREIGN KEY (photo_id) REFERENCES photo(photo_id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registration_product_information_copyright_company_id_fkey",
+      "column_name": "copyright_company_id",
+      "foreign_table": "copyright_company",
+      "foreign_column": "copyright_company_id",
+      "definition": "FOREIGN KEY (copyright_company_id) REFERENCES copyright_company(copyright_company_id) ON DELETE SET NULL"
+    },
+    {
       "table_name": "registered_product_color_tag",
       "constraint_name": "registration_product_color_tag_member_slot_fk",
       "column_name": "slot",
       "foreign_table": "color_tag",
       "foreign_column": "slot",
+      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_registration_product_id_fkey",
+      "column_name": "registered_product_id",
+      "foreign_table": "registered_product",
+      "foreign_column": "registered_product_id",
+      "definition": "FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "registered_product_color_tag",
+      "constraint_name": "registration_product_color_tag_member_slot_fk",
+      "column_name": "members_id",
+      "foreign_table": "color_tag",
+      "foreign_column": "members_id",
       "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
     },
     {
@@ -2596,22 +2780,6 @@
       "foreign_table": null,
       "foreign_column": null,
       "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
-    },
-    {
-      "table_name": "registered_product_color_tag",
-      "constraint_name": "registration_product_color_tag_registration_product_id_fkey",
-      "column_name": "registered_product_id",
-      "foreign_table": "registered_product",
-      "foreign_column": "registered_product_id",
-      "definition": "FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE"
-    },
-    {
-      "table_name": "registered_product_color_tag",
-      "constraint_name": "registration_product_color_tag_member_slot_fk",
-      "column_name": "members_id",
-      "foreign_table": "color_tag",
-      "foreign_column": "members_id",
-      "definition": "FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE"
     },
     {
       "table_name": "storage_location",
@@ -2644,14 +2812,6 @@
       "foreign_table": "works_series",
       "foreign_column": "works_series_id",
       "definition": "FOREIGN KEY (works_series_id) REFERENCES works_series(works_series_id) ON DELETE SET NULL"
-    },
-    {
-      "table_name": "oshi_accent_settings",
-      "constraint_name": "oshi_accent_settings_members_id_fkey",
-      "column_name": "members_id",
-      "foreign_table": null,
-      "foreign_column": null,
-      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     }
   ],
   "checks": [
@@ -2676,6 +2836,21 @@
       "definition": "CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))"
     },
     {
+      "table_name": "data_export",
+      "constraint_name": "data_export_status_check",
+      "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'running'::text, 'ready'::text, 'failed'::text])))"
+    },
+    {
+      "table_name": "data_export",
+      "constraint_name": "data_export_kind_check",
+      "definition": "CHECK ((kind = ANY (ARRAY['text'::text, 'media'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_landing_page_check",
+      "definition": "CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))"
+    },
+    {
       "table_name": "display_settings",
       "constraint_name": "display_settings_list_sort_check",
       "definition": "CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))"
@@ -2697,23 +2872,8 @@
     },
     {
       "table_name": "display_settings",
-      "constraint_name": "display_settings_date_format_mode_check",
-      "definition": "CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_currency_format_mode_check",
-      "definition": "CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))"
-    },
-    {
-      "table_name": "display_settings",
       "constraint_name": "display_settings_gallery_layout_check",
       "definition": "CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_gallery_image_fit_check",
-      "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
     },
     {
       "table_name": "display_settings",
@@ -2722,8 +2882,28 @@
     },
     {
       "table_name": "display_settings",
-      "constraint_name": "display_settings_landing_page_check",
-      "definition": "CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))"
+      "constraint_name": "display_settings_date_format_mode_check",
+      "definition": "CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_gallery_image_fit_check",
+      "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_font_pack_check",
+      "definition": "CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_currency_format_mode_check",
+      "definition": "CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_view_name_len_check",
+      "definition": "CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))"
     },
     {
       "table_name": "gallery_view",
@@ -2736,9 +2916,29 @@
       "definition": "CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))"
     },
     {
-      "table_name": "gallery_view",
-      "constraint_name": "gallery_view_view_name_len_check",
-      "definition": "CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))"
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_main_hex_format",
+      "definition": "CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
+    },
+    {
+      "table_name": "oshi_accent_settings",
+      "constraint_name": "oshi_accent_settings_sub_hex_format",
+      "definition": "CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
+    },
+    {
+      "table_name": "product_external_ref",
+      "constraint_name": "product_external_ref_source_check",
+      "definition": "CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))"
+    },
+    {
+      "table_name": "product_external_ref",
+      "constraint_name": "product_external_ref_rakuten_required",
+      "definition": "CHECK (((source <> 'rakuten'::text) OR ((external_item_code IS NOT NULL) AND (length(btrim(external_item_code)) > 0) AND (shop_name IS NOT NULL) AND (length(btrim(shop_name)) > 0) AND (length(btrim(product_url)) > 0))))"
+    },
+    {
+      "table_name": "product_external_ref",
+      "constraint_name": "product_external_ref_manual_url",
+      "definition": "CHECK (((source <> 'manual'::text) OR (length(btrim(product_url)) > 0)))"
     },
     {
       "table_name": "registered_product_color_tag",
@@ -2754,16 +2954,6 @@
       "table_name": "storage_location_preset_slot_dismissed",
       "constraint_name": "receipt_location_preset_slot_dismissed_slot_range",
       "definition": "CHECK (((slot >= 1) AND (slot <= 6)))"
-    },
-    {
-      "table_name": "oshi_accent_settings",
-      "constraint_name": "oshi_accent_settings_main_hex_format",
-      "definition": "CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
-    },
-    {
-      "table_name": "oshi_accent_settings",
-      "constraint_name": "oshi_accent_settings_sub_hex_format",
-      "definition": "CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
     }
   ]
 }

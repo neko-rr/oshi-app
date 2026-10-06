@@ -92,6 +92,8 @@ DEFAULT_KEEP_AT_HAND_COUNT = 1
 MIN_KEEP_AT_HAND_COUNT = 1
 MAX_KEEP_AT_HAND_COUNT = 99
 DEFAULT_AUTO_SALES_DESIRED = False
+DEFAULT_FONT_PACK = "clean"
+ALLOWED_FONT_PACK = frozenset({"clean", "soft", "magazine", "readable"})
 
 
 @lru_cache(maxsize=1)
@@ -106,7 +108,7 @@ SELECT_COLS = (
     "currency_code_override,currency_format_mode,"
     "register_start_step,default_storage_location_id,"
     "gallery_show_name,gallery_show_tags,gallery_show_price,"
-    "gallery_image_fit,keep_at_hand_count,auto_sales_desired"
+    "gallery_image_fit,keep_at_hand_count,auto_sales_desired,font_pack"
 )
 
 
@@ -231,6 +233,7 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
             "gallery_image_fit": DEFAULT_GALLERY_IMAGE_FIT,
             "keep_at_hand_count": DEFAULT_KEEP_AT_HAND_COUNT,
             "auto_sales_desired": DEFAULT_AUTO_SALES_DESIRED,
+            "font_pack": DEFAULT_FONT_PACK,
         }
     try:
         text_scale = _normalize_level(int(row.get("text_scale")), field="text_scale")
@@ -344,6 +347,14 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
             )
         except ValueError:
             auto_sales_desired = DEFAULT_AUTO_SALES_DESIRED
+    try:
+        font_pack = _normalize_choice(
+            str(row.get("font_pack") or ""),
+            field="font_pack",
+            allowed=ALLOWED_FONT_PACK,
+        )
+    except ValueError:
+        font_pack = DEFAULT_FONT_PACK
     return {
         "text_scale": text_scale,
         "ui_density": ui_density,
@@ -363,6 +374,7 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
         "gallery_image_fit": gallery_image_fit,
         "keep_at_hand_count": keep_at_hand_count,
         "auto_sales_desired": auto_sales_desired,
+        "font_pack": font_pack,
     }
 
 
@@ -402,6 +414,7 @@ def save_display_settings(
     gallery_image_fit: str,
     keep_at_hand_count: int = DEFAULT_KEEP_AT_HAND_COUNT,
     auto_sales_desired: bool = DEFAULT_AUTO_SALES_DESIRED,
+    font_pack: str = DEFAULT_FONT_PACK,
 ) -> dict[str, Any]:
     default_storage = _normalize_default_storage_location_id(
         default_storage_location_id
@@ -463,6 +476,9 @@ def save_display_settings(
         "auto_sales_desired": _normalize_bool(
             auto_sales_desired, field="auto_sales_desired"
         ),
+        "font_pack": _normalize_choice(
+            font_pack, field="font_pack", allowed=ALLOWED_FONT_PACK
+        ),
     }
     client = create_user_client(access_token)
     if default_storage is not None:
@@ -493,4 +509,5 @@ def save_display_settings(
         "gallery_image_fit": payload["gallery_image_fit"],
         "keep_at_hand_count": payload["keep_at_hand_count"],
         "auto_sales_desired": payload["auto_sales_desired"],
+        "font_pack": payload["font_pack"],
     }

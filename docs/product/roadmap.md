@@ -42,7 +42,7 @@
 | `account_delete` | 退会・全データ削除（Auth＋Storage＋DB CASCADE。即時） | shipped |
 | `theme_colors` | テーマパック（トークン一式切替） | shipped |
 | `oshi_accent` | 推し色2色オーバーレイ（適用はプレミアム想定・無料はプレビュー） | shipped |
-| `display_settings` | 文字サイズ・UI密度（7段階・見た目画面） | shipped |
+| `display_settings` | 文字パック・文字サイズ・UI密度（見た目画面） | shipped |
 | `product_currency_fiat` | 製品ごとの法定通貨記録（表示設定とは分離。換算なし） | shipped |
 | `i18n_web` | 多言語（ja/en・URL `/en`・辞書段階移行） | partial |
 | `responsive_web` | スマホ縦横・下部タブ Web | shipped |

@@ -16,6 +16,14 @@ export const DEFAULT_REGISTER_START_STEP: RegisterStartStepId = "barcode";
 export const DEFAULT_KEEP_AT_HAND_COUNT = 1;
 export const DEFAULT_AUTO_SALES_DESIRED = false;
 export const DEFAULT_GALLERY_SHOW = true;
+export type FontPackId = "clean" | "soft" | "magazine" | "readable";
+export const DEFAULT_FONT_PACK: FontPackId = "clean";
+export const FONT_PACK_IDS: readonly FontPackId[] = [
+  "clean",
+  "soft",
+  "magazine",
+  "readable",
+] as const;
 
 export const LIST_SORT_IDS: readonly ListSortId[] = [
   "newest",
@@ -135,4 +143,16 @@ export function sanitizeGalleryCardFields(
     gallery_show_tags: sanitizeGalleryShow(raw?.gallery_show_tags),
     gallery_show_price: sanitizeGalleryShow(raw?.gallery_show_price),
   };
+}
+
+export function sanitizeFontPack(raw: unknown): FontPackId {
+  if (
+    raw === "clean" ||
+    raw === "soft" ||
+    raw === "magazine" ||
+    raw === "readable"
+  ) {
+    return raw;
+  }
+  return DEFAULT_FONT_PACK;
 }

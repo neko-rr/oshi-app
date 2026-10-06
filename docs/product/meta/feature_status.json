@@ -141,10 +141,11 @@
       "id": "display_settings",
       "phase": "must",
       "status": "shipped",
-      "title_ja": "文字・密度・並び・着地・居住地日時・金額表示",
+      "title_ja": "文字パック・文字サイズ・密度・並び・着地・居住地日時・金額表示",
       "evidence_paths": [
         "apps/web/src/app/[locale]/settings/theme/page.tsx",
         "apps/web/src/components/settings/DisplaySettingsPanel.tsx",
+        "apps/web/src/components/settings/FontPackPicker.tsx",
         "apps/web/src/components/settings/ResidenceSettingsPanel.tsx",
         "apps/web/src/components/format/FormattedAppMoney.tsx",
         "apps/web/src/hooks/useDisplaySettings.ts",
@@ -153,6 +154,7 @@
         "apps/api/app/services/display_settings_service.py",
         "supabase/migrations/20260903180000_display_settings_residence.sql",
         "supabase/migrations/20260904033000_display_settings_currency.sql",
+        "supabase/migrations/20261006120000_display_settings_font_pack.sql",
         "docs/product/acceptance/settings.md"
       ],
       "expected_web_paths": [

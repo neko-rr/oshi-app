@@ -1,4 +1,4 @@
-/* 顧客向け表示プリセット（文字サイズ・UI密度）。data-* は AppPreferencesRoot / ブート script が付与 */
+/* 顧客向け表示プリセット（文字サイズ・UI密度・文字パック）。data-* は AppPreferencesRoot / ブート script が付与 */
 
 html {
   --text-scale: 1;

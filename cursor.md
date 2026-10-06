@@ -1,5 +1,12 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-10-06: 文字パック（ユーザー別）
+
+- `/settings/theme` で `font_pack`: `clean` / `soft` / `magazine` / `readable`
+- 保存は `display_settings`（ゲストは端末のみ）。テーマ色とは独立
+- 既定は `clean`（Noto Sans JP ＋ Plus Jakarta Sans）
+- ライセンスは OFL。Geist はルート既定から外した
+
 ## 2026-10-05: Next.js 16 と Cloudflare
 
 - Web は **Next.js 16.3.8**。入口は `apps/web/src/proxy.ts`
