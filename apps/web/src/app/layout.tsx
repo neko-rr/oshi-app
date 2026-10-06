@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
 import {
   BRAND_MARK_BACKGROUND,
   DISPLAY_SETTINGS_LOCAL_KEY,
@@ -9,12 +8,8 @@ import {
   SITE_INDEXABLE,
   THEME_LOCAL_KEY,
 } from "@/lib/brand";
+import { fontPackVariableClassName } from "@/lib/fontPackFonts";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const SITE_DESCRIPTION = "Merch & storage — グッズの場所がわかる";
 
@@ -53,7 +48,7 @@ export const viewport: Viewport = {
 };
 
 /** localStorage の見た目設定を初回描画前に html へ載せ、チラつきを抑える */
-const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem(${JSON.stringify(THEME_LOCAL_KEY)});if(t){d.setAttribute("data-theme",t);}var m=localStorage.getItem(${JSON.stringify(MASCOT_LOCAL_KEY)});if(m){d.setAttribute("data-mascot",m);}var raw=localStorage.getItem(${JSON.stringify(DISPLAY_SETTINGS_LOCAL_KEY)});if(!raw)return;var p=JSON.parse(raw);var s=Number(p&&p.text_scale);var u=Number(p&&p.ui_density);if(Number.isInteger(s)&&s>=1&&s<=7){d.setAttribute("data-text-scale",String(s));}if(Number.isInteger(u)&&u>=1&&u<=7){d.setAttribute("data-ui-density",String(u));}}catch(e){}})();`;
+const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem(${JSON.stringify(THEME_LOCAL_KEY)});if(t){d.setAttribute("data-theme",t);}var m=localStorage.getItem(${JSON.stringify(MASCOT_LOCAL_KEY)});if(m){d.setAttribute("data-mascot",m);}var raw=localStorage.getItem(${JSON.stringify(DISPLAY_SETTINGS_LOCAL_KEY)});if(!raw)return;var p=JSON.parse(raw);var s=Number(p&&p.text_scale);var u=Number(p&&p.ui_density);if(Number.isInteger(s)&&s>=1&&s<=7){d.setAttribute("data-text-scale",String(s));}if(Number.isInteger(u)&&u>=1&&u<=7){d.setAttribute("data-ui-density",String(u));}var f=p&&p.font_pack;if(f==="clean"||f==="soft"||f==="magazine"||f==="readable"){d.setAttribute("data-font-pack",f);}}catch(e){}})();`;
 
 type Props = {
   children: React.ReactNode;
@@ -67,11 +62,12 @@ export default function RootLayout({ children }: Props) {
   return (
     <html
       lang="ja"
-      className={geistSans.variable}
+      className={fontPackVariableClassName}
       data-theme="default"
       data-mascot="kaze_neko"
       data-text-scale="3"
       data-ui-density="4"
+      data-font-pack="clean"
       suppressHydrationWarning
     >
       <head>

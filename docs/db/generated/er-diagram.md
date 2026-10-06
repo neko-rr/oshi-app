@@ -29,29 +29,30 @@ erDiagram
   theme_settings["theme_settings / テーマ設定"]
   work["work / 作品"]
   works_series["works_series / 作品シリーズ"]
+  character }o--|| works_series : works_series_id
+  character }o--|| color : hair_color
   character }o--|| color : eye_color
   character }o--|| color : theme_color
-  character }o--|| color : hair_color
   character }o--|| work : work_id
-  character }o--|| works_series : works_series_id
   display_settings }o--|| storage_location : default_storage_location_id
   member }o--|| member_type : members_type_name
   photo }o--|| color : photo_theme_color
+  product_external_ref }o--|| registered_product : registered_product_id
   product_size }o--|| product_type : product_group_id
-  registered_product }o--|| product_type : product_group_id
-  registered_product }o--|| photo : photo_id
-  registered_product }o--|| works_series : works_series_id
-  registered_product }o--|| work : work_id
-  registered_product }o--|| character : character_id
-  registered_product }o--|| copyright_company : copyright_company_id
   registered_product }o--|| product_size : product_size_id
   registered_product }o--|| storage_location : storage_location_id
   registered_product }o--|| color_tag : color_tag_id
   registered_product }o--|| category_tag : category_tag_id
   registered_product }o--|| currency_unit : currency_unit_id
+  registered_product }o--|| product_type : product_group_id
+  registered_product }o--|| character : character_id
+  registered_product }o--|| work : work_id
+  registered_product }o--|| works_series : works_series_id
+  registered_product }o--|| photo : photo_id
+  registered_product }o--|| copyright_company : copyright_company_id
   registered_product_color_tag }o--|| color_tag : slot
-  registered_product_color_tag }o--|| color_tag : members_id
   registered_product_color_tag }o--|| registered_product : registered_product_id
+  registered_product_color_tag }o--|| color_tag : members_id
   work }o--|| works_series : works_series_id
 ```
 

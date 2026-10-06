@@ -147,7 +147,7 @@
   "Appearance": {
     "back": "← Settings",
     "title": "Appearance",
-    "intro": "Choose a theme for the overall look. Oshi colors add accents on top. Also set text size, density, language, and dates.",
+    "intro": "Choose a theme for the overall look. Oshi colors add accents on top. Also set type, text size, density, language, and dates.",
     "themeTitle": "Theme (base look)",
     "themeHint": "Background, text, and overall mood change together. Default is green. Frame contrast shows light vs dark.",
     "mascotTitle": "Mascot",
@@ -158,6 +158,8 @@
     "oshiCollapsedHint": "Collapsed (keeps theme preview clear)",
     "oshiExpand": "Expand",
     "oshiCollapse": "Collapse",
+    "fontTitle": "Type",
+    "fontHint": "Japanese and English fonts come as a set. Body stays readable; headings add a little warmth.",
     "readabilityTitle": "Readability",
     "readabilityHint": "Pick text size and UI density (line spacing and list padding) in steps.",
     "languageTitle": "Language",
@@ -362,6 +364,22 @@
     "cardPreviewPrice": "¥1,200",
     "cardPreviewTags": "Category · Storage",
     "landingPage": "After login",
+    "fontPack": "Type pack",
+    "fontPackHint": "Pick one of four. Fonts are not mixed a la carte.",
+    "fontPackSampleHeading": "Oshihaven heading",
+    "fontPackSampleBody": "Merch names and Gallery sit in this type.",
+    "fontPackOptions": {
+      "clean": "Clean",
+      "soft": "Soft",
+      "magazine": "Editorial",
+      "readable": "Readable"
+    },
+    "fontPackHints": {
+      "clean": "Noto Sans JP + Plus Jakarta Sans",
+      "soft": "Rounded headings, clear body",
+      "magazine": "Magazine gothic (recommended)",
+      "readable": "Clear letterforms for long sessions"
+    },
     "syncing": "Syncing…",
     "preview": "Preview",
     "previewBody": "Product names and notes appear at this size and spacing. Moving the bar updates instantly.",

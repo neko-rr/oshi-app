@@ -4,6 +4,7 @@
 @import "../styles/colors.css";
 @import "../styles/tailwind-theme.css";
 @import "../styles/display-prefs.css";
+@import "../styles/font-packs.css";
 @import "../styles/oshi-accent.css";
 @import "../styles/design-lab.css";
 @import "../styles/motion.css";
@@ -15,5 +16,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
+  }
+  h1, h2, h3 {
+    font-family: var(--font-heading, var(--font-sans));
   }
 }

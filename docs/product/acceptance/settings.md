@@ -6,6 +6,7 @@
 - [x] カテゴリタグを追加・編集・削除できる（Lucide アイコンピッカー・slug 保存）
 - [x] 収納場所を追加・編集・削除できる（Lucide アイコンピッカー）
 - [x] テーマを `/settings/theme` で選び、`GET/PUT /theme-settings` に保存できる（既定は緑系 `default`。todo-app 方式でトークン一式切替。UI は Lab B。枠黒＝ライト／枠白＝ダーク）
+- [x] `/settings/theme`（見た目）で文字パック（`font_pack`: clean / soft / magazine / readable）を選べ、全画面に即反映できる（未ログイン・ゲストは localStorage。本登録は `display_settings` 同期）
 - [x] `/settings/theme`（見た目）で文字の大きさ（7段階）と UI 密度（7段階）を定点スナップバーで変え、ドラッグ中に即反映できる
 - [x] 文字・密度は `GET/PUT /display-settings`（`text_scale` / `ui_density`、1〜7）に保存できる（未ログイン時は localStorage）
 - [x] 同じ見た目画面で一覧の並び既定（`list_sort`: newest / name / created_at）、ギャラリー表示（`gallery_layout`: grid / large / list）、ログイン後の着地（`landing_page`: home / gallery / register）を選べる

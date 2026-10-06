@@ -147,7 +147,7 @@
   "Appearance": {
     "back": "← 設定",
     "title": "見た目",
-    "intro": "テーマで基本の見た目を決め、推し色はボタンなどのアクセントに重ねられます。文字の大きさ・密度・言語・日時もここで変えられます。",
+    "intro": "テーマで基本の見た目を決め、推し色はボタンなどのアクセントに重ねられます。文字の雰囲気・大きさ・密度・言語・日時もここで変えられます。",
     "themeTitle": "テーマ（基本の見た目）",
     "themeHint": "背景・文字・全体の雰囲気がまとめて変わります。既定は緑です。枠の黒／白でライトとダークが分かります。",
     "mascotTitle": "マスコット",
@@ -158,6 +158,8 @@
     "oshiCollapsedHint": "閉じています（テーマ確認を優先）",
     "oshiExpand": "開く",
     "oshiCollapse": "閉じる",
+    "fontTitle": "文字の雰囲気",
+    "fontHint": "和文と欧文はセットです。本文は読みやすく、見出しだけ少し温度を変えます。",
     "readabilityTitle": "読みやすさ",
     "readabilityHint": "文字サイズと UI 密度（行間・一覧の余白）を段階で選べます。",
     "languageTitle": "表示言語",
@@ -362,6 +364,22 @@
     "cardPreviewPrice": "¥1,200",
     "cardPreviewTags": "カテゴリ · 収納",
     "landingPage": "ログイン後の着地",
+    "fontPack": "文字パック",
+    "fontPackHint": "4つから選べます。フォントを個別に組み合わせることはできません。",
+    "fontPackSampleHeading": "Oshihaven 見出し",
+    "fontPackSampleBody": "推しグッズの名前と Gallery がこの字で並びます。",
+    "fontPackOptions": {
+      "clean": "清潔",
+      "soft": "やわらか",
+      "magazine": "雑誌・大人",
+      "readable": "読みやすい"
+    },
+    "fontPackHints": {
+      "clean": "Noto Sans JP ＋ Plus Jakarta Sans",
+      "soft": "見出しは丸ゴ。本文はすっきり",
+      "magazine": "誌面っぽいゴシック（おすすめ）",
+      "readable": "はっきりした字形。長時間向け"
+    },
     "syncing": "同期中…",
     "preview": "プレビュー",
     "previewBody": "推しグッズの名前やメモが、この大きさ・行間で表示されます。バーを動かすとすぐに変わります。",

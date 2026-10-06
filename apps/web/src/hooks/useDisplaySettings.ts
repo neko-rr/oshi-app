@@ -19,6 +19,7 @@ import {
   DEFAULT_LANDING_PAGE,
   DEFAULT_LIST_SORT,
   DEFAULT_REGISTER_START_STEP,
+  DEFAULT_FONT_PACK,
   sanitizeDefaultStorageLocationId,
   sanitizeGalleryCardFields,
   sanitizeGalleryImageFit,
@@ -29,11 +30,13 @@ import {
   sanitizeRegisterStartStep,
   sanitizeKeepAtHandCount,
   sanitizeAutoSalesDesired,
+  sanitizeFontPack,
   type GalleryImageFitId,
   type GalleryLayoutId,
   type LandingPageId,
   type ListSortId,
   type RegisterStartStepId,
+  type FontPackId,
 } from "@/lib/displayPrefs";
 import {
   DEFAULT_CURRENCY_FORMAT_MODE,
@@ -72,6 +75,7 @@ export type DisplaySettings = {
   gallery_show_price: boolean;
   keep_at_hand_count: number;
   auto_sales_desired: boolean;
+  font_pack: FontPackId;
 };
 
 export const DEFAULT_TEXT_SCALE: DisplayLevel = 3;
@@ -119,6 +123,8 @@ export type DisplaySettingsContextValue = {
   autoSalesDesired: boolean;
   setKeepAtHandCount: (n: number) => void;
   setAutoSalesDesired: (on: boolean) => void;
+  fontPack: FontPackId;
+  setFontPack: (id: FontPackId) => void;
   isSyncing: boolean;
 };
 
@@ -163,6 +169,7 @@ function defaults(): DisplaySettings {
     default_storage_location_id: null,
     keep_at_hand_count: 1,
     auto_sales_desired: false,
+    font_pack: DEFAULT_FONT_PACK,
     ...sanitizeGalleryCardFields(null),
   };
 }
@@ -190,6 +197,7 @@ function sanitizePrefs(raw: unknown): DisplaySettings {
     ),
     keep_at_hand_count: sanitizeKeepAtHandCount(obj.keep_at_hand_count),
     auto_sales_desired: sanitizeAutoSalesDesired(obj.auto_sales_desired),
+    font_pack: sanitizeFontPack(obj.font_pack),
     ...sanitizeGalleryCardFields(obj),
   };
 }
@@ -211,6 +219,7 @@ function applyToDocument(prefs: DisplaySettings) {
   root.setAttribute("data-text-scale", String(prefs.text_scale));
   root.setAttribute("data-ui-density", String(prefs.ui_density));
   root.setAttribute("data-gallery-layout", prefs.gallery_layout);
+  root.setAttribute("data-font-pack", prefs.font_pack);
 }
 
 async function fetchViaFastAPI(token: string): Promise<DisplaySettings | null> {
@@ -441,6 +450,13 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
     }));
   }, []);
 
+  const setFontPack = useCallback((id: FontPackId) => {
+    setPrefs((prev) => ({
+      ...prev,
+      font_pack: sanitizeFontPack(id),
+    }));
+  }, []);
+
   return useMemo(
     () => ({
       textScale: prefs.text_scale,
@@ -461,6 +477,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       galleryShowPrice: prefs.gallery_show_price,
       keepAtHandCount: prefs.keep_at_hand_count,
       autoSalesDesired: prefs.auto_sales_desired,
+      fontPack: prefs.font_pack,
       setTextScale,
       setUiDensity,
       setListSort,
@@ -479,6 +496,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setGalleryShowPrice,
       setKeepAtHandCount,
       setAutoSalesDesired,
+      setFontPack,
       isSyncing,
     }),
     [
@@ -501,6 +519,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
       setGalleryShowPrice,
       setKeepAtHandCount,
       setAutoSalesDesired,
+      setFontPack,
       isSyncing,
     ],
   );

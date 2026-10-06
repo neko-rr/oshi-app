@@ -15,6 +15,8 @@
 | `service_role` | `color_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `copyright_company` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `currency_unit` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `data_export` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `data_export` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `display_settings` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `display_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `gallery_view` | `DELETE,INSERT,SELECT,UPDATE` |
@@ -22,6 +24,8 @@
 | `service_role` | `icon_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `member` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `member_type` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `oshi_accent_settings` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `oshi_accent_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `photo` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `photo` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `product_external_ref` | `DELETE,INSERT,SELECT,UPDATE` |
@@ -40,30 +44,43 @@
 | `service_role` | `theme_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `work` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `service_role` | `works_series` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
-| `authenticated` | `oshi_accent_settings` | `DELETE,INSERT,SELECT,UPDATE` |
-| `service_role` | `oshi_accent_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 
 ## RLS ポリシー
 
 | 表 | 名前 | cmd | USING | WITH CHECK |
 |----|------|-----|-------|------------|
+| `category_tag` | `category_tag_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `category_tag` | `category_tag_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `category_tag_preset_slot_dismissed` | `category_tag_preset_slot_dismissed_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `category_tag_preset_slot_dismissed` | `category_tag_preset_slot_dismissed_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `color_tag` | `color_tag_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `color_tag` | `color_tag_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `data_export` | `data_export_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
+| `data_export` | `data_export_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `display_settings` | `display_settings_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `display_settings` | `display_settings_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `gallery_view` | `gallery_view_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `gallery_view` | `gallery_view_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `member` | `member_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `member` | `member_self_insert` | `a` | `` | `(auth.uid() = members_id)` |
 | `member` | `member_self_select` | `r` | `(auth.uid() = members_id)` | `` |
 | `member` | `member_self_update` | `w` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `oshi_accent_settings` | `oshi_accent_settings_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
+| `oshi_accent_settings` | `oshi_accent_settings_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `photo` | `photo_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `photo` | `photo_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `product_external_ref` | `product_external_ref_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `product_external_ref` | `product_external_ref_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `registered_product` | `registered_product_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `registered_product` | `registered_product_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `registered_product_color_tag` | `registered_product_color_tag_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `registered_product_color_tag` | `rpct_delete` | `d` | `(auth.uid() = members_id)` | `` |
 | `registered_product_color_tag` | `rpct_insert` | `a` | `` | `(auth.uid() = members_id)` |
 | `registered_product_color_tag` | `rpct_select` | `r` | `(auth.uid() = members_id)` | `` |
 | `registered_product_color_tag` | `rpct_update` | `w` | `(auth.uid() = members_id)` | `` |
+| `storage_location` | `storage_location_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `storage_location` | `storage_location_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `storage_location_preset_slot_dismissed` | `storage_location_preset_slot_dismissed_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `storage_location_preset_slot_dismissed` | `storage_location_preset_slot_dismissed_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
+| `theme_settings` | `theme_settings_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `theme_settings` | `theme_settings_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
-| `oshi_accent_settings` | `oshi_accent_settings_self_all` | `*` | `((SELECT auth.uid()) = members_id)` | `((SELECT auth.uid()) = members_id)` |

@@ -5,6 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import ThemePicker from "@/components/ui/ThemePicker";
 import { DisplaySettingsPanel } from "@/components/settings/DisplaySettingsPanel";
+import { FontPackPicker } from "@/components/settings/FontPackPicker";
 import { LocaleSwitcher } from "@/components/settings/LocaleSwitcher";
 import { MascotPickerPanel } from "@/components/settings/MascotPickerPanel";
 import { OshiAccentPanel } from "@/components/settings/OshiAccentPanel";
@@ -113,6 +114,14 @@ export default function AppearanceSettingsPage() {
         </h2>
         <p className="text-sm text-muted-foreground">{t("residenceHint")}</p>
         <ResidenceSettingsPanel />
+      </section>
+
+      <section className="stack-density">
+        <h2 className="text-lg font-semibold tracking-tight">
+          {t("fontTitle")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("fontHint")}</p>
+        <FontPackPicker />
       </section>
 
       <section className="stack-density">

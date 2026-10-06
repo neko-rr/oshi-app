@@ -69,6 +69,7 @@
 | 軸 | 段階 | 既定 | 効果 |
 |----|------|------|------|
 | `text_scale`（文字の大きさ） | 1〜7 | 3（×1.0） | `html` の `font-size` 倍率（0.875〜1.375） |
+| `font_pack`（文字パック） | `clean` / `soft` / `magazine` / `readable` | `clean` | 和文＋欧文のセット。テーマ色とは独立。`html[data-font-pack]` |
 | `ui_density`（UI密度） | 1〜7 | 4 | 行間・main／ギャラリー余白（つめつめ←→ゆったり） |
 | `list_sort`（一覧の並び） | `newest` / `name` / `created_at` | `newest` | ギャラリー・検索の既定ソート |
 | `gallery_layout`（ギャラリー表示） | `grid` / `large` / `list` | `grid` | 写真主役グリッド／大きめ／リスト |

@@ -132,6 +132,7 @@
 | ギャラリー画像フィット | `gallery_image_fit` | `text` | NO | `'cover'::text` |
 | 手元残数 | `keep_at_hand_count` | `smallint` | NO | `1` |
 | 余剰交換OK自動 | `auto_sales_desired` | `boolean` | NO | `false` |
+| フォントパック | `font_pack` | `text` | NO | `'clean'::text` |
 
 ## `gallery_view`（ギャラリー保存ビュー）
 

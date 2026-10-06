@@ -5,7 +5,7 @@
 
 | 日付 | ID | 要約 | 反映先 |
 |------|-----|------|--------|
-| 2026-09-16 | fb-016 | 猫・犬・風ねこを kit/adult フォルダ分割。三毛は白黒茶必須（ハチワレ禁止） | [mascots.md](../mascots.md) · [mascot-asset-brief.md](../mascot-asset-brief.md) |
+| 2026-10-06 | fb-017 | 文字パック4種（清潔／やわらか／雑誌・大人／読みやすい）。日英セット。既定 clean。テーマ色と独立 | [tokens.md](../tokens.md) · `/settings/theme` |
 | 2026-09-16 | fb-015 | 画風マスターをくらげ（jelly-nuance）に更新。7体を同雰囲気で差し替え。旧 cat/dog 削除 | [mascot-asset-brief.md](../mascot-asset-brief.md) · [mascots.md](../mascots.md) |
 | 2026-09-16 | fb-014 | 庇護欲×MIDORI画風を7体の scenes P0 に展開。くらげは現行維持 | [mascot-asset-brief.md](../mascot-asset-brief.md) · [mascots.md](../mascots.md) |
 | 2026-09-16 | fb-013 | マスコット北極星を明文化: 庇護欲をそそる愛らしいキャラ×大人かわいいお洒落画風 | [mascot-asset-brief.md](../mascot-asset-brief.md) |

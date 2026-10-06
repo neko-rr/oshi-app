@@ -2741,6 +2741,17 @@
             "type": "boolean",
             "title": "Auto Sales Desired",
             "default": false
+          },
+          "font_pack": {
+            "type": "string",
+            "enum": [
+              "clean",
+              "soft",
+              "magazine",
+              "readable"
+            ],
+            "title": "Font Pack",
+            "default": "clean"
           }
         },
         "type": "object",

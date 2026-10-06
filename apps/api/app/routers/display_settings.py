@@ -34,6 +34,7 @@ class DisplaySettingsBody(BaseModel):
     gallery_image_fit: str = Field(min_length=1, max_length=32)
     keep_at_hand_count: int = Field(default=1, ge=1, le=99)
     auto_sales_desired: bool = False
+    font_pack: Literal["clean", "soft", "magazine", "readable"] = "clean"
 
 
 def _err(exc: Exception) -> HTTPException:
@@ -94,6 +95,7 @@ def put_display_settings(
             gallery_image_fit=body.gallery_image_fit,
             keep_at_hand_count=body.keep_at_hand_count,
             auto_sales_desired=body.auto_sales_desired,
+            font_pack=body.font_pack,
         )
     except Exception as exc:
         raise _err(exc) from exc

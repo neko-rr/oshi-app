@@ -36,6 +36,7 @@ FULL_PREFS = {
     "gallery_image_fit": "contain",
     "keep_at_hand_count": 2,
     "auto_sales_desired": True,
+    "font_pack": "magazine",
 }
 
 BASE_BODY = {
@@ -57,6 +58,7 @@ BASE_BODY = {
     "gallery_image_fit": "cover",
     "keep_at_hand_count": 1,
     "auto_sales_desired": False,
+    "font_pack": "clean",
 }
 
 
@@ -99,6 +101,7 @@ def test_put_display_settings_saves_prefs() -> None:
         "gallery_image_fit": "contain",
         "keep_at_hand_count": 3,
         "auto_sales_desired": True,
+        "font_pack": "soft",
     }
     with (
         patch("app.deps.auth.verify_access_token", return_value=USER),
@@ -130,6 +133,7 @@ def test_put_display_settings_saves_prefs() -> None:
     assert mocked.call_args.kwargs["gallery_image_fit"] == "contain"
     assert mocked.call_args.kwargs["keep_at_hand_count"] == 3
     assert mocked.call_args.kwargs["auto_sales_desired"] is True
+    assert mocked.call_args.kwargs["font_pack"] == "soft"
     assert mocked.call_args.kwargs["members_id"] == USER.members_id
 
 
@@ -243,6 +247,7 @@ def test_normalize_residence_defaults() -> None:
         "gallery_image_fit": "cover",
         "keep_at_hand_count": 1,
         "auto_sales_desired": False,
+        "font_pack": "clean",
     }
 
 
@@ -419,6 +424,42 @@ def test_put_display_settings_rejects_unknown_currency_format_mode() -> None:
             "/display-settings",
             headers=AUTH,
             json={**BASE_BODY, "currency_format_mode": "fancy"},
+        )
+    assert res.status_code == 400
+    assert res.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_normalize_font_pack_allowlist() -> None:
+    from app.services import display_settings_service as svc
+    import pytest
+
+    assert svc.DEFAULT_FONT_PACK == "clean"
+    assert svc._normalize_choice(
+        "magazine",
+        field="font_pack",
+        allowed=svc.ALLOWED_FONT_PACK,
+    ) == "magazine"
+    with pytest.raises(ValueError, match="font_pack"):
+        svc._normalize_choice(
+            "comic",
+            field="font_pack",
+            allowed=svc.ALLOWED_FONT_PACK,
+        )
+
+
+def test_row_or_defaults_falls_back_invalid_font_pack() -> None:
+    from app.services import display_settings_service as svc
+
+    out = svc._row_or_defaults({"font_pack": "comic"})
+    assert out["font_pack"] == "clean"
+
+
+def test_put_display_settings_rejects_unknown_font_pack() -> None:
+    with patch("app.deps.auth.verify_access_token", return_value=USER):
+        res = client.put(
+            "/display-settings",
+            headers=AUTH,
+            json={**BASE_BODY, "font_pack": "comic"},
         )
     assert res.status_code == 400
     assert res.json()["error"]["code"] == "VALIDATION_ERROR"

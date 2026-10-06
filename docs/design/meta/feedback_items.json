@@ -251,6 +251,20 @@
         "meta/mascots.json"
       ],
       "lab_ref": null
+    },
+    {
+      "id": "fb-017",
+      "status": "accepted",
+      "created_at": "2026-10-06",
+      "source": "user",
+      "area": "settings/font-pack",
+      "request_ja": "無味なフォントを、商用利用可の文字パック（清潔／やわらか／雑誌・大人／読みやすい）としてユーザー別に選べるようにする。日英はセット。",
+      "agent_note": "2026-10-06 人が A 案で実装依頼。display_settings.font_pack。既定 clean。テーマ色とは独立。",
+      "target_docs": [
+        "tokens.md",
+        "acceptance/settings.md"
+      ],
+      "lab_ref": null
     }
   ]
 }
