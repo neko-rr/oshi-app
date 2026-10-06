@@ -365,20 +365,24 @@
     "cardPreviewTags": "Category · Storage",
     "landingPage": "After login",
     "fontPack": "Type pack",
-    "fontPackHint": "Pick one of four. Fonts are not mixed a la carte.",
+    "fontPackHint": "Body packs plus display headings. Fonts are not mixed a la carte.",
     "fontPackSampleHeading": "Oshihaven heading",
     "fontPackSampleBody": "Merch names and Gallery sit in this type.",
     "fontPackOptions": {
       "clean": "Clean",
       "soft": "Soft",
       "magazine": "Editorial",
-      "readable": "Readable"
+      "readable": "Readable",
+      "story": "Story",
+      "notebook": "Notebook handwriting"
     },
     "fontPackHints": {
-      "clean": "Noto Sans JP + Plus Jakarta Sans",
-      "soft": "Rounded headings, clear body",
-      "magazine": "Magazine gothic (recommended)",
-      "readable": "Clear letterforms for long sessions"
+      "clean": "IBM Plex. Edges and numerals read as chosen type",
+      "soft": "Rounder display headings, clear body",
+      "magazine": "Serif headings, magazine gothic body",
+      "readable": "Wider letters for long sessions",
+      "story": "Antique mincho headings. Body stays Clean",
+      "notebook": "Handwritten headings. Body stays Clean"
     },
     "syncing": "Syncing…",
     "preview": "Preview",
@@ -855,7 +859,7 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "intro": "Spending and tag breakdown (Phase 2 · simple view)",
+    "intro": "See the color mix of your merch, and other simple totals.",
     "home": "Home",
     "loadFailed": "Failed to load dashboard",
     "noData": "No data",
@@ -864,6 +868,12 @@
     "categoryTags": "Category tags (category_tags)",
     "storageLocations": "Storage locations (storage_locations)",
     "colorTags": "Color tags (color_tags)",
+    "colorShareTitle": "Oshi color mix",
+    "colorShareHint": "Counts of color tags on your merch. If one item has several colors, each is counted.",
+    "colorShareEmpty": "No color-tagged merch yet. Add colors in the gallery and a chart appears here.",
+    "colorShareAssignments": "{count} color tags applied",
+    "colorShareUntagged": "{count} items with no color",
+    "colorSharePieAria": "Color tag share pie",
     "meta": "Meta (meta)",
     "emptyGuest": "Guests cannot view analytics. Create an account to use the dashboard.",
     "upgradeLink": "Create an account"
@@ -906,6 +916,12 @@
     "title": "Sorry, something went wrong.",
     "codeError": "Code error: {error}",
     "unspecified": "An unspecified error occurred."
+  },
+  "AppStatus": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The address may be wrong, or this page is no longer here.",
+    "errorTitle": "Couldn’t display this page",
+    "errorBody": "Please wait a moment and try again."
   },
   "SignUpSuccess": {
     "title": "Thank you for signing up!",

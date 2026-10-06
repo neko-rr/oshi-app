@@ -53,7 +53,7 @@
 |----|------|------|
 | `dashboard` | ダッシュボード | partial |
 | `spending` | 推しへの支出の家計簿的集計 | planned |
-| `tag_analytics` | 推し色割合などタグ分析 | planned |
+| `tag_analytics` | 推し色割合などタグ分析 | shipped |
 | `oshi_days` | 推し初めて何日 | planned |
 | `duplicate_exchange` | ダブり・交換 OK 数 | partial |
 | `storage_capacity` | 規定サイズタグでの収納枚数計算 | planned |

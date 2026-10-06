@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 };
 
 /** localStorage の見た目設定を初回描画前に html へ載せ、チラつきを抑える */
-const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem(${JSON.stringify(THEME_LOCAL_KEY)});if(t){d.setAttribute("data-theme",t);}var m=localStorage.getItem(${JSON.stringify(MASCOT_LOCAL_KEY)});if(m){d.setAttribute("data-mascot",m);}var raw=localStorage.getItem(${JSON.stringify(DISPLAY_SETTINGS_LOCAL_KEY)});if(!raw)return;var p=JSON.parse(raw);var s=Number(p&&p.text_scale);var u=Number(p&&p.ui_density);if(Number.isInteger(s)&&s>=1&&s<=7){d.setAttribute("data-text-scale",String(s));}if(Number.isInteger(u)&&u>=1&&u<=7){d.setAttribute("data-ui-density",String(u));}var f=p&&p.font_pack;if(f==="clean"||f==="soft"||f==="magazine"||f==="readable"){d.setAttribute("data-font-pack",f);}}catch(e){}})();`;
+const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem(${JSON.stringify(THEME_LOCAL_KEY)});if(t){d.setAttribute("data-theme",t);}var m=localStorage.getItem(${JSON.stringify(MASCOT_LOCAL_KEY)});if(m){d.setAttribute("data-mascot",m);}var raw=localStorage.getItem(${JSON.stringify(DISPLAY_SETTINGS_LOCAL_KEY)});if(!raw)return;var p=JSON.parse(raw);var s=Number(p&&p.text_scale);var u=Number(p&&p.ui_density);if(Number.isInteger(s)&&s>=1&&s<=7){d.setAttribute("data-text-scale",String(s));}if(Number.isInteger(u)&&u>=1&&u<=7){d.setAttribute("data-ui-density",String(u));}var f=p&&p.font_pack;if(f==="festival"){f="notebook";}if(f==="clean"||f==="soft"||f==="magazine"||f==="readable"||f==="story"||f==="notebook"){d.setAttribute("data-font-pack",f);}}catch(e){}})();`;
 
 type Props = {
   children: React.ReactNode;

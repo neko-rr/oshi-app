@@ -5,7 +5,9 @@
 
 | 日付 | ID | 要約 | 反映先 |
 |------|-----|------|--------|
-| 2026-10-06 | fb-017 | 文字パック4種（清潔／やわらか／雑誌・大人／読みやすい）。日英セット。既定 clean。テーマ色と独立 | [tokens.md](../tokens.md) · `/settings/theme` |
+| 2026-10-06 | fb-020 | ブランドマークは風ねこシルエット。仮「Oh」アイコン廃止 | [icons.md](../icons.md) · ヘッダー · `icon.png` |
+| 2026-10-06 | fb-019 | 本番6パックを差の出る組み合わせに採用（清潔Plex／やわらかKiwi／雑誌明朝見出し／読みやすいLexend／物語／手帳）。まつりと旧4はLab提案 | [tokens.md](../tokens.md) · `/settings/theme` |
+| 2026-10-06 | fb-018 | 飾り字2パック追加（物語＝Antique見出し／まつり＝Dela見出し）。本文は清潔のまま | [tokens.md](../tokens.md) · `/settings/theme` |
 | 2026-09-16 | fb-015 | 画風マスターをくらげ（jelly-nuance）に更新。7体を同雰囲気で差し替え。旧 cat/dog 削除 | [mascot-asset-brief.md](../mascot-asset-brief.md) · [mascots.md](../mascots.md) |
 | 2026-09-16 | fb-014 | 庇護欲×MIDORI画風を7体の scenes P0 に展開。くらげは現行維持 | [mascot-asset-brief.md](../mascot-asset-brief.md) · [mascots.md](../mascots.md) |
 | 2026-09-16 | fb-013 | マスコット北極星を明文化: 庇護欲をそそる愛らしいキャラ×大人かわいいお洒落画風 | [mascot-asset-brief.md](../mascot-asset-brief.md) |

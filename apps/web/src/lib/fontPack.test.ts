@@ -12,18 +12,23 @@ import {
 } from "./displayPrefs.ts";
 
 describe("sanitizeFontPack", () => {
-  it("allows the four shipped packs", () => {
+  it("allows the shipped packs including display sets", () => {
     assert.deepEqual([...FONT_PACK_IDS], [
       "clean",
       "soft",
       "magazine",
       "readable",
+      "story",
+      "notebook",
     ]);
     assert.equal(DEFAULT_FONT_PACK, "clean");
     assert.equal(sanitizeFontPack("clean"), "clean");
     assert.equal(sanitizeFontPack("soft"), "soft");
     assert.equal(sanitizeFontPack("magazine"), "magazine");
     assert.equal(sanitizeFontPack("readable"), "readable");
+    assert.equal(sanitizeFontPack("story"), "story");
+    assert.equal(sanitizeFontPack("notebook"), "notebook");
+    assert.equal(sanitizeFontPack("festival"), "notebook");
   });
 
   it("falls back to clean on unknown or empty values", () => {

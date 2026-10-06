@@ -11,6 +11,7 @@ import {
   mascotPartUrl,
   mascotSceneUrl,
   mascotSignaturePartUrl,
+  parseMascotId,
   sanitizeMascotId,
 } from "./mascotCatalog.ts";
 
@@ -27,6 +28,12 @@ describe("mascotCatalog", () => {
     assert.equal(sanitizeMascotId("cat"), "calico");
     assert.equal(sanitizeMascotId("dog"), "shiba");
     assert.equal(sanitizeMascotId("unknown"), DEFAULT_MASCOT_ID);
+  });
+
+  it("parseMascotId は空・未知を null にする", () => {
+    assert.equal(parseMascotId(""), null);
+    assert.equal(parseMascotId("bogus"), null);
+    assert.equal(parseMascotId("none"), "none");
   });
 
   it("mascotSceneUrl はこねこ=kit・おとな=adult・単系統は直下 scenes", () => {

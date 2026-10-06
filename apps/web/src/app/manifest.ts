@@ -5,7 +5,7 @@ const DESCRIPTION = "Merch & storage — グッズの場所がわかる";
 
 /**
  * ホーム画面に追加したときの名前とアイコン。
- * アイコンは app/icon.tsx の生成物（後から png 差し替え）。
+ * アイコンは app/icon.png（風ねこシルエット）。
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {

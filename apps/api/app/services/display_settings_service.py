@@ -93,7 +93,10 @@ MIN_KEEP_AT_HAND_COUNT = 1
 MAX_KEEP_AT_HAND_COUNT = 99
 DEFAULT_AUTO_SALES_DESIRED = False
 DEFAULT_FONT_PACK = "clean"
-ALLOWED_FONT_PACK = frozenset({"clean", "soft", "magazine", "readable"})
+ALLOWED_FONT_PACK = frozenset(
+    {"clean", "soft", "magazine", "readable", "story", "notebook"}
+)
+FONT_PACK_ALIASES = {"festival": "notebook"}
 
 
 @lru_cache(maxsize=1)
@@ -125,6 +128,12 @@ def _normalize_choice(value: str, *, field: str, allowed: frozenset[str]) -> str
     if raw not in allowed:
         raise ValueError(f"未対応の表示設定です（{field}）")
     return raw
+
+
+def _normalize_font_pack(value: Any) -> str:
+    raw = str(value or "").strip()
+    raw = FONT_PACK_ALIASES.get(raw, raw)
+    return _normalize_choice(raw, field="font_pack", allowed=ALLOWED_FONT_PACK)
 
 
 def _normalize_timezone_override(value: Any) -> str | None:
@@ -348,11 +357,7 @@ def _row_or_defaults(row: dict[str, Any] | None) -> dict[str, Any]:
         except ValueError:
             auto_sales_desired = DEFAULT_AUTO_SALES_DESIRED
     try:
-        font_pack = _normalize_choice(
-            str(row.get("font_pack") or ""),
-            field="font_pack",
-            allowed=ALLOWED_FONT_PACK,
-        )
+        font_pack = _normalize_font_pack(row.get("font_pack") or "")
     except ValueError:
         font_pack = DEFAULT_FONT_PACK
     return {
@@ -476,9 +481,7 @@ def save_display_settings(
         "auto_sales_desired": _normalize_bool(
             auto_sales_desired, field="auto_sales_desired"
         ),
-        "font_pack": _normalize_choice(
-            font_pack, field="font_pack", allowed=ALLOWED_FONT_PACK
-        ),
+        "font_pack": _normalize_font_pack(font_pack),
     }
     client = create_user_client(access_token)
     if default_storage is not None:

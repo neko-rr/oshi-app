@@ -37,17 +37,17 @@ HEADER = (
 
 
 def _load_dotenv_api() -> None:
-    env_path = ROOT / "apps" / "api" / ".env"
-    if not env_path.is_file():
-        return
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    for env_path in (ROOT / "apps" / "api" / ".env", ROOT / ".env"):
+        if not env_path.is_file():
             continue
-        k, _, v = line.partition("=")
-        k, v = k.strip(), v.strip().strip('"').strip("'")
-        if k in ("DATABASE_URL", "SUPABASE_DB_URL") and k not in os.environ:
-            os.environ[k] = v
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            if k in ("DATABASE_URL", "SUPABASE_DB_URL") and k not in os.environ and v:
+                os.environ[k] = v
 
 
 def fetch_snapshot_from_db(url: str) -> dict:

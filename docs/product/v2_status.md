@@ -14,7 +14,7 @@ Dash → **Next.js Web + FastAPI + Supabase** への移行状況。
 | 基盤（Auth / JWKS / RLS / Storage photos） | 完了 |
 | Must 本線 Web | **ほぼ完了（shipped 中心）** |
 | Must 磨き | responsive 完了（下部タブ） |
-| Phase 2 | dashboard 入口のみ。他は planned |
+| Phase 2 | dashboard にカラータグ割合。支出深掘り等は planned |
 | Later | deferred（要求待ち。推し色の課金適用は `premium`） |
 | Expo モバイル | 枠・デザイン契約のみ（機能未） |
 

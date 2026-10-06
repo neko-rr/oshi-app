@@ -2748,7 +2748,9 @@
               "clean",
               "soft",
               "magazine",
-              "readable"
+              "readable",
+              "story",
+              "notebook"
             ],
             "title": "Font Pack",
             "default": "clean"

@@ -434,17 +434,24 @@ def test_normalize_font_pack_allowlist() -> None:
     import pytest
 
     assert svc.DEFAULT_FONT_PACK == "clean"
-    assert svc._normalize_choice(
-        "magazine",
-        field="font_pack",
-        allowed=svc.ALLOWED_FONT_PACK,
-    ) == "magazine"
+    assert "story" in svc.ALLOWED_FONT_PACK
+    assert "notebook" in svc.ALLOWED_FONT_PACK
+    assert "festival" not in svc.ALLOWED_FONT_PACK
+    assert svc._normalize_font_pack("notebook") == "notebook"
+    assert svc._normalize_font_pack("festival") == "notebook"
     with pytest.raises(ValueError, match="font_pack"):
         svc._normalize_choice(
             "comic",
             field="font_pack",
             allowed=svc.ALLOWED_FONT_PACK,
         )
+
+
+def test_row_or_defaults_maps_festival_alias_to_notebook() -> None:
+    from app.services import display_settings_service as svc
+
+    out = svc._row_or_defaults({"font_pack": "festival"})
+    assert out["font_pack"] == "notebook"
 
 
 def test_row_or_defaults_falls_back_invalid_font_pack() -> None:

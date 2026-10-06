@@ -2,7 +2,7 @@
 
 # Lab → 本番 採用状況
 
-生成時刻 (UTC): `2026-10-06T11:03:12Z`
+生成時刻 (UTC): `2026-10-06T14:23:12Z`
 
 正本: `docs/design/meta/design_adoption.json`。更新手順: skill `design-adoption`。
 
@@ -14,5 +14,5 @@
 | `/register` | `partial` | 'a' | '2026-09-06' | 写真プレビュー・続けて登録強化・スキャナ片手。Lab 3案は未実施（機能磨き） |
 | `/dashboard` | `not_started` | None | None |  |
 | `/settings` | `adopted` | 'a' | '2026-09-06' | その他ハブ: 分析・設定・ログアウト・法務。下部タブ「その他」の着地 |
-| `/settings/theme` | `adopted` | 'b' | '2026-09-01' | B: 大きめ丸＋写真帯。枠黒＝ライト／枠白＝ダーク。ダーク時はパック fg で可読性確保 |
+| `/settings/theme` | `adopted` | 'b' | '2026-10-06' | B: 大きめ丸＋写真帯。文字パックは Lab 採用の6（清潔Plex／やわらかKiwi／雑誌明朝／読みやすいLexend／物語／手帳） |
 | `/auth/login` | `not_started` | None | None |  |

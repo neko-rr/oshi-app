@@ -30,11 +30,12 @@ ALLOW_HEX_GLOBS = (
     # 推し色スウォッチ・コントラスト計算（色データ本体。UI 部品への直書きではない）
     "lib/oshiContrast.ts",
     "lib/oshiContrast.selftest.ts",
+    "lib/colorTagShare.test.ts",
     "lib/oshiAccentPrefs.ts",
     "lib/themeColorScale.ts",
     "lib/themeColorScale.selftest.ts",
     "components/settings/OshiAccentPanel.tsx",
-    # 仮アイコン色（画像生成は CSS 変数を使えない）
+    # ブランドマーク地色（favicon 画像は CSS 変数を使えない）
     "lib/brand.ts",
     # カラータグ / カテゴリ色は製品ラベル用（推し色・UI トークンとは別）
     "app/settings/color-tags/",

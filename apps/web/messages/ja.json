@@ -365,20 +365,24 @@
     "cardPreviewTags": "カテゴリ · 収納",
     "landingPage": "ログイン後の着地",
     "fontPack": "文字パック",
-    "fontPackHint": "4つから選べます。フォントを個別に組み合わせることはできません。",
+    "fontPackHint": "本文用と、見出しが飾り字のパックがあります。フォントを個別には組み合わせられません。",
     "fontPackSampleHeading": "Oshihaven 見出し",
     "fontPackSampleBody": "推しグッズの名前と Gallery がこの字で並びます。",
     "fontPackOptions": {
       "clean": "清潔",
       "soft": "やわらか",
       "magazine": "雑誌・大人",
-      "readable": "読みやすい"
+      "readable": "読みやすい",
+      "story": "物語",
+      "notebook": "手帳・手書き見出し"
     },
     "fontPackHints": {
-      "clean": "Noto Sans JP ＋ Plus Jakarta Sans",
-      "soft": "見出しは丸ゴ。本文はすっきり",
-      "magazine": "誌面っぽいゴシック（おすすめ）",
-      "readable": "はっきりした字形。長時間向け"
+      "clean": "IBM Plex。端が立つ本文",
+      "soft": "見出しは丸みのはっきりした丸ゴ。本文はすっきり",
+      "magazine": "見出しは明朝、本文は誌面ゴシック",
+      "readable": "字幅が広い。長時間向け",
+      "story": "見出しはAntique明朝。本文は清潔のまま",
+      "notebook": "見出しは手帳の手書き。本文は清潔のまま"
     },
     "syncing": "同期中…",
     "preview": "プレビュー",
@@ -855,7 +859,7 @@
   },
   "Dashboard": {
     "title": "ダッシュボード",
-    "intro": "支出・タグ構成などの集計（Phase 2・簡易表示）",
+    "intro": "所持グッズの色の割合など、いまの箱の様子です。",
     "home": "ホーム",
     "loadFailed": "ダッシュボードの取得に失敗しました",
     "noData": "データなし",
@@ -864,6 +868,12 @@
     "categoryTags": "カテゴリータグ (category_tags)",
     "storageLocations": "収納場所 (storage_locations)",
     "colorTags": "カラータグ (color_tags)",
+    "colorShareTitle": "推し色の割合",
+    "colorShareHint": "グッズに付けたカラータグの件数です。1つのグッズに複数色があるときは、それぞれ数えます。",
+    "colorShareEmpty": "まだカラータグの付いたグッズがありません。ギャラリーで色を付けるとここに円が出ます。",
+    "colorShareAssignments": "色の付与 {count} 件",
+    "colorShareUntagged": "色なしのグッズ {count} 件",
+    "colorSharePieAria": "カラータグ割合の円",
     "meta": "メタ (meta)",
     "emptyGuest": "ゲスト中は集計を表示できません。本登録するとダッシュボードが使えます。",
     "upgradeLink": "本登録する"
@@ -906,6 +916,12 @@
     "title": "問題が発生しました",
     "codeError": "エラーコード: {error}",
     "unspecified": "原因不明のエラーが発生しました。"
+  },
+  "AppStatus": {
+    "notFoundTitle": "ページが見つかりません",
+    "notFoundBody": "アドレスが違うか、このページはもうありません。",
+    "errorTitle": "表示できませんでした",
+    "errorBody": "時間をおいて、もう一度お試しください。"
   },
   "SignUpSuccess": {
     "title": "ご登録ありがとうございます",
