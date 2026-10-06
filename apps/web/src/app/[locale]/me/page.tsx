@@ -31,14 +31,14 @@ export default async function MePage({
   }
 
   const { createClient } = await import("@/lib/server");
+  const { loadServerAuth } = await import("@/lib/serverAuth");
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) {
+  const auth = await loadServerAuth(supabase);
+  if (!auth) {
     await redirectTo("/auth/login");
   }
-  const session = data.session!;
+  const { user, accessToken } = auth!;
 
-  const accessToken = session.access_token;
   let apiMe: MeResponse | null = null;
   let apiError: string | null = null;
   try {
@@ -47,8 +47,8 @@ export default async function MePage({
     apiError = e instanceof Error ? e.message : t("apiMeFailed");
   }
 
-  const sessionEmail = session.user.email ?? null;
-  const sessionMembersId = session.user.id;
+  const sessionEmail = user.email ?? null;
+  const sessionMembersId = user.id;
 
   return (
     <div className="flex flex-col justify-center gap-4 py-10">

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-05T13:01:56Z",
+  "generated_at": "2026-10-06T10:32:33Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -585,42 +585,6 @@
       "file": "apps/api/app/services/theme_service.py"
     }
   ],
-  "gaps": [
-    {
-      "id": "i18n_web",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/middleware.ts"
-    },
-    {
-      "id": "storage_locations",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/settings/storage-locations/page.tsx"
-    },
-    {
-      "id": "category_tags",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/settings/category-tags/page.tsx"
-    },
-    {
-      "id": "color_tags",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/settings/color-tags/page.tsx"
-    },
-    {
-      "id": "privacy_policy",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/privacy/page.tsx"
-    },
-    {
-      "id": "licenses_notices",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/licenses/page.tsx"
-    },
-    {
-      "id": "dashboard",
-      "kind": "missing_file",
-      "detail": "evidence が無い: apps/web/src/app/dashboard/page.tsx"
-    }
-  ],
+  "gaps": [],
   "feature_count": 47
 }

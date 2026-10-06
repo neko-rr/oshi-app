@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type Props = {
   file: File | null;
@@ -30,12 +31,12 @@ export function StepPhoto({
 
   useEffect(() => {
     if (!file) {
-      setPreviewUrl(null);
-      return;
+      return runAfterTick(() => setPreviewUrl(null));
     }
     const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    const cancel = runAfterTick(() => setPreviewUrl(url));
     return () => {
+      cancel();
       URL.revokeObjectURL(url);
     };
   }, [file]);

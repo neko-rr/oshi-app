@@ -9,6 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import LabMockSurface from "@/components/design-lab/LabMockSurface";
+import { runAfterTick } from "@/lib/runAfterTick";
 import {
   labCvdFilterCss,
   type LabCvdModeId,
@@ -78,15 +79,20 @@ export default function LabPcExpandPreview({
 
   useEffect(() => {
     if (!open) return;
-    setVariant(initialVariant);
     const updateMax = () => {
       const next = Math.max(MIN_WIDTH, window.innerWidth - 48);
       setMaxWidth(next);
       setWidthPx((w) => Math.min(Math.max(w, MIN_WIDTH), next));
     };
-    updateMax();
+    const cancel = runAfterTick(() => {
+      setVariant(initialVariant);
+      updateMax();
+    });
     window.addEventListener("resize", updateMax);
-    return () => window.removeEventListener("resize", updateMax);
+    return () => {
+      cancel();
+      window.removeEventListener("resize", updateMax);
+    };
   }, [open, initialVariant]);
 
   useEffect(() => {

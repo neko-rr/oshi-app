@@ -32,6 +32,7 @@ import { buildContinueDraft, clearEventBundle } from "./buildContinueDraft";
 import { RegistrationRequiredDialog } from "@/components/auth/RegistrationRequiredDialog";
 import { isAnonymousUser } from "@/lib/authGuest";
 import { getClientE2eStubSession } from "@/lib/e2eAuthStub";
+import { runAfterTick } from "@/lib/runAfterTick";
 import {
   StepBarcode,
   type OwnedProductHint,
@@ -224,36 +225,40 @@ export function RegisterWizard() {
       return;
     }
     defaultStorageAppliedRef.current = true;
-    setDraft((prev) => {
-      if (prev.storageLocationId != null) return prev;
-      return { ...prev, storageLocationId: defaultStorageLocationId };
+    return runAfterTick(() => {
+      setDraft((prev) => {
+        if (prev.storageLocationId != null) return prev;
+        return { ...prev, storageLocationId: defaultStorageLocationId };
+      });
     });
   }, [defaultStorageLocationId, storageLocationsRaw]);
   // Vision 後にカテゴリ一覧が届いたら種類名を再マッチ
   useEffect(() => {
     if (categories.length === 0) return;
-    setDraft((prev) => {
-      if (
-        prev.fieldSources.category_tag_id === "user" ||
-        prev.categoryTagId != null ||
-        !prev.unmatchedProductType
-      ) {
-        return prev;
-      }
-      const matchedId = matchCategoryId(
-        prev.unmatchedProductType,
-        categories.map((c) => ({
-          category_tag_id: c.category_tag_id,
-          category_tag_name: c.category_tag_name,
-        })),
-      );
-      if (matchedId == null) return prev;
-      return {
-        ...prev,
-        categoryTagId: matchedId,
-        unmatchedProductType: null,
-        fieldSources: { ...prev.fieldSources, category_tag_id: "vision" },
-      };
+    return runAfterTick(() => {
+      setDraft((prev) => {
+        if (
+          prev.fieldSources.category_tag_id === "user" ||
+          prev.categoryTagId != null ||
+          !prev.unmatchedProductType
+        ) {
+          return prev;
+        }
+        const matchedId = matchCategoryId(
+          prev.unmatchedProductType,
+          categories.map((c) => ({
+            category_tag_id: c.category_tag_id,
+            category_tag_name: c.category_tag_name,
+          })),
+        );
+        if (matchedId == null) return prev;
+        return {
+          ...prev,
+          categoryTagId: matchedId,
+          unmatchedProductType: null,
+          fieldSources: { ...prev.fieldSources, category_tag_id: "vision" },
+        };
+      });
     });
   }, [categories]);
 

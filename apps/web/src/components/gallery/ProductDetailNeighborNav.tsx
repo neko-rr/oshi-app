@@ -12,6 +12,7 @@ import type { GalleryListQuery } from "@/lib/galleryListQuery";
 import { galleryDetailHref } from "@/lib/galleryListQuery";
 import { ChevronLeft } from "@/lib/icons";
 import { cn } from "@/lib/utils";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type Props = {
   registeredProductId: number;
@@ -40,11 +41,15 @@ export function ProductDetailNeighborNav({
     neighborsRef.current = neighbors;
   }, [neighbors]);
 
-  useEffect(() => {
-    setNeighbors(
-      neighborsForId(readGalleryBrowseOrder(), registeredProductId),
-    );
-  }, [registeredProductId]);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        setNeighbors(
+          neighborsForId(readGalleryBrowseOrder(), registeredProductId),
+        );
+      }),
+    [registeredProductId],
+  );
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

@@ -15,5 +15,14 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "oshi-app"
     }
-  ]
+  ],
+  // Worker Previews（ブランチは wrangler preview）。本番 env は継承しない。
+  "previews": {
+    "services": [
+      {
+        "binding": "WORKER_SELF_REFERENCE",
+        "service": "oshi-app"
+      }
+    ]
+  }
 }

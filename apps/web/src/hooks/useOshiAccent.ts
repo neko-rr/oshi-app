@@ -22,6 +22,7 @@ import {
   tryResolveOshiColors,
   type ResolvedOshiColors,
 } from "@/lib/oshiContrast";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 function apiBase(): string {
   return (
@@ -176,9 +177,12 @@ export function useOshiAccentState(): OshiAccentContextValue {
     applyOshiAccentToDocument("off", null);
   }, [previewLive, resolved, server.active, server.entitled]);
 
-  useEffect(() => {
-    void refreshFromServer();
-  }, [refreshFromServer]);
+  useEffect(
+    () => runAfterTick(() => {
+      void refreshFromServer();
+    }),
+    [refreshFromServer],
+  );
 
   return {
     draft,

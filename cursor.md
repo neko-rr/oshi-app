@@ -5,6 +5,7 @@
 - Web は **Next.js 16.3.8**。入口は `apps/web/src/proxy.ts`
 - vinext check は 91%。`next-intl` が部分対応のため、本番載せは当面 OpenNext
 - Cloudflare Worker 名 `oshi-app`（製品名 Oshihaven とは別。Dashboard 接続名に合わせる）。env は `NEXT_PUBLIC_*` のみ
+- ブランチ Preview は Dashboard の Preview コマンドを `pnpm -C apps/web exec wrangler preview` にする（`versions upload` だと公式プレビュー一覧に出ない）
 
 ## 2026-09-24: 製品ブランド Oshihaven
 

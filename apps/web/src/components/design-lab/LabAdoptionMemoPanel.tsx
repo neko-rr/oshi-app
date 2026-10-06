@@ -7,6 +7,7 @@ import {
   type LabAdoptionMemo,
 } from "@/components/design-lab/lab-adoption";
 import { LAB_VARIANTS, type LabVariantId } from "@/components/design-lab/lab-meta";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 export default function LabAdoptionMemoPanel() {
   const [memo, setMemo] = useState<LabAdoptionMemo>({
@@ -16,9 +17,9 @@ export default function LabAdoptionMemoPanel() {
   });
   const [savedFlash, setSavedFlash] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => runAfterTick(() => {
     setMemo(loadAdoptionMemo());
-  }, []);
+  }), []);
 
   const persist = (next: LabAdoptionMemo) => {
     const withTime = {

@@ -22,5 +22,14 @@
     "test:register-contract": "pnpm -C apps/web test:register-contract",
     "test:register-e2e": "pnpm -C apps/web test:register-e2e",
     "generate:design-docs": "python scripts/generate_design_docs.py"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "esbuild",
+      "unrs-resolver",
+      "workerd"
+    ]
   }
 }

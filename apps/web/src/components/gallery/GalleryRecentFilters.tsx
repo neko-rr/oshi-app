@@ -13,6 +13,7 @@ import {
   rememberRecentGalleryQuery,
   type GalleryRecentEntry,
 } from "@/lib/galleryRecentQueries";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 export type RecentLabelNames = {
   categories: Map<number, string>;
@@ -76,14 +77,19 @@ export function GalleryRecentFilters({
     [t],
   );
 
-  useEffect(() => {
-    setEntries(readRecentGalleryQueries());
-  }, []);
+  useEffect(
+    () => runAfterTick(() => {
+      setEntries(readRecentGalleryQueries());
+    }),
+    [],
+  );
 
   useEffect(() => {
-    const label = buildRecentQueryLabel(listQuery, labelNames, fallbacks);
-    setEntries(rememberRecentGalleryQuery(listQuery, label));
     // fingerprint 変化時だけ記録（labelNames の参照揺れを避ける）
+    return runAfterTick(() => {
+      const label = buildRecentQueryLabel(listQuery, labelNames, fallbacks);
+      setEntries(rememberRecentGalleryQuery(listQuery, label));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fingerprint が正
   }, [fingerprint, fallbacks]);
 

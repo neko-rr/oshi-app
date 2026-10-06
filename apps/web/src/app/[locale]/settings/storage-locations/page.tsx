@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/client";
 import { isPresetSlot } from "@/lib/tagPresets";
 import { GuestServerGate } from "@/components/auth/GuestServerGate";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type StorageLocationItem = {
   storage_location_id: number;
@@ -96,9 +97,9 @@ export default function StorageLocationsSettingsPage() {
     }
   }, [getToken, tCommon]);
 
-  useEffect(() => {
+  useEffect(() => runAfterTick(() => {
     void load();
-  }, [load]);
+  }), [load]);
 
   function startEdit(item: StorageLocationItem) {
     setEditingId(item.storage_location_id);

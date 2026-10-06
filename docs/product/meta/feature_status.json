@@ -82,7 +82,7 @@
         "apps/web/messages/ja.json",
         "apps/web/messages/en.json",
         "apps/web/src/components/settings/LocaleSwitcher.tsx",
-        "apps/web/src/middleware.ts",
+        "apps/web/src/proxy.ts",
         "docs/product/i18n.md",
         "docs/product/i18n_glossary.md",
         "scripts/check_i18n_message_keys.py",
@@ -548,7 +548,7 @@
       "status": "shipped",
       "title_ja": "収納場所",
       "evidence_paths": [
-        "apps/web/src/app/settings/storage-locations/page.tsx",
+        "apps/web/src/app/[locale]/settings/storage-locations/page.tsx",
         "apps/api/app/routers/tags.py",
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
@@ -566,7 +566,7 @@
       "status": "shipped",
       "title_ja": "カテゴリタグ",
       "evidence_paths": [
-        "apps/web/src/app/settings/category-tags/page.tsx",
+        "apps/web/src/app/[locale]/settings/category-tags/page.tsx",
         "apps/api/app/routers/tags.py",
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
@@ -584,7 +584,7 @@
       "status": "shipped",
       "title_ja": "カラータグ",
       "evidence_paths": [
-        "apps/web/src/app/settings/color-tags/page.tsx",
+        "apps/web/src/app/[locale]/settings/color-tags/page.tsx",
         "apps/api/app/routers/tags.py",
         "apps/api/app/services/tag_service.py",
         "docs/product/acceptance/settings.md"
@@ -622,7 +622,7 @@
       "status": "shipped",
       "title_ja": "プライバシーポリシー",
       "evidence_paths": [
-        "apps/web/src/app/privacy/page.tsx",
+        "apps/web/src/app/[locale]/privacy/page.tsx",
         "apps/web/src/lib/middleware.ts",
         "docs/product/acceptance/privacy.md"
       ],
@@ -637,7 +637,7 @@
       "status": "shipped",
       "title_ja": "ライセンス・表記（OSS／外部サービス）",
       "evidence_paths": [
-        "apps/web/src/app/licenses/page.tsx",
+        "apps/web/src/app/[locale]/licenses/page.tsx",
         "scripts/generate_third_party_notices.py",
         "docs/legal/README.md",
         "docs/legal/services.json",
@@ -654,7 +654,7 @@
       "status": "partial",
       "title_ja": "ダッシュボード",
       "evidence_paths": [
-        "apps/web/src/app/dashboard/page.tsx",
+        "apps/web/src/app/[locale]/dashboard/page.tsx",
         "apps/api/app/services/dashboard_service.py",
         "docs/product/acceptance/dashboard.md"
       ],

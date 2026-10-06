@@ -17,6 +17,7 @@ import {
   readLocalMascotId,
   writeLocalMascotId,
 } from "@/lib/mascotPrefs";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 export type MascotContextValue = {
   mascotId: MascotId;
@@ -28,11 +29,15 @@ export const MascotContext = createContext<MascotContextValue | null>(null);
 export function useMascotState(): MascotContextValue {
   const [mascotId, setMascotIdState] = useState<MascotId>(DEFAULT_MASCOT_ID);
 
-  useEffect(() => {
-    const id = readLocalMascotId();
-    setMascotIdState(id);
-    applyMascotToDocument(id);
-  }, []);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        const id = readLocalMascotId();
+        setMascotIdState(id);
+        applyMascotToDocument(id);
+      }),
+    [],
+  );
 
   const setMascotId = useCallback((id: MascotId) => {
     writeLocalMascotId(id);

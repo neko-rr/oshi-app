@@ -9,13 +9,6 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    // Next 16 の eslint-plugin-react-hooks が新規に error にした。
-    // mount 時の localStorage/API 同期は既存パターン。専用リファクタまで無効。
-    rules: {
-      "react-hooks/set-state-in-effect": "off",
-    },
-  },
-  {
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/lib/icons.ts"],
     rules: {

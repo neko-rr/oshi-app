@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { LOCAL_STORAGE_PREFIX } from "@/lib/brand";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 const STORAGE_KEY = `${LOCAL_STORAGE_PREFIX}design-lab:mobile-origin`;
 const LAB_PATH = "/dev/design-lab";
@@ -76,22 +77,26 @@ export default function LabMobileQr({ pageOrigin }: LabMobileQrProps) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setOriginInput(saved);
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-    if (pageOrigin && !isLoopbackHost(pageHost)) {
-      setOriginInput(pageOrigin);
-    } else {
-      setOriginInput("http://192.168.0.0:3000");
-    }
-  }, [pageOrigin, pageHost]);
+  useEffect(
+    () =>
+      runAfterTick(() => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            setOriginInput(saved);
+            return;
+          }
+        } catch {
+          /* ignore */
+        }
+        if (pageOrigin && !isLoopbackHost(pageHost)) {
+          setOriginInput(pageOrigin);
+        } else {
+          setOriginInput("http://192.168.0.0:3000");
+        }
+      }),
+    [pageOrigin, pageHost],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -124,13 +129,14 @@ export default function LabMobileQr({ pageOrigin }: LabMobileQrProps) {
 
   useEffect(() => {
     if (!labUrl || loopbackQr) {
-      setDataUrl(null);
-      setError(
-        loopbackQr
-          ? "localhost / 127.0.0.1 はスマホから届きません。下で PC の LAN アドレスを指定してください。"
-          : null,
-      );
-      return;
+      return runAfterTick(() => {
+        setDataUrl(null);
+        setError(
+          loopbackQr
+            ? "localhost / 127.0.0.1 はスマホから届きません。下で PC の LAN アドレスを指定してください。"
+            : null,
+        );
+      });
     }
     let cancelled = false;
     void (async () => {

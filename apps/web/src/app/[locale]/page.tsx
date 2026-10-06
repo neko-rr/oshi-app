@@ -29,10 +29,11 @@ export default async function HomePage({ params }: Props) {
   let isGuest = false;
   if (hasSupabase) {
     const { createClient } = await import("@/lib/server");
+    const { loadServerAuth } = await import("@/lib/serverAuth");
     const supabase = await createClient();
-    const { data } = await supabase.auth.getSession();
-    sessionToken = data.session?.access_token ?? null;
-    isGuest = isAnonymousUser(data.session?.user);
+    const auth = await loadServerAuth(supabase);
+    sessionToken = auth?.accessToken ?? null;
+    isGuest = isAnonymousUser(auth?.user);
   }
 
   let stats: ProductStats | null = null;
