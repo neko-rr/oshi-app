@@ -51,6 +51,10 @@ import { Plus, Settings } from "@/lib/icons";
 - **favicon** / **OG 画像** / **ブランドロゴ**（1〜数点）  
 - ユーザー写真（Storage — UI アイコンとは別）
 
+**ブランドマーク（現行）:** 風ねこのセージシルエット。  
+ヘッダー: `apps/web/public/brand/logo.png`（`BRAND_LOGO_SRC`）。  
+favicon: `apps/web/src/app/favicon.ico`（タブが読む正）。あわせて `icon.png`（512）・`apple-icon.png`（180）。仮の「Oh」文字アイコンは廃止（タブには元々出ていなかった。`.ico` が別だったため）。
+
 ## 採用一覧（アプリ共通）
 
 <!-- AUTO:icons-catalog START — sync_design_icons.py。手編集禁止 -->

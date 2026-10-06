@@ -32,10 +32,10 @@ def dashboard_charts(
     granularity: str = Query(default="month"),
     daily_limit: int = Query(default=90, ge=1, le=366),
 ) -> dict:
-    _ = user
     try:
         return fetch_dashboard_charts(
             access_token=access_token,
+            members_id=user.members_id,
             granularity=granularity,
             daily_limit=daily_limit,
         )

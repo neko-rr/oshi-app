@@ -14,10 +14,10 @@ export const PRODUCT_ORIGIN = "https://oshihaven.com";
  */
 export const SITE_INDEXABLE = false;
 
-/** 仮アイコン・マニフェストの地色（既定テーマの背景に近い。CSS変数は画像に載せられない） */
+/** アイコン・マニフェストの地色（既定テーマの背景に近い。CSS変数は画像に載せられない） */
 export const BRAND_MARK_BACKGROUND = "#f6f5f2";
-/** 仮アイコンの文字色（既定テーマの文字色に近い） */
-export const BRAND_MARK_FOREGROUND = "#37332e";
+/** ヘッダー・公開ロゴ（風ねこシルエット） */
+export const BRAND_LOGO_SRC = "/brand/logo.png";
 
 /** ブラウザ保存キーの接頭辞 */
 export const LOCAL_STORAGE_PREFIX = "oshihaven:";

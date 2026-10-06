@@ -16,13 +16,21 @@ export const DEFAULT_REGISTER_START_STEP: RegisterStartStepId = "barcode";
 export const DEFAULT_KEEP_AT_HAND_COUNT = 1;
 export const DEFAULT_AUTO_SALES_DESIRED = false;
 export const DEFAULT_GALLERY_SHOW = true;
-export type FontPackId = "clean" | "soft" | "magazine" | "readable";
+export type FontPackId =
+  | "clean"
+  | "soft"
+  | "magazine"
+  | "readable"
+  | "story"
+  | "notebook";
 export const DEFAULT_FONT_PACK: FontPackId = "clean";
 export const FONT_PACK_IDS: readonly FontPackId[] = [
   "clean",
   "soft",
   "magazine",
   "readable",
+  "story",
+  "notebook",
 ] as const;
 
 export const LIST_SORT_IDS: readonly ListSortId[] = [
@@ -146,11 +154,14 @@ export function sanitizeGalleryCardFields(
 }
 
 export function sanitizeFontPack(raw: unknown): FontPackId {
+  if (raw === "festival") return "notebook";
   if (
     raw === "clean" ||
     raw === "soft" ||
     raw === "magazine" ||
-    raw === "readable"
+    raw === "readable" ||
+    raw === "story" ||
+    raw === "notebook"
   ) {
     return raw;
   }

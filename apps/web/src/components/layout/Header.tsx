@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HeaderAuthActions } from "@/components/layout/HeaderAuthActions";
-import { PRODUCT_NAME } from "@/lib/brand";
+import { BRAND_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
 import { shouldShowAppChromeNav } from "@/lib/appChromePolicy";
 
 type HeaderProps = {
@@ -39,8 +40,17 @@ export default function Header({
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
         <Link
           href="/"
-          className="shrink-0 text-lg font-bold hover:opacity-80 sm:text-xl"
+          className="flex shrink-0 items-center gap-2 text-lg font-bold hover:opacity-80 sm:text-xl"
         >
+          <Image
+            src={BRAND_LOGO_SRC}
+            alt=""
+            width={32}
+            height={32}
+            className="size-8 rounded-md"
+            unoptimized
+            priority
+          />
           {PRODUCT_NAME}
         </Link>
         {/* デスクトップ: 従来どおり横ナビ */}

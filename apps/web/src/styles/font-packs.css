@@ -1,36 +1,50 @@
 /* 文字パック。テーマ色の --font-sans を上書きする（色パックとは独立） */
 
 html[data-font-pack="clean"] {
-  --font-sans: var(--font-plus-jakarta), var(--font-noto-sans-jp), ui-sans-serif,
+  --font-sans: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), ui-sans-serif,
     sans-serif;
-  --font-heading: var(--font-plus-jakarta), var(--font-noto-sans-jp),
+  --font-heading: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp),
     ui-sans-serif, sans-serif;
 }
 
 html[data-font-pack="soft"] {
   --font-sans: var(--font-nunito-sans), var(--font-noto-sans-jp), ui-sans-serif,
     sans-serif;
-  --font-heading: var(--font-nunito-sans), var(--font-zen-maru), ui-sans-serif,
+  --font-heading: var(--font-nunito-sans), var(--font-kiwi-maru), ui-sans-serif,
     sans-serif;
 }
 
 html[data-font-pack="magazine"] {
   --font-sans: var(--font-figtree), var(--font-zen-kaku), ui-sans-serif,
     sans-serif;
-  --font-heading: var(--font-figtree), var(--font-zen-kaku), ui-sans-serif,
-    sans-serif;
+  --font-heading: var(--font-newsreader), var(--font-kaisei-decol), ui-serif,
+    serif;
 }
 
 html[data-font-pack="readable"] {
-  --font-sans: var(--font-atkinson), var(--font-biz-udpgothic), ui-sans-serif,
+  --font-sans: var(--font-lexend), var(--font-biz-udpgothic), ui-sans-serif,
     sans-serif;
-  --font-heading: var(--font-atkinson), var(--font-biz-udpgothic), ui-sans-serif,
+  --font-heading: var(--font-lexend), var(--font-biz-udpgothic), ui-sans-serif,
+    sans-serif;
+}
+
+html[data-font-pack="story"] {
+  --font-sans: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), ui-sans-serif,
+    sans-serif;
+  --font-heading: var(--font-fraunces), var(--font-shippori-antique), ui-serif,
+    serif;
+}
+
+html[data-font-pack="notebook"] {
+  --font-sans: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), ui-sans-serif,
+    sans-serif;
+  --font-heading: var(--font-shantell-sans), var(--font-klee-one), ui-sans-serif,
     sans-serif;
 }
 
 /* 設定の見本カード（選択中パックと独立して見せる） */
 [data-font-preview="clean"] {
-  font-family: var(--font-plus-jakarta), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), sans-serif;
 }
 
 [data-font-preview="soft"] {
@@ -38,13 +52,33 @@ html[data-font-pack="readable"] {
 }
 
 [data-font-preview="soft"][data-font-preview-role="heading"] {
-  font-family: var(--font-nunito-sans), var(--font-zen-maru), sans-serif;
+  font-family: var(--font-nunito-sans), var(--font-kiwi-maru), sans-serif;
 }
 
 [data-font-preview="magazine"] {
   font-family: var(--font-figtree), var(--font-zen-kaku), sans-serif;
 }
 
+[data-font-preview="magazine"][data-font-preview-role="heading"] {
+  font-family: var(--font-newsreader), var(--font-kaisei-decol), serif;
+}
+
 [data-font-preview="readable"] {
-  font-family: var(--font-atkinson), var(--font-biz-udpgothic), sans-serif;
+  font-family: var(--font-lexend), var(--font-biz-udpgothic), sans-serif;
+}
+
+[data-font-preview="story"] {
+  font-family: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), sans-serif;
+}
+
+[data-font-preview="story"][data-font-preview-role="heading"] {
+  font-family: var(--font-fraunces), var(--font-shippori-antique), serif;
+}
+
+[data-font-preview="notebook"] {
+  font-family: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), sans-serif;
+}
+
+[data-font-preview="notebook"][data-font-preview-role="heading"] {
+  font-family: var(--font-shantell-sans), var(--font-klee-one), sans-serif;
 }

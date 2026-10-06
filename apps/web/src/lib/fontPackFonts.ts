@@ -1,33 +1,40 @@
 import {
-  Atkinson_Hyperlegible,
   BIZ_UDPGothic,
   Figtree,
+  Fraunces,
+  IBM_Plex_Sans,
+  IBM_Plex_Sans_JP,
+  Kaisei_Decol,
+  Kiwi_Maru,
+  Klee_One,
+  Lexend,
+  Newsreader,
   Noto_Sans_JP,
   Nunito_Sans,
-  Plus_Jakarta_Sans,
+  Shantell_Sans,
+  Shippori_Antique,
   Zen_Kaku_Gothic_New,
-  Zen_Maru_Gothic,
 } from "next/font/google";
 
-/** 清潔（既定本文）。欧文は Plus Jakarta、和文は Noto。 */
-export const fontPlusJakarta = Plus_Jakarta_Sans({
+/** 清潔（既定本文）。IBM Plex。 */
+export const fontIbmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-plus-jakarta",
+  variable: "--font-ibm-plex-sans",
   preload: true,
 });
 
-export const fontNotoSansJp = Noto_Sans_JP({
+export const fontIbmPlexJp = IBM_Plex_Sans_JP({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   display: "swap",
-  variable: "--font-noto-sans-jp",
+  variable: "--font-ibm-plex-jp",
   preload: true,
   adjustFontFallback: false,
 });
 
-/** やわらか。本文 Nunito + Noto、見出し Zen Maru。 */
+/** やわらか。本文 Nunito + Noto、見出し Kiwi Maru。 */
 export const fontNunitoSans = Nunito_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -36,16 +43,25 @@ export const fontNunitoSans = Nunito_Sans({
   preload: false,
 });
 
-export const fontZenMaru = Zen_Maru_Gothic({
+export const fontNotoSansJp = Noto_Sans_JP({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   display: "swap",
-  variable: "--font-zen-maru",
+  variable: "--font-noto-sans-jp",
   preload: false,
   adjustFontFallback: false,
 });
 
-/** 雑誌・大人。Figtree + Zen Kaku。 */
+export const fontKiwiMaru = Kiwi_Maru({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-kiwi-maru",
+  preload: false,
+  adjustFontFallback: false,
+});
+
+/** 雑誌。本文 Figtree + Zen Kaku、見出し Newsreader + Kaisei Decol。 */
 export const fontFigtree = Figtree({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -63,12 +79,29 @@ export const fontZenKaku = Zen_Kaku_Gothic_New({
   adjustFontFallback: false,
 });
 
-/** 読みやすい。Atkinson + BIZ UDPGothic。 */
-export const fontAtkinson = Atkinson_Hyperlegible({
+export const fontNewsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-atkinson",
+  variable: "--font-newsreader",
+  preload: false,
+});
+
+export const fontKaiseiDecol = Kaisei_Decol({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+  variable: "--font-kaisei-decol",
+  preload: false,
+  adjustFontFallback: false,
+});
+
+/** 読みやすい。Lexend + BIZ UDPGothic。 */
+export const fontLexend = Lexend({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-lexend",
   preload: false,
 });
 
@@ -81,14 +114,57 @@ export const fontBizUdpgothic = BIZ_UDPGothic({
   adjustFontFallback: false,
 });
 
+/** 物語。見出しだけ Antique＋Fraunces。本文は清潔と同じ。 */
+export const fontShipporiAntique = Shippori_Antique({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-shippori-antique",
+  preload: false,
+  adjustFontFallback: false,
+});
+
+export const fontFraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+  variable: "--font-fraunces",
+  preload: false,
+});
+
+/** 手帳。見出しだけ Klee One＋Shantell Sans。本文は清潔と同じ。 */
+export const fontKleeOne = Klee_One({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  display: "swap",
+  variable: "--font-klee-one",
+  preload: false,
+  adjustFontFallback: false,
+});
+
+export const fontShantellSans = Shantell_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-shantell-sans",
+  preload: false,
+});
+
 /** html に載せる CSS 変数クラス（全パック分。未使用パックは preload しない） */
 export const fontPackVariableClassName = [
-  fontPlusJakarta.variable,
-  fontNotoSansJp.variable,
+  fontIbmPlexSans.variable,
+  fontIbmPlexJp.variable,
   fontNunitoSans.variable,
-  fontZenMaru.variable,
+  fontNotoSansJp.variable,
+  fontKiwiMaru.variable,
   fontFigtree.variable,
   fontZenKaku.variable,
-  fontAtkinson.variable,
+  fontNewsreader.variable,
+  fontKaiseiDecol.variable,
+  fontLexend.variable,
   fontBizUdpgothic.variable,
+  fontShipporiAntique.variable,
+  fontFraunces.variable,
+  fontKleeOne.variable,
+  fontShantellSans.variable,
 ].join(" ");

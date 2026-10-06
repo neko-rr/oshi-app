@@ -786,6 +786,12 @@ export default function LabThemeColorStudio() {
                 ← 3案比較 Lab
               </Link>
               <Link
+                href="/dev/design-lab/font-packs"
+                className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
+              >
+                文字パック候補
+              </Link>
+              <Link
                 href="/settings/theme"
                 className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
               >

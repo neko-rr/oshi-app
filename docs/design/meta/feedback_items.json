@@ -265,6 +265,33 @@
         "acceptance/settings.md"
       ],
       "lab_ref": null
+    },
+    {
+      "id": "fb-019",
+      "status": "accepted",
+      "created_at": "2026-10-06",
+      "source": "user",
+      "area": "design-lab/font-packs",
+      "request_ja": "飾り字2パックに加え、清潔／やわらか／雑誌／読みやすいも差が出る組み合わせを再検討。候補は全部Labで見たい。10個前後、理由付き。",
+      "agent_note": "2026-10-06 人が本番6を決定。旧4とまつりはLab提案。まつりは手帳・手書き見出しに差し替え。",
+      "target_docs": [
+        "tokens.md",
+        "compare-workflow.md"
+      ],
+      "lab_ref": "/dev/design-lab/font-packs"
+    },
+    {
+      "id": "fb-020",
+      "status": "accepted",
+      "created_at": "2026-10-06",
+      "source": "user",
+      "area": "brand/kaze-neko-logo",
+      "request_ja": "ロゴ未設定だったので、風ねこのシルエットをロゴらしく生成してロゴにする。",
+      "agent_note": "2026-10-06 反映。仮「Oh」アイコン廃止。logo.png + app/icon.png + apple-icon.png。ヘッダーにマーク＋Oshihaven。",
+      "target_docs": [
+        "icons.md"
+      ],
+      "lab_ref": null
     }
   ]
 }

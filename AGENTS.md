@@ -10,7 +10,7 @@
 作者・マスコット IP は **風ねこ / Kaze Neko**（製品名とは別。SUZURI 等は IP 名義）。
 
 表示名・公式URL・検索可否・localStorage 接頭辞の正本は `apps/web/src/lib/brand.ts`。  
-未公開中は `SITE_INDEXABLE = false`。仮アイコンの差し替えと、アプリリンクは公式 URL を使う旨は [cursor.md](cursor.md) の「製品ブランド Oshihaven」と [apps/mobile/README.md](apps/mobile/README.md)。  
+未公開中は `SITE_INDEXABLE = false`。ロゴは風ねこシルエット。アプリリンクは公式 URL を使う旨は [cursor.md](cursor.md) の「製品ブランド Oshihaven」と [apps/mobile/README.md](apps/mobile/README.md)。  
 リポジトリ名 `oshi-app` は技術名のまま（製品名にしない）。
 
 **v2 移行（2026-09）:** Must 本線はほぼ完了。正本は [docs/product/v2_status.md](docs/product/v2_status.md) / [roadmap.md](docs/product/roadmap.md)。  

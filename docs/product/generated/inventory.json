@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T11:03:11Z",
+  "generated_at": "2026-10-06T14:23:39Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -51,6 +51,11 @@
       "path": "/dashboard",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/dashboard/page.tsx"
+    },
+    {
+      "path": "/dev/design-lab/font-packs",
+      "kind": "page",
+      "file": "apps/web/src/app/[locale]/dev/design-lab/font-packs/page.tsx"
     },
     {
       "path": "/dev/design-lab",
@@ -519,6 +524,10 @@
     {
       "name": "barcode_lookup_service",
       "file": "apps/api/app/services/barcode_lookup_service.py"
+    },
+    {
+      "name": "color_tag_analytics_service",
+      "file": "apps/api/app/services/color_tag_analytics_service.py"
     },
     {
       "name": "dashboard_service",

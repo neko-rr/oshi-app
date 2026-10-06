@@ -147,6 +147,7 @@ brand-archive/mascots/         … 差し替え前・生成の種・風ねこ原
 |------------|-----|------|
 | ギャラリー0件 | scenes | `idle` |
 | 検索0件／404 | scenes | `not_found` |
+| 障害・表示失敗 | scenes | `not_found`（困った顔。ユーザー設定。読めないときは **風ねこ（おとな）**） |
 | 登録完了・達成 | scenes（短）or parts完了 | `celebrate` or `paw` 等 |
 | API待ち・アップロード | parts | `face` + 小物周回／バーノブ |
 | インライン保存中 | parts | `face_sm` |
@@ -157,7 +158,8 @@ brand-archive/mascots/         … 差し替え前・生成の種・風ねこ原
 
 | `mascot_id` | 待ち | 空・404・祝福 |
 |-------------|------|----------------|
-| `kaze_neko`（既定） | parts（配線後）／当面 scenes loading | scenes |
+| `kaze_neko`（設定の既定） | parts（配線後）／当面 scenes loading | scenes |
+| 設定不明（DB／端末が読めない） | — | **風ねこ（おとな）** の `not_found` |
 | 他キャラ | parts 準備後／当面 scenes loading | scenes |
 | `none` | **現行 shadcn のみ** | キャラ画像なし |
 

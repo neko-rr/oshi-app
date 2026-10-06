@@ -3,7 +3,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.deps.auth import AuthenticatedUser, get_access_token, require_permanent_user
 from app.services import display_settings_service
@@ -34,7 +34,16 @@ class DisplaySettingsBody(BaseModel):
     gallery_image_fit: str = Field(min_length=1, max_length=32)
     keep_at_hand_count: int = Field(default=1, ge=1, le=99)
     auto_sales_desired: bool = False
-    font_pack: Literal["clean", "soft", "magazine", "readable"] = "clean"
+    font_pack: Literal["clean", "soft", "magazine", "readable", "story", "notebook"] = (
+        "clean"
+    )
+
+    @field_validator("font_pack", mode="before")
+    @classmethod
+    def _alias_font_pack(cls, value: object) -> object:
+        if value == "festival":
+            return "notebook"
+        return value
 
 
 def _err(exc: Exception) -> HTTPException:

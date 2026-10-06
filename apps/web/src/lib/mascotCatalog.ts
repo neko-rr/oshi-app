@@ -240,11 +240,17 @@ export function isMascotId(value: string): value is MascotId {
   return ID_SET.has(value);
 }
 
-export function sanitizeMascotId(raw: unknown): MascotId {
-  if (typeof raw !== "string") return DEFAULT_MASCOT_ID;
+/** 保存値を解釈。空・未知は null（呼び出し側でフォールバック） */
+export function parseMascotId(raw: unknown): MascotId | null {
+  if (typeof raw !== "string") return null;
   const v = raw.trim();
+  if (!v) return null;
   if (LEGACY_MASCOT_MAP[v]) return LEGACY_MASCOT_MAP[v];
-  return isMascotId(v) ? v : DEFAULT_MASCOT_ID;
+  return isMascotId(v) ? v : null;
+}
+
+export function sanitizeMascotId(raw: unknown): MascotId {
+  return parseMascotId(raw) ?? DEFAULT_MASCOT_ID;
 }
 
 export function getMascotCatalogItem(
@@ -325,4 +331,21 @@ export function mascotLoadingFrameUrls(id: MascotId): string[] {
   }
   const single = mascotSceneUrl(id, "loading");
   return single ? [single] : [];
+}
+
+/** 端末／DB の設定が読めないときの感情点フォールバック */
+export const UNKNOWN_PREFERENCE_MASCOT_ID: MascotId = "kaze_neko_adult";
+
+export type EmotionalSceneKind = "not_found" | "error";
+
+export function resolveMascotIdForEmotionalScene(
+  raw: unknown,
+): MascotId {
+  return parseMascotId(raw) ?? UNKNOWN_PREFERENCE_MASCOT_ID;
+}
+
+export function poseForEmotionalScene(
+  _kind: EmotionalSceneKind,
+): MascotPoseId {
+  return "not_found";
 }

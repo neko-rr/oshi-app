@@ -8,6 +8,7 @@ import { describe, it } from "node:test";
 import {
   DISPLAY_SETTINGS_LOCAL_KEY,
   LOCAL_STORAGE_PREFIX,
+  BRAND_LOGO_SRC,
   MASCOT_LOCAL_KEY,
   PRODUCT_NAME,
   PRODUCT_ORIGIN,
@@ -22,6 +23,7 @@ describe("brand storage keys", () => {
     assert.equal(PRODUCT_NAME, "Oshihaven");
     assert.equal(PRODUCT_ORIGIN, "https://oshihaven.com");
     assert.equal(SITE_INDEXABLE, false);
+    assert.equal(BRAND_LOGO_SRC, "/brand/logo.png");
     assert.equal(LOCAL_STORAGE_PREFIX, "oshihaven:");
     assert.equal(THEME_LOCAL_KEY, "oshihaven:themeId");
     assert.equal(MASCOT_LOCAL_KEY, "oshihaven:mascotId");

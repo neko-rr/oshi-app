@@ -158,6 +158,12 @@ export default function DesignLabView() {
             >
               テーマ色見本スタジオ（常設）
             </Link>
+            <Link
+              href="/dev/design-lab/font-packs"
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-50"
+            >
+              文字パック候補スタジオ（常設）
+            </Link>
             <button
               type="button"
               aria-pressed={showUiCallouts}

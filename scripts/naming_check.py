@@ -62,6 +62,7 @@ NEXT_FIXED = {
     "layout.tsx",
     "loading.tsx",
     "error.tsx",
+    "global-error.tsx",
     "not-found.tsx",
     "route.ts",
     "route.tsx",

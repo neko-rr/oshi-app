@@ -3,7 +3,13 @@ import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS } from "@oshi/shared";
 import { apiFetch } from "@/lib/api";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { ColorTagSharePanel } from "@/components/dashboard/ColorTagSharePanel";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+
+function metaNumber(meta: Record<string, unknown>, key: string): number {
+  const n = meta[key];
+  return typeof n === "number" && Number.isFinite(n) ? n : 0;
+}
 
 type DashboardCharts = {
   spend_series: unknown[];
@@ -118,6 +124,30 @@ export default async function DashboardPage({
 
       {charts ? (
         <div className="flex flex-col gap-4">
+          <ColorTagSharePanel
+            title={t("colorShareTitle")}
+            hint={t("colorShareHint")}
+            items={charts.color_tags ?? []}
+            noDataLabel={t("colorShareEmpty")}
+            assignmentLabel={t("colorShareAssignments", {
+              count: metaNumber(
+                charts.meta ?? {},
+                "color_tag_assignment_total",
+              ),
+            })}
+            untaggedLabel={t("colorShareUntagged", {
+              count: metaNumber(charts.meta ?? {}, "color_tag_untagged_count"),
+            })}
+            assignmentTotal={metaNumber(
+              charts.meta ?? {},
+              "color_tag_assignment_total",
+            )}
+            untaggedCount={metaNumber(
+              charts.meta ?? {},
+              "color_tag_untagged_count",
+            )}
+            pieLabel={t("colorSharePieAria")}
+          />
           <SectionList
             title={t("spendSeries")}
             items={charts.spend_series ?? []}
@@ -136,11 +166,6 @@ export default async function DashboardPage({
           <SectionList
             title={t("storageLocations")}
             items={charts.storage_locations ?? []}
-            noDataLabel={t("noData")}
-          />
-          <SectionList
-            title={t("colorTags")}
-            items={charts.color_tags ?? []}
             noDataLabel={t("noData")}
           />
           {charts.meta && Object.keys(charts.meta).length > 0 ? (

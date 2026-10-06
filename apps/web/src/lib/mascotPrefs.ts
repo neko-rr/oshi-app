@@ -5,22 +5,23 @@
 
 import { MASCOT_LOCAL_KEY } from "@/lib/brand";
 import {
-  DEFAULT_MASCOT_ID,
   sanitizeMascotId,
   type MascotId,
 } from "@/lib/mascotCatalog";
 
 export { MASCOT_LOCAL_KEY };
 
-export function readLocalMascotId(): MascotId {
+export function readLocalMascotPreferenceRaw(): string | null {
   try {
-    if (typeof window === "undefined") return DEFAULT_MASCOT_ID;
-    const raw = localStorage.getItem(MASCOT_LOCAL_KEY);
-    if (!raw) return DEFAULT_MASCOT_ID;
-    return sanitizeMascotId(raw);
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(MASCOT_LOCAL_KEY);
   } catch {
-    return DEFAULT_MASCOT_ID;
+    return null;
   }
+}
+
+export function readLocalMascotId(): MascotId {
+  return sanitizeMascotId(readLocalMascotPreferenceRaw());
 }
 
 export function writeLocalMascotId(id: MascotId): void {

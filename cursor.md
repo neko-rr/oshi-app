@@ -1,10 +1,27 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-10-06: `pnpm dev:web` は webpack
+
+- Next 16.3 + Turbopack は和文 `next/font/google` で `Can't resolve '@vercel/turbopack-next/internal/font/google/font'` になる（既知）
+- `apps/web` の `dev` は `next dev --webpack`
+
+## 2026-10-06: 文字パック候補は Lab で比較
+
+- 見本: `/dev/design-lab/font-packs`（本番6＋旧組み合わせの提案）
+- 本番6: 清潔Plex／やわらかKiwi／雑誌明朝見出し／読みやすいLexend／物語／手帳
+- まつりは提案として残し、本番IDは `notebook`（旧 `festival` は読み替え）
+
+## 2026-10-06: ダッシュボードの推し色割合
+
+- `/dashboard` 先頭にカラータグの円＋バー（`GET /dashboard/charts` の `color_tags` + meta）
+- 件数は接合表 `registered_product_color_tag`。1グッズ複数色はそれぞれ加算
+- テーマ／推し色オーバーレイとは別（製品ラベル）
+
 ## 2026-10-06: 文字パック（ユーザー別）
 
-- `/settings/theme` で `font_pack`: `clean` / `soft` / `magazine` / `readable`
+- `/settings/theme` で `font_pack`: `clean` / `soft` / `magazine` / `readable` / `story` / `notebook`
 - 保存は `display_settings`（ゲストは端末のみ）。テーマ色とは独立
-- 既定は `clean`（Noto Sans JP ＋ Plus Jakarta Sans）
+- 既定は `clean`（IBM Plex Sans JP ＋ IBM Plex Sans）
 - ライセンスは OFL。Geist はルート既定から外した
 
 ## 2026-10-05: Next.js 16 と Cloudflare
@@ -24,7 +41,7 @@
 - **localStorage 接頭辞:** `oshihaven:`（旧 `oshiapp:` は読まない。テストユーザーのみのため移行なし）
 - 表示定数: `apps/web/src/lib/brand.ts`
 - **未公開:** `SITE_INDEXABLE = false`（検索に出さない）。公開日に `true`
-- **仮アイコン:** `src/app/icon.tsx` と `apple-icon.tsx`。本番絵は同名の png に差し替えて tsx を消す
+- **ロゴ／アイコン:** 風ねこシルエット。ヘッダーは `public/brand/logo.png`。タブは `src/app/favicon.ico`（ブラウザが最優先）。あわせて `icon.png`（512）と `apple-icon.png`（180）
 - **アプリのリンク:** `https://oshihaven.com/...`（`apps/mobile/README.md`）
 
 ## 2026-09-16: 検索はギャラリーに統合
