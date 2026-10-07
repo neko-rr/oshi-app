@@ -1,4 +1,5 @@
-/* 文字パック。テーマ色の --font-sans を上書きする（色パックとは独立） */
+/* 文字パック（正本）。テーマ色 colors.css には --font-* を置かない。
+   html[data-font-pack] が --font-sans / --font-heading を決める。既定は layout の clean。 */
 
 html[data-font-pack="clean"] {
   --font-sans: var(--font-ibm-plex-sans), var(--font-ibm-plex-jp), ui-sans-serif,

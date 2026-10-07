@@ -15,6 +15,7 @@ DB の `docs/db/` と同じ二層。**Spec Kit は使わない。**
 | [roadmap.md](roadmap.md) | Must / Phase2 / Later | **手** |
 | [v2_status.md](v2_status.md) | v2 移行の要約（ほぼ完了の境界） | **手** |
 | [register_fields.md](register_fields.md) | 登録項目 Core/Oshi/External/Hidden | **手** |
+| [photo_storage.md](photo_storage.md) | 写真の圧縮既定・有料画質／容量候補 | **手** |
 | [register_e2e.md](register_e2e.md) | 登録自動テスト（合成フィクスチャ・層） | **手** |
 | [flows/](flows/) | 主要ユーザーフロー | **手** |
 | [acceptance/](acceptance/) | 画面ごとの受け入れ条件（DoD） | **手** |

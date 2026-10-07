@@ -126,7 +126,9 @@ test.describe("register wizard fixtures", () => {
 
     const photos = apiCallsOf(calls, "POST", API_PATHS.photos);
     expect(photos).toHaveLength(1);
-    expect(photos[0]?.bodyText).toContain(fixtureCase.front_image);
+    // クライアント圧縮後は JPEG（元が png でも filename は .jpg）
+    const frontStem = fixtureCase.front_image.replace(/\.[^.]+$/, "");
+    expect(photos[0]?.bodyText).toContain(`${frontStem}.jpg`);
     expect(photos[0]?.bodyText).not.toContain(fixtureCase.barcode_image);
 
     const products = apiCallsOf(calls, "POST", API_PATHS.products);

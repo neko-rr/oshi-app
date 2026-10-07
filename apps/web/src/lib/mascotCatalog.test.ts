@@ -12,6 +12,8 @@ import {
   mascotSceneUrl,
   mascotSignaturePartUrl,
   parseMascotId,
+  resolveLoadingSilhouetteUrls,
+  resolveNavPendingSilhouetteUrl,
   sanitizeMascotId,
 } from "./mascotCatalog.ts";
 
@@ -82,5 +84,23 @@ describe("mascotCatalog", () => {
       "/brand/mascots/calico/kit/parts/bell.png",
     );
     assert.equal(mascotSignaturePartUrl("none"), null);
+  });
+
+  it("resolveLoadingSilhouetteUrls は none→ロゴ、風ねこは連番", () => {
+    assert.deepEqual(resolveLoadingSilhouetteUrls("none"), [
+      "/brand/logo.png",
+    ]);
+    assert.equal(resolveLoadingSilhouetteUrls("kaze_neko").length, 3);
+    assert.deepEqual(resolveLoadingSilhouetteUrls("jellyfish"), [
+      "/brand/mascots/jellyfish/scenes/loading.png",
+    ]);
+  });
+
+  it("resolveNavPendingSilhouetteUrl は face_sm を優先する", () => {
+    assert.equal(
+      resolveNavPendingSilhouetteUrl("shiba"),
+      "/brand/mascots/shiba/kit/parts/face_sm.png",
+    );
+    assert.equal(resolveNavPendingSilhouetteUrl("none"), "/brand/logo.png");
   });
 });

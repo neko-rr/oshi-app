@@ -237,14 +237,30 @@
       "evidence_paths": [
         "apps/api/app/routers/photos.py",
         "apps/api/app/services/photo_service.py",
-        "apps/web/src/components/register/StepPhoto.tsx"
+        "apps/web/src/components/register/StepPhoto.tsx",
+        "apps/web/src/lib/prepareRegisterPhoto.ts",
+        "docs/product/photo_storage.md"
       ],
       "expected_web_paths": [
         "/register"
       ],
       "expected_api_paths": [
         "/photos"
-      ]
+      ],
+      "notes": "選択時に無料ティアでクライアント圧縮（長辺2048・目標2.5MB）。有料画質は photo_quality_paid。"
+    },
+    {
+      "id": "photo_quality_paid",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "写真画質・容量の有料ティア",
+      "evidence_paths": [
+        "docs/product/photo_storage.md",
+        "apps/web/src/lib/prepareRegisterPhoto.ts"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": [],
+      "notes": "課金差は長辺と容量。2MB vs 3MB のみは不可。resolvePhotoQualityTier / PHOTO_STORAGE_QUOTA_BYTES。premium とセット。"
     },
     {
       "id": "vision_assist",
@@ -800,11 +816,14 @@
       "phase": "later",
       "status": "deferred",
       "title_ja": "プレミアム",
-      "evidence_paths": [],
+      "evidence_paths": [
+        "docs/product/photo_storage.md"
+      ],
       "expected_web_paths": [
         "/premium"
       ],
-      "expected_api_paths": []
+      "expected_api_paths": [],
+      "notes": "推し色全体適用に加え、写真画質・Storage 容量（photo_quality_paid）を候補に含む。"
     },
     {
       "id": "product_currency_fiat",

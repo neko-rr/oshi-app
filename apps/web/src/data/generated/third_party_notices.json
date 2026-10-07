@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-10-06T11:03:18Z",
+  "generated_at": "2026-10-07T12:11:50Z",
   "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
+    {
+      "name": "@marsidev/react-turnstile",
+      "version": "1.6.1",
+      "license": "MIT",
+      "ecosystem": "npm",
+      "homepage": "https://github.com/marsidev/react-turnstile"
+    },
     {
       "name": "@opennextjs/cloudflare",
       "version": "1.20.7",
@@ -211,8 +218,8 @@
       "id": "rakuten",
       "name_ja": "楽天市場API（商品検索等）",
       "attribution_required": true,
-      "status": "deferred_live_off",
-      "note_ja": "商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。LIVE オフ時はロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を再確認する。",
+      "status": "active",
+      "note_ja": "商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。`RAKUTEN_LIVE_CALLS=1` で実呼び出し。許可Webサイトは `RAKUTEN_ORIGIN`（API サーバー Origin）と一致させる。表示必須・ロゴ規定は公式に従う。",
       "docs_url": "https://webservice.rakuten.co.jp/"
     },
     {

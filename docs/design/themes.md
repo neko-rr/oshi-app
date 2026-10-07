@@ -12,12 +12,14 @@
 
 | 層 | 役割 |
 |----|------|
-| `apps/web/src/styles/colors.css` | `data-theme="…"` ごとに CSS 変数一式を定義 |
+| `apps/web/src/styles/colors.css` | `data-theme="…"` ごとに **色**トークン一式を定義（`--font-*` は置かない） |
 | `tailwind-theme.css` | `--primary` 等 → Tailwind `--color-*` へ橋渡し |
 | UI 部品 | `bg-primary` 等のみ（hex 禁止に近い運用） |
 | 保存 | FastAPI `GET/PUT /theme-settings` → `theme_settings.theme` |
 
 `<select>` でテーマ ID を選び、`document.documentElement` の `data-theme` を切り替える。**これが意図した簡単さ**であり、accent だけ差し替える方式ではない。
+
+**文字（フォント）はテーマ色とは別軸。** 正は `display_settings.font_pack` → `html[data-font-pack]` → `apps/web/src/styles/font-packs.css`（[tokens.md](tokens.md)）。
 
 ## 既定
 

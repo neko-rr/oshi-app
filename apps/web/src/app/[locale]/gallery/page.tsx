@@ -141,10 +141,42 @@ export default async function GalleryPage({
   } else {
     try {
       const token = accessToken;
-      const prefs = await apiFetch<DisplayPrefsSlice>(
+      // prefs とタグ類は同時開始。一覧だけ sort 確定後（URL に sort があれば prefs と並列）。
+      const prefsPromise = apiFetch<DisplayPrefsSlice>(
         API_PATHS.displaySettings,
         { accessToken: token },
       ).catch(() => null);
+      const tagsPromise = Promise.all([
+        apiFetch<TagMasterListResponse<CategoryTagItem>>(
+          API_PATHS.categoryTags,
+          { accessToken: token },
+        ).catch(() => ({ items: [] as CategoryTagItem[] })),
+        apiFetch<TagMasterListResponse<StorageLocationItem>>(
+          API_PATHS.storageLocations,
+          { accessToken: token },
+        ).catch(() => ({ items: [] as StorageLocationItem[] })),
+        apiFetch<TagMasterListResponse<ColorTagItem>>(API_PATHS.colorTags, {
+          accessToken: token,
+        }).catch(() => ({ items: [] as ColorTagItem[] })),
+        apiFetch<GalleryViewListResponse>(API_PATHS.galleryViews, {
+          accessToken: token,
+        }).catch(() => ({ items: [] as GalleryViewListResponse["items"] })),
+      ]);
+
+      const urlSort = listQuery.sort;
+      const productsStartedEarly = urlSort
+        ? apiFetch<ProductListResponse>(
+            productsApiPath({
+              ...listQuery,
+              sort: urlSort,
+              offset: 0,
+              limit: PAGE_LIMIT,
+            }),
+            { accessToken: token },
+          )
+        : null;
+
+      const prefs = await prefsPromise;
       listSort = sanitizeListSort(prefs?.list_sort ?? listQuery.sort);
       galleryLayout = sanitizeGalleryLayout(prefs?.gallery_layout);
       galleryImageFit = sanitizeGalleryImageFit(prefs?.gallery_image_fit);
@@ -155,25 +187,14 @@ export default async function GalleryPage({
         offset: 0,
         limit: PAGE_LIMIT,
       };
-      const [productList, catList, storageList, colorList, viewList] =
+
+      const [productList, [catList, storageList, colorList, viewList]] =
         await Promise.all([
-          apiFetch<ProductListResponse>(productsApiPath(effectiveQuery), {
-            accessToken: token,
-          }),
-          apiFetch<TagMasterListResponse<CategoryTagItem>>(
-            API_PATHS.categoryTags,
-            { accessToken: token },
-          ).catch(() => ({ items: [] as CategoryTagItem[] })),
-          apiFetch<TagMasterListResponse<StorageLocationItem>>(
-            API_PATHS.storageLocations,
-            { accessToken: token },
-          ).catch(() => ({ items: [] as StorageLocationItem[] })),
-          apiFetch<TagMasterListResponse<ColorTagItem>>(API_PATHS.colorTags, {
-            accessToken: token,
-          }).catch(() => ({ items: [] as ColorTagItem[] })),
-          apiFetch<GalleryViewListResponse>(API_PATHS.galleryViews, {
-            accessToken: token,
-          }).catch(() => ({ items: [] as GalleryViewListResponse["items"] })),
+          productsStartedEarly ??
+            apiFetch<ProductListResponse>(productsApiPath(effectiveQuery), {
+              accessToken: token,
+            }),
+          tagsPromise,
         ]);
       list = productList;
       categories = catList.items ?? [];

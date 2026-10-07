@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T14:23:39Z",
+  "generated_at": "2026-10-07T12:11:42Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -594,6 +594,17 @@
       "file": "apps/api/app/services/theme_service.py"
     }
   ],
-  "gaps": [],
-  "feature_count": 47
+  "gaps": [
+    {
+      "id": "photo_quality_paid",
+      "kind": "status_has_evidence",
+      "detail": "deferred だが evidence_paths がある（整理候補）"
+    },
+    {
+      "id": "premium",
+      "kind": "status_has_evidence",
+      "detail": "deferred だが evidence_paths がある（整理候補）"
+    }
+  ],
+  "feature_count": 48
 }

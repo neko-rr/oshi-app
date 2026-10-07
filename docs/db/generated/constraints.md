@@ -20,7 +20,7 @@
 | `display_settings` | `display_settings_keep_at_hand_count_check` | `CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))` |
 | `display_settings` | `display_settings_date_format_mode_check` | `CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))` |
 | `display_settings` | `display_settings_gallery_image_fit_check` | `CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))` |
-| `display_settings` | `display_settings_font_pack_check` | `CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text])))` |
+| `display_settings` | `display_settings_font_pack_check` | `CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))` |
 | `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
 | `gallery_view` | `gallery_view_view_name_len_check` | `CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))` |
 | `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |

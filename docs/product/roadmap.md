@@ -66,7 +66,14 @@
 | `sns_share` | GET 投稿・求譲など SNS 連携 | deferred |
 | `legal_terms` | 利用規約・お問い合わせ・バージョン | deferred |
 | `premium` | プレミアム移行（推し色の全体適用・保存を含む候補） | deferred |
+| `photo_quality_paid` | 保管画質ティア／Storage 容量の有料化（無料は圧縮既定） | deferred |
 | `crypto_nft_assets` | 暗号資産・NFT（法定通貨と別モデル） | deferred |
+
+### 写真・容量（2026-10-07）
+
+- **無料既定:** 登録時クライアント圧縮（長辺 **2048**・目標 ~2.5MB）。正本 [photo_storage.md](photo_storage.md)
+- **有料化の軸:** **長辺（解像度）** と **合計容量／枚数**。同じ解像度で「2MB vs 3MB」だけの課金はしない（画面差がほぼ無い）
+- 実装入口: `resolvePhotoQualityTier` / `PHOTO_STORAGE_QUOTA_BYTES`（クォータ強制は未）
 
 ### 通貨まわりの決定メモ（2026-09-04）
 

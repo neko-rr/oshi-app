@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AppEmotionalStatusScreen } from "@/components/feedback/AppEmotionalStatusScreen";
 
@@ -10,7 +11,7 @@ export default function RootNotFound() {
       body="アドレスが違うか、このページはもうありません。"
     >
       <Button asChild>
-        <a href="/">ホーム</a>
+        <Link href="/">ホーム</Link>
       </Button>
     </AppEmotionalStatusScreen>
   );

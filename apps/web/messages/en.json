@@ -1,4 +1,8 @@
 {
+  "AuthCaptcha": {
+    "missingSiteKey": "Bot protection (Turnstile) is not configured. Please contact the site admin.",
+    "missingToken": "Complete the bot check, then try again."
+  },
   "Guest": {
     "startAsGuest": "Continue as guest",
     "starting": "Starting…",
@@ -629,12 +633,17 @@
     },
     "photo": {
       "title": "Step 2 — Front photo",
-      "intro": "On mobile, the camera opens. On desktop, you can pick a file. Registration works without a photo.",
+      "intro": "On mobile, the camera opens. On desktop, you can pick a file. Registration works without a photo. Orientation is corrected automatically; you can rotate the preview if it is still wrong.",
       "label": "Front photo (capture or upload)",
       "selected": "Selected: {name}",
       "previewAlt": "Preview of the selected front photo",
       "retake": "Retake",
-      "confirmThumbAlt": "Photo to register"
+      "rotateLeft": "Rotate left",
+      "rotateRight": "Rotate right",
+      "confirmThumbAlt": "Photo to register",
+      "compressing": "Preparing photo…",
+      "compressFailed": "This photo can’t be used. Please choose another image.",
+      "tooLarge": "This photo is too large. Choose another image or take a new one."
     },
     "confirm": {
       "title": "Step 6 — Review and register",

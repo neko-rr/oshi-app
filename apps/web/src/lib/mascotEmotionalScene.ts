@@ -23,5 +23,6 @@ export function resolveMascotIdForEmotionalScene(
 export function poseForEmotionalScene(
   kind: EmotionalSceneKind,
 ): MascotPoseId {
+  void kind;
   return "not_found";
 }

@@ -1,4 +1,8 @@
 {
+  "AuthCaptcha": {
+    "missingSiteKey": "ボット対策（Turnstile）の設定がありません。管理者に連絡してください。",
+    "missingToken": "ボット確認が完了してから再度お試しください。"
+  },
   "Guest": {
     "startAsGuest": "ゲストではじめる",
     "starting": "開始中…",
@@ -629,12 +633,17 @@
     },
     "photo": {
       "title": "手順 2 — 正面写真",
-      "intro": "スマホではカメラが開きます。PC ではファイル選択もできます。なくても登録できます。",
+      "intro": "スマホではカメラが開きます。PC ではファイル選択もできます。なくても登録できます。向きは自動で直し、違うときはプレビューで回せます。",
       "label": "正面写真（撮影またはアップロード）",
       "selected": "選択中: {name}",
       "previewAlt": "選択した正面写真のプレビュー",
       "retake": "撮り直し",
-      "confirmThumbAlt": "登録する写真"
+      "rotateLeft": "左に回す",
+      "rotateRight": "右に回す",
+      "confirmThumbAlt": "登録する写真",
+      "compressing": "写真を整えています…",
+      "compressFailed": "この写真は使えません。別の画像を選んでください。",
+      "tooLarge": "写真が大きすぎます。別の画像を選ぶか、もう一度撮影してください。"
     },
     "confirm": {
       "title": "手順 6 — 確認と本登録",

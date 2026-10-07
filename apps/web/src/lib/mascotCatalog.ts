@@ -333,6 +333,41 @@ export function mascotLoadingFrameUrls(id: MascotId): string[] {
   return single ? [single] : [];
 }
 
+/** brand.ts の BRAND_LOGO_SRC と同じ（カタログは brand に依存しない） */
+const BRAND_LOGO_FALLBACK = "/brand/logo.png";
+
+/** 連番フレームの間隔（短い待ち用。長い演出にしない） */
+export const MASCOT_LOADING_FRAME_MS = 280;
+
+/**
+ * フル画面待ち用シルエットの画像 URL 列。
+ * none → ブランドロゴ。連番があればそれ、なければ loading → idle。
+ */
+export function resolveLoadingSilhouetteUrls(id: MascotId): string[] {
+  if (id === "none") {
+    return [BRAND_LOGO_FALLBACK];
+  }
+  const frames = mascotLoadingFrameUrls(id);
+  if (frames.length > 0) return frames;
+  const loading = mascotSceneUrl(id, "loading");
+  if (loading) return [loading];
+  const idle = mascotSceneUrl(id, "idle");
+  if (idle) return [idle];
+  return [BRAND_LOGO_FALLBACK];
+}
+
+/**
+ * ナビ pending 用の小シルエット。face_sm → face → ブランドロゴ。
+ */
+export function resolveNavPendingSilhouetteUrl(id: MascotId): string {
+  if (id === "none") return BRAND_LOGO_FALLBACK;
+  return (
+    mascotPartUrl(id, "face_sm.png") ??
+    mascotPartUrl(id, "face.png") ??
+    BRAND_LOGO_FALLBACK
+  );
+}
+
 /** 端末／DB の設定が読めないときの感情点フォールバック */
 export const UNKNOWN_PREFERENCE_MASCOT_ID: MascotId = "kaze_neko_adult";
 
@@ -345,7 +380,8 @@ export function resolveMascotIdForEmotionalScene(
 }
 
 export function poseForEmotionalScene(
-  _kind: EmotionalSceneKind,
+  kind: EmotionalSceneKind,
 ): MascotPoseId {
+  void kind;
   return "not_found";
 }

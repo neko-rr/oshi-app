@@ -681,8 +681,21 @@ export function RegisterWizard() {
       let photoId: number | null = null;
 
       if (draft.file) {
+        const { prepareRegisterPhoto } = await import(
+          "@/lib/prepareRegisterPhoto"
+        );
+        const prepared = await prepareRegisterPhoto(draft.file, {
+          plan: "free",
+        });
+        if (!prepared.ok) {
+          throw new Error(
+            prepared.code === "too_large"
+              ? t("photo.tooLarge")
+              : t("photo.compressFailed"),
+          );
+        }
         const form = new FormData();
-        form.append("file", draft.file);
+        form.append("file", prepared.file);
         const photoRes = await fetch(`${apiBase()}${API_PATHS.photos}`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

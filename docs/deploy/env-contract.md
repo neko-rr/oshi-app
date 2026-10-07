@@ -35,7 +35,9 @@
 | `NEXT_PUBLIC_SUPABASE_URL` | **必須** | 公開可 | `.env.local` | Workers env | プロジェクト URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **必須** | 公開可 | 同上 | 同上 | **anon/publishable のみ**。service_role 禁止 |
 | `NEXT_PUBLIC_API_BASE_URL` | **必須** | 公開可 | 開発は `http://127.0.0.1:8000` | **HTTPS の Render URL** | 末尾スラッシュなし推奨 |
+| `NEXT_PUBLIC_API_WAKE_ON_AUTH` | 任意 | 公開可 | 未設定=起こす | 未設定=起こす。**有料常時起動後は `0`** | Render Free 用。詳細は [README.md](README.md)「API 起床」 |
 | `NEXT_PUBLIC_BASE_URL` | 任意 | 公開可 | 任意 | 本番 Web のオリジン | リダイレクト組み立て用 |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Auth CAPTCHA 利用時 **必須** | 公開可 | `.env.local` | Workers env | Cloudflare Turnstile の **Site Key のみ**。Secret は Web/CF/Render に置かない（Supabase Auth の CAPTCHA 設定のみ） |
 | `AUTH_GATE_BYPASS` | 任意（開発のみ） | **非公開** | `.env.local` のみ | **置くな** | `=1` かつ非本番のときだけ、Supabase 未設定でも**業務ルート**を通す。通常は未設定。`/dev`（Design Lab）は非本番なら未ログイン可（別途） |
 | `NEXT_PUBLIC_E2E_AUTH_STUB_ENABLED` | 任意（**register-e2e のみ**） | 公開可だが **本番禁止** | テスト時のみ `1` | **置くな** | クライアントが Cookie `oshi_e2e_auth` を認証スタブとして読む。通常 CI の `next build` には付けない |
 | `E2E_AUTH_STUB_ENABLED` | 任意（**register-e2e のみ**） | **非公開** | テスト時のみ `1` | **置くな** | middleware が stub Cookie で保護ルートを通す。CF / Render 禁止 |
@@ -62,7 +64,7 @@
 | `RAKUTEN_ACCESS_KEY` | 任意 | 秘密 | 同上（新API必須） | 同上 | applicationId とセット |
 | `RAKUTEN_AFFILIATE_ID` | 任意 | — | 同上 | 同上 | |
 | `RAKUTEN_ORIGIN` | 任意 | — | 許可Webサイトと一致する Origin | 同上 | サーバーから付与 |
-| `RAKUTEN_LIVE_CALLS` | 任意 | — | 既定オフ | 同上 | |
+| `RAKUTEN_LIVE_CALLS` | 任意 | — | コード既定はオフ。キー再登録後は `1` で実呼出 | 同上 | 許可サイトと `RAKUTEN_ORIGIN` を一致 |
 | `OSHI_ACCENT_ENTITLED` | 任意 | — | 開発確認のみ `1`/`true` | 本番は未設定（false） | 推し色の保存・全体適用ゲート。課金前は全員ロック |
 
 テンプレ正本: `apps/api/.env.example`（Pydantic: `apps/api/app/core/settings.py`）。
