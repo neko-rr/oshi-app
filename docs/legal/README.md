@@ -24,4 +24,4 @@ python scripts/generate_third_party_notices.py --check
 ## やらないこと
 
 - `generated/` や Web 側 JSON の手編集
-- 楽天 LIVE オフのままロゴだけ先に出す（`services.json` の状態を正とする）
+- `services.json` の状態と矛盾する表示（LIVE オフ扱いのままロゴだけ出す等）

@@ -1,5 +1,59 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-10-07: Auth CAPTCHA（Turnstile）
+
+- Cloudflare Turnstile + Supabase Attack Protection（Captcha ON）
+- Web は `NEXT_PUBLIC_TURNSTILE_SITE_KEY` のみ（`.env.local` / CF）。**Secret は Supabase のみ**
+- 埋め込み: ゲスト／ログイン／新規登録／パスワード再設定（Google OAuth は対象外）
+- 自前 siteverify（FastAPI / Workers）は使わない
+
+## 2026-10-07: 遷移体感 A+B（loading + ナビ pending）
+
+- `[locale]/loading.tsx` → 設定マスコットの **シルエット**（`MascotLoadingSilhouette`）
+- 下部タブ／ヘッダー `Link` → `useLinkStatus` + 小シルエット（100ms 遅延）
+- 認可・`apiFetch` の `no-store` は変更なし。本番反映は Web 再デプロイ
+
+## 2026-10-07: ギャラリー fetch 並列化（C）
+
+- `gallery/page.tsx`: prefs とタグ類を同時開始。製品一覧は URL `sort` があれば同時、なければ prefs 確定後
+- Render Free API: **15分無通信でスリープ**／次リクエストで約1分で起床
+
+## 2026-10-07: 登録写真のクライアント圧縮（無料既定）
+
+- `prepareRegisterPhoto`: 長辺 2048・目標 ~2.5MB・API 10MB 未満（選択時＋保存前）
+- 有料方針: **長辺＋容量**（2MB vs 3MB だけは不可）。正本 `docs/product/photo_storage.md`
+- 入口: `resolvePhotoQualityTier` / `PHOTO_STORAGE_QUOTA_BYTES`（強制は未）
+- 向き: EXIF を画素に焼く＋登録プレビューで左右 90°（`rotateRegisterPhoto`）
+
+## 2026-10-07: ログイン起こし（Render Free）
+
+- `wakeApi` → 認証成功後に `GET /health`（パスワード／ゲスト／Google callback）
+- 無効化: `NEXT_PUBLIC_API_WAKE_ON_AUTH=0`
+- **有料常時起動にしたら必ず止める**（正本: `docs/deploy/README.md`「API 起床」）
+
+## 2026-10-07: `handle_new_user` を member 向けに修正（セキュリティ）
+
+- 症状: Anonymous ON でも `Database error creating anonymous user`（旧表 `member_information` 参照）
+- 対応: migration `20261007140000_fix_handle_new_user_member.sql`（ライブ適用済み）
+  - INSERT 先を `public.member` に修正
+  - ゲストは `member` 行を作らない／本登録化 UPDATE で upsert
+  - `SECURITY DEFINER` + `search_path` 固定、クライアントから EXECUTE revoke
+- 検証: ゲスト開始成功・直近 anon に member 行 0。連打スクショ時は CF Worker 1102 に注意
+
+## 2026-10-07: README をポートフォリオ向けに再構成
+
+- ルート `README.md` をプロトタイプ経緯＋課題＋技術ハイライト優先に更新（露骨な採用向け表記は避ける）
+- プロトタイプ: https://github.com/neko-rr/oshi-app-prototype （Render デモ URL は本線とバックエンド共有のため載せない）
+- 公式: https://oshihaven.com 。スクショは `docs/readme/screenshots/`
+- 再撮影: `apps/web/scripts/capture_readme_screenshots.mjs`
+
+## 2026-10-07: 楽天 LIVE は有効（ローカル疎通済み）
+
+- `RAKUTEN_LIVE_CALLS=1` + applicationId / accessKey / Origin。疎通 HTTP 200
+- 許可Webサイト = `RAKUTEN_ORIGIN`（API サーバー。Web の oshihaven.com ではない）
+- 正本: `docs/legal/services.json`（status=`active`）/ `docs/WAKE_UP.md`
+- 下記の古い「LIVE オフ前提」メモは無効
+
 ## 2026-10-06: `pnpm dev:web` は webpack
 
 - Next 16.3 + Turbopack は和文 `next/font/google` で `Can't resolve '@vercel/turbopack-next/internal/font/google/font'` になる（既知）
@@ -22,7 +76,7 @@
 - `/settings/theme` で `font_pack`: `clean` / `soft` / `magazine` / `readable` / `story` / `notebook`
 - 保存は `display_settings`（ゲストは端末のみ）。テーマ色とは独立
 - 既定は `clean`（IBM Plex Sans JP ＋ IBM Plex Sans）
-- ライセンスは OFL。Geist はルート既定から外した
+- ライセンスは OFL。`colors.css` にフォント名は置かない（正は `font-packs.css`）
 
 ## 2026-10-05: Next.js 16 と Cloudflare
 

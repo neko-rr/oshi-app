@@ -81,6 +81,8 @@ export {
   Rabbit,
   Radio,
   Ribbon,
+  RotateCcw,
+  RotateCw,
   ScanBarcode,
   Scissors,
   ScrollText,

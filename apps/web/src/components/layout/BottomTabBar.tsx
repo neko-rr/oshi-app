@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
+import {
+  NavLinkPendingHint,
+  NavLinkPendingOverlay,
+} from "@/components/layout/NavLinkPendingHint";
 import { Ellipsis, Images, Plus } from "@/lib/icons";
 import type { LucideIcon } from "@/lib/icons";
 
@@ -67,13 +71,20 @@ export default function BottomTabBar() {
                 aria-label={label}
                 aria-current={active ? "page" : undefined}
                 className={[
-                  "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-1 text-[10px] landscape:min-h-9 landscape:gap-0",
+                  "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-1 text-[10px] landscape:min-h-9 landscape:gap-0",
                   active
                     ? "font-semibold text-primary"
                     : "text-muted-foreground hover:text-foreground",
                 ].join(" ")}
               >
-                <Icon className="size-5 shrink-0 landscape:size-4" aria-hidden />
+                <NavLinkPendingOverlay />
+                <span className="relative">
+                  <Icon
+                    className="size-5 shrink-0 landscape:size-4"
+                    aria-hidden
+                  />
+                  <NavLinkPendingHint className="-right-3 -top-1 landscape:hidden" />
+                </span>
                 <span className="truncate landscape:hidden">{label}</span>
               </Link>
             </li>

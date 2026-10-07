@@ -24,6 +24,13 @@ import {
 } from "@/lib/displayPrefs";
 import { GuestStartButton } from "@/components/auth/GuestStartButton";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { AuthTurnstile } from "@/components/auth/AuthTurnstile";
+import { wakeApiInBackground } from "@/lib/wakeApi";
+import {
+  authCaptchaBlockReason,
+  readTurnstileSiteKey,
+  resolveCaptchaToken,
+} from "@/lib/authCaptcha";
 
 function apiBase(): string {
   return (
@@ -38,10 +45,18 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const t = useTranslations("LoginForm");
   const tOauth = useTranslations("AuthOAuth");
+  const tCaptcha = useTranslations("AuthCaptcha");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaRemount, setCaptchaRemount] = useState(0);
+
+  function clearCaptcha() {
+    setCaptchaToken(null);
+    setCaptchaRemount((n) => n + 1);
+  }
   const router = useRouter();
   const { landingPage } = useDisplaySettings();
   const destAfterAuth = landingPath(landingPage);
@@ -53,11 +68,34 @@ export function LoginForm({
     setError(null);
 
     try {
+      const siteKey = readTurnstileSiteKey(
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+      );
+      const block = authCaptchaBlockReason(siteKey, captchaToken);
+      if (block === "missing_site_key") {
+        setError(tCaptcha("missingSiteKey"));
+        return;
+      }
+      if (block === "missing_token") {
+        setError(tCaptcha("missingToken"));
+        return;
+      }
+      const token = resolveCaptchaToken(captchaToken);
+      if (!token) {
+        setError(tCaptcha("missingToken"));
+        return;
+      }
+
       const { error: signError } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken: token },
       });
       if (signError) throw signError;
+      clearCaptcha();
+
+      // Render Free 起床（失敗してもログイン継続。有料化後は wakeApi を止める）
+      wakeApiInBackground();
 
       let dest = destAfterAuth;
       try {
@@ -77,6 +115,7 @@ export function LoginForm({
       }
       router.push(dest);
     } catch (err: unknown) {
+      clearCaptcha();
       setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setIsLoading(false);
@@ -128,8 +167,18 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+              <AuthTurnstile
+                action="login"
+                remountKey={captchaRemount}
+                onTokenChange={setCaptchaToken}
+                className="flex justify-center"
+              />
               {error ? <p className="text-sm text-red-500">{error}</p> : null}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !captchaToken}
+              >
                 {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>

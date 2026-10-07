@@ -23,6 +23,8 @@ AI がローカルに置けない・**人間が Dashboard でやる作業**。
 
 - [ ] `SUPABASE_SECRET_KEY` を Dashboard に設定（値はチャット・Git に出さない）
 - [ ] 退会は通常 CRUD では使わない（`supabase_admin` 経由のみ）
+- [ ] **Free のまま**ならログイン起こし（`wakeApi`）を有効のまま（`NEXT_PUBLIC_API_WAKE_ON_AUTH` 未設定で可）
+- [ ] **有料常時起動に上げたら** Cloudflare で `NEXT_PUBLIC_API_WAKE_ON_AUTH=0`（手順: [deploy/README.md](deploy/README.md)「API 起床」）
 
 ## 2. Supabase Dashboard
 
@@ -36,7 +38,11 @@ AI がローカルに置けない・**人間が Dashboard でやる作業**。
   - Authentication → Providers → Anonymous（**2026-09-06 有効化済み**）  
   - **先に** RLS の `*_reject_anonymous` / `jwt_is_permanent_user()` がライブに入っていること（migration `20260906200000_reject_anonymous_rls`）  
   - 有効化後、ログイン画面の「ゲストではじめる」が動く  
-  - 一般公開時は CAPTCHA / Turnstile を検討（匿名ユーザー肥大防止）  
+  - **CAPTCHA / Turnstile（ボット対策）**  
+    - Cloudflare Turnstile ウィジェット作成（ドメイン: `oshihaven.com` + 自動の localhost）  
+    - Supabase → Authentication → **Attack Protection** → Enable Captcha → Provider **Turnstile** → **Secret のみ**貼付（Git / CF / `.env` 禁止）  
+    - Web: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`（Site Key・公開可）。ゲスト／ログイン／新規登録／パスワード再設定で `captchaToken` を渡す  
+    - 漏洩パスワード保護は別項目（Pro 以上・公開前に検討）  
 - **Google Provider を ON**（ログイン／新規登録の「Google で続ける」）  
   - Client ID / Secret は Dashboard のみ（Git に書かない）  
   - Google Cloud の承認済みリダイレクト URI は **Supabase** の `https://<project>.supabase.co/auth/v1/callback`  
@@ -163,6 +169,6 @@ pnpm dev:web
 コア（認証・製品・写真・タグ・統計・ダッシュボード・assist 設計）は移管済み。  
 登録ウィザード（1→2→6）・検索・プライバシーページは Web で利用可。  
 後回し: 書籍/SNS、規約、theme_settings 表、全削除、カメラ本格読取、Vision LIVE。  
-楽天は仕様変更で再登録まで LIVE 停止前提（`RAKUTEN_LIVE_CALLS=0`）。IO は `IO_LIVE_CALLS=1` で実呼び出し。
+楽天は 2026 新APIで再登録済み。ローカルは `RAKUTEN_LIVE_CALLS=1` で実呼び出し可（`APPLICATION_ID` / `ACCESS_KEY` / `ORIGIN`）。Render でも同じキーと LIVE=1・許可サイト一致が必要。IO は `IO_LIVE_CALLS=1` のとき実呼び出し。
 
 エージェント規約: `AGENTS.md` + `.cursor/rules/*.mdc` + skill `official-docs-first`

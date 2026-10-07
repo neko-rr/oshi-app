@@ -2893,7 +2893,7 @@
     {
       "table_name": "display_settings",
       "constraint_name": "display_settings_font_pack_check",
-      "definition": "CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text])))"
+      "definition": "CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))"
     },
     {
       "table_name": "display_settings",

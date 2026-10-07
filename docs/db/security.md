@@ -21,8 +21,14 @@
 2. 業務データは **ユーザー JWT + RLS**（`auth.mdc`）。通常経路で service_role を使わない
 3. ユーザー所有表は `members_id = auth.uid()`
 4. **Anonymous Sign-In** を使う場合は、全 wired 表＋Storage に `is_anonymous` 拒否（RESTRICTIVE / `jwt_is_permanent_user()`）を必須とする。Anonymous は `authenticated` ロールのため、members_id チェックだけでは足りない
-5. **未連携（schema_ready）の表は Data API から触らせない**（権限なし）。連携するときに明示 GRANT
-6. 新規表はテンプレ `docs/db/new-table-template.sql` に従う
+5. **`handle_new_user` / `handle_user_became_permanent`（auth.users トリガー）**  
+   - 書き込み先は **`public.member`**（旧 `member_information` 禁止）  
+   - **ゲスト（`is_anonymous`）では `member` 行を作らない**（肥大化・誤紐づけ防止）  
+   - 本登録化時の UPDATE で upsert  
+   - `SECURITY DEFINER` + 固定 `search_path`。`anon` / `authenticated` / `public` から **EXECUTE 不可**（トリガー専用）  
+   - migration: `20261007140000_fix_handle_new_user_member.sql`
+6. **未連携（schema_ready）の表は Data API から触らせない**（権限なし）。連携するときに明示 GRANT
+7. 新規表はテンプレ `docs/db/new-table-template.sql` に従う
 
 ## 表の区分
 

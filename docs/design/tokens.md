@@ -69,7 +69,7 @@
 | 軸 | 段階 | 既定 | 効果 |
 |----|------|------|------|
 | `text_scale`（文字の大きさ） | 1〜7 | 3（×1.0） | `html` の `font-size` 倍率（0.875〜1.375） |
-| `font_pack`（文字パック） | `clean` / `soft` / `magazine` / `readable` / `story` / `notebook` | `clean` | 和文＋欧文のセット。`story` と `notebook` は見出しだけ飾り字。`html[data-font-pack]`。旧組み合わせは Lab `/dev/design-lab/font-packs` に提案として残す |
+| `font_pack`（文字パック） | `clean` / `soft` / `magazine` / `readable` / `story` / `notebook` | `clean` | 和文＋欧文のセット。実装は `font-packs.css`（`colors.css` にフォント名を置かない）。`story` と `notebook` は見出しだけ飾り字。`html[data-font-pack]`。旧組み合わせは Lab `/dev/design-lab/font-packs` |
 | `ui_density`（UI密度） | 1〜7 | 4 | 行間・main／ギャラリー余白（つめつめ←→ゆったり） |
 | `list_sort`（一覧の並び） | `newest` / `name` / `created_at` | `newest` | ギャラリー・検索の既定ソート |
 | `gallery_layout`（ギャラリー表示） | `grid` / `large` / `list` | `grid` | 写真主役グリッド／大きめ／リスト |

@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-10-06T14:23:12Z`
+生成時刻 (UTC): `2026-10-06T16:33:06Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 

@@ -19,17 +19,31 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Link } from '@/i18n/navigation'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { AuthTurnstile } from '@/components/auth/AuthTurnstile'
+import {
+  authCaptchaBlockReason,
+  readTurnstileSiteKey,
+  resolveCaptchaToken,
+} from '@/lib/authCaptcha'
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const t = useTranslations('SignUp')
   const tOauth = useTranslations('AuthOAuth')
   const tCommon = useTranslations('Common')
+  const tCaptcha = useTranslations('AuthCaptcha')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaRemount, setCaptchaRemount] = useState(0)
   const router = useRouter()
+
+  function clearCaptcha() {
+    setCaptchaToken(null)
+    setCaptchaRemount((n) => n + 1)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -59,16 +73,37 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
     }
 
     try {
+      const siteKey = readTurnstileSiteKey(
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+      )
+      const block = authCaptchaBlockReason(siteKey, captchaToken)
+      if (block === 'missing_site_key') {
+        setError(tCaptcha('missingSiteKey'))
+        return
+      }
+      if (block === 'missing_token') {
+        setError(tCaptcha('missingToken'))
+        return
+      }
+      const token = resolveCaptchaToken(captchaToken)
+      if (!token) {
+        setError(tCaptcha('missingToken'))
+        return
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          captchaToken: token,
         },
       })
       if (error) throw error
+      clearCaptcha()
       router.push('/auth/sign-up-success')
     } catch (err: unknown) {
+      clearCaptcha()
       setError(err instanceof Error ? err.message : tCommon('genericError'))
     } finally {
       setIsLoading(false)
@@ -126,8 +161,18 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
               </div>
+              <AuthTurnstile
+                action="signup"
+                remountKey={captchaRemount}
+                onTokenChange={setCaptchaToken}
+                className="flex justify-center"
+              />
               {error ? <p className="text-sm text-red-500">{error}</p> : null}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !captchaToken}
+              >
                 {isLoading ? t('submitting') : t('submit')}
               </Button>
             </div>

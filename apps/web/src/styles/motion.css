@@ -5,10 +5,33 @@
   --motion-playful: 220ms;
 }
 
+/* ナビ pending: 速い遷移では出さず、100ms 後にだけシルエット／オーバーレイ */
+.nav-link-pending-hint--active {
+  animation: nav-link-pending-fade var(--motion-normal) ease forwards;
+  animation-delay: 100ms;
+}
+
+.nav-link-pending-overlay--active {
+  animation: nav-link-pending-fade var(--motion-normal) ease forwards;
+  animation-delay: 100ms;
+}
+
+@keyframes nav-link-pending-fade {
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .icon-picker-tile,
   .icon-picker-tile--active {
     transition: none !important;
     transform: none !important;
+  }
+
+  .nav-link-pending-hint--active,
+  .nav-link-pending-overlay--active {
+    animation: none;
+    opacity: 1;
   }
 }

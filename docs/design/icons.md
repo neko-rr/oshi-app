@@ -62,7 +62,7 @@ favicon: `apps/web/src/app/favicon.ico`（タブが読む正）。あわせて `
 |------|-----------|------|
 | 追加・登録 | `Plus` | 主 CTA の横は控えめ |
 | 設定 | `Settings` | ナビ・設定入口 |
-| ギャラリー・写真 | `Image` / `Images` | 一覧・サムネ欠け |
+| ギャラリー・写真 | `Image` / `Images` / `RotateCcw` / `RotateCw` | 一覧・サムネ欠け。登録プレビューの左右回転 |
 | 検索 | `Search` | ギャラリー内検索・ピッカー等 |
 | 戻る | `ChevronLeft` | 詳細・フォーム |
 | 並び替え | `ChevronUp` / `ChevronDown` | 設定タグ一覧 |

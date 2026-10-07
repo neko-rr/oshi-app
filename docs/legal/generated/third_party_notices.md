@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-10-06T11:03:18Z`
+生成時刻 (UTC): `2026-10-07T11:50:44Z`
 
 ## アプリ本体
 
@@ -14,6 +14,7 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 
 | 名前 | 版 | ライセンス | 系統 |
 |------|----|------------|------|
+| @marsidev/react-turnstile | 1.6.1 | MIT | npm |
 | @opennextjs/cloudflare | 1.20.7 | MIT | npm |
 | @radix-ui/react-avatar | 1.2.6 | MIT | npm |
 | @radix-ui/react-label | 2.1.15 | MIT | npm |
@@ -50,8 +51,8 @@ OSS 一覧とは別に、API／ブランドガイドライン上の表示義務�
 
 ### 楽天市場API（商品検索等）
 
-- 状態: `deferred_live_off` · 要表示
-- 商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。LIVE オフ時はロゴ／クレジットを出さない。LIVE 再開前に公式の表示必須・ロゴ規定を再確認する。
+- 状態: `active` · 要表示
+- 商品検索APIで照合結果を登録推奨として表示し、再購入用URLを保存する（affiliateId 付与時はアフィリエイトURL）。`RAKUTEN_LIVE_CALLS=1` で実呼び出し。許可Webサイトは `RAKUTEN_ORIGIN`（API サーバー Origin）と一致させる。表示必須・ロゴ規定は公式に従う。
 - 参考: https://webservice.rakuten.co.jp/
 
 ### Supabase（Auth / DB / Storage）

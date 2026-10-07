@@ -26,9 +26,11 @@
       "usage_ja": "ギャラリー・写真",
       "icons": [
         "Image",
-        "Images"
+        "Images",
+        "RotateCcw",
+        "RotateCw"
       ],
-      "note_ja": "一覧・サムネ欠け"
+      "note_ja": "一覧・サムネ欠け。登録プレビューの左右回転"
     },
     {
       "usage_ja": "検索",

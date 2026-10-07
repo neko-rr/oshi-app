@@ -10,6 +10,7 @@ import {
   type MascotId,
 } from "@/lib/mascotCatalog";
 import { readLocalMascotPreferenceRaw } from "@/lib/mascotPrefs";
+import { runAfterTick } from "@/lib/runAfterTick";
 
 type Props = {
   kind: EmotionalSceneKind;
@@ -25,9 +26,11 @@ export function MascotEmotionalMark({ kind }: Props) {
   );
 
   useEffect(() => {
-    setMascotId(
-      resolveMascotIdForEmotionalScene(readLocalMascotPreferenceRaw()),
-    );
+    return runAfterTick(() => {
+      setMascotId(
+        resolveMascotIdForEmotionalScene(readLocalMascotPreferenceRaw()),
+      );
+    });
   }, []);
 
   const src = mascotSceneUrl(mascotId, poseForEmotionalScene(kind));
