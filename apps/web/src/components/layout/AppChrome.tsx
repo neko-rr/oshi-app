@@ -30,10 +30,10 @@ export default function AppChrome({ children }: AppChromeProps) {
       <OfflineBanner />
       <main
         className={[
-          "mx-auto w-full max-w-3xl flex-1 px-4 py-density-main",
+          "mx-auto w-full max-w-3xl flex-1 px-4",
           hideTabs
-            ? ""
-            : "pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-density-main",
+            ? "py-density-main"
+            : "pt-density-main pb-above-bottom-tabs",
         ].join(" ")}
       >
         {children}

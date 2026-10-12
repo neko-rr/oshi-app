@@ -982,42 +982,33 @@ export function RegisterWizard() {
           guestTrial={
             isGuest ? (
               <div className="flex flex-col gap-2">
-                <div
-                  className="flex flex-wrap gap-2"
-                  role="group"
-                  aria-label={tAssist("guestModeLabel")}
-                >
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={guestMode === "api" ? "default" : "outline"}
-                    onClick={() => setGuestMode("api")}
-                  >
-                    {tAssist("guestModeApi")}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={guestMode === "screen" ? "default" : "outline"}
-                    onClick={() => {
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={guestMode === "api" ? "default" : "outline"}
+                  aria-pressed={guestMode === "api"}
+                  onClick={() => {
+                    if (guestMode === "api") {
                       setGuestMode("screen");
                       setGuestCaptchaToken(null);
-                    }}
-                  >
-                    {tAssist("guestModeScreen")}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {guestMode === "api"
-                    ? tAssist("guestTrialHint")
-                    : tAssist("guestScreenHint")}
-                </p>
+                      return;
+                    }
+                    setGuestMode("api");
+                  }}
+                >
+                  {tAssist("guestModeApi")}
+                </Button>
                 {guestMode === "api" ? (
-                  <AuthTurnstile
-                    action="guest-assist"
-                    remountKey={guestCaptchaRemount}
-                    onTokenChange={setGuestCaptchaToken}
-                  />
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      {tAssist("guestTrialHint")}
+                    </p>
+                    <AuthTurnstile
+                      action="guest-assist"
+                      remountKey={guestCaptchaRemount}
+                      onTokenChange={setGuestCaptchaToken}
+                    />
+                  </>
                 ) : null}
               </div>
             ) : null

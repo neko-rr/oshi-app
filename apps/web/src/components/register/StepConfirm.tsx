@@ -181,7 +181,7 @@ export function StepConfirm({
   }, [photoFile]);
 
   return (
-    <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4">
+    <form onSubmit={onSubmit} className="register-step flex max-w-md flex-col gap-4">
       <div>
         <h2 className="text-lg font-semibold">{t("title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
@@ -632,7 +632,7 @@ export function StepConfirm({
         </div>
       )}
 
-      <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-3 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="register-sticky-actions sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-3 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         {showContinue ? (
           <>
             <Button type="button" onClick={onContinueRegister}>

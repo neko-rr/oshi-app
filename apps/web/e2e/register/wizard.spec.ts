@@ -183,11 +183,14 @@ test.describe("register wizard fixtures", () => {
     expect(created.photo_id == null).toBe(true);
   });
 
-  test("guest: 画面だけ確認は次へで進み、本保存はゲートする", async ({
+  test("guest: スキップで進み、本保存はゲートする", async ({
     page,
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "guest");
+    await expect(
+      page.getByRole("button", { name: /画面だけ確認|Preview screens only/ }),
+    ).toHaveCount(0);
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await dismissStartNudge(page);
     await expect(page.locator("#wizard_photo")).toBeVisible();

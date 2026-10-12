@@ -81,6 +81,40 @@ html[data-ui-density="7"] {
   padding-block: calc(1.5rem * var(--density-space));
 }
 
+.pt-density-main {
+  padding-top: calc(1.5rem * var(--density-space));
+}
+
+/*
+ * スマホ下部タブの下に本文を通す。
+ * py-density-main の padding-block は層の外にあり、Tailwind の pb 指定より強い。
+ * タブ分の余白は同じ置き場のこのクラスで足す。
+ */
+.pb-above-bottom-tabs {
+  padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  .pb-above-bottom-tabs {
+    padding-bottom: calc(1.5rem * var(--density-space));
+  }
+}
+
+@media (max-width: 1023px) {
+  html:has(.pb-above-bottom-tabs) {
+    scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* 登録の固定操作（次へ等）に、最後の入力が隠れないようにする */
+  .register-step :is(input, textarea, select, a, button) {
+    scroll-margin-bottom: calc(9.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .register-sticky-actions :is(a, button) {
+    scroll-margin-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ギャラリーグリッドの余白 */
 .gallery-density-grid {
   gap: calc(0.625rem * var(--density-space));

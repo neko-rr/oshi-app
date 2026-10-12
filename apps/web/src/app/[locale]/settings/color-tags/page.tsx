@@ -8,7 +8,7 @@ import { API_PATHS } from "@oshi/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { GuestServerGate } from "@/components/auth/GuestServerGate";
 
 type ColorTagItem = {
@@ -35,23 +35,24 @@ export default function ColorTagsSettingsPage() {
   const t = useTranslations("ColorTags");
   const tCommon = useTranslations("Common");
   const router = useRouter();
+  const session = useBrowserSession();
   const defaultSlots = useMemo(() => emptySlots(), []);
   const [entries, setEntries] = useState<ColorTagItem[]>(defaultSlots);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const getToken = useCallback(async () => {
-    const supabase = createClient();
-    const { data, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !data.session) {
+  const getToken = useCallback(() => {
+    if (session.status !== "ready") return null;
+    if (!session.accessToken) {
       router.push("/auth/login");
       return null;
     }
-    return data.session.access_token;
-  }, [router]);
+    return session.accessToken;
+  }, [router, session.accessToken, session.status]);
 
   useEffect(() => {
+    if (session.status !== "ready") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -95,7 +96,7 @@ export default function ColorTagsSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [getToken, defaultSlots, tCommon]);
+  }, [getToken, defaultSlots, tCommon, session.status]);
 
   function updateSlot(
     slot: number,
