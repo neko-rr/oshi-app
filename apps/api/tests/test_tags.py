@@ -130,6 +130,18 @@ def test_storage_locations_requires_auth() -> None:
     assert client.delete("/storage-locations/1").status_code == 401
 
 
+def test_normalize_storage_capacity_range() -> None:
+    from app.services.tag_service import normalize_storage_capacity
+
+    assert normalize_storage_capacity(10) == 10
+    assert normalize_storage_capacity("1") == 1
+    try:
+        normalize_storage_capacity(0)
+        raise AssertionError("0 は入る枚数にできない")
+    except ValueError:
+        pass
+
+
 def test_patch_storage_location_calls_service() -> None:
     with (
         patch("app.deps.auth.verify_access_token", return_value=USER),

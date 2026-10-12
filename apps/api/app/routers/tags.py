@@ -32,11 +32,13 @@ class CategoryUpdate(BaseModel):
 class StorageLocationCreate(BaseModel):
     storage_location_name: str
     storage_location_icon: str = "map-pin"
+    storage_count_per_1: int = Field(default=1, ge=1, le=9999)
 
 
 class StorageLocationUpdate(BaseModel):
     storage_location_name: str
     storage_location_icon: str = "map-pin"
+    storage_count_per_1: int = Field(default=1, ge=1, le=9999)
 
 
 class TagOrderRequest(BaseModel):
@@ -260,6 +262,7 @@ def post_storage_location(
             access_token=access_token,
             name=body.storage_location_name,
             icon=body.storage_location_icon,
+            capacity_count=body.storage_count_per_1,
         )
     except Exception as exc:
         raise _err(exc) from exc
@@ -280,6 +283,7 @@ def patch_storage_location(
             storage_location_id=storage_location_id,
             name=body.storage_location_name,
             icon=body.storage_location_icon,
+            capacity_count=body.storage_count_per_1,
         )
     except Exception as exc:
         raise _err(exc) from exc

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS, type ProductTagSummary } from "@oshi/shared";
 import { ProductDetailEditor } from "@/components/ProductDetailEditor";
+import { ProductPhotoReplace } from "@/components/gallery/ProductPhotoReplace";
 import { ProductDetailHero } from "@/components/gallery/ProductDetailHero";
 import { ProductDetailNeighborNav } from "@/components/gallery/ProductDetailNeighborNav";
 import { FormattedAppDate } from "@/components/format/FormattedAppDate";
@@ -75,6 +76,15 @@ export default async function GalleryDetailPage({
     category_tag_id?: string;
     storage_location_id?: string;
     color_tag_slot?: string;
+    sales_desired?: string;
+    want_object?: string;
+    missing_price?: string;
+    missing_purchase_date?: string;
+    purchase_month?: string;
+    missing_category?: string;
+    missing_storage?: string;
+    missing_photo?: string;
+    duplicate_barcode?: string;
     offset?: string;
     sort?: string;
     v?: string;
@@ -157,6 +167,7 @@ export default async function GalleryDetailPage({
             alt={detail.product_name?.trim() || t("photoAlt")}
             emptyLabel={tGallery("noImage")}
           />
+          <ProductPhotoReplace registeredProductId={id} />
 
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">

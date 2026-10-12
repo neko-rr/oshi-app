@@ -203,6 +203,140 @@
               "title": "Sort"
             },
             "description": "newest / name / created_at"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 16
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "edit のとき登録項目を含めて返す",
+              "title": "View"
+            },
+            "description": "edit のとき登録項目を含めて返す"
+          },
+          {
+            "name": "sales_desired",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき交換OK（sales_desired_flag=1）だけ",
+              "default": false,
+              "title": "Sales Desired"
+            },
+            "description": "true のとき交換OK（sales_desired_flag=1）だけ"
+          },
+          {
+            "name": "want_object",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき欲しい（want_object_flag=1）だけ",
+              "default": false,
+              "title": "Want Object"
+            },
+            "description": "true のとき欲しい（want_object_flag=1）だけ"
+          },
+          {
+            "name": "missing_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき購入価格が空のものだけ",
+              "default": false,
+              "title": "Missing Price"
+            },
+            "description": "true のとき購入価格が空のものだけ"
+          },
+          {
+            "name": "missing_purchase_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき購入日が空のものだけ",
+              "default": false,
+              "title": "Missing Purchase Date"
+            },
+            "description": "true のとき購入日が空のものだけ"
+          },
+          {
+            "name": "purchase_month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 7
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "YYYY-MM。その月の購入日だけ",
+              "title": "Purchase Month"
+            },
+            "description": "YYYY-MM。その月の購入日だけ"
+          },
+          {
+            "name": "missing_category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のときカテゴリが空のものだけ",
+              "default": false,
+              "title": "Missing Category"
+            },
+            "description": "true のときカテゴリが空のものだけ"
+          },
+          {
+            "name": "missing_storage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき収納場所が空のものだけ",
+              "default": false,
+              "title": "Missing Storage"
+            },
+            "description": "true のとき収納場所が空のものだけ"
+          },
+          {
+            "name": "missing_photo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき写真が無いものだけ",
+              "default": false,
+              "title": "Missing Photo"
+            },
+            "description": "true のとき写真が無いものだけ"
+          },
+          {
+            "name": "duplicate_barcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "true のとき同じバーコードが2件以上の品だけ",
+              "default": false,
+              "title": "Duplicate Barcode"
+            },
+            "description": "true のとき同じバーコードが2件以上の品だけ"
           }
         ],
         "responses": {
@@ -605,7 +739,7 @@
           "assist"
         ],
         "summary": "Assist Describe Image",
-        "description": "Vision 説明（キー未設定・LIVE 無効時は soft status）。",
+        "description": "写真抽出。ゲストは CAPTCHA 成功かつ楽天照合と合計1時間3回まで。",
         "operationId": "assist_describe_image_assist_vision_describe_post",
         "requestBody": {
           "content": {
@@ -703,7 +837,7 @@
           "assist"
         ],
         "summary": "Assist Barcode Lookup",
-        "description": "楽天バーコード検索（同上）。",
+        "description": "楽天バーコード検索。ゲストは CAPTCHA 成功かつ写真抽出と合計1時間3回まで。",
         "operationId": "assist_barcode_lookup_assist_barcode_lookup_post",
         "requestBody": {
           "content": {
@@ -2102,6 +2236,200 @@
           }
         }
       }
+    },
+    "/spending-budgets": {
+      "put": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Put Spending Budget",
+        "operationId": "put_spending_budget_spending_budgets_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpendingBudgetBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Put Spending Budget Spending Budgets Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/spending-budgets/{currency_code}": {
+      "delete": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Remove Spending Budget",
+        "operationId": "remove_spending_budget_spending_budgets__currency_code__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "currency_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Currency Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Spending Budget Spending Budgets  Currency Code  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oshi-days": {
+      "put": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Put Oshi Day",
+        "operationId": "put_oshi_day_oshi_days_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OshiDayBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Put Oshi Day Oshi Days Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Remove Oshi Day",
+        "operationId": "remove_oshi_day_oshi_days_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "character_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "title": "Character Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Remove Oshi Day Oshi Days Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2127,6 +2455,17 @@
             "type": "string",
             "minLength": 1,
             "title": "Barcode"
+          },
+          "captcha_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captcha Token"
           }
         },
         "type": "object",
@@ -2594,6 +2933,17 @@
               }
             ],
             "title": "Raw Base64"
+          },
+          "captcha_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captcha Token"
           }
         },
         "type": "object",
@@ -2932,6 +3282,58 @@
             "type": "array",
             "title": "Color Tag Slots"
           },
+          "sales_desired": {
+            "type": "boolean",
+            "title": "Sales Desired",
+            "default": false
+          },
+          "want_object": {
+            "type": "boolean",
+            "title": "Want Object",
+            "default": false
+          },
+          "missing_price": {
+            "type": "boolean",
+            "title": "Missing Price",
+            "default": false
+          },
+          "missing_purchase_date": {
+            "type": "boolean",
+            "title": "Missing Purchase Date",
+            "default": false
+          },
+          "purchase_month": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 7
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Month"
+          },
+          "missing_category": {
+            "type": "boolean",
+            "title": "Missing Category",
+            "default": false
+          },
+          "missing_storage": {
+            "type": "boolean",
+            "title": "Missing Storage",
+            "default": false
+          },
+          "missing_photo": {
+            "type": "boolean",
+            "title": "Missing Photo",
+            "default": false
+          },
+          "duplicate_barcode": {
+            "type": "boolean",
+            "title": "Duplicate Barcode",
+            "default": false
+          },
           "list_sort": {
             "type": "string",
             "title": "List Sort",
@@ -3078,6 +3480,28 @@
         ],
         "title": "OshiAccentSettingsBody"
       },
+      "OshiDayBody": {
+        "properties": {
+          "character_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Character Name"
+          },
+          "start_date": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 8,
+            "title": "Start Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "character_name",
+          "start_date"
+        ],
+        "title": "OshiDayBody"
+      },
       "PatchProductRequest": {
         "properties": {
           "product_name": {
@@ -3090,6 +3514,18 @@
               }
             ],
             "title": "Product Name"
+          },
+          "photo_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Id"
           },
           "product_group_name": {
             "anyOf": [
@@ -3347,6 +3783,26 @@
         ],
         "title": "RestorePresetRequest"
       },
+      "SpendingBudgetBody": {
+        "properties": {
+          "currency_code": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 3,
+            "title": "Currency Code"
+          },
+          "monthly_amount": {
+            "type": "integer",
+            "title": "Monthly Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "currency_code",
+          "monthly_amount"
+        ],
+        "title": "SpendingBudgetBody"
+      },
       "StorageLocationCreate": {
         "properties": {
           "storage_location_name": {
@@ -3357,6 +3813,13 @@
             "type": "string",
             "title": "Storage Location Icon",
             "default": "map-pin"
+          },
+          "storage_count_per_1": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Storage Count Per 1",
+            "default": 1
           }
         },
         "type": "object",
@@ -3375,6 +3838,13 @@
             "type": "string",
             "title": "Storage Location Icon",
             "default": "map-pin"
+          },
+          "storage_count_per_1": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Storage Count Per 1",
+            "default": 1
           }
         },
         "type": "object",

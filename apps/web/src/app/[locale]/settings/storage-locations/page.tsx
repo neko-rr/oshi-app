@@ -25,8 +25,14 @@ type StorageLocationItem = {
   storage_location_id: number;
   storage_location_name: string;
   storage_location_icon?: string;
+  storage_count_per_1?: number;
   slot?: number | null;
 };
+
+function capacityOf(item: StorageLocationItem): number {
+  const count = item.storage_count_per_1;
+  return typeof count === "number" && count >= 1 ? count : 1;
+}
 
 function apiBase(): string {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -46,9 +52,11 @@ export default function StorageLocationsSettingsPage() {
   const [createIcon, setCreateIcon] = useState<string>(
     LUCIDE_ICON_FALLBACK_STORAGE,
   );
+  const [createCapacity, setCreateCapacity] = useState("1");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editIcon, setEditIcon] = useState<string>(LUCIDE_ICON_FALLBACK_STORAGE);
+  const [editCapacity, setEditCapacity] = useState("1");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -105,6 +113,7 @@ export default function StorageLocationsSettingsPage() {
     setEditingId(item.storage_location_id);
     setEditName(item.storage_location_name);
     setEditIcon(item.storage_location_icon || LUCIDE_ICON_FALLBACK_STORAGE);
+    setEditCapacity(String(capacityOf(item)));
     setError(null);
   }
 
@@ -112,9 +121,20 @@ export default function StorageLocationsSettingsPage() {
     setEditingId(null);
   }
 
+  function readCapacity(text: string): number | null {
+    const amount = Number(text.trim());
+    if (!Number.isInteger(amount) || amount < 1 || amount > 9999) return null;
+    return amount;
+  }
+
   async function onCreate(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
+    const capacity = readCapacity(createCapacity);
+    if (capacity == null) {
+      setError(t("capacityInvalid"));
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -129,6 +149,7 @@ export default function StorageLocationsSettingsPage() {
         body: JSON.stringify({
           storage_location_name: name.trim(),
           storage_location_icon: createIcon,
+          storage_count_per_1: capacity,
         }),
       });
       if (!res.ok) {
@@ -140,6 +161,7 @@ export default function StorageLocationsSettingsPage() {
       }
       setName("");
       setCreateIcon(LUCIDE_ICON_FALLBACK_STORAGE);
+      setCreateCapacity("1");
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : tCommon("addFailed"));
@@ -151,6 +173,11 @@ export default function StorageLocationsSettingsPage() {
   async function onSaveEdit(e: FormEvent) {
     e.preventDefault();
     if (editingId == null || !editName.trim()) return;
+    const capacity = readCapacity(editCapacity);
+    if (capacity == null) {
+      setError(t("capacityInvalid"));
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -167,6 +194,7 @@ export default function StorageLocationsSettingsPage() {
           body: JSON.stringify({
             storage_location_name: editName.trim(),
             storage_location_icon: editIcon,
+            storage_count_per_1: capacity,
           }),
         },
       );
@@ -342,6 +370,18 @@ export default function StorageLocationsSettingsPage() {
                         ariaLabel={t("iconAria")}
                       />
                     </div>
+                    <div className="grid gap-1">
+                      <Label htmlFor={`edit-capacity-${item.storage_location_id}`}>
+                        {t("capacityLabel")}
+                      </Label>
+                      <Input
+                        id={`edit-capacity-${item.storage_location_id}`}
+                        inputMode="numeric"
+                        className="min-h-11 w-28"
+                        value={editCapacity}
+                        onChange={(e) => setEditCapacity(e.target.value)}
+                      />
+                    </div>
                     <div className="flex gap-2">
                       <Button type="submit" size="sm" disabled={saving}>
                         {saving ? tCommon("saving") : tCommon("save")}
@@ -378,6 +418,9 @@ export default function StorageLocationsSettingsPage() {
                         </span>
                         <span className="truncate">
                           {item.storage_location_name}
+                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t("capacityShort", { count: capacityOf(item) })}
                         </span>
                         {isPresetSlot(item.slot) ? (
                           <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
@@ -425,6 +468,17 @@ export default function StorageLocationsSettingsPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="storage_capacity">{t("capacityLabel")}</Label>
+          <Input
+            id="storage_capacity"
+            inputMode="numeric"
+            className="min-h-11 w-28"
+            value={createCapacity}
+            onChange={(e) => setCreateCapacity(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">{t("capacityHint")}</p>
         </div>
         <div className="grid gap-2">
           <Label>{tCommon("icon")}</Label>

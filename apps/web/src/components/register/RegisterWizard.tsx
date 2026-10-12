@@ -29,8 +29,10 @@ import {
   resolveAssistMessage,
 } from "./assistMessages";
 import { buildContinueDraft, clearEventBundle } from "./buildContinueDraft";
+import { AuthTurnstile } from "@/components/auth/AuthTurnstile";
 import { RegistrationRequiredDialog } from "@/components/auth/RegistrationRequiredDialog";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { GUEST_PREVIEW_COLOR_TAGS } from "@/lib/guestPreviewColorTags";
 import { getClientE2eStubSession } from "@/lib/e2eAuthStub";
 import { runAfterTick } from "@/lib/runAfterTick";
 import {
@@ -112,6 +114,12 @@ export function RegisterWizard() {
   const [step, setStep] = useState<WizardStep>(registerStartStep);
   const [draft, setDraft] = useState<RegisterDraft>(() => emptyDraft());
   const [colors, setColors] = useState<ColorTagItem[]>([]);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestMode, setGuestMode] = useState<"screen" | "api">("screen");
+  const [guestCaptchaToken, setGuestCaptchaToken] = useState<string | null>(
+    null,
+  );
+  const [guestCaptchaRemount, setGuestCaptchaRemount] = useState(0);
   const [categories, setCategories] = useState<CategoryTagItem[]>([]);
   const [storageLocationsRaw, setStorageLocationsRaw] = useState<
     StorageLocationItem[]
@@ -181,7 +189,14 @@ export function RegisterWizard() {
     (async () => {
       try {
         const session = await getSessionUser();
-        if (!session || session.isAnonymous || cancelled) return;
+        if (cancelled) return;
+        if (!session) return;
+        if (session.isAnonymous) {
+          setIsGuest(true);
+          setColors(GUEST_PREVIEW_COLOR_TAGS);
+          return;
+        }
+        setIsGuest(false);
         const headers = { Authorization: `Bearer ${session.accessToken}` };
         const [colorRes, catRes, storageRes] = await Promise.all([
           fetch(`${apiBase()}${API_PATHS.colorTags}`, { headers }),
@@ -307,8 +322,13 @@ export function RegisterWizard() {
       return;
     }
     try {
-      const token = await requirePermanentToken("barcode");
-      if (!token) return;
+      const session = await getSessionUser();
+      if (!session) {
+        router.push("/auth/login");
+        return;
+      }
+      if (session.isAnonymous) return;
+      const token = session.accessToken;
       const hints = await fetchDuplicateHints({
         apiBase: apiBase(),
         accessToken: token,
@@ -337,23 +357,54 @@ export function RegisterWizard() {
       return;
     }
     try {
-      const token = await requirePermanentToken("barcode");
-      if (!token) {
+      const session = await getSessionUser();
+      if (!session) {
+        router.push("/auth/login");
         return;
+      }
+      if (session.isAnonymous && guestMode === "screen") {
+        return;
+      }
+      const body: { barcode: string; captcha_token?: string } = {
+        barcode: trimmed,
+      };
+      if (session.isAnonymous) {
+        if (!guestCaptchaToken) {
+          patchDraft({ barcodeNote: tAssist("guestCaptchaRequired") });
+          setAssistHint(tAssist("guestCaptchaRequired"));
+          return;
+        }
+        body.captcha_token = guestCaptchaToken;
       }
       const res = await fetch(`${apiBase()}${API_PATHS.assistBarcodeLookup}`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ barcode: trimmed }),
+        body: JSON.stringify(body),
       });
+      if (session.isAnonymous) {
+        setGuestCaptchaToken(null);
+        setGuestCaptchaRemount((n) => n + 1);
+      }
       if (!res.ok) {
-        patchDraft({
-          barcodeNote: tAssist("lookupApiFailed"),
-        });
-        setAssistHint(tAssist("skipExternalLookup"));
+        const errBody = (await res.json().catch(() => null)) as {
+          error?: { code?: string };
+        } | null;
+        const code = errBody?.error?.code;
+        const note =
+          code === "GUEST_LOOKUP_QUOTA"
+            ? tAssist("guestQuota")
+            : code === "CAPTCHA_REQUIRED" ||
+                code === "CAPTCHA_INVALID" ||
+                code === "CAPTCHA_NOT_CONFIGURED"
+              ? tAssist("guestCaptchaFailed")
+              : tAssist("lookupApiFailed");
+        patchDraft({ barcodeNote: note });
+        setAssistHint(
+          code === "GUEST_LOOKUP_QUOTA" ? note : tAssist("skipExternalLookup"),
+        );
         return;
       }
       const json = (await res.json()) as BarcodeLookupResponse;
@@ -398,7 +449,13 @@ export function RegisterWizard() {
         });
         const itemCode = candidates[0]?.external_item_code ?? null;
         void checkOwned(trimmed, itemCode);
-        setAssistHint(null);
+        setAssistHint(
+          json.guest_trial && typeof json.lookups_remaining === "number"
+            ? tAssist("guestLookupsRemaining", {
+                count: json.lookups_remaining,
+              })
+            : null,
+        );
         return;
       }
       const msg = formatAssist(status, json.message);
@@ -528,19 +585,44 @@ export function RegisterWizard() {
       return;
     }
 
+    if (isGuest && guestMode === "screen") {
+      setAssistPhase("done");
+      return;
+    }
     setAssistPhase("running");
     setAssistHint(tAssist("applyingSuggestions"));
     try {
-      const token = await requirePermanentToken("assist");
-      if (!token) {
-        setAssistPhase("idle");
-        return;
+      let token: string | null = null;
+      let captchaToken: string | null = null;
+      if (isGuest && guestMode === "api") {
+        const session = await getSessionUser();
+        if (!session) {
+          router.push("/auth/login");
+          setAssistPhase("idle");
+          return;
+        }
+        if (!guestCaptchaToken) {
+          setAssistHint(tAssist("guestCaptchaRequired"));
+          setAssistPhase("idle");
+          return;
+        }
+        token = session.accessToken;
+        captchaToken = guestCaptchaToken;
+        setGuestCaptchaToken(null);
+        setGuestCaptchaRemount((n) => n + 1);
+      } else {
+        token = await requirePermanentToken("assist");
+        if (!token) {
+          setAssistPhase("idle");
+          return;
+        }
       }
       const result = await runAssistPipeline({
         apiBase: apiBase(),
         accessToken: token,
         file,
         signal: controller.signal,
+        captchaToken,
       });
       if (result.kind === "aborted") return;
       if (result.kind === "http_error") {
@@ -897,6 +979,49 @@ export function RegisterWizard() {
           }}
           onDetected={(decoded) => void onDetected(decoded)}
           onLookupAndNext={() => void onLookupAndNext()}
+          guestTrial={
+            isGuest ? (
+              <div className="flex flex-col gap-2">
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                  aria-label={tAssist("guestModeLabel")}
+                >
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={guestMode === "api" ? "default" : "outline"}
+                    onClick={() => setGuestMode("api")}
+                  >
+                    {tAssist("guestModeApi")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={guestMode === "screen" ? "default" : "outline"}
+                    onClick={() => {
+                      setGuestMode("screen");
+                      setGuestCaptchaToken(null);
+                    }}
+                  >
+                    {tAssist("guestModeScreen")}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {guestMode === "api"
+                    ? tAssist("guestTrialHint")
+                    : tAssist("guestScreenHint")}
+                </p>
+                {guestMode === "api" ? (
+                  <AuthTurnstile
+                    action="guest-assist"
+                    remountKey={guestCaptchaRemount}
+                    onTokenChange={setGuestCaptchaToken}
+                  />
+                ) : null}
+              </div>
+            ) : null
+          }
           onSkip={() => {
             patchDraft({ barcode: "", barcodeType: null, barcodeNote: null });
             setOwnedHint(null);
@@ -925,6 +1050,20 @@ export function RegisterWizard() {
           onNext={() => goConfirmFromPhoto()}
           onSkip={() => goConfirmFromPhoto({ clearPhoto: true })}
           onBack={() => setStep("barcode")}
+          guestTrial={
+            isGuest && guestMode === "api" ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {tAssist("guestPhotoHint")}
+                </p>
+                <AuthTurnstile
+                  action="guest-assist"
+                  remountKey={guestCaptchaRemount}
+                  onTokenChange={setGuestCaptchaToken}
+                />
+              </div>
+            ) : null
+          }
         />
       ) : null}
 
@@ -947,6 +1086,7 @@ export function RegisterWizard() {
           wantObject={draft.wantObject}
           photoFile={draft.file}
           colors={colors}
+          colorTagsHint={isGuest ? tAssist("guestColorPreview") : null}
           categories={categories}
           storageLocations={storageLocations}
           categoryTagId={draft.categoryTagId}

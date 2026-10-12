@@ -15,6 +15,15 @@ class GalleryViewCreateBody(BaseModel):
     category_tag_ids: list[int] = Field(default_factory=list)
     storage_location_ids: list[int] = Field(default_factory=list)
     color_tag_slots: list[int] = Field(default_factory=list)
+    sales_desired: bool = False
+    want_object: bool = False
+    missing_price: bool = False
+    missing_purchase_date: bool = False
+    purchase_month: str | None = Field(default=None, max_length=7)
+    missing_category: bool = False
+    missing_storage: bool = False
+    missing_photo: bool = False
+    duplicate_barcode: bool = False
     list_sort: str = "newest"
 
 
@@ -68,6 +77,15 @@ def create_gallery_view(
             category_tag_ids=body.category_tag_ids,
             storage_location_ids=body.storage_location_ids,
             color_tag_slots=body.color_tag_slots,
+            sales_desired=body.sales_desired,
+            want_object=body.want_object,
+            missing_price=body.missing_price,
+            missing_purchase_date=body.missing_purchase_date,
+            purchase_month=body.purchase_month,
+            missing_category=body.missing_category,
+            missing_storage=body.missing_storage,
+            missing_photo=body.missing_photo,
+            duplicate_barcode=body.duplicate_barcode,
             list_sort=body.list_sort,
         )
     except Exception as exc:

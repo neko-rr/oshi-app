@@ -57,7 +57,10 @@ function normalizeStructured(
 export type VisionHttpErrorKey =
   | "imageLoadFailed"
   | "visionConnectFailed"
-  | "visionFailed";
+  | "visionFailed"
+  | "guestQuota"
+  | "guestCaptchaFailed"
+  | "guestCaptchaRequired";
 
 export type RunAssistPipelineResult =
   | { kind: "skipped"; reason: "no_photo" }
@@ -78,8 +81,9 @@ export async function runAssistPipeline(options: {
   accessToken: string;
   file: File | null;
   signal?: AbortSignal;
+  captchaToken?: string | null;
 }): Promise<RunAssistPipelineResult> {
-  const { apiBase, accessToken, file, signal } = options;
+  const { apiBase, accessToken, file, signal, captchaToken } = options;
   if (!file) {
     return { kind: "skipped", reason: "no_photo" };
   }
@@ -104,13 +108,30 @@ export async function runAssistPipeline(options: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ image_source: imageSource }),
+      body: JSON.stringify({
+        image_source: imageSource,
+        ...(captchaToken ? { captcha_token: captchaToken } : {}),
+      }),
       signal,
     });
     if (signal?.aborted) {
       return { kind: "aborted" };
     }
     if (!res.ok) {
+      const errBody = (await res.json().catch(() => null)) as {
+        error?: { code?: string };
+      } | null;
+      const code = errBody?.error?.code;
+      if (code === "GUEST_LOOKUP_QUOTA") {
+        return { kind: "http_error", messageKey: "guestQuota" };
+      }
+      if (
+        code === "CAPTCHA_REQUIRED" ||
+        code === "CAPTCHA_INVALID" ||
+        code === "CAPTCHA_NOT_CONFIGURED"
+      ) {
+        return { kind: "http_error", messageKey: "guestCaptchaFailed" };
+      }
       return {
         kind: "http_error",
         messageKey: "visionConnectFailed",

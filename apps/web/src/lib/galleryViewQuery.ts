@@ -13,6 +13,15 @@ export type GalleryViewItem = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  sales_desired?: boolean;
+  want_object?: boolean;
+  missing_price?: boolean;
+  missing_purchase_date?: boolean;
+  purchase_month?: string | null;
+  missing_category?: boolean;
+  missing_storage?: boolean;
+  missing_photo?: boolean;
+  duplicate_barcode?: boolean;
   list_sort: string;
   display_order?: number;
 };
@@ -37,6 +46,15 @@ export function galleryListQueryFromView(view: GalleryViewItem): GalleryListQuer
     ...(category_tag_ids.length > 0 ? { category_tag_ids } : {}),
     ...(storage_location_ids.length > 0 ? { storage_location_ids } : {}),
     ...(color_tag_slots.length > 0 ? { color_tag_slots } : {}),
+    ...(view.sales_desired ? { sales_desired: true } : {}),
+    ...(view.want_object ? { want_object: true } : {}),
+    ...(view.missing_price ? { missing_price: true } : {}),
+    ...(view.missing_purchase_date ? { missing_purchase_date: true } : {}),
+    ...(view.purchase_month ? { purchase_month: view.purchase_month } : {}),
+    ...(view.missing_category ? { missing_category: true } : {}),
+    ...(view.missing_storage ? { missing_storage: true } : {}),
+    ...(view.missing_photo ? { missing_photo: true } : {}),
+    ...(view.duplicate_barcode ? { duplicate_barcode: true } : {}),
     sort,
   };
 }
@@ -52,6 +70,15 @@ export function galleryViewPayloadFromQuery(
   category_tag_ids: number[];
   storage_location_ids: number[];
   color_tag_slots: number[];
+  sales_desired: boolean;
+  want_object: boolean;
+  missing_price: boolean;
+  missing_purchase_date: boolean;
+  purchase_month: string | null;
+  missing_category: boolean;
+  missing_storage: boolean;
+  missing_photo: boolean;
+  duplicate_barcode: boolean;
   list_sort: ListSortId;
 } {
   const name = viewName.trim();
@@ -61,6 +88,15 @@ export function galleryViewPayloadFromQuery(
     category_tag_ids: [...(query.category_tag_ids ?? [])],
     storage_location_ids: [...(query.storage_location_ids ?? [])],
     color_tag_slots: [...(query.color_tag_slots ?? [])],
+    sales_desired: Boolean(query.sales_desired),
+    want_object: Boolean(query.want_object),
+    missing_price: Boolean(query.missing_price),
+    missing_purchase_date: Boolean(query.missing_purchase_date),
+    purchase_month: query.purchase_month ?? null,
+    missing_category: Boolean(query.missing_category),
+    missing_storage: Boolean(query.missing_storage),
+    missing_photo: Boolean(query.missing_photo),
+    duplicate_barcode: Boolean(query.duplicate_barcode),
     list_sort: query.sort ?? fallbackSort,
   };
 }

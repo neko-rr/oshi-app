@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     # Developer コンソールの「許可されたWebサイト」と揃える（Origin/Referer 用）
     rakuten_origin: str = ""
     rakuten_live_calls: bool = False
+    # ゲスト照合の Turnstile siteverify 専用。Web / Cloudflare には置かない
+    turnstile_secret_key: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:

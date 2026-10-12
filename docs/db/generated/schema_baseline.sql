@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-10-07T12:11:44.581965+00:00
+-- generated_at_utc: 2026-10-12T13:50:25.779830+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -138,7 +138,16 @@ CREATE TABLE IF NOT EXISTS public.gallery_view (
   list_sort text NOT NULL DEFAULT 'newest'::text,
   display_order integer NOT NULL DEFAULT 0,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now()
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  sales_desired boolean NOT NULL DEFAULT false,
+  want_object boolean NOT NULL DEFAULT false,
+  missing_price boolean NOT NULL DEFAULT false,
+  missing_purchase_date boolean NOT NULL DEFAULT false,
+  purchase_month text,
+  missing_category boolean NOT NULL DEFAULT false,
+  missing_storage boolean NOT NULL DEFAULT false,
+  missing_photo boolean NOT NULL DEFAULT false,
+  duplicate_barcode boolean NOT NULL DEFAULT false
 );
 
 -- === icon_tag ===
@@ -181,6 +190,16 @@ CREATE TABLE IF NOT EXISTS public.oshi_accent_settings (
   sub_hex text NOT NULL DEFAULT '#6a9bb8'::text,
   active boolean NOT NULL DEFAULT false,
   presets jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- === oshi_day ===
+CREATE TABLE IF NOT EXISTS public.oshi_day (
+  oshi_day_id bigint NOT NULL,
+  members_id uuid NOT NULL,
+  character_name text NOT NULL,
+  start_date date NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
@@ -295,6 +314,16 @@ CREATE TABLE IF NOT EXISTS public.registered_product_color_tag (
   members_id uuid NOT NULL,
   registered_product_id integer NOT NULL,
   slot integer NOT NULL
+);
+
+-- === spending_budget ===
+CREATE TABLE IF NOT EXISTS public.spending_budget (
+  spending_budget_id bigint NOT NULL,
+  members_id uuid NOT NULL,
+  currency_code text NOT NULL,
+  monthly_amount integer NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
 -- === storage_location ===

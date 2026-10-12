@@ -59,3 +59,41 @@ def persist_photo_upload(
         raise RuntimeError("画像のアップロードに失敗しました") from None
 
     return {"photo_id": photo_id, "object_path": object_path}
+
+
+def delete_member_photo(
+    *,
+    members_id: str,
+    access_token: str,
+    photo_id: int,
+) -> None:
+    """自分の photo 行と Storage オブジェクトを削除する。"""
+    if not isinstance(photo_id, int) or photo_id <= 0:
+        return
+    client = create_user_client(access_token)
+    found = (
+        client.table("photo")
+        .select("photo_id,photo_thumbnail_url,photo_high_resolution_url")
+        .eq("members_id", members_id)
+        .eq("photo_id", photo_id)
+        .limit(1)
+        .execute()
+    )
+    data = found.data if hasattr(found, "data") else None
+    if not isinstance(data, list) or not data or not isinstance(data[0], dict):
+        return
+    row = data[0]
+    paths: list[str] = []
+    for key in ("photo_thumbnail_url", "photo_high_resolution_url"):
+        raw = row.get(key)
+        if isinstance(raw, str) and raw.strip() and raw.strip() not in paths:
+            paths.append(raw.strip())
+    if paths:
+        try:
+            client.storage.from_(_BUCKET).remove(paths)
+        except Exception:
+            logger.exception("写真オブジェクトの削除に失敗 photo_id=%s", photo_id)
+            raise RuntimeError("画像の削除に失敗しました") from None
+    client.table("photo").delete().eq("members_id", members_id).eq(
+        "photo_id", photo_id
+    ).execute()

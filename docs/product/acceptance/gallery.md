@@ -7,8 +7,9 @@
 - [x] 空のとき分かりやすい空状態がある
 - [x] カテゴリ／収納のチップで絞り込める（複数可・同種 OR／異種 AND）
 - [x] カラータグ（スロット）でも絞り込める
+- [x] 交換OK・欲しいで絞り込める（オンだけ。他の条件と AND。保存ビューと最近使った条件にも残る）
 - [x] 一覧 URL にクエリ版 `v=1` が付く（パラメータがあるとき。欠落も v1 として読む）
-- [x] いまの条件の件数要約と一発クリアがある（検索・カテゴリ・収納・色。並びは残す）
+- [x] いまの条件の件数要約と一発クリアがある（検索・カテゴリ・収納・色・交換OK・欲しい。並びは残す）
 - [x] 名前付き保存ビューを最大20件まで保存・適用・削除できる（`gallery_view` / `GET|POST|PATCH|DELETE /gallery-views`）
 - [x] 一覧上で並びを変えられる（URL `sort` ＋ `display_settings.list_sort` 同期）
 - [x] 複数選択して収納を一括変更できる（`PATCH /products/bulk`）
@@ -24,5 +25,8 @@
 - [x] 一括更新・もっと見る失敗時（オフライン／電波弱含む）に再試行導線がある
 - [x] 写真フィットを選べる（枠いっぱい／はみ出し少なめ。大きめ表示は常に全体表示）。端末間で同期
 - [x] 最近使った検索・絞込条件をチップから再適用できる（端末ローカル履歴）
+- [x] 「編集」で読み込み済みの行をその場で直し、変えた行だけ保存できる（基本／詳しく。`GET /products?view=edit` と `PATCH /products/{id}`）
+- [x] 編集モードは「選択」と同時に入らない。未保存で抜けるときは確認がある
+- [x] 写真がある行は左右 90 度回転でき、保存時だけ新しい写真に差し替える（自分の `photo_id` のみ。破棄すると元に戻る）
 
-関連: `gallery` / `gallery_card_fields` / `gallery_filters_v2` / `gallery_sort_ui` / `gallery_bulk_storage` / `gallery_bulk_category` / `gallery_selection_scope` / `gallery_saved_views` / `gallery_image_fit` / `gallery_recent_filters` / `gallery_detail_neighbors`
+関連: `gallery` / `gallery_card_fields` / `gallery_filters_v2` / `gallery_status_filters` / `gallery_sort_ui` / `gallery_bulk_storage` / `gallery_bulk_category` / `gallery_selection_scope` / `gallery_saved_views` / `gallery_image_fit` / `gallery_recent_filters` / `gallery_detail_neighbors` / `gallery_inline_edit`

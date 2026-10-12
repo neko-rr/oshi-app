@@ -14,6 +14,15 @@ export type GalleryRecentQuery = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  sales_desired?: boolean;
+  want_object?: boolean;
+  missing_price?: boolean;
+  missing_purchase_date?: boolean;
+  purchase_month?: string;
+  missing_category?: boolean;
+  missing_storage?: boolean;
+  missing_photo?: boolean;
+  duplicate_barcode?: boolean;
   sort?: string;
 };
 
@@ -29,6 +38,15 @@ function hasActiveFilters(query: GalleryRecentQuery): boolean {
   if ((query.category_tag_ids?.length ?? 0) > 0) return true;
   if ((query.storage_location_ids?.length ?? 0) > 0) return true;
   if ((query.color_tag_slots?.length ?? 0) > 0) return true;
+  if (query.sales_desired) return true;
+  if (query.want_object) return true;
+  if (query.missing_price) return true;
+  if (query.missing_purchase_date) return true;
+  if (query.purchase_month) return true;
+  if (query.missing_category) return true;
+  if (query.missing_storage) return true;
+  if (query.missing_photo) return true;
+  if (query.duplicate_barcode) return true;
   return false;
 }
 
@@ -40,6 +58,15 @@ export function fingerprintGalleryQuery(query: GalleryRecentQuery): string {
     (query.storage_location_ids ?? []).join(","),
     (query.color_tag_slots ?? []).join(","),
     query.sort ?? "",
+    query.sales_desired ? "1" : "",
+    query.want_object ? "1" : "",
+    query.missing_price ? "1" : "",
+    query.missing_purchase_date ? "1" : "",
+    query.purchase_month ?? "",
+    query.missing_category ? "1" : "",
+    query.missing_storage ? "1" : "",
+    query.missing_photo ? "1" : "",
+    query.duplicate_barcode ? "1" : "",
   ];
   return parts.join("|");
 }
@@ -56,6 +83,15 @@ export function normalizeRecentQuery(query: GalleryRecentQuery): GalleryRecentQu
     ...(query.color_tag_slots?.length
       ? { color_tag_slots: [...query.color_tag_slots] }
       : {}),
+    ...(query.sales_desired ? { sales_desired: true } : {}),
+    ...(query.want_object ? { want_object: true } : {}),
+    ...(query.missing_price ? { missing_price: true } : {}),
+    ...(query.missing_purchase_date ? { missing_purchase_date: true } : {}),
+    ...(query.purchase_month ? { purchase_month: query.purchase_month } : {}),
+    ...(query.missing_category ? { missing_category: true } : {}),
+    ...(query.missing_storage ? { missing_storage: true } : {}),
+    ...(query.missing_photo ? { missing_photo: true } : {}),
+    ...(query.duplicate_barcode ? { duplicate_barcode: true } : {}),
     ...(query.sort ? { sort: query.sort } : {}),
   };
 }

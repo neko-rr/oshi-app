@@ -16,7 +16,10 @@ MAX_COLOR_SLOT = 7
 
 SELECT_COLS = (
     "gallery_view_id,view_name,q,category_tag_ids,storage_location_ids,"
-    "color_tag_slots,list_sort,display_order,created_at,updated_at"
+    "color_tag_slots,sales_desired,want_object,missing_price,"
+    "missing_purchase_date,purchase_month,missing_category,missing_storage,"
+    "missing_photo,duplicate_barcode,list_sort,display_order,"
+    "created_at,updated_at"
 )
 
 
@@ -65,6 +68,12 @@ def _normalize_color_slots(raw: list[int] | None) -> list[int]:
     return ids
 
 
+def _normalize_purchase_month(raw: str | None) -> str | None:
+    from app.services.product_list_filters import parse_purchase_month
+
+    return parse_purchase_month(raw)
+
+
 def _normalize_list_sort(raw: str | None) -> str:
     value = (raw or "newest").strip()
     if value not in ALLOWED_LIST_SORT:
@@ -80,6 +89,15 @@ def _row_to_item(row: dict[str, Any]) -> dict[str, Any]:
         "category_tag_ids": list(row.get("category_tag_ids") or []),
         "storage_location_ids": list(row.get("storage_location_ids") or []),
         "color_tag_slots": list(row.get("color_tag_slots") or []),
+        "sales_desired": bool(row.get("sales_desired")),
+        "want_object": bool(row.get("want_object")),
+        "missing_price": bool(row.get("missing_price")),
+        "missing_purchase_date": bool(row.get("missing_purchase_date")),
+        "purchase_month": row.get("purchase_month") or None,
+        "missing_category": bool(row.get("missing_category")),
+        "missing_storage": bool(row.get("missing_storage")),
+        "missing_photo": bool(row.get("missing_photo")),
+        "duplicate_barcode": bool(row.get("duplicate_barcode")),
         "list_sort": str(row.get("list_sort") or "newest"),
         "display_order": int(row.get("display_order") or 0),
     }
@@ -115,6 +133,15 @@ def create_gallery_view(
     category_tag_ids: list[int] | None = None,
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
+    sales_desired: bool = False,
+    want_object: bool = False,
+    missing_price: bool = False,
+    missing_purchase_date: bool = False,
+    purchase_month: str | None = None,
+    missing_category: bool = False,
+    missing_storage: bool = False,
+    missing_photo: bool = False,
+    duplicate_barcode: bool = False,
     list_sort: str | None = None,
 ) -> dict[str, Any]:
     if not members_id or not str(members_id).strip():
@@ -150,6 +177,15 @@ def create_gallery_view(
             storage_location_ids, field="storage_location_ids"
         ),
         "color_tag_slots": _normalize_color_slots(color_tag_slots),
+        "sales_desired": bool(sales_desired),
+        "want_object": bool(want_object),
+        "missing_price": bool(missing_price),
+        "missing_purchase_date": bool(missing_purchase_date),
+        "purchase_month": _normalize_purchase_month(purchase_month),
+        "missing_category": bool(missing_category),
+        "missing_storage": bool(missing_storage),
+        "missing_photo": bool(missing_photo),
+        "duplicate_barcode": bool(duplicate_barcode),
         "list_sort": _normalize_list_sort(list_sort),
         "display_order": 0,
     }

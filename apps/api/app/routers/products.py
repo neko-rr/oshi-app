@@ -7,8 +7,12 @@ from app.schemas.products import (
     CreateProductResponse,
     PatchProductRequest,
 )
-from app.services.product_list_filters import parse_positive_id_list
+from app.services.product_list_filters import (
+    parse_positive_id_list,
+    parse_purchase_month,
+)
 from app.services.duplicate_hints_service import get_duplicate_hints
+from app.services.photo_service import require_member_photo
 from app.services.product_service import (
     bulk_patch_products_for_member,
     create_product_for_member,
@@ -52,6 +56,48 @@ def list_products(
         default="newest",
         description="newest / name / created_at",
     ),
+    view: str | None = Query(
+        default=None,
+        max_length=16,
+        description="edit のとき登録項目を含めて返す",
+    ),
+    sales_desired: bool = Query(
+        default=False,
+        description="true のとき交換OK（sales_desired_flag=1）だけ",
+    ),
+    want_object: bool = Query(
+        default=False,
+        description="true のとき欲しい（want_object_flag=1）だけ",
+    ),
+    missing_price: bool = Query(
+        default=False,
+        description="true のとき購入価格が空のものだけ",
+    ),
+    missing_purchase_date: bool = Query(
+        default=False,
+        description="true のとき購入日が空のものだけ",
+    ),
+    purchase_month: str | None = Query(
+        default=None,
+        max_length=7,
+        description="YYYY-MM。その月の購入日だけ",
+    ),
+    missing_category: bool = Query(
+        default=False,
+        description="true のときカテゴリが空のものだけ",
+    ),
+    missing_storage: bool = Query(
+        default=False,
+        description="true のとき収納場所が空のものだけ",
+    ),
+    missing_photo: bool = Query(
+        default=False,
+        description="true のとき写真が無いものだけ",
+    ),
+    duplicate_barcode: bool = Query(
+        default=False,
+        description="true のとき同じバーコードが2件以上の品だけ",
+    ),
 ) -> dict:
     try:
         category_tag_ids = parse_positive_id_list(
@@ -63,6 +109,10 @@ def list_products(
         color_tag_slots = parse_positive_id_list(
             color_tag_slot, field="color_tag_slot", max_value=7, max_items=7
         )
+        view_norm = (view or "").strip() or None
+        if view_norm not in {None, "edit"}:
+            raise ValueError("未対応の view です")
+        month = parse_purchase_month(purchase_month)
         items = list_products_for_member(
             user.members_id,
             access_token=access_token,
@@ -74,6 +124,16 @@ def list_products(
             storage_location_ids=storage_location_ids or None,
             color_tag_slots=color_tag_slots or None,
             sort=sort,
+            view=view_norm,
+            sales_desired=sales_desired,
+            want_object=want_object,
+            missing_price=missing_price,
+            missing_purchase_date=missing_purchase_date,
+            purchase_month=month,
+            missing_category=missing_category,
+            missing_storage=missing_storage,
+            missing_photo=missing_photo,
+            duplicate_barcode=duplicate_barcode,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -250,6 +310,7 @@ def patch_product(
         "sales_desired_flag",
         "sales_desired_quantity",
         "want_object_flag",
+        "photo_id",
     ):
         if key not in data:
             continue
@@ -261,6 +322,8 @@ def patch_product(
             "sales_desired_quantity",
             "registration_quantity",
         ):
+            continue
+        if key == "photo_id" and data[key] is None:
             continue
         fields[key] = data[key]
     # 価格クリア時は記録通貨も落とす（ゴミ通貨だけ残さない）
@@ -280,6 +343,12 @@ def patch_product(
             else []
         )
     try:
+        if isinstance(fields.get("photo_id"), int):
+            require_member_photo(
+                members_id=user.members_id,
+                access_token=access_token,
+                photo_id=int(fields["photo_id"]),
+            )
         updated = patch_product_for_member(
             user.members_id,
             access_token=access_token,

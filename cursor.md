@@ -1,11 +1,77 @@
 # Cursor 開発メモ（重要連絡）
 
+## 2026-10-12: 写真なし・同じバーコード・カテゴリなし・収納なし
+
+- 統計の「写真なし」「同じバーコード」は件数が出て、そのギャラリーへ移る。0件でもカードは出る
+- 「カテゴリなし」「収納なし」の件数も、そのギャラリーへ移る
+- 同じバーコードは、前後の空白を除いて2件以上。空の番号は数えない。楽天の商品コードでは数えない
+- 写真の差し替えは、これまでどおり詳細だけ
+
+## 2026-10-12: 家計の穴と収納の入る枚数
+
+- 統計の「価格なし」「購入日なし」「月」は、同じ条件のギャラリーへ移る。予算の「今月」もその月の一覧
+- ギャラリーの状態チップに価格なし・購入日なし。購入月は付いているときだけ出る
+- 収納場所の「入る枚数」と、統計の残り。初期値は1枚。サイズからの自動計算はしない
+
+## 2026-10-12: 月ごとの支出・予算・推し何日目
+
+- `/dashboard` に、購入日の暦月（直近12か月、空月なし、日付なしは別枠）、通貨ごとの毎月同じ上限、キャラごとの推し何日目
+- 開始日がそのキャラの1日目。未来の開始日は日数を出さない。購入日から開始日は推測しない
+- 通貨は足さない。月ごとに違う予算、カテゴリ予算、推し部屋は未
+
+## 2026-10-12: 統計タブの数・内訳・通貨別支出
+
+- `/dashboard` は所持・欲しい・交換OK、カテゴリ、収納、通貨ごとの購入価格合計。色の円は残す
+- 件数はギャラリーの同じ絞り込みへ移る。通貨は足し合わせない
+
+## 2026-10-12: 詳細で写真を1件差し替え
+
+- 製品詳細のヒーロー下。「新しい写真を選ぶ」→ プレビュー → 「この写真で保存」
+- `POST /photos` のあと `PATCH /products/{id}` は `photo_id` だけ。他の項目は触らない
+- ギャラリー編集モードは回転のまま。一覧での別写真差し替えはしない
+
+## 2026-10-12: ギャラリーの交換OK・欲しい絞り込み
+
+- `/gallery` の状態チップ。URL / API は `sales_desired=1` と `want_object=1`（オンだけ。省略は絞らない）
+- 保存ビューは `gallery_view.sales_desired` / `want_object`（boolean。JSON に入れない）
+- 購入後にフラグを直す場所は、製品詳細とギャラリー編集の「詳しく」
+
+## 2026-10-12: ギャラリー編集モード
+
+- `/gallery` の「編集」は行ごとの登録項目。選択モード（同じ収納・カテゴリ）とは同時に入らない
+- 一覧の詳しい項目は `GET /products?view=edit` だけ。通常の一覧は薄いまま
+- 写真は左右 90 度。保存時に `POST /photos` して `PATCH` の `photo_id` を差し替える。自分の写真以外は拒否
+- 差し替え後、他製品が参照していなければ元の写真行と Storage を消す。失敗しても保存結果は残す
+- 別写真への差し替えと詳細画面の回転は今回なし
+
+## 2026-10-12: ゲストの楽天照合は1時間3回 + Turnstile
+
+- ゲストは登録で「API（自動タグ付け）を試す」か「画面だけ確認」を選ぶ。画面だけはスキップ進行で CAPTCHA なし
+- `POST /assist/barcode/lookup` と `POST /assist/vision/describe` がゲスト可。CAPTCHA 必須。合計1時間3回。超過は 429 `GUEST_LOOKUP_QUOTA`
+- キーワード / Vision / 保存 / 写真は本登録のまま
+- 色ラベルは登録確認の見本（`guestPreviewColorTags`）。DB には書かない
+- API env `TURNSTILE_SECRET_KEY`（Render のみ）。Site Key は従来の `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- 回数は API プロセス内メモリ。再起動で戻る。複数インスタンスでは共有しない
+
+## 2026-10-08: 不正アクセス・大量アクセス（追加実装は急がない）
+
+- 本線（RLS・JWKS・Turnstile・Private Storage・CORS）で限定公開は十分
+- 今は運用: 管理 2FA・Auth Rate Limits 確認・ゲスト月1掃除・依存更新
+- 公開／Pro: 漏洩パスワード ON・ログ監視・必要なら CF Rate Limit／重い API のみ制限
+- 正本: `docs/db/security.md` / `docs/WAKE_UP.md`「不正アクセス・大量アクセス」
+
+## 2026-10-07: パスキーは導入しない（deferred）
+
+- Supabase Passkeys は **experimental**（[公式](https://supabase.com/docs/guides/auth/passkeys)）。Dashboard OFF
+- 製品 ID `auth_passkey`（deferred）。正本: `docs/product/roadmap.md` / `docs/db/security.md` / `docs/WAKE_UP.md`
+- 勝手に実装・Dashboard ON にするな。再検討は安定化または明確な需要後
+
 ## 2026-10-07: Auth CAPTCHA（Turnstile）
 
 - Cloudflare Turnstile + Supabase Attack Protection（Captcha ON）
 - Web は `NEXT_PUBLIC_TURNSTILE_SITE_KEY` のみ（`.env.local` / CF）。**Secret は Supabase のみ**
 - 埋め込み: ゲスト／ログイン／新規登録／パスワード再設定（Google OAuth は対象外）
-- 自前 siteverify（FastAPI / Workers）は使わない
+- Auth 用 Secret は Supabase。ゲスト照合の siteverify だけ API の `TURNSTILE_SECRET_KEY`（Web / Workers には置かない）
 
 ## 2026-10-07: 遷移体感 A+B（loading + ナビ pending）
 
@@ -30,6 +96,13 @@
 - `wakeApi` → 認証成功後に `GET /health`（パスワード／ゲスト／Google callback）
 - 無効化: `NEXT_PUBLIC_API_WAKE_ON_AUTH=0`
 - **有料常時起動にしたら必ず止める**（正本: `docs/deploy/README.md`「API 起床」）
+
+## 2026-10-08: ゲスト本登録に Google（linkIdentity）
+
+- `/auth/upgrade` でログイン／新規と同じく「Google で続ける」を先頭表示
+- 実装は `linkIdentity`（UID 維持）。通常ログインは従来どおり `signInWithOAuth`
+- **Dashboard で Manual Linking を ON にすること**（WAKE_UP に追記）。OFF だと失敗する
+- ヘルパ: `apps/web/src/lib/googleAuth.ts` + 単体テスト
 
 ## 2026-10-07: `handle_new_user` を member 向けに修正（セキュリティ）
 

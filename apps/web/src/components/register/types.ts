@@ -41,6 +41,8 @@ export type BarcodeLookupResponse = {
   items?: BarcodeLookupItem[];
   message?: string;
   suggested_category_name?: string | null;
+  guest_trial?: boolean;
+  lookups_remaining?: number;
 };
 
 export type RegisterDraft = {

@@ -3,7 +3,7 @@
 
 コード・SQL は英語物理名。**このファイルは意味の説明用**（自動生成）。
 
-生成日時(UTC): `2026-10-07 12:11:44Z`
+生成日時(UTC): `2026-10-12 13:50:25Z`
 
 ## 使い方
 
@@ -172,7 +172,7 @@
 ## ギャラリー保存ビュー（`gallery_view`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 11
+- **列数:** 20
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -187,6 +187,15 @@
 | 表示順 | `display_order` | `integer` | 表示並び順 |
 | 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 | 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 交換OK | `sales_desired` | `boolean` |  |
+| 欲しい | `want_object` | `boolean` |  |
+| 価格なし | `missing_price` | `boolean` |  |
+| 購入日なし | `missing_purchase_date` | `boolean` | 日付 |
+| 購入月 | `purchase_month` | `text` |  |
+| カテゴリなし | `missing_category` | `boolean` |  |
+| 収納なし | `missing_storage` | `boolean` |  |
+| 写真なし | `missing_photo` | `boolean` |  |
+| 同じバーコード | `duplicate_barcode` | `boolean` |  |
 
 ## アイコンタグ（`icon_tag`）
 
@@ -245,6 +254,20 @@
 | サブ色 | `sub_hex` | `text` |  |
 | 有効 | `active` | `boolean` |  |
 | プリセット一覧 | `presets` | `jsonb` |  |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+
+## 推し何日目（`oshi_day`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 6
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| 推し何日目ID | `oshi_day_id` | `bigint` | 識別子または外部キー |
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| キャラクター名 | `character_name` | `text` |  |
+| 開始日 | `start_date` | `date` | 日付 |
 | 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 | 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 
@@ -383,6 +406,20 @@
 | 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
 | 登録製品ID | `registered_product_id` | `integer` | 識別子または外部キー |
 | スロット | `slot` | `integer` | 枠番号（プリセット等） |
+
+## 支出予算（`spending_budget`）
+
+- **状態:** アプリ連携済み（API 可）（`wired`）
+- **列数:** 6
+
+| 日本語列名 | 物理名 | 型 | 補足 |
+|------------|--------|----|------|
+| 支出予算ID | `spending_budget_id` | `bigint` | 識別子または外部キー |
+| 会員ID | `members_id` | `uuid` | テナント（ログインユーザー = auth.uid()） |
+| 通貨コード | `currency_code` | `text` |  |
+| 毎月の金額 | `monthly_amount` | `integer` |  |
+| 作成日時 | `created_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
+| 更新日時 | `updated_at` | `timestamp with time zone` | タイムスタンプ（時刻付き） |
 
 ## 収納場所（`storage_location`）
 

@@ -16,7 +16,7 @@ describe("fingerprintGalleryQuery", () => {
   it("ignores offset conceptually via normalize fields only", () => {
     assert.equal(
       fingerprintGalleryQuery({ q: "a", category_tag_ids: [1, 2] }),
-      "a|1,2|||",
+      "a|1,2||||||||||||",
     );
   });
 });
@@ -30,6 +30,8 @@ describe("isRecordableRecentQuery", () => {
       isRecordableRecentQuery({ category_tag_ids: [1] }),
       true,
     );
+    assert.equal(isRecordableRecentQuery({ sales_desired: true }), true);
+    assert.equal(isRecordableRecentQuery({ want_object: true }), true);
   });
 });
 

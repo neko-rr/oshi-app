@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BarcodeScanner } from "@/components/barcode/BarcodeScanner";
@@ -25,6 +26,8 @@ type Props = {
   onLookupAndNext: () => void;
   onSkip: () => void;
   onManualAll: () => void;
+  /** ゲスト照合の説明と CAPTCHA */
+  guestTrial?: ReactNode;
 };
 
 export function StepBarcode({
@@ -37,6 +40,7 @@ export function StepBarcode({
   onLookupAndNext,
   onSkip,
   onManualAll,
+  guestTrial = null,
 }: Props) {
   const t = useTranslations("Register.barcode");
   const tCommon = useTranslations("Common");
@@ -86,6 +90,8 @@ export function StepBarcode({
           </p>
         ) : null}
       </div>
+
+      {guestTrial}
 
       <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-2 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <Button

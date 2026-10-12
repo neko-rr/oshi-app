@@ -41,16 +41,52 @@ AI がローカルに置けない・**人間が Dashboard でやる作業**。
   - **CAPTCHA / Turnstile（ボット対策）**  
     - Cloudflare Turnstile ウィジェット作成（ドメイン: `oshihaven.com` + 自動の localhost）  
     - Supabase → Authentication → **Attack Protection** → Enable Captcha → Provider **Turnstile** → **Secret のみ**貼付（Git / CF / `.env` 禁止）  
-    - Web: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`（Site Key・公開可）。ゲスト／ログイン／新規登録／パスワード再設定で `captchaToken` を渡す  
+    - Web: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`（Site Key・公開可）。ゲスト／ログイン／新規登録／パスワード再設定、およびゲストのバーコード照合で使う  
+    - ゲスト照合の検証は API。Render に `TURNSTILE_SECRET_KEY`（同じウィジェットの Secret。Web / CF には置かない）  
     - 漏洩パスワード保護は別項目（Pro 以上・公開前に検討）  
-- **Google Provider を ON**（ログイン／新規登録の「Google で続ける」）  
+- **Google Provider を ON**（ログイン／新規登録／ゲスト本登録の「Google で続ける」）  
   - Client ID / Secret は Dashboard のみ（Git に書かない）  
   - Google Cloud の承認済みリダイレクト URI は **Supabase** の `https://<project>.supabase.co/auth/v1/callback`  
-  - Authorized JavaScript origins に `https://oshihaven.com`（開発は `http://127.0.0.1:3000`）
+  - Authorized JavaScript origins に `https://oshihaven.com`（開発は `http://127.0.0.1:3000`）  
+- **Manual Linking を ON**（ゲスト本登録の Google = `linkIdentity` に必須）  
+  - Authentication → Providers（または Auth settings）→ **Enable manual linking**  
+  - OFF のままだとゲストから Google で本登録できない  
+  - 公式: [Anonymous Sign-Ins](https://supabase.com/docs/guides/auth/auth-anonymous) / [Identity Linking](https://supabase.com/docs/guides/auth/auth-identity-linking)
 - **公開前**: Auth の漏洩パスワード保護（Have I Been Pwned）  
   - **Pro プラン以上が必要**（2026-08 時点・無料では不可）  
   - 一般公開・有料プラン移行時に有効化を検討  
   - 詳細メモ: [docs/db/security.md](db/security.md)（Git に載せてよい運用メモ）
+- **Passkeys（パスキー）: 今は導入しない（Dashboard OFF のまま）**  
+  - 公式: [Passkey authentication](https://supabase.com/docs/guides/auth/passkeys)（**experimental**。API 変更の可能性・クライアント opt-in 必須）  
+  - 本線はメール／Google／ゲスト＋Turnstile で足りる。ゲストはパスキー登録不可  
+  - 再検討: experimental 解除後、または一般公開後に明確な需要が出たとき  
+  - 製品 ID: `auth_passkey`（`deferred`）。[roadmap.md](product/roadmap.md) / [security.md](db/security.md)
+
+### 不正アクセス・大量アクセス（公開前チェック）
+
+詳細の表・優先度は [db/security.md](db/security.md)「不正アクセス・大量アクセス」。ここに運用チェックだけ置く。
+
+**方針:** 現行（RLS・JWKS・Turnstile・Private Storage・CORS・Redirect）で限定公開は十分。緊急の追加実装は不要。
+
+#### 今（コード不要）
+
+- [ ] **管理画面 2FA** — GitHub / Cloudflare / Supabase / Google Cloud / Render  
+- [ ] Supabase → Authentication → **Rate Limits** を確認（既定で問題なければそのまま）  
+- [ ] ゲスト掃除（下記）を月1で回す  
+- [ ] 依存更新（下記 Renovate）を進められる状態にする  
+
+#### 一般公開・Pro 移行時
+
+- [ ] 漏洩パスワード保護 ON（上記・Pro 以上）  
+- [ ] Auth／Render ログをときどき見る習慣（連打・401 急増）  
+- [ ] （任意）Cloudflare の Bot／Rate Limiting（ゾーン／プランに応じて）  
+- [ ] （任意・利用増後）API の重い経路だけレート制限  
+
+#### 後回し（勝手に実装しない）
+
+- パスキー（`auth_passkey`）／ユーザー向け MFA  
+- API 全体の重いレート制限ミドルウェア  
+- 自前 WAF・自前 CAPTCHA サーバ  
 
 ### 匿名ユーザー（ゲスト）掃除方針
 

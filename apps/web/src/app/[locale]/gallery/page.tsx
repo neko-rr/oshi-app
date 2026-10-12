@@ -78,6 +78,15 @@ export default async function GalleryPage({
     category_tag_id?: string;
     storage_location_id?: string;
     color_tag_slot?: string;
+    sales_desired?: string;
+    want_object?: string;
+    missing_price?: string;
+    missing_purchase_date?: string;
+    purchase_month?: string;
+    missing_category?: string;
+    missing_storage?: string;
+    missing_photo?: string;
+    duplicate_barcode?: string;
     offset?: string;
     sort?: string;
     v?: string;
@@ -240,6 +249,15 @@ export default async function GalleryPage({
           category_tag_ids: listQuery.category_tag_ids,
           storage_location_ids: listQuery.storage_location_ids,
           color_tag_slots: listQuery.color_tag_slots,
+          sales_desired: listQuery.sales_desired,
+          want_object: listQuery.want_object,
+          missing_price: listQuery.missing_price,
+          missing_purchase_date: listQuery.missing_purchase_date,
+          purchase_month: listQuery.purchase_month,
+          missing_category: listQuery.missing_category,
+          missing_storage: listQuery.missing_storage,
+          missing_photo: listQuery.missing_photo,
+          duplicate_barcode: listQuery.duplicate_barcode,
           sort: browseQuery.sort,
         }}
       />
@@ -357,6 +375,13 @@ export default async function GalleryPage({
             icon: c.category_tag_icon,
             color: c.category_tag_color,
           }))}
+          colorOptions={colorTags
+            .filter((c) => (c.color_tag_name || "").trim().length > 0)
+            .map((c) => ({
+              slot: c.slot,
+              name: c.color_tag_name,
+              color: c.color_tag_color,
+            }))}
         />
       ) : null}
     </div>

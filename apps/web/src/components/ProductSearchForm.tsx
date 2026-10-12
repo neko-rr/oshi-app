@@ -17,6 +17,15 @@ type Props = {
     | "category_tag_ids"
     | "storage_location_ids"
     | "color_tag_slots"
+    | "sales_desired"
+    | "want_object"
+    | "missing_price"
+    | "missing_purchase_date"
+    | "purchase_month"
+    | "missing_category"
+    | "missing_storage"
+    | "missing_photo"
+    | "duplicate_barcode"
     | "sort"
   >;
 };
@@ -38,6 +47,15 @@ export function ProductSearchForm({
         category_tag_ids: preserveFilters?.category_tag_ids,
         storage_location_ids: preserveFilters?.storage_location_ids,
         color_tag_slots: preserveFilters?.color_tag_slots,
+        sales_desired: preserveFilters?.sales_desired,
+        want_object: preserveFilters?.want_object,
+        missing_price: preserveFilters?.missing_price,
+        missing_purchase_date: preserveFilters?.missing_purchase_date,
+        purchase_month: preserveFilters?.purchase_month,
+        missing_category: preserveFilters?.missing_category,
+        missing_storage: preserveFilters?.missing_storage,
+        missing_photo: preserveFilters?.missing_photo,
+        duplicate_barcode: preserveFilters?.duplicate_barcode,
         sort: preserveFilters?.sort,
       }),
     );

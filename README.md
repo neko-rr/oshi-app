@@ -9,6 +9,15 @@
 | 作者・IP | 風ねこ / Kaze Neko（製品ブランドとは分離） |
 | ライセンス | [LICENSE](LICENSE) — Copyright (c) 2026 neko-rr. **All Rights Reserved** |
 
+[https://oshihaven.com](https://oshihaven.com) は、アカウントを作る前に触れます。ログイン画面の「ゲストではじめる」から入ってください。共有のデモ用パスワードはありません。人ごとに短い匿名セッションが分かれ、他の人のデータは見えません。
+
+ゲストは進み方を2つから選べます。
+
+- **画面だけ確認** — スキップで登録画面を進みます。外部 API は呼びません。
+- **API（自動タグ付け）を試す** — 楽天のバーコード照合と、写真からの抽出です。確認（CAPTCHA）のあと、合わせて1時間に3回までです。結果は画面に出るだけで、保存されません。
+
+グッズの保存、写真のアップロード、キーワード検索は本登録のあとです。ゲストの書き込みは API が拒否し、データベースの RLS でも拒否します。
+
 <p align="center">
   <img src="docs/readme/screenshots/01-home-desktop.png" alt="Oshihaven トップ（デスクトップ）" width="720" />
 </p>

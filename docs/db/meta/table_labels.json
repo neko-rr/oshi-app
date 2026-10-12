@@ -19,6 +19,8 @@
   "oshi_accent_settings": { "ja": "推し色設定", "status": "wired" },
   "display_settings": { "ja": "表示設定", "status": "wired" },
   "gallery_view": { "ja": "ギャラリー保存ビュー", "status": "wired" },
+  "spending_budget": { "ja": "支出予算", "status": "wired" },
+  "oshi_day": { "ja": "推し何日目", "status": "wired" },
   "data_export": { "ja": "データ書き出し", "status": "wired" },
   "registered_product_color_tag": { "ja": "登録製品カラータグ", "status": "wired" },
   "product_external_ref": { "ja": "製品外部参照", "status": "wired" },

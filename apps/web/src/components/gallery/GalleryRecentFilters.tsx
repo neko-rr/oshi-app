@@ -36,6 +36,14 @@ export function buildRecentQueryLabel(
     category: string;
     storage: string;
     color: string;
+    salesDesired: string;
+    wantObject: string;
+    missingPrice: string;
+    missingDate: string;
+    missingCategory: string;
+    missingStorage: string;
+    missingPhoto: string;
+    duplicateBarcode: string;
   },
 ): string {
   const parts: string[] = [];
@@ -51,6 +59,15 @@ export function buildRecentQueryLabel(
   for (const slot of query.color_tag_slots ?? []) {
     parts.push(names?.colors.get(slot) ?? `${fallbacks.color}${slot}`);
   }
+  if (query.sales_desired) parts.push(fallbacks.salesDesired);
+  if (query.want_object) parts.push(fallbacks.wantObject);
+  if (query.missing_price) parts.push(fallbacks.missingPrice);
+  if (query.missing_purchase_date) parts.push(fallbacks.missingDate);
+  if (query.purchase_month) parts.push(query.purchase_month);
+  if (query.missing_category) parts.push(fallbacks.missingCategory);
+  if (query.missing_storage) parts.push(fallbacks.missingStorage);
+  if (query.missing_photo) parts.push(fallbacks.missingPhoto);
+  if (query.duplicate_barcode) parts.push(fallbacks.duplicateBarcode);
   return parts.join(" · ") || fallbacks.search;
 }
 
@@ -73,6 +90,14 @@ export function GalleryRecentFilters({
       category: t("category"),
       storage: t("storage"),
       color: t("color"),
+      salesDesired: t("salesDesiredFilter"),
+      wantObject: t("wantObjectFilter"),
+      missingPrice: t("missingPriceFilter"),
+      missingDate: t("missingDateFilter"),
+      missingCategory: t("missingCategoryFilter"),
+      missingStorage: t("missingStorageFilter"),
+      missingPhoto: t("missingPhotoFilter"),
+      duplicateBarcode: t("duplicateBarcodeFilter"),
     }),
     [t],
   );
@@ -126,6 +151,15 @@ export function GalleryRecentFilters({
                 category_tag_ids: entry.query.category_tag_ids,
                 storage_location_ids: entry.query.storage_location_ids,
                 color_tag_slots: entry.query.color_tag_slots,
+                sales_desired: entry.query.sales_desired,
+                want_object: entry.query.want_object,
+                missing_price: entry.query.missing_price,
+                missing_purchase_date: entry.query.missing_purchase_date,
+                purchase_month: entry.query.purchase_month,
+                missing_category: entry.query.missing_category,
+                missing_storage: entry.query.missing_storage,
+                missing_photo: entry.query.missing_photo,
+                duplicate_barcode: entry.query.duplicate_barcode,
                 sort:
                   entry.query.sort === "newest" ||
                   entry.query.sort === "name" ||

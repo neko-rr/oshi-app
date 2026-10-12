@@ -52,6 +52,7 @@ class PatchProductRequest(BaseModel):
     """PATCH /products/{id} — スカラーとタグ付け。"""
 
     product_name: str | None = None
+    photo_id: int | None = Field(default=None, ge=1)
     product_group_name: str | None = None
     works_series_name: str | None = None
     title: str | None = None
