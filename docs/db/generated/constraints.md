@@ -7,30 +7,34 @@
 |----|------|------|
 | `category_tag` | `category_tag_slot_range` | `CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))` |
 | `category_tag_preset_slot_dismissed` | `category_tag_preset_slot_dismissed_slot_range` | `CHECK (((slot >= 1) AND (slot <= 6)))` |
-| `color_tag` | `color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
 | `color_tag` | `color_tag_color_hex_check` | `CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))` |
-| `data_export` | `data_export_status_check` | `CHECK ((status = ANY (ARRAY['pending'::text, 'running'::text, 'ready'::text, 'failed'::text])))` |
+| `color_tag` | `color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
 | `data_export` | `data_export_kind_check` | `CHECK ((kind = ANY (ARRAY['text'::text, 'media'::text])))` |
+| `data_export` | `data_export_status_check` | `CHECK ((status = ANY (ARRAY['pending'::text, 'running'::text, 'ready'::text, 'failed'::text])))` |
+| `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
+| `display_settings` | `display_settings_date_format_mode_check` | `CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))` |
+| `display_settings` | `display_settings_font_pack_check` | `CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))` |
+| `display_settings` | `display_settings_gallery_image_fit_check` | `CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))` |
+| `display_settings` | `display_settings_gallery_layout_check` | `CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))` |
+| `display_settings` | `display_settings_keep_at_hand_count_check` | `CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))` |
 | `display_settings` | `display_settings_landing_page_check` | `CHECK ((landing_page = ANY (ARRAY['home'::text, 'gallery'::text, 'register'::text])))` |
 | `display_settings` | `display_settings_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
 | `display_settings` | `display_settings_register_start_step_check` | `CHECK ((register_start_step = ANY (ARRAY['barcode'::text, 'photo'::text, 'confirm'::text])))` |
 | `display_settings` | `display_settings_text_scale_check` | `CHECK (((text_scale >= 1) AND (text_scale <= 7)))` |
 | `display_settings` | `display_settings_ui_density_check` | `CHECK (((ui_density >= 1) AND (ui_density <= 7)))` |
-| `display_settings` | `display_settings_gallery_layout_check` | `CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))` |
-| `display_settings` | `display_settings_keep_at_hand_count_check` | `CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))` |
-| `display_settings` | `display_settings_date_format_mode_check` | `CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))` |
-| `display_settings` | `display_settings_gallery_image_fit_check` | `CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))` |
-| `display_settings` | `display_settings_font_pack_check` | `CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))` |
-| `display_settings` | `display_settings_currency_format_mode_check` | `CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))` |
-| `gallery_view` | `gallery_view_view_name_len_check` | `CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))` |
-| `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
 | `gallery_view` | `gallery_view_color_tag_slots_check` | `CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))` |
+| `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
+| `gallery_view` | `gallery_view_purchase_month_check` | `CHECK ((purchase_month IS NULL) OR (purchase_month ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'::text))` |
+| `gallery_view` | `gallery_view_view_name_len_check` | `CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))` |
 | `oshi_accent_settings` | `oshi_accent_settings_main_hex_format` | `CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))` |
 | `oshi_accent_settings` | `oshi_accent_settings_sub_hex_format` | `CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))` |
-| `product_external_ref` | `product_external_ref_source_check` | `CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))` |
-| `product_external_ref` | `product_external_ref_rakuten_required` | `CHECK (((source <> 'rakuten'::text) OR ((external_item_code IS NOT NULL) AND (length(btrim(external_item_code)) > 0) AND (shop_name IS NOT NULL) AND (length(btrim(shop_name)) > 0) AND (length(btrim(product_url)) > 0))))` |
+| `oshi_day` | `oshi_day_character_name_len_check` | `CHECK (((char_length(character_name) >= 1) AND (char_length(character_name) <= 80)))` |
 | `product_external_ref` | `product_external_ref_manual_url` | `CHECK (((source <> 'manual'::text) OR (length(btrim(product_url)) > 0)))` |
+| `product_external_ref` | `product_external_ref_rakuten_required` | `CHECK (((source <> 'rakuten'::text) OR ((external_item_code IS NOT NULL) AND (length(btrim(external_item_code)) > 0) AND (shop_name IS NOT NULL) AND (length(btrim(shop_name)) > 0) AND (length(btrim(product_url)) > 0))))` |
+| `product_external_ref` | `product_external_ref_source_check` | `CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))` |
 | `registered_product_color_tag` | `registration_product_color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
+| `spending_budget` | `spending_budget_amount_check` | `CHECK (((monthly_amount >= 0) AND (monthly_amount <= 999999999)))` |
+| `spending_budget` | `spending_budget_currency_len_check` | `CHECK (((char_length(currency_code) >= 3) AND (char_length(currency_code) <= 8)))` |
 | `storage_location` | `receipt_location_slot_range` | `CHECK (((slot IS NULL) OR ((slot >= 1) AND (slot <= 6))))` |
 | `storage_location_preset_slot_dismissed` | `receipt_location_preset_slot_dismissed_slot_range` | `CHECK (((slot >= 1) AND (slot <= 6)))` |
 
@@ -53,6 +57,7 @@
 | `member` | `member_type` | `FOREIGN KEY (members_type_name) REFERENCES member_type(members_type_name) ON DELETE SET NULL` |
 | `member` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `oshi_accent_settings` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
+| `oshi_day` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `photo` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `photo` | `color` | `FOREIGN KEY (photo_theme_color) REFERENCES color(color_group_id) ON DELETE SET NULL` |
 | `product_external_ref` | `registered_product` | `FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE` |
@@ -73,6 +78,7 @@
 | `registered_product_color_tag` | `color_tag` | `FOREIGN KEY (members_id, slot) REFERENCES color_tag(members_id, slot) ON DELETE CASCADE` |
 | `registered_product_color_tag` | `registered_product` | `FOREIGN KEY (registered_product_id) REFERENCES registered_product(registered_product_id) ON DELETE CASCADE` |
 | `registered_product_color_tag` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
+| `spending_budget` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `storage_location` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `storage_location_preset_slot_dismissed` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
 | `theme_settings` | `?` | `FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE` |
@@ -115,6 +121,9 @@
 | `member_type` | `member_type_pkey` | `CREATE UNIQUE INDEX member_type_pkey ON public.member_type USING btree (members_type_name)` |
 | `oshi_accent_settings` | `oshi_accent_settings_members_id_idx` | `CREATE INDEX oshi_accent_settings_members_id_idx ON public.oshi_accent_settings USING btree (members_id)` |
 | `oshi_accent_settings` | `oshi_accent_settings_pkey` | `CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)` |
+| `oshi_day` | `oshi_day_members_character_key` | `CREATE UNIQUE INDEX oshi_day_members_character_key ON public.oshi_day USING btree (members_id, character_name)` |
+| `oshi_day` | `oshi_day_members_id_idx` | `CREATE INDEX oshi_day_members_id_idx ON public.oshi_day USING btree (members_id)` |
+| `oshi_day` | `oshi_day_pkey` | `CREATE UNIQUE INDEX oshi_day_pkey ON public.oshi_day USING btree (oshi_day_id)` |
 | `photo` | `idx_photo_member` | `CREATE INDEX idx_photo_member ON public.photo USING btree (members_id)` |
 | `photo` | `idx_photo_theme_color` | `CREATE INDEX idx_photo_theme_color ON public.photo USING btree (photo_theme_color)` |
 | `photo` | `photo_pkey` | `CREATE UNIQUE INDEX photo_pkey ON public.photo USING btree (photo_id)` |
@@ -145,6 +154,9 @@
 | `registered_product_color_tag` | `idx_rpct_member_product` | `CREATE INDEX idx_rpct_member_product ON public.registered_product_color_tag USING btree (members_id, registered_product_id)` |
 | `registered_product_color_tag` | `idx_rpct_member_slot` | `CREATE INDEX idx_rpct_member_slot ON public.registered_product_color_tag USING btree (members_id, slot)` |
 | `registered_product_color_tag` | `registered_product_color_tag_pk` | `CREATE UNIQUE INDEX registered_product_color_tag_pk ON public.registered_product_color_tag USING btree (members_id, registered_product_id, slot)` |
+| `spending_budget` | `spending_budget_members_currency_key` | `CREATE UNIQUE INDEX spending_budget_members_currency_key ON public.spending_budget USING btree (members_id, currency_code)` |
+| `spending_budget` | `spending_budget_members_id_idx` | `CREATE INDEX spending_budget_members_id_idx ON public.spending_budget USING btree (members_id)` |
+| `spending_budget` | `spending_budget_pkey` | `CREATE UNIQUE INDEX spending_budget_pkey ON public.spending_budget USING btree (spending_budget_id)` |
 | `storage_location` | `idx_storage_location_member` | `CREATE INDEX idx_storage_location_member ON public.storage_location USING btree (members_id)` |
 | `storage_location` | `idx_storage_location_member_created` | `CREATE INDEX idx_storage_location_member_created ON public.storage_location USING btree (members_id, created_at)` |
 | `storage_location` | `idx_storage_location_member_display` | `CREATE INDEX idx_storage_location_member_display ON public.storage_location USING btree (members_id, display_order)` |

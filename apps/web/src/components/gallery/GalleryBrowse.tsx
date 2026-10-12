@@ -3,12 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { API_PATHS, type ProductListItem, type ProductListResponse } from "@oshi/shared";
+import {
+  API_PATHS,
+  type ProductEditListItem,
+  type ProductListItem,
+  type ProductListResponse,
+} from "@oshi/shared";
 import {
   GalleryBulkBar,
   type BulkPickKind,
   type BulkTagOption,
 } from "@/components/gallery/GalleryBulkBar";
+import { GalleryEditList } from "@/components/gallery/GalleryEditList";
 import { ProductGalleryGrid } from "@/components/ProductGalleryGrid";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
@@ -39,6 +45,12 @@ import {
 } from "@/lib/gallerySelection";
 import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
 
+type ColorEditOption = {
+  slot: number;
+  name: string;
+  color: string;
+};
+
 type Props = {
   initialItems: ProductListItem[];
   initialHasMore: boolean;
@@ -49,6 +61,7 @@ type Props = {
   cardFields?: GalleryCardFields;
   storageOptions?: BulkTagOption[];
   categoryOptions?: BulkTagOption[];
+  colorOptions?: ColorEditOption[];
 };
 
 export function GalleryBrowse({
@@ -61,12 +74,15 @@ export function GalleryBrowse({
   cardFields = DEFAULT_GALLERY_CARD_FIELDS,
   storageOptions = [],
   categoryOptions = [],
+  colorOptions = [],
 }: Props) {
   const t = useTranslations("Gallery");
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const { flashSuccess } = useFeedback();
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState<ProductEditListItem[]>(initialItems);
+  const [editMode, setEditMode] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const [offset, setOffset] = useState(listQuery.offset ?? 0);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -82,6 +98,7 @@ export function GalleryBrowse({
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [bulkErrorOffline, setBulkErrorOffline] = useState(false);
   const lastBulkBodyRef = useRef<Record<string, unknown> | null>(null);
+  const listRetryRef = useRef<"more" | "edit">("more");
 
   useEffect(() => {
     writeGalleryBrowseOrder(items.map((item) => item.registered_product_id));
@@ -241,6 +258,7 @@ export function GalleryBrowse({
     setLoading(true);
     setError(null);
     setErrorOffline(false);
+    listRetryRef.current = "more";
     try {
       const supabase = createClient();
       const { data, error: sessionError } = await supabase.auth.getSession();
@@ -258,6 +276,7 @@ export function GalleryBrowse({
         ...listQuery,
         limit,
         offset: nextOffset,
+        ...(editMode ? { view: "edit" as const } : {}),
       });
       const res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
         headers: {
@@ -287,11 +306,79 @@ export function GalleryBrowse({
     }
   }
 
+  async function enterEditMode() {
+    if (selectionMode || editLoading) return;
+    setEditLoading(true);
+    setError(null);
+    setErrorOffline(false);
+    listRetryRef.current = "edit";
+    try {
+      const supabase = createClient();
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !data.session) {
+        setError(tCommon("loginRequired"));
+        return;
+      }
+      const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!base) {
+        setError(t("apiBaseMissing"));
+        return;
+      }
+      const collected: ProductEditListItem[] = [];
+      let cursor = listQuery.offset ?? 0;
+      let nextHasMore = hasMore;
+      const targetCount = Math.max(items.length, 1);
+      while (collected.length < targetCount) {
+        const pageLimit = Math.min(100, targetCount - collected.length);
+        const path = productsApiPath({
+          ...listQuery,
+          limit: pageLimit,
+          offset: cursor,
+          view: "edit",
+        });
+        const res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
+        if (!res.ok) {
+          throw new Error(
+            tCommon("fetchFailedStatus", { status: String(res.status) }),
+          );
+        }
+        const body = (await res.json()) as ProductListResponse;
+        const batch = (body.items ?? []) as ProductEditListItem[];
+        collected.push(...batch);
+        nextHasMore = Boolean(body.has_more);
+        if (batch.length === 0) break;
+        cursor += batch.length;
+        if (batch.length < pageLimit) break;
+      }
+      if (collected.length === 0) {
+        throw new Error(tCommon("fetchFailed"));
+      }
+      setItems(collected);
+      setHasMore(nextHasMore);
+      setEditMode(true);
+    } catch (e: unknown) {
+      const offline = isLikelyOfflineError(e);
+      setErrorOffline(offline);
+      setError(
+        networkUserMessage(e, {
+          offline: tCommon("offlineHint"),
+          fallback: tCommon("fetchFailed"),
+        }),
+      );
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
   return (
     <div
       className={[
         "stack-density",
-        selectionMode
+        selectionMode || editMode
           ? "pb-[calc(8rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
           : "",
       ].join(" ")}
@@ -343,19 +430,42 @@ export function GalleryBrowse({
             if (body) void applyBulkPatch(body);
           }}
         />
-      ) : (
-        <div>
+      ) : editMode ? null : (
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-9"
+            className="min-h-11"
             onClick={() => setSelectionMode(true)}
           >
             {t("selectMode")}
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11"
+            disabled={editLoading}
+            onClick={() => void enterEditMode()}
+          >
+            {editLoading ? tCommon("loading") : t("editMode")}
+          </Button>
         </div>
       )}
+      {editMode ? (
+        <GalleryEditList
+          items={items}
+          categoryOptions={categoryOptions}
+          storageOptions={storageOptions}
+          colorOptions={colorOptions}
+          hasMore={hasMore}
+          loadingMore={loading}
+          onLoadMore={() => void loadMore()}
+          onExit={() => setEditMode(false)}
+          onItemsChange={setItems}
+        />
+      ) : (
       <ProductGalleryGrid
         items={displayItems}
         listQuery={listQuery}
@@ -366,6 +476,7 @@ export function GalleryBrowse({
         selectedIds={selectedIds}
         onToggleSelect={toggleSelect}
       />
+      )}
       {showSelectedOnly && displayItems.length === 0 ? (
         <p className="text-sm text-muted-foreground" role="status">
           {t("bulkShowSelectedEmpty")}
@@ -375,10 +486,12 @@ export function GalleryBrowse({
         <NetworkRetryNotice
           message={error}
           offline={errorOffline}
-          onRetry={() => void loadMore()}
+          onRetry={() =>
+            void (listRetryRef.current === "edit" ? enterEditMode() : loadMore())
+          }
         />
       ) : null}
-      {hasMore && !showSelectedOnly ? (
+      {hasMore && !showSelectedOnly && !editMode ? (
         <div className="flex justify-center">
           <Button
             type="button"

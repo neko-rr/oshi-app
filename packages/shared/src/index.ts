@@ -21,6 +21,8 @@ export const API_PATHS = {
   account: "/account",
   statsProducts: "/stats/products",
   dashboardCharts: "/dashboard/charts",
+  spendingBudgets: "/spending-budgets",
+  oshiDays: "/oshi-days",
   assistVisionDescribe: "/assist/vision/describe",
   assistTagsExtract: "/assist/tags/extract",
   assistBarcodeLookup: "/assist/barcode/lookup",
@@ -57,6 +59,38 @@ export type ProductListItem = {
   currency_code?: string | null;
   category_tag?: ProductTagSummary | null;
   storage_location?: ProductTagSummary | null;
+};
+
+/** 製品に紐づく外部参照（編集モードの一覧） */
+export type ProductExternalRefSummary = {
+  source: string;
+  product_url: string;
+  external_item_code?: string | null;
+  shop_name?: string | null;
+  label?: string | null;
+  is_primary?: boolean;
+};
+
+/** GET /products?view=edit の1件 */
+export type ProductEditListItem = ProductListItem & {
+  photo_high_resolution_path?: string | null;
+  photo_high_resolution_url?: string | null;
+  memo?: string | null;
+  barcode_type?: string | null;
+  product_group_name?: string | null;
+  works_series_name?: string | null;
+  title?: string | null;
+  character_name?: string | null;
+  purchase_location?: string | null;
+  purchase_date?: string | null;
+  registration_quantity?: number | null;
+  sales_desired_flag?: number | boolean | null;
+  sales_desired_quantity?: number | null;
+  want_object_flag?: number | boolean | null;
+  category_tag_id?: number | null;
+  storage_location_id?: number | null;
+  color_tag_slots?: number[];
+  external_refs?: ProductExternalRefSummary[];
 };
 
 export type ProductListResponse = {

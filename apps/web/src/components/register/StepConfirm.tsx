@@ -35,6 +35,8 @@ type Props = {
   wantObject: boolean;
   photoFile: File | null;
   colors: ColorTagItem[];
+  /** ゲスト見本ラベルの説明。保存はしない */
+  colorTagsHint?: string | null;
   categories: CategoryTagItem[];
   storageLocations: StorageLocationItem[];
   categoryTagId: number | null;
@@ -106,6 +108,7 @@ export function StepConfirm({
   wantObject,
   photoFile,
   colors,
+  colorTagsHint = null,
   categories,
   storageLocations,
   categoryTagId,
@@ -377,6 +380,9 @@ export function StepConfirm({
               <legend className="text-sm font-medium">
                 {t("colorTagsLegend")}
               </legend>
+              {colorTagsHint ? (
+                <p className="text-xs text-muted-foreground">{colorTagsHint}</p>
+              ) : null}
               <div className="flex flex-col gap-2">
                 {colors.map((c) => (
                   <label

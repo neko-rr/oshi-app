@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ type Props = {
   onNext: () => void;
   onSkip: () => void;
   onBack: () => void;
+  guestTrial?: ReactNode;
 };
 
 /**
@@ -29,6 +30,7 @@ export function StepPhoto({
   onNext,
   onSkip,
   onBack,
+  guestTrial = null,
 }: Props) {
   const t = useTranslations("Register.photo");
   const tCommon = useTranslations("Common");
@@ -180,6 +182,8 @@ export function StepPhoto({
           </div>
         </div>
       ) : null}
+
+      {guestTrial}
 
       <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] z-10 -mx-1 flex flex-wrap gap-2 border-t border-border bg-background/95 px-1 py-2 backdrop-blur lg:static lg:bottom-auto lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <Button type="button" onClick={onNext} disabled={compressing}>

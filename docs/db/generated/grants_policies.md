@@ -26,6 +26,8 @@
 | `service_role` | `member_type` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `oshi_accent_settings` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `oshi_accent_settings` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `oshi_day` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `oshi_day` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `photo` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `photo` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `product_external_ref` | `DELETE,INSERT,SELECT,UPDATE` |
@@ -36,6 +38,8 @@
 | `service_role` | `registered_product` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `registered_product_color_tag` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `registered_product_color_tag` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
+| `authenticated` | `spending_budget` | `DELETE,INSERT,SELECT,UPDATE` |
+| `service_role` | `spending_budget` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `storage_location` | `DELETE,INSERT,SELECT,UPDATE` |
 | `service_role` | `storage_location` | `DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE` |
 | `authenticated` | `storage_location_preset_slot_dismissed` | `DELETE,INSERT,SELECT` |
@@ -67,6 +71,8 @@
 | `member` | `member_self_update` | `w` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `oshi_accent_settings` | `oshi_accent_settings_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `oshi_accent_settings` | `oshi_accent_settings_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
+| `oshi_day` | `oshi_day_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
+| `oshi_day` | `oshi_day_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
 | `photo` | `photo_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `photo` | `photo_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `product_external_ref` | `product_external_ref_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
@@ -78,6 +84,8 @@
 | `registered_product_color_tag` | `rpct_insert` | `a` | `` | `(auth.uid() = members_id)` |
 | `registered_product_color_tag` | `rpct_select` | `r` | `(auth.uid() = members_id)` | `` |
 | `registered_product_color_tag` | `rpct_update` | `w` | `(auth.uid() = members_id)` | `` |
+| `spending_budget` | `spending_budget_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
+| `spending_budget` | `spending_budget_self_all` | `*` | `(( SELECT auth.uid() AS uid) = members_id)` | `(( SELECT auth.uid() AS uid) = members_id)` |
 | `storage_location` | `storage_location_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |
 | `storage_location` | `storage_location_self_all` | `*` | `(auth.uid() = members_id)` | `(auth.uid() = members_id)` |
 | `storage_location_preset_slot_dismissed` | `storage_location_preset_slot_dismissed_reject_anonymous` | `*` | `jwt_is_permanent_user()` | `jwt_is_permanent_user()` |

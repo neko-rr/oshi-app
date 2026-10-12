@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T12:11:42Z",
+  "generated_at": "2026-10-12T13:50:33Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -312,6 +312,18 @@
       "router_var": "router"
     },
     {
+      "method": "DELETE",
+      "path": "/oshi-days",
+      "file": "apps/api/app/routers/stats.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PUT",
+      "path": "/oshi-days",
+      "file": "apps/api/app/routers/stats.py",
+      "router_var": "router"
+    },
+    {
       "method": "POST",
       "path": "/photos",
       "file": "apps/api/app/routers/photos.py",
@@ -357,6 +369,18 @@
       "method": "PATCH",
       "path": "/products/{registered_product_id}",
       "file": "apps/api/app/routers/products.py",
+      "router_var": "router"
+    },
+    {
+      "method": "PUT",
+      "path": "/spending-budgets",
+      "file": "apps/api/app/routers/stats.py",
+      "router_var": "router"
+    },
+    {
+      "method": "DELETE",
+      "path": "/spending-budgets/{currency_code}",
+      "file": "apps/api/app/routers/stats.py",
       "router_var": "router"
     },
     {
@@ -500,6 +524,14 @@
       "path": "/dashboard/charts"
     },
     {
+      "key": "spendingBudgets",
+      "path": "/spending-budgets"
+    },
+    {
+      "key": "oshiDays",
+      "path": "/oshi-days"
+    },
+    {
       "key": "assistVisionDescribe",
       "path": "/assist/vision/describe"
     },
@@ -558,6 +590,10 @@
       "file": "apps/api/app/services/oshi_accent_service.py"
     },
     {
+      "name": "oshi_day_service",
+      "file": "apps/api/app/services/oshi_day_service.py"
+    },
+    {
       "name": "photo_service",
       "file": "apps/api/app/services/photo_service.py"
     },
@@ -576,6 +612,10 @@
     {
       "name": "rakuten_genre_service",
       "file": "apps/api/app/services/rakuten_genre_service.py"
+    },
+    {
+      "name": "spending_budget_service",
+      "file": "apps/api/app/services/spending_budget_service.py"
     },
     {
       "name": "stats_service",
@@ -604,7 +644,12 @@
       "id": "premium",
       "kind": "status_has_evidence",
       "detail": "deferred だが evidence_paths がある（整理候補）"
+    },
+    {
+      "id": "auth_passkey",
+      "kind": "status_has_evidence",
+      "detail": "deferred だが evidence_paths がある（整理候補）"
     }
   ],
-  "feature_count": 48
+  "feature_count": 51
 }

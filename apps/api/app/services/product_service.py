@@ -89,6 +89,45 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _external_refs_from_row(row: dict[str, Any]) -> list[dict[str, Any]]:
+    """一覧 embed または external_refs から外部参照を取り出す。"""
+    raw = row.get("product_external_ref")
+    if raw is None:
+        raw = row.get("external_refs")
+    if isinstance(raw, dict):
+        raw = [raw]
+    if not isinstance(raw, list):
+        return []
+    refs: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        source = item.get("source")
+        url = item.get("product_url")
+        if not isinstance(source, str) or not source.strip():
+            continue
+        if not isinstance(url, str) or not url.strip():
+            continue
+        refs.append(
+            {
+                "source": source.strip(),
+                "product_url": url.strip(),
+                "external_item_code": item.get("external_item_code"),
+                "shop_name": item.get("shop_name"),
+                "label": item.get("label"),
+                "is_primary": bool(item.get("is_primary")),
+            }
+        )
+    return refs
+
+
+def normalize_product_edit_row(row: dict[str, Any]) -> dict[str, Any]:
+    """編集モード用。詳細項目と外部参照を含む。"""
+    item = normalize_product_detail(row)
+    item["external_refs"] = _external_refs_from_row(row)
+    return item
+
+
 def filter_products_by_query(
     items: list[dict[str, Any]],
     q: str | None,
@@ -143,6 +182,16 @@ def list_products_for_member(
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
     sort: str | None = None,
+    view: str | None = None,
+    sales_desired: bool = False,
+    want_object: bool = False,
+    missing_price: bool = False,
+    missing_purchase_date: bool = False,
+    purchase_month: str | None = None,
+    missing_category: bool = False,
+    missing_storage: bool = False,
+    missing_photo: bool = False,
+    duplicate_barcode: bool = False,
     fetch_page: FetchPage | None = None,
     sign_object: SignObject | None = None,
 ) -> list[dict[str, Any]]:
@@ -164,6 +213,9 @@ def list_products_for_member(
     sort_norm = (sort or "newest").strip() or "newest"
     if sort_norm not in {"newest", "name", "created_at"}:
         raise ValueError("未対応の並び順です")
+    view_norm = (view or "").strip() or None
+    if view_norm not in {None, "edit"}:
+        raise ValueError("未対応の view です")
 
     cat_ids = list(category_tag_ids or [])
     storage_ids = list(storage_location_ids or [])
@@ -178,19 +230,41 @@ def list_products_for_member(
     mid = str(members_id).strip()
     token = str(access_token).strip()
     q_applied_in_fetch = False
+    fetch_kwargs: dict[str, Any] = {
+        "members_id": mid,
+        "access_token": token,
+        "limit": limit,
+        "offset": offset,
+        "barcode_number": barcode_norm,
+        "q": q_norm,
+        "category_tag_ids": cat_ids or None,
+        "storage_location_ids": storage_ids or None,
+        "color_tag_slots": color_slots or None,
+        "sort": sort_norm,
+    }
+    if view_norm == "edit":
+        fetch_kwargs["view"] = "edit"
+    # 未指定の fetch 差し替えが TypeError にならないよう、ON のときだけ渡す
+    if sales_desired:
+        fetch_kwargs["sales_desired"] = True
+    if want_object:
+        fetch_kwargs["want_object"] = True
+    if missing_price:
+        fetch_kwargs["missing_price"] = True
+    if missing_purchase_date:
+        fetch_kwargs["missing_purchase_date"] = True
+    if purchase_month:
+        fetch_kwargs["purchase_month"] = purchase_month
+    if missing_category:
+        fetch_kwargs["missing_category"] = True
+    if missing_storage:
+        fetch_kwargs["missing_storage"] = True
+    if missing_photo:
+        fetch_kwargs["missing_photo"] = True
+    if duplicate_barcode:
+        fetch_kwargs["duplicate_barcode"] = True
     try:
-        rows = fetcher(
-            members_id=mid,
-            access_token=token,
-            limit=limit,
-            offset=offset,
-            barcode_number=barcode_norm,
-            q=q_norm,
-            category_tag_ids=cat_ids or None,
-            storage_location_ids=storage_ids or None,
-            color_tag_slots=color_slots or None,
-            sort=sort_norm,
-        )
+        rows = fetcher(**fetch_kwargs)
         q_applied_in_fetch = True
     except TypeError:
         # 古い fetch 差し替え用（新引数未対応）
@@ -219,7 +293,10 @@ def list_products_for_member(
     if not isinstance(rows, list):
         return []
 
-    items = [normalize_product_row(r) for r in rows if isinstance(r, dict)]
+    if view_norm == "edit":
+        items = [normalize_product_edit_row(r) for r in rows if isinstance(r, dict)]
+    else:
+        items = [normalize_product_row(r) for r in rows if isinstance(r, dict)]
     items = filter_products_by_barcode(items, barcode_norm)
     # 旧 fetch 互換時のみメモリ側で q フォールバック
     if q_norm and not q_applied_in_fetch:
@@ -243,6 +320,18 @@ def list_products_for_member(
             except Exception:
                 logger.exception("サムネイル署名に失敗")
                 item["photo_thumbnail_url"] = None
+        if view_norm == "edit":
+            high = item.get("photo_high_resolution_path")
+            if isinstance(high, str) and high.strip():
+                try:
+                    item["photo_high_resolution_url"] = signer(
+                        object_path=high.lstrip("/"),
+                        access_token=token,
+                        expires_in=3600,
+                    )
+                except Exception:
+                    logger.exception("高解像度写真の署名に失敗")
+                    item["photo_high_resolution_url"] = None
     # カラースロット一括付与
     ids = [
         int(i["registered_product_id"])
@@ -458,6 +547,18 @@ def patch_product_for_member(
     from app.services import display_settings_service
 
     patch_fields = dict(fields)
+    new_photo_id = patch_fields.get("photo_id")
+    old_photo_id = existing.get("photo_id")
+    if isinstance(old_photo_id, str) and old_photo_id.isdigit():
+        old_photo_id = int(old_photo_id)
+    if isinstance(new_photo_id, int):
+        from app.services.photo_service import require_member_photo
+
+        require_member_photo(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            photo_id=new_photo_id,
+        )
     if "currency_code" in patch_fields:
         patch_fields["currency_code"] = normalize_currency_code(
             patch_fields.get("currency_code")
@@ -528,6 +629,21 @@ def patch_product_for_member(
             registered_product_id=registered_product_id,
             fields=patch_fields,
         )
+    if (
+        isinstance(new_photo_id, int)
+        and isinstance(old_photo_id, int)
+        and new_photo_id != old_photo_id
+    ):
+        try:
+            from app.services.photo_service import retire_replaced_photo
+
+            retire_replaced_photo(
+                members_id=str(members_id).strip(),
+                access_token=str(access_token).strip(),
+                photo_id=old_photo_id,
+            )
+        except Exception:
+            logger.exception("差し替え後の旧写真削除に失敗 photo_id=%s", old_photo_id)
     if color_tag_slots is not None:
         from app.services.product_color_tag_service import set_product_color_slots
 

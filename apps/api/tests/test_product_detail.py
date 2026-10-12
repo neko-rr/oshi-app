@@ -284,6 +284,89 @@ def test_patch_product_clearing_price_also_clears_currency() -> None:
     assert mocked.call_args[1]["fields"]["currency_code"] is None
 
 
+def test_patch_product_passes_owned_photo_id() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email=None,
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.require_member_photo",
+            return_value={"photo_id": 4},
+        ) as owned,
+        patch(
+            "app.routers.products.patch_product_for_member",
+            return_value={"registered_product_id": 1, "photo_id": 4},
+        ) as mocked,
+    ):
+        res = client.patch(
+            "/products/1",
+            headers={"Authorization": "Bearer x"},
+            json={"photo_id": 4},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["fields"]["photo_id"] == 4
+    assert owned.call_args[1]["photo_id"] == 4
+
+
+def test_patch_product_rejects_unowned_photo() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email=None,
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.require_member_photo",
+            side_effect=ValueError("写真が見つかりません"),
+        ),
+        patch("app.routers.products.patch_product_for_member") as mocked,
+    ):
+        res = client.patch(
+            "/products/1",
+            headers={"Authorization": "Bearer x"},
+            json={"photo_id": 99},
+        )
+    assert res.status_code == 400
+    assert res.json()["error"]["code"] == "VALIDATION_ERROR"
+    mocked.assert_not_called()
+
+
+def test_require_member_photo_rejects_missing() -> None:
+    from app.services.photo_service import require_member_photo
+
+    with pytest.raises(ValueError, match="写真"):
+        require_member_photo(
+            members_id="22222222-2222-2222-2222-222222222222",
+            access_token="tok",
+            photo_id=99,
+            fetch_photo=lambda **_: None,
+        )
+
+
+def test_retire_replaced_photo_deletes_only_when_unreferenced() -> None:
+    from app.services.photo_service import retire_replaced_photo
+
+    deleted: list[int] = []
+    retire_replaced_photo(
+        members_id="22222222-2222-2222-2222-222222222222",
+        access_token="tok",
+        photo_id=3,
+        count_product_refs=lambda **_: 1,
+        delete_photo=lambda **kw: deleted.append(kw["photo_id"]),
+    )
+    assert deleted == []
+    retire_replaced_photo(
+        members_id="22222222-2222-2222-2222-222222222222",
+        access_token="tok",
+        photo_id=3,
+        count_product_refs=lambda **_: 0,
+        delete_photo=lambda **kw: deleted.append(kw["photo_id"]),
+    )
+    assert deleted == [3]
+
+
 def test_post_products_rejects_unknown_currency() -> None:
     user = AuthenticatedUser(
         members_id="22222222-2222-2222-2222-222222222222",

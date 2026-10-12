@@ -14,5 +14,6 @@
 - [x] ゲストはギャラリー・ダッシュボードで生エラーではなく本登録 CTA を見る
 - [x] ログアウトできる（ヘッダー・設定・/me）
 - [x] 秘密・JWT を画面やログに出さない
+- [ ] （**deferred**）パスキー（Passkeys）でログイン／登録できる — 今は対象外。`auth_passkey` / [roadmap.md](../roadmap.md)
 
 関連: `auth_session` / `guest_onboarding` / `docs/product/flows/guest.md` / `.cursor/rules/auth.mdc`

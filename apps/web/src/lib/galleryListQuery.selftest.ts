@@ -9,6 +9,15 @@ type GalleryListQuery = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  sales_desired?: boolean;
+  want_object?: boolean;
+  missing_price?: boolean;
+  missing_purchase_date?: boolean;
+  purchase_month?: string;
+  missing_category?: boolean;
+  missing_storage?: boolean;
+  missing_photo?: boolean;
+  duplicate_barcode?: boolean;
   offset?: number;
   sort?: string;
 };
@@ -48,12 +57,21 @@ function galleryFilterSummaryCounts(query: GalleryListQuery) {
     category: query.category_tag_ids?.length ?? 0,
     storage: query.storage_location_ids?.length ?? 0,
     color: query.color_tag_slots?.length ?? 0,
+    sales_desired: Boolean(query.sales_desired),
+    want_object: Boolean(query.want_object),
   };
 }
 
 function hasActiveGalleryFilters(query: GalleryListQuery): boolean {
   const c = galleryFilterSummaryCounts(query);
-  return c.q || c.category > 0 || c.storage > 0 || c.color > 0;
+  return (
+    c.q ||
+    c.category > 0 ||
+    c.storage > 0 ||
+    c.color > 0 ||
+    c.sales_desired ||
+    c.want_object
+  );
 }
 
 /** galleryListQuery.withClearedFilters と同契約 */
@@ -78,7 +96,7 @@ assert.deepEqual(
     color_tag_slots: [1, 3],
     sort: "name",
   }),
-  { q: true, category: 2, storage: 1, color: 2 },
+  { q: true, category: 2, storage: 1, color: 2, sales_desired: false, want_object: false },
 );
 assert.equal(hasActiveGalleryFilters({ category_tag_ids: [1] }), true);
 assert.equal(hasActiveGalleryFilters({ sort: "newest" }), false);
@@ -107,6 +125,15 @@ function buildGalleryListSearch(query: GalleryListQuery): string {
   if (storages) sp.set("storage_location_id", storages);
   const colors = formatIdList(query.color_tag_slots);
   if (colors) sp.set("color_tag_slot", colors);
+  if (query.sales_desired) sp.set("sales_desired", "1");
+  if (query.want_object) sp.set("want_object", "1");
+  if (query.missing_price) sp.set("missing_price", "1");
+  if (query.missing_purchase_date) sp.set("missing_purchase_date", "1");
+  if (query.purchase_month) sp.set("purchase_month", query.purchase_month);
+  if (query.missing_category) sp.set("missing_category", "1");
+  if (query.missing_storage) sp.set("missing_storage", "1");
+  if (query.missing_photo) sp.set("missing_photo", "1");
+  if (query.duplicate_barcode) sp.set("duplicate_barcode", "1");
   if (query.offset != null && query.offset > 0) {
     sp.set("offset", String(query.offset));
   }
@@ -140,5 +167,35 @@ assert.ok(buildGalleryListSearch({ q: "foo" }).startsWith("v=1&"));
 assert.equal(parseGalleryQueryVersion(undefined), 1);
 assert.equal(parseGalleryQueryVersion("1"), 1);
 assert.equal(parseGalleryQueryVersion("9"), 1);
+
+function parseOnFlag(raw: string | undefined): boolean {
+  const value = (raw ?? "").trim().toLowerCase();
+  return value === "1" || value === "true";
+}
+
+assert.equal(parseOnFlag("1"), true);
+assert.equal(parseOnFlag("0"), false);
+const search = buildGalleryListSearch({ sales_desired: true, want_object: true });
+assert.ok(search.includes("sales_desired=1"));
+assert.ok(search.includes("want_object=1"));
+assert.ok(
+  buildGalleryListSearch({
+    missing_price: true,
+    purchase_month: "2026-10",
+  }).includes("purchase_month=2026-10"),
+);
+assert.ok(
+  buildGalleryListSearch({
+    missing_category: true,
+    missing_storage: true,
+    missing_photo: true,
+    duplicate_barcode: true,
+  }).includes("duplicate_barcode=1"),
+);
+assert.equal(hasActiveGalleryFilters({ sales_desired: true }), true);
+assert.deepEqual(
+  withClearedFilters({ sales_desired: true, want_object: true, sort: "name" }),
+  { sort: "name" },
+);
 
 console.log("galleryListQuery.selftest: ok");

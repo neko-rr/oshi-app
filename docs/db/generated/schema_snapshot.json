@@ -639,6 +639,60 @@
           "type": "timestamp with time zone",
           "not_null": true,
           "default": "now()"
+        },
+        {
+          "column": "sales_desired",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "want_object",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "missing_price",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "missing_purchase_date",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "purchase_month",
+          "type": "text",
+          "not_null": false,
+          "default": null
+        },
+        {
+          "column": "missing_category",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "missing_storage",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "missing_photo",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
+        },
+        {
+          "column": "duplicate_barcode",
+          "type": "boolean",
+          "not_null": true,
+          "default": "false"
         }
       ]
     },
@@ -819,6 +873,48 @@
           "type": "jsonb",
           "not_null": true,
           "default": "'[]'::jsonb"
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        }
+      ]
+    },
+    {
+      "table_name": "oshi_day",
+      "comment": "キャラクターごとの推し開始日。その日を1日目として数える",
+      "columns": [
+        {
+          "column": "oshi_day_id",
+          "type": "bigint",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "character_name",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "start_date",
+          "type": "date",
+          "not_null": true,
+          "default": null
         },
         {
           "column": "created_at",
@@ -1399,6 +1495,48 @@
       ]
     },
     {
+      "table_name": "spending_budget",
+      "comment": "通貨ごとの毎月の支出上限。月ごとに金額は変えない。換算しない",
+      "columns": [
+        {
+          "column": "spending_budget_id",
+          "type": "bigint",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "members_id",
+          "type": "uuid",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "currency_code",
+          "type": "text",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "monthly_amount",
+          "type": "integer",
+          "not_null": true,
+          "default": null
+        },
+        {
+          "column": "created_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        },
+        {
+          "column": "updated_at",
+          "type": "timestamp with time zone",
+          "not_null": true,
+          "default": "now()"
+        }
+      ]
+    },
+    {
       "table_name": "storage_location",
       "comment": null,
       "columns": [
@@ -1812,6 +1950,21 @@
       "indexdef": "CREATE UNIQUE INDEX oshi_accent_settings_pkey ON public.oshi_accent_settings USING btree (members_id, members_type_name)"
     },
     {
+      "tablename": "oshi_day",
+      "indexname": "oshi_day_members_character_key",
+      "indexdef": "CREATE UNIQUE INDEX oshi_day_members_character_key ON public.oshi_day USING btree (members_id, character_name)"
+    },
+    {
+      "tablename": "oshi_day",
+      "indexname": "oshi_day_members_id_idx",
+      "indexdef": "CREATE INDEX oshi_day_members_id_idx ON public.oshi_day USING btree (members_id)"
+    },
+    {
+      "tablename": "oshi_day",
+      "indexname": "oshi_day_pkey",
+      "indexdef": "CREATE UNIQUE INDEX oshi_day_pkey ON public.oshi_day USING btree (oshi_day_id)"
+    },
+    {
       "tablename": "photo",
       "indexname": "idx_photo_member",
       "indexdef": "CREATE INDEX idx_photo_member ON public.photo USING btree (members_id)"
@@ -1960,6 +2113,21 @@
       "tablename": "registered_product_color_tag",
       "indexname": "registered_product_color_tag_pk",
       "indexdef": "CREATE UNIQUE INDEX registered_product_color_tag_pk ON public.registered_product_color_tag USING btree (members_id, registered_product_id, slot)"
+    },
+    {
+      "tablename": "spending_budget",
+      "indexname": "spending_budget_members_currency_key",
+      "indexdef": "CREATE UNIQUE INDEX spending_budget_members_currency_key ON public.spending_budget USING btree (members_id, currency_code)"
+    },
+    {
+      "tablename": "spending_budget",
+      "indexname": "spending_budget_members_id_idx",
+      "indexdef": "CREATE INDEX spending_budget_members_id_idx ON public.spending_budget USING btree (members_id)"
+    },
+    {
+      "tablename": "spending_budget",
+      "indexname": "spending_budget_pkey",
+      "indexdef": "CREATE UNIQUE INDEX spending_budget_pkey ON public.spending_budget USING btree (spending_budget_id)"
     },
     {
       "tablename": "storage_location",
@@ -2140,6 +2308,16 @@
     },
     {
       "grantee": "authenticated",
+      "table_name": "oshi_day",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "oshi_day",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
       "table_name": "photo",
       "privs": "DELETE,INSERT,SELECT,UPDATE"
     },
@@ -2186,6 +2364,16 @@
     {
       "grantee": "service_role",
       "table_name": "registered_product_color_tag",
+      "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_name": "spending_budget",
+      "privs": "DELETE,INSERT,SELECT,UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_name": "spending_budget",
       "privs": "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE"
     },
     {
@@ -2357,6 +2545,20 @@
       "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
     },
     {
+      "table_name": "oshi_day",
+      "polname": "oshi_day_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "oshi_day",
+      "polname": "oshi_day_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
+    },
+    {
       "table_name": "photo",
       "polname": "photo_reject_anonymous",
       "polcmd": "*",
@@ -2432,6 +2634,20 @@
       "polcmd": "w",
       "using_expr": "(auth.uid() = members_id)",
       "with_check": null
+    },
+    {
+      "table_name": "spending_budget",
+      "polname": "spending_budget_reject_anonymous",
+      "polcmd": "*",
+      "using_expr": "jwt_is_permanent_user()",
+      "with_check": "jwt_is_permanent_user()"
+    },
+    {
+      "table_name": "spending_budget",
+      "polname": "spending_budget_self_all",
+      "polcmd": "*",
+      "using_expr": "(( SELECT auth.uid() AS uid) = members_id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = members_id)"
     },
     {
       "table_name": "storage_location",
@@ -2592,6 +2808,14 @@
     {
       "table_name": "oshi_accent_settings",
       "constraint_name": "oshi_accent_settings_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "oshi_day",
+      "constraint_name": "oshi_day_members_id_fkey",
       "column_name": "members_id",
       "foreign_table": null,
       "foreign_column": null,
@@ -2782,6 +3006,14 @@
       "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
     },
     {
+      "table_name": "spending_budget",
+      "constraint_name": "spending_budget_members_id_fkey",
+      "column_name": "members_id",
+      "foreign_table": null,
+      "foreign_column": null,
+      "definition": "FOREIGN KEY (members_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
       "table_name": "storage_location",
       "constraint_name": "receipt_location_members_id_fkey",
       "column_name": "members_id",
@@ -2827,13 +3059,18 @@
     },
     {
       "table_name": "color_tag",
+      "constraint_name": "color_tag_color_hex_check",
+      "definition": "CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))"
+    },
+    {
+      "table_name": "color_tag",
       "constraint_name": "color_tag_slot_range",
       "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
     },
     {
-      "table_name": "color_tag",
-      "constraint_name": "color_tag_color_hex_check",
-      "definition": "CHECK ((color_tag_color ~ '^#[0-9A-Fa-f]{6}$'::text))"
+      "table_name": "data_export",
+      "constraint_name": "data_export_kind_check",
+      "definition": "CHECK ((kind = ANY (ARRAY['text'::text, 'media'::text])))"
     },
     {
       "table_name": "data_export",
@@ -2841,9 +3078,34 @@
       "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'running'::text, 'ready'::text, 'failed'::text])))"
     },
     {
-      "table_name": "data_export",
-      "constraint_name": "data_export_kind_check",
-      "definition": "CHECK ((kind = ANY (ARRAY['text'::text, 'media'::text])))"
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_currency_format_mode_check",
+      "definition": "CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_date_format_mode_check",
+      "definition": "CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_font_pack_check",
+      "definition": "CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_gallery_image_fit_check",
+      "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_gallery_layout_check",
+      "definition": "CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))"
+    },
+    {
+      "table_name": "display_settings",
+      "constraint_name": "display_settings_keep_at_hand_count_check",
+      "definition": "CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))"
     },
     {
       "table_name": "display_settings",
@@ -2871,39 +3133,9 @@
       "definition": "CHECK (((ui_density >= 1) AND (ui_density <= 7)))"
     },
     {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_gallery_layout_check",
-      "definition": "CHECK ((gallery_layout = ANY (ARRAY['grid'::text, 'large'::text, 'list'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_keep_at_hand_count_check",
-      "definition": "CHECK (((keep_at_hand_count >= 1) AND (keep_at_hand_count <= 99)))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_date_format_mode_check",
-      "definition": "CHECK ((date_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'iso'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_gallery_image_fit_check",
-      "definition": "CHECK ((gallery_image_fit = ANY (ARRAY['cover'::text, 'contain'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_font_pack_check",
-      "definition": "CHECK ((font_pack = ANY (ARRAY['clean'::text, 'soft'::text, 'magazine'::text, 'readable'::text, 'story'::text, 'notebook'::text])))"
-    },
-    {
-      "table_name": "display_settings",
-      "constraint_name": "display_settings_currency_format_mode_check",
-      "definition": "CHECK ((currency_format_mode = ANY (ARRAY['residence'::text, 'ui_locale'::text, 'plain'::text])))"
-    },
-    {
       "table_name": "gallery_view",
-      "constraint_name": "gallery_view_view_name_len_check",
-      "definition": "CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))"
+      "constraint_name": "gallery_view_color_tag_slots_check",
+      "definition": "CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))"
     },
     {
       "table_name": "gallery_view",
@@ -2912,8 +3144,13 @@
     },
     {
       "table_name": "gallery_view",
-      "constraint_name": "gallery_view_color_tag_slots_check",
-      "definition": "CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))"
+      "constraint_name": "gallery_view_purchase_month_check",
+      "definition": "CHECK ((purchase_month IS NULL) OR (purchase_month ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'::text))"
+    },
+    {
+      "table_name": "gallery_view",
+      "constraint_name": "gallery_view_view_name_len_check",
+      "definition": "CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))"
     },
     {
       "table_name": "oshi_accent_settings",
@@ -2926,9 +3163,14 @@
       "definition": "CHECK ((sub_hex ~ '^#[0-9A-Fa-f]{6}$'::text))"
     },
     {
+      "table_name": "oshi_day",
+      "constraint_name": "oshi_day_character_name_len_check",
+      "definition": "CHECK (((char_length(character_name) >= 1) AND (char_length(character_name) <= 80)))"
+    },
+    {
       "table_name": "product_external_ref",
-      "constraint_name": "product_external_ref_source_check",
-      "definition": "CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))"
+      "constraint_name": "product_external_ref_manual_url",
+      "definition": "CHECK (((source <> 'manual'::text) OR (length(btrim(product_url)) > 0)))"
     },
     {
       "table_name": "product_external_ref",
@@ -2937,13 +3179,23 @@
     },
     {
       "table_name": "product_external_ref",
-      "constraint_name": "product_external_ref_manual_url",
-      "definition": "CHECK (((source <> 'manual'::text) OR (length(btrim(product_url)) > 0)))"
+      "constraint_name": "product_external_ref_source_check",
+      "definition": "CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))"
     },
     {
       "table_name": "registered_product_color_tag",
       "constraint_name": "registration_product_color_tag_slot_range",
       "definition": "CHECK (((slot >= 1) AND (slot <= 7)))"
+    },
+    {
+      "table_name": "spending_budget",
+      "constraint_name": "spending_budget_amount_check",
+      "definition": "CHECK (((monthly_amount >= 0) AND (monthly_amount <= 999999999)))"
+    },
+    {
+      "table_name": "spending_budget",
+      "constraint_name": "spending_budget_currency_len_check",
+      "definition": "CHECK (((char_length(currency_code) >= 3) AND (char_length(currency_code) <= 8)))"
     },
     {
       "table_name": "storage_location",

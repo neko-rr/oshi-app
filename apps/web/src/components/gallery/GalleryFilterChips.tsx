@@ -16,7 +16,16 @@ import {
   withSort,
   withToggledCategory,
   withToggledColorSlot,
+  withClearedPurchaseMonth,
+  withToggledDuplicateBarcode,
+  withToggledMissingCategory,
+  withToggledMissingPhoto,
+  withToggledMissingPrice,
+  withToggledMissingStorage,
+  withToggledMissingPurchaseDate,
+  withToggledSalesDesired,
   withToggledStorage,
+  withToggledWantObject,
 } from "@/lib/galleryListQuery";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
 import { cn } from "@/lib/utils";
@@ -90,6 +99,19 @@ export function GalleryFilterChips({
   if (counts.color > 0) {
     summaryParts.push(t("filterSummaryColor", { count: counts.color }));
   }
+  if (counts.sales_desired) summaryParts.push(t("filterSummarySalesDesired"));
+  if (counts.want_object) summaryParts.push(t("filterSummaryWant"));
+  if (counts.missing_price) summaryParts.push(t("filterSummaryMissingPrice"));
+  if (counts.missing_purchase_date) summaryParts.push(t("filterSummaryMissingDate"));
+  if (counts.missing_category) summaryParts.push(t("filterSummaryMissingCategory"));
+  if (counts.missing_storage) summaryParts.push(t("filterSummaryMissingStorage"));
+  if (counts.missing_photo) summaryParts.push(t("filterSummaryMissingPhoto"));
+  if (counts.duplicate_barcode) summaryParts.push(t("filterSummaryDuplicate"));
+  if (counts.purchase_month && listQuery.purchase_month) {
+    summaryParts.push(
+      t("filterSummaryPurchaseMonth", { month: listQuery.purchase_month }),
+    );
+  }
   const summaryText = summaryParts.join(t("filterSummarySep"));
 
   return (
@@ -114,6 +136,83 @@ export function GalleryFilterChips({
           </Link>
         </div>
       ) : null}
+
+      <div>
+        <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+          {t("statusFilter")}
+        </p>
+        <div
+          className="flex flex-wrap gap-1.5"
+          role="group"
+          aria-label={t("statusFilter")}
+        >
+          <Link
+            href={galleryListHref(withToggledSalesDesired(baseQuery))}
+            className={chipClass(Boolean(listQuery.sales_desired))}
+            aria-pressed={Boolean(listQuery.sales_desired)}
+          >
+            {t("salesDesiredFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledWantObject(baseQuery))}
+            className={chipClass(Boolean(listQuery.want_object))}
+            aria-pressed={Boolean(listQuery.want_object)}
+          >
+            {t("wantObjectFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledMissingPrice(baseQuery))}
+            className={chipClass(Boolean(listQuery.missing_price))}
+            aria-pressed={Boolean(listQuery.missing_price)}
+          >
+            {t("missingPriceFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledMissingPurchaseDate(baseQuery))}
+            className={chipClass(Boolean(listQuery.missing_purchase_date))}
+            aria-pressed={Boolean(listQuery.missing_purchase_date)}
+          >
+            {t("missingDateFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledMissingCategory(baseQuery))}
+            className={chipClass(Boolean(listQuery.missing_category))}
+            aria-pressed={Boolean(listQuery.missing_category)}
+          >
+            {t("missingCategoryFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledMissingStorage(baseQuery))}
+            className={chipClass(Boolean(listQuery.missing_storage))}
+            aria-pressed={Boolean(listQuery.missing_storage)}
+          >
+            {t("missingStorageFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledMissingPhoto(baseQuery))}
+            className={chipClass(Boolean(listQuery.missing_photo))}
+            aria-pressed={Boolean(listQuery.missing_photo)}
+          >
+            {t("missingPhotoFilter")}
+          </Link>
+          <Link
+            href={galleryListHref(withToggledDuplicateBarcode(baseQuery))}
+            className={chipClass(Boolean(listQuery.duplicate_barcode))}
+            aria-pressed={Boolean(listQuery.duplicate_barcode)}
+          >
+            {t("duplicateBarcodeFilter")}
+          </Link>
+          {listQuery.purchase_month ? (
+            <Link
+              href={galleryListHref(withClearedPurchaseMonth(baseQuery))}
+              className={chipClass(true)}
+              aria-pressed
+            >
+              {t("purchaseMonthFilter", { month: listQuery.purchase_month })}
+            </Link>
+          ) : null}
+        </div>
+      </div>
 
       <div>
         <p className="mb-1.5 text-xs font-medium text-muted-foreground">

@@ -70,6 +70,71 @@ def test_create_gallery_view() -> None:
     assert res.json() == SAMPLE
     assert mocked.call_args.kwargs["view_name"] == "棚Aの缶"
     assert mocked.call_args.kwargs["category_tag_ids"] == [3]
+    assert mocked.call_args.kwargs["sales_desired"] is False
+    assert mocked.call_args.kwargs["want_object"] is False
+
+
+def test_create_gallery_view_keeps_status_flags() -> None:
+    body = {
+        "view_name": "欲しい",
+        "sales_desired": True,
+        "want_object": True,
+    }
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=USER),
+        patch(
+            "app.routers.gallery_views.gallery_view_service.create_gallery_view",
+            return_value=SAMPLE,
+        ) as mocked,
+    ):
+        res = client.post("/gallery-views", json=body, headers=AUTH)
+    assert res.status_code == 200
+    assert mocked.call_args.kwargs["sales_desired"] is True
+    assert mocked.call_args.kwargs["want_object"] is True
+
+
+def test_create_gallery_view_keeps_ledger_filters() -> None:
+    body = {
+        "view_name": "2026年10月",
+        "missing_price": True,
+        "missing_purchase_date": False,
+        "purchase_month": "2026-10",
+    }
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=USER),
+        patch(
+            "app.routers.gallery_views.gallery_view_service.create_gallery_view",
+            return_value=SAMPLE,
+        ) as mocked,
+    ):
+        res = client.post("/gallery-views", json=body, headers=AUTH)
+    assert res.status_code == 200
+    assert mocked.call_args.kwargs["missing_price"] is True
+    assert mocked.call_args.kwargs["missing_purchase_date"] is False
+    assert mocked.call_args.kwargs["purchase_month"] == "2026-10"
+
+
+def test_create_gallery_view_keeps_hole_filters() -> None:
+    body = {
+        "view_name": "穴",
+        "missing_category": True,
+        "missing_storage": True,
+        "missing_photo": True,
+        "duplicate_barcode": True,
+    }
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=USER),
+        patch(
+            "app.routers.gallery_views.gallery_view_service.create_gallery_view",
+            return_value=SAMPLE,
+        ) as mocked,
+    ):
+        res = client.post("/gallery-views", json=body, headers=AUTH)
+    assert res.status_code == 200
+    assert mocked.call_args.kwargs["missing_category"] is True
+    assert mocked.call_args.kwargs["missing_storage"] is True
+    assert mocked.call_args.kwargs["missing_photo"] is True
+    assert mocked.call_args.kwargs["duplicate_barcode"] is True
 
 
 def test_patch_gallery_view_name() -> None:

@@ -149,6 +149,15 @@
 | 表示順 | `display_order` | `integer` | NO | `0` |
 | 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
+| 交換OK | `sales_desired` | `boolean` | NO | `false` |
+| 欲しい | `want_object` | `boolean` | NO | `false` |
+| 価格なし | `missing_price` | `boolean` | NO | `false` |
+| 購入日なし | `missing_purchase_date` | `boolean` | NO | `false` |
+| 購入月 | `purchase_month` | `text` | YES | |
+| カテゴリなし | `missing_category` | `boolean` | NO | `false` |
+| 収納なし | `missing_storage` | `boolean` | NO | `false` |
+| 写真なし | `missing_photo` | `boolean` | NO | `false` |
+| 同じバーコード | `duplicate_barcode` | `boolean` | NO | `false` |
 
 ## `icon_tag`（アイコンタグ）
 
@@ -195,6 +204,17 @@
 | サブ色 | `sub_hex` | `text` | NO | `'#6a9bb8'::text` |
 | 有効 | `active` | `boolean` | NO | `false` |
 | プリセット一覧 | `presets` | `jsonb` | NO | `'[]'::jsonb` |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
+
+## `oshi_day`（推し何日目）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| 推し何日目ID | `oshi_day_id` | `bigint` | NO | |
+| 会員ID | `members_id` | `uuid` | NO | |
+| キャラクター名 | `character_name` | `text` | NO | |
+| 開始日 | `start_date` | `date` | NO | |
 | 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
 | 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
 
@@ -315,6 +335,17 @@
 | 会員ID | `members_id` | `uuid` | NO | |
 | 登録製品ID | `registered_product_id` | `integer` | NO | |
 | スロット | `slot` | `integer` | NO | |
+
+## `spending_budget`（支出予算）
+
+| 日本語列名 | 物理名 | 型 | NULL | default |
+|------------|--------|----|------|---------|
+| 支出予算ID | `spending_budget_id` | `bigint` | NO | |
+| 会員ID | `members_id` | `uuid` | NO | |
+| 通貨コード | `currency_code` | `text` | NO | |
+| 毎月の金額 | `monthly_amount` | `integer` | NO | |
+| 作成日時 | `created_at` | `timestamp with time zone` | NO | `now()` |
+| 更新日時 | `updated_at` | `timestamp with time zone` | NO | `now()` |
 
 ## `storage_location`（収納場所）
 

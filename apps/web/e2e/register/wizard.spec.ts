@@ -65,7 +65,7 @@ async function dismissStartNudge(page: Page) {
 }
 
 test.describe("register wizard fixtures", () => {
-  test("guest: バーコード画像読取後にゲートし、業務 API に届かない", async ({
+  test("guest: バーコード読取はローカルのみ。照合APIは確認なしでは呼ばない", async ({
     page,
     context,
   }) => {
@@ -73,8 +73,7 @@ test.describe("register wizard fixtures", () => {
     await page
       .locator("#barcode_image_upload")
       .setInputFiles(fixtureFile(fixtureCase.barcode_image));
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /本登録が必要/ })).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
       { timeout: 15_000 },
@@ -184,7 +183,7 @@ test.describe("register wizard fixtures", () => {
     expect(created.photo_id == null).toBe(true);
   });
 
-  test("guest: 正面の次へでゲートし、本保存でもゲートする", async ({
+  test("guest: 画面だけ確認は次へで進み、本保存はゲートする", async ({
     page,
     context,
   }) => {
@@ -196,18 +195,12 @@ test.describe("register wizard fixtures", () => {
       .locator("#wizard_photo")
       .setInputFiles(fixtureFile(fixtureCase.front_image));
     await page.getByRole("button", { name: /^次へ$|^Next$/ }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(
-      page.getByText(/アシスト機能には本登録|assist features/i),
-    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.locator("#product_name")).toBeVisible();
     expect(apiCallsOf(calls, "POST", API_PATHS.assistVisionDescribe)).toHaveLength(
       0,
     );
     expect(apiCallsOf(calls, "POST", API_PATHS.photos)).toHaveLength(0);
-
-    await page.getByRole("button", { name: /閉じる|Close/i }).click();
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-    await expect(page.locator("#product_name")).toBeVisible();
     await page.locator("#product_name").fill("E2E Guest Save");
     await page.getByRole("button", { name: /登録する|^Register$/i }).click();
     await expect(page.getByRole("dialog")).toBeVisible();

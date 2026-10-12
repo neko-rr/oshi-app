@@ -3,6 +3,7 @@ import { redirectTo } from "@/i18n/redirect";
 import { API_PATHS } from "@oshi/shared";
 import { apiFetch } from "@/lib/api";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { CollectionSummary } from "@/components/dashboard/CollectionSummary";
 import { ColorTagSharePanel } from "@/components/dashboard/ColorTagSharePanel";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -12,45 +13,12 @@ function metaNumber(meta: Record<string, unknown>, key: string): number {
 }
 
 type DashboardCharts = {
-  spend_series: unknown[];
-  product_mix: unknown[];
-  category_tags: unknown[];
-  storage_locations: unknown[];
   color_tags: unknown[];
   meta: Record<string, unknown>;
+  collection?: unknown;
+  budgets?: unknown;
+  oshi_days?: unknown;
 };
-
-function SectionList({
-  title,
-  items,
-  noDataLabel,
-}: {
-  title: string;
-  items: unknown[];
-  noDataLabel: string;
-}) {
-  return (
-    <section className="rounded-md border border-border bg-card p-4 text-card-foreground">
-      <h2 className="mb-2 text-lg font-medium">{title}</h2>
-      {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{noDataLabel}</p>
-      ) : (
-        <ul className="space-y-2 text-sm">
-          {items.map((item, i) => (
-            <li
-              key={i}
-              className="rounded border border-border bg-background px-2 py-1 font-mono text-xs"
-            >
-              {typeof item === "object" && item !== null
-                ? JSON.stringify(item)
-                : String(item)}
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
 
 export default async function DashboardPage({
   params,
@@ -124,6 +92,11 @@ export default async function DashboardPage({
 
       {charts ? (
         <div className="flex flex-col gap-4">
+          <CollectionSummary
+            raw={charts.collection}
+            budgets={charts.budgets}
+            oshiDays={charts.oshi_days}
+          />
           <ColorTagSharePanel
             title={t("colorShareTitle")}
             hint={t("colorShareHint")}
@@ -148,34 +121,6 @@ export default async function DashboardPage({
             )}
             pieLabel={t("colorSharePieAria")}
           />
-          <SectionList
-            title={t("spendSeries")}
-            items={charts.spend_series ?? []}
-            noDataLabel={t("noData")}
-          />
-          <SectionList
-            title={t("productMix")}
-            items={charts.product_mix ?? []}
-            noDataLabel={t("noData")}
-          />
-          <SectionList
-            title={t("categoryTags")}
-            items={charts.category_tags ?? []}
-            noDataLabel={t("noData")}
-          />
-          <SectionList
-            title={t("storageLocations")}
-            items={charts.storage_locations ?? []}
-            noDataLabel={t("noData")}
-          />
-          {charts.meta && Object.keys(charts.meta).length > 0 ? (
-            <section className="rounded-md border border-border bg-card p-4 text-card-foreground">
-              <h2 className="mb-2 text-lg font-medium">{t("meta")}</h2>
-              <pre className="overflow-auto text-xs">
-                {JSON.stringify(charts.meta, null, 2)}
-              </pre>
-            </section>
-          ) : null}
         </div>
       ) : null}
     </div>

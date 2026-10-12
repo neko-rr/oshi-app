@@ -24,7 +24,7 @@
 - [x] スキャナが全幅寄りで、横向きでも枠と CTA が被らない
 - [x] 登録成功時に短い成功フラッシュが出る
 - [x] API 失敗時（オフライン／電波弱含む）に再試行導線がある
-- [x] ゲストはウィザード画面を進められるが、写真アップロード・照合・Assist・本保存は本登録ゲートになる
+- [x] ゲストは「画面だけ確認」（スキップ進行・CAPTCHA なし）と「API（自動タグ付け）を試す」（楽天照合と写真抽出。CAPTCHA 成功かつ合計1時間3回。保存しない）を選べる。色ラベルは見本のみ。キーワード・写真の本保存は本登録ゲート
 - [x] 楽天照合成功時、先頭候補で名・価格・外部参照を自動入力し、確認画面の候補リスト（最大5）から差し替えできる（手入力欄は上書きしない）
 - [x] 楽天候補を選んだとき `product_url` / `external_item_code` / `shop_name` が `product_external_ref`（source=`rakuten`）として本保存される（スキップ登録では楽天行なしで可）
 - [x] メルカリ等の任意URL（source=`manual`・任意ラベル）を登録確認で入力・保存できる
@@ -36,6 +36,6 @@
 - [x] 同じグッズ（バーコードまたは楽天 item_code）の所持ヒントに件数・合計所持数が出る（追加登録は妨げない）
 - [x] 確認画面からキーワードで楽天検索し、候補を登録欄へ反映できる
 
-後続（Must 本線外）: 店頭専用購入済み画面、一括／CLIP、交換OK一覧フィルタ・交換画面。
+後続（Must 本線外）: 店頭専用購入済み画面、一括／CLIP、交換画面。一覧の交換OK・欲しい絞り込みはギャラリー側。
 
 関連: `register_flow` / `register_wizard_defaults` / `product_external_ref` / `duplicate_exchange` / `guest_onboarding` / `docs/product/flows/register.md` / `docs/product/register_fields.md` / `docs/product/flows/guest.md`

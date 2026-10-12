@@ -543,6 +543,48 @@
       "notes": "category_tag_id / clear_category_tag。選択モードは収納と共用。"
     },
     {
+      "id": "gallery_inline_edit",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "ギャラリー行編集",
+      "evidence_paths": [
+        "apps/web/src/components/gallery/GalleryEditList.tsx",
+        "apps/web/src/components/gallery/GalleryBrowse.tsx",
+        "apps/api/app/routers/products.py",
+        "apps/api/app/services/product_service.py",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products"
+      ],
+      "notes": "GET /products?view=edit。保存は行ごとの PATCH。写真は左右90度のみ。選択モードとは同時に入らない。交換OK・欲しいは詳しく。"
+    },
+    {
+      "id": "gallery_status_filters",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "交換OK・欲しいで絞り込み",
+      "evidence_paths": [
+        "apps/web/src/components/gallery/GalleryFilterChips.tsx",
+        "apps/web/src/lib/galleryListQuery.ts",
+        "apps/api/app/routers/products.py",
+        "apps/api/app/services/gallery_view_service.py",
+        "supabase/migrations/20261012120000_gallery_view_sales_want.sql",
+        "docs/product/acceptance/gallery.md"
+      ],
+      "expected_web_paths": [
+        "/gallery"
+      ],
+      "expected_api_paths": [
+        "/products",
+        "/gallery-views"
+      ],
+      "notes": "sales_desired=1 / want_object=1 はフラグ1だけ。保存ビューは boolean 列。交換専用画面は未。"
+    },
+    {
       "id": "product_detail",
       "phase": "must",
       "status": "shipped",
@@ -551,7 +593,9 @@
         "apps/web/src/app/[locale]/gallery/[registered_product_id]/page.tsx",
         "apps/web/src/components/ProductDetailEditor.tsx",
         "apps/web/src/components/gallery/ProductDetailHero.tsx",
+        "apps/web/src/components/gallery/ProductPhotoReplace.tsx",
         "apps/web/src/components/gallery/ProductPhotoLightbox.tsx",
+        "apps/web/src/lib/replaceProductPhoto.ts",
         "docs/product/acceptance/product_detail.md"
       ],
       "expected_web_paths": [
@@ -560,7 +604,7 @@
       "expected_api_paths": [
         "/products/{registered_product_id}"
       ],
-      "notes": "ヒーロー写真フルスクリーン拡大（ピンチ / +/-）。隣製品ナビ（スワイプ／前後）"
+      "notes": "ヒーロー写真フルスクリーン拡大（ピンチ / +/-）。隣製品ナビ（スワイプ／前後）。写真の撮り直しは詳細の1件。"
     },
     {
       "id": "storage_locations",
@@ -683,16 +727,29 @@
       ],
       "expected_api_paths": [
         "/dashboard/charts"
-      ]
+      ],
+      "notes": "所持・欲しい・交換OK、写真なし、同じバーコード、カテゴリと収納の内訳、通貨別支出。件数はギャラリーへ移る。JSONの生表示は出さない。"
     },
     {
       "id": "spending",
       "phase": "phase2",
-      "status": "planned",
+      "status": "shipped",
       "title_ja": "支出集計",
-      "evidence_paths": [],
-      "expected_web_paths": [],
-      "expected_api_paths": []
+      "evidence_paths": [
+        "apps/api/app/services/dashboard_service.py",
+        "apps/web/src/components/dashboard/CollectionSummary.tsx",
+        "apps/web/src/components/dashboard/SpendingBudgetEditor.tsx",
+        "apps/api/app/services/spending_budget_service.py",
+        "docs/product/acceptance/dashboard.md"
+      ],
+      "expected_web_paths": [
+        "/dashboard"
+      ],
+      "expected_api_paths": [
+        "/dashboard/charts",
+        "/spending-budgets"
+      ],
+      "notes": "通貨ごとの合計と、購入日の暦月、毎月同じ上限。換算・月ごとに違う予算・カテゴリ予算はしない。"
     },
     {
       "id": "tag_analytics",
@@ -717,11 +774,21 @@
     {
       "id": "oshi_days",
       "phase": "phase2",
-      "status": "planned",
+      "status": "shipped",
       "title_ja": "推し何日目",
-      "evidence_paths": [],
-      "expected_web_paths": [],
-      "expected_api_paths": []
+      "evidence_paths": [
+        "apps/api/app/services/oshi_day_service.py",
+        "apps/web/src/components/dashboard/OshiDayEditor.tsx",
+        "apps/web/src/app/[locale]/dashboard/page.tsx",
+        "docs/product/acceptance/dashboard.md"
+      ],
+      "expected_web_paths": [
+        "/dashboard"
+      ],
+      "expected_api_paths": [
+        "/oshi-days"
+      ],
+      "notes": "キャラ名ごとの開始日。その日が1日目。未来日は日数なし。購入日からは推測しない。"
     },
     {
       "id": "duplicate_exchange",
@@ -747,16 +814,29 @@
         "/products/duplicate-hints",
         "/display-settings"
       ],
-      "notes": "土台のみ。所持数・交換OK個数・欲しいフラグ・手元数設定・hints。一覧フィルタ／交換画面／CLIPは未。"
+      "notes": "土台、交換OK・欲しいの絞り込み、同じバーコードが2件以上の件数とギャラリー絞り込みまで。空の番号は数えない。楽天コードでは一覧を絞らない。交換画面／CLIPは未。"
     },
     {
       "id": "storage_capacity",
       "phase": "phase2",
-      "status": "planned",
+      "status": "shipped",
       "title_ja": "収納枚数計算",
-      "evidence_paths": [],
-      "expected_web_paths": [],
-      "expected_api_paths": []
+      "evidence_paths": [
+        "apps/api/app/services/dashboard_service.py",
+        "apps/api/app/services/tag_service.py",
+        "apps/web/src/components/dashboard/CollectionSummary.tsx",
+        "apps/web/src/app/[locale]/settings/storage-locations/page.tsx",
+        "docs/product/acceptance/dashboard.md"
+      ],
+      "expected_web_paths": [
+        "/dashboard",
+        "/settings/storage-locations"
+      ],
+      "expected_api_paths": [
+        "/dashboard/charts",
+        "/storage-locations"
+      ],
+      "notes": "場所ごとの入る枚数（storage_count_per_1）と現在件数。サイズからの自動計算はしない。"
     },
     {
       "id": "oshi_room",
@@ -902,6 +982,21 @@
       "expected_api_paths": [
         "/me"
       ]
+    },
+    {
+      "id": "auth_passkey",
+      "phase": "later",
+      "status": "deferred",
+      "title_ja": "パスキー（Passkeys / WebAuthn）",
+      "evidence_paths": [
+        "docs/product/roadmap.md",
+        "docs/db/security.md",
+        "docs/WAKE_UP.md",
+        "docs/product/acceptance/auth.md"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": [],
+      "notes": "2026-10-07: 導入しない。Supabase Passkeys は experimental。本線はメール／Google／ゲスト＋Turnstile。Dashboard OFF。再検討は安定化または明確な需要後。"
     }
   ]
 }

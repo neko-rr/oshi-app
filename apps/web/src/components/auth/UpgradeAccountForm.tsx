@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/client";
 import { isAnonymousUser } from "@/lib/authGuest";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,11 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /**
- * ゲスト → 本登録（同一 user にメール紐づけ）。
- * 公式: updateUser({ email }) → 確認 → updateUser({ password })
+ * ゲスト → 本登録（同一 user に Google / メールを紐づけ）。
+ * Google: linkIdentity（UID 維持）。メール: updateUser → 確認 → password。
  */
 export function UpgradeAccountForm() {
   const t = useTranslations("GuestUpgrade");
+  const tOauth = useTranslations("AuthOAuth");
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -128,37 +130,48 @@ export function UpgradeAccountForm() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {phase === "email" ? (
-          <form onSubmit={(e) => void submitEmail(e)} className="flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="upgrade-email">{t("email")}</Label>
-              <Input
-                id="upgrade-email"
-                type="email"
-                required
-                value={email}
-                onChange={(ev) => setEmail(ev.target.value)}
-                autoComplete="email"
-              />
+          <div className="flex flex-col gap-6">
+            <GoogleSignInButton intent="upgrade" next="/" />
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span className="h-px flex-1 bg-border" />
+              {tOauth("or")}
+              <span className="h-px flex-1 bg-border" />
             </div>
-            {error ? (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            ) : null}
-            {error === t("emailTaken") ? (
-              <p className="text-sm text-muted-foreground">
-                <Link
-                  href="/auth/login"
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  {t("goLogin")}
-                </Link>
-              </p>
-            ) : null}
-            <Button type="submit" disabled={busy}>
-              {busy ? t("sending") : t("sendVerify")}
-            </Button>
-          </form>
+            <form
+              onSubmit={(e) => void submitEmail(e)}
+              className="flex flex-col gap-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="upgrade-email">{t("email")}</Label>
+                <Input
+                  id="upgrade-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  autoComplete="email"
+                />
+              </div>
+              {error ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              ) : null}
+              {error === t("emailTaken") ? (
+                <p className="text-sm text-muted-foreground">
+                  <Link
+                    href="/auth/login"
+                    className="text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("goLogin")}
+                  </Link>
+                </p>
+              ) : null}
+              <Button type="submit" disabled={busy}>
+                {busy ? t("sending") : t("sendVerify")}
+              </Button>
+            </form>
+          </div>
         ) : null}
 
         {phase === "await_verify" ? (

@@ -225,6 +225,104 @@ def test_list_products_uses_fetch_and_filters_by_member_context() -> None:
     assert items[0]["photo_thumbnail_url"] is None
 
 
+def test_list_products_edit_view_keeps_registration_fields() -> None:
+    """view=edit は登録項目と外部参照を返し、fetch に view を渡す。"""
+    captured: dict = {}
+
+    def fake_fetch(**kwargs):
+        captured["view"] = kwargs.get("view")
+        return [
+            {
+                "registered_product_id": 4,
+                "product_name": "缶バッジ",
+                "photo_id": 8,
+                "memo": "見た目メモ",
+                "character_name": "風ねこ",
+                "works_series_name": "作品",
+                "title": "タイトル",
+                "product_group_name": "グループ",
+                "purchase_location": "会場",
+                "purchase_date": "2026-10-01",
+                "registration_quantity": 2,
+                "sales_desired_flag": 0,
+                "sales_desired_quantity": 0,
+                "want_object_flag": 1,
+                "barcode_number": "4901",
+                "creation_date": None,
+                "photo": None,
+                "product_external_ref": [
+                    {
+                        "source": "manual",
+                        "product_url": "https://example.com/item",
+                        "label": "通販",
+                        "is_primary": True,
+                    }
+                ],
+            }
+        ]
+
+    items = list_products_for_member(
+        "33333333-3333-3333-3333-333333333333",
+        access_token="user-jwt",
+        view="edit",
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert captured["view"] == "edit"
+    assert items[0]["memo"] == "見た目メモ"
+    assert items[0]["character_name"] == "風ねこ"
+    assert items[0]["works_series_name"] == "作品"
+    assert items[0]["purchase_date"] == "2026-10-01"
+    assert items[0]["want_object_flag"] == 1
+    assert items[0]["external_refs"][0]["source"] == "manual"
+    assert items[0]["external_refs"][0]["product_url"] == "https://example.com/item"
+
+
+def test_list_products_passes_status_flags_to_fetch() -> None:
+    captured: dict = {}
+
+    def fake_fetch(**kwargs):
+        captured["sales_desired"] = kwargs.get("sales_desired")
+        captured["want_object"] = kwargs.get("want_object")
+        return []
+
+    list_products_for_member(
+        "33333333-3333-3333-3333-333333333333",
+        access_token="user-jwt",
+        sales_desired=True,
+        want_object=True,
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert captured["sales_desired"] is True
+    assert captured["want_object"] is True
+
+
+def test_list_products_browse_omits_edit_fields() -> None:
+    def fake_fetch(**kwargs):
+        return [
+            {
+                "registered_product_id": 4,
+                "product_name": "缶バッジ",
+                "photo_id": None,
+                "memo": "秘匿にしないが閲覧一覧には出さない",
+                "character_name": "風ねこ",
+                "creation_date": None,
+                "photo": None,
+            }
+        ]
+
+    items = list_products_for_member(
+        "33333333-3333-3333-3333-333333333333",
+        access_token="user-jwt",
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert "memo" not in items[0]
+    assert "character_name" not in items[0]
+    assert "external_refs" not in items[0]
+
+
 def test_list_products_returns_empty_when_supabase_unconfigured() -> None:
     def boom(**_kwargs):
         raise RuntimeError("supabase_not_configured")

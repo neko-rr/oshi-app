@@ -31,6 +31,8 @@
 | `gallery_bulk_category` | 複数選択でカテゴリ一括変更（同 bulk API） | shipped |
 | `gallery_selection_scope` | 選択範囲操作（ページ全選択／条件最大100／選択のみ表示） | shipped |
 | `gallery_saved_views` | 名前付きフィルタ＋並びの保存（無料・上限20） | shipped |
+| `gallery_inline_edit` | 一覧の編集モード（行ごとの登録項目と写真の左右回転） | shipped |
+| `gallery_status_filters` | 交換OK・欲しいで一覧を絞る | shipped |
 | `product_detail` | 詳細の閲覧・編集 | shipped |
 | `storage_locations` | 収納場所タグ | shipped |
 | `category_tags` | カテゴリタグ設定 | shipped |
@@ -52,11 +54,11 @@
 | ID | 内容 | 状態 |
 |----|------|------|
 | `dashboard` | ダッシュボード | partial |
-| `spending` | 推しへの支出の家計簿的集計 | planned |
+| `spending` | 推しへの支出（月次・通貨ごとの毎月予算。換算なし） | shipped |
 | `tag_analytics` | 推し色割合などタグ分析 | shipped |
-| `oshi_days` | 推し初めて何日 | planned |
-| `duplicate_exchange` | ダブり・交換 OK 数 | partial |
-| `storage_capacity` | 規定サイズタグでの収納枚数計算 | planned |
+| `oshi_days` | キャラごとの推し何日目 | shipped |
+| `duplicate_exchange` | ダブり件数（同じバーコード）と交換 OK。交換画面は未 | partial |
+| `storage_capacity` | 収納場所ごとの入る枚数と現在件数 | shipped |
 
 ## Phase 3 / Later
 
@@ -68,6 +70,14 @@
 | `premium` | プレミアム移行（推し色の全体適用・保存を含む候補） | deferred |
 | `photo_quality_paid` | 保管画質ティア／Storage 容量の有料化（無料は圧縮既定） | deferred |
 | `crypto_nft_assets` | 暗号資産・NFT（法定通貨と別モデル） | deferred |
+| `auth_passkey` | Supabase Passkeys（WebAuthn）。ログインの第3手段候補 | deferred |
+
+### パスキー（2026-10-07）
+
+- **今は導入しない。** Supabase 公式が [experimental](https://supabase.com/docs/guides/auth/passkeys)（Dashboard でも Beta 表記）。API・クライアント opt-in が変わりうる
+- 認証本線は **メール／Google／ゲスト＋Turnstile**。ゲストはパスキー登録不可のため、体験の主戦場にも効きにくい
+- 再検討: experimental 解除後、または一般公開後に明確な需要が出たとき。Dashboard は OFF のまま（RP ID を雑に触らない）
+- 運用メモ: [docs/db/security.md](../db/security.md) / [WAKE_UP.md](../WAKE_UP.md)
 
 ### 写真・容量（2026-10-07）
 
@@ -95,6 +105,7 @@
 /privacy          プライバシーポリシー
 /licenses         ライセンス・表記
 /auth/*           ログイン（Google・メール・ゲスト）・登録・パスワード・ゲスト本登録（upgrade）
+                  ※パスキーは deferred（`auth_passkey`）。勝手に足さない
 ```
 
 未実装の「推し部屋」等はルートを勝手に増やさない。`deferred` のまま要求待ち。

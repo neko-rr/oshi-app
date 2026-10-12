@@ -139,6 +139,153 @@ def test_list_products_passes_tag_filters_and_echoes() -> None:
     assert body["has_more"] is False
 
 
+def test_list_products_passes_edit_view() -> None:
+    """編集モードは view=edit のときだけ詳しい項目を取りに行く。"""
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            params={"view": "edit"},
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["view"] == "edit"
+
+
+def test_list_products_omits_view_by_default() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1].get("view") in (None, "")
+
+
+def test_list_products_passes_exchange_and_want_filters() -> None:
+    """交換OK・欲しいは 1 のときだけ一覧取得へ渡す。"""
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            params={"sales_desired": "1", "want_object": "1"},
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["sales_desired"] is True
+    assert mocked.call_args[1]["want_object"] is True
+
+
+def test_list_products_passes_ledger_hole_filters() -> None:
+    """価格なし・購入日なし・購入月は一覧取得へ渡す。月が不正なら 400。"""
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            params={
+                "missing_price": "1",
+                "missing_purchase_date": "1",
+                "purchase_month": "2026-10",
+            },
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["missing_price"] is True
+    assert mocked.call_args[1]["missing_purchase_date"] is True
+    assert mocked.call_args[1]["purchase_month"] == "2026-10"
+
+    with patch("app.deps.auth.verify_access_token", return_value=user):
+        bad = client.get(
+            "/products",
+            params={"purchase_month": "2026-13"},
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert bad.status_code == 400
+    assert bad.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_list_products_passes_hole_and_duplicate_filters() -> None:
+    """収納なし・カテゴリなし・写真なし・同じバーコードは一覧取得へ渡す。"""
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with (
+        patch("app.deps.auth.verify_access_token", return_value=user),
+        patch(
+            "app.routers.products.list_products_for_member",
+            return_value=[],
+        ) as mocked,
+    ):
+        res = client.get(
+            "/products",
+            params={
+                "missing_category": "1",
+                "missing_storage": "1",
+                "missing_photo": "1",
+                "duplicate_barcode": "1",
+            },
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 200
+    assert mocked.call_args[1]["missing_category"] is True
+    assert mocked.call_args[1]["missing_storage"] is True
+    assert mocked.call_args[1]["missing_photo"] is True
+    assert mocked.call_args[1]["duplicate_barcode"] is True
+
+
+def test_list_products_rejects_unknown_view() -> None:
+    user = AuthenticatedUser(
+        members_id="22222222-2222-2222-2222-222222222222",
+        email="a@example.com",
+    )
+    with patch("app.deps.auth.verify_access_token", return_value=user):
+        res = client.get(
+            "/products",
+            params={"view": "full"},
+            headers={"Authorization": "Bearer fake-jwt"},
+        )
+    assert res.status_code == 400
+    assert res.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
 def test_list_products_rejects_invalid_color_slot() -> None:
     user = AuthenticatedUser(
         members_id="22222222-2222-2222-2222-222222222222",

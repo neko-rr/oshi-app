@@ -45,3 +45,20 @@ def parse_positive_id_list(
         if len(out) > max_items:
             raise ValueError(f"未対応のフィルタです（{field}）")
     return out
+
+
+def parse_purchase_month(raw: str | None) -> str | None:
+    """YYYY-MM だけ通す。空は絞らない。"""
+    text = (raw or "").strip()
+    if not text:
+        return None
+    if len(text) != 7 or text[4] != "-":
+        raise ValueError("未対応の購入月です")
+    year_s, month_s = text[:4], text[5:]
+    if not (year_s.isdigit() and month_s.isdigit()):
+        raise ValueError("未対応の購入月です")
+    year = int(year_s)
+    month = int(month_s)
+    if year < 1900 or year > 9999 or month < 1 or month > 12:
+        raise ValueError("未対応の購入月です")
+    return f"{year:04d}-{month:02d}"

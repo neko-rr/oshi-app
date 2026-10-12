@@ -108,6 +108,40 @@ def _resolve_tag_ids_matching_name(
     return out
 
 
+def _duplicate_barcode_product_ids(client: Any, members_id: str) -> list[int]:
+    """同じバーコードが2件以上の製品 ID。空の番号は含めない。"""
+    rows: list[dict[str, Any]] = []
+    offset = 0
+    page = 1000
+    while offset < 20000:
+        resp = (
+            client.table("registered_product")
+            .select("registered_product_id,barcode_number")
+            .eq("members_id", members_id)
+            .range(offset, offset + page - 1)
+            .execute()
+        )
+        batch = [row for row in (resp.data or []) if isinstance(row, dict)]
+        rows.extend(batch)
+        if len(batch) < page:
+            break
+        offset += page
+    counts: dict[str, int] = {}
+    ids_by_key: dict[str, list[int]] = {}
+    for row in rows:
+        pid = row.get("registered_product_id")
+        key = str(row.get("barcode_number") or "").strip()
+        if not isinstance(pid, int) or not key:
+            continue
+        counts[key] = counts.get(key, 0) + 1
+        ids_by_key.setdefault(key, []).append(pid)
+    out: list[int] = []
+    for key, count in counts.items():
+        if count >= 2:
+            out.extend(ids_by_key[key])
+    return out
+
+
 def fetch_products_page(
     *,
     members_id: str,
@@ -120,6 +154,16 @@ def fetch_products_page(
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
     sort: str | None = None,
+    view: str | None = None,
+    sales_desired: bool = False,
+    want_object: bool = False,
+    missing_price: bool = False,
+    missing_purchase_date: bool = False,
+    purchase_month: str | None = None,
+    missing_category: bool = False,
+    missing_storage: bool = False,
+    missing_photo: bool = False,
+    duplicate_barcode: bool = False,
 ) -> list[dict[str, Any]]:
     """registered_product を 1 ページ取得（RLS + eq members_id）。
 
@@ -163,9 +207,12 @@ def fetch_products_page(
         if not color_product_ids:
             return []
 
+    select_cols = (
+        _PRODUCT_EDIT_SELECT if (view or "").strip() == "edit" else _PRODUCT_LIST_SELECT
+    )
     query = (
         client.table("registered_product")
-        .select(_PRODUCT_LIST_SELECT)
+        .select(select_cols)
         .eq("members_id", members_id)
     )
     code = (barcode_number or "").strip()
@@ -175,8 +222,41 @@ def fetch_products_page(
         query = query.in_("category_tag_id", cat_ids)
     if storage_ids_filter:
         query = query.in_("storage_location_id", storage_ids_filter)
+    if duplicate_barcode:
+        duplicate_ids = _duplicate_barcode_product_ids(client, members_id)
+        if color_product_ids is not None:
+            allowed = set(color_product_ids)
+            duplicate_ids = [pid for pid in duplicate_ids if pid in allowed]
+        if not duplicate_ids:
+            return []
+        color_product_ids = duplicate_ids
     if color_product_ids is not None:
         query = query.in_("registered_product_id", color_product_ids)
+    # フラグ 1 だけ。0 と未設定は除外する
+    if sales_desired:
+        query = query.eq("sales_desired_flag", 1)
+    if want_object:
+        query = query.eq("want_object_flag", 1)
+    if missing_price:
+        query = query.is_("purchase_price", "null")
+    if missing_purchase_date:
+        query = query.is_("purchase_date", "null")
+    if missing_category:
+        query = query.is_("category_tag_id", "null")
+    if missing_storage:
+        query = query.is_("storage_location_id", "null")
+    if missing_photo:
+        query = query.is_("photo_id", "null")
+    month = (purchase_month or "").strip()
+    if month:
+        year = int(month[:4])
+        mon = int(month[5:7])
+        start = f"{year:04d}-{mon:02d}-01"
+        if mon == 12:
+            end = f"{year + 1:04d}-01-01"
+        else:
+            end = f"{year:04d}-{mon + 1:02d}-01"
+        query = query.gte("purchase_date", start).lt("purchase_date", end)
 
     needle = (q or "").strip()
     if needle:
@@ -339,6 +419,61 @@ storage_location(storage_location_id,storage_location_name,storage_location_icon
 """.replace(
     "\n", ""
 )
+
+_PRODUCT_EDIT_SELECT = (
+    _PRODUCT_DETAIL_SELECT
+    + ",product_external_ref(source,product_url,external_item_code,shop_name,label,is_primary)"
+)
+
+
+def fetch_photo_for_member(
+    *,
+    members_id: str,
+    access_token: str,
+    photo_id: int,
+) -> dict[str, Any] | None:
+    """members_id 一致の photo 1件。無ければ None。"""
+    client = create_user_client(access_token)
+    response = (
+        client.table("photo")
+        .select("photo_id,photo_thumbnail_url,photo_high_resolution_url")
+        .eq("members_id", members_id)
+        .eq("photo_id", photo_id)
+        .limit(1)
+        .execute()
+    )
+    if getattr(response, "error", None):
+        logger.exception("写真の取得に失敗: %s", response.error)
+        raise RuntimeError("写真の取得に失敗しました")
+    data = response.data if hasattr(response, "data") else None
+    if not isinstance(data, list) or not data or not isinstance(data[0], dict):
+        return None
+    return data[0]
+
+
+def count_products_with_photo(
+    *,
+    members_id: str,
+    access_token: str,
+    photo_id: int,
+) -> int:
+    """この写真を参照している自製品が1件でもあれば 1。"""
+    client = create_user_client(access_token)
+    response = (
+        client.table("registered_product")
+        .select("registered_product_id")
+        .eq("members_id", members_id)
+        .eq("photo_id", photo_id)
+        .limit(1)
+        .execute()
+    )
+    if getattr(response, "error", None):
+        logger.exception("写真参照数の取得に失敗: %s", response.error)
+        raise RuntimeError("写真参照数の取得に失敗しました")
+    data = response.data if hasattr(response, "data") else None
+    if not isinstance(data, list):
+        return 0
+    return len(data)
 
 
 def fetch_product_by_id(

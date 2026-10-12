@@ -63,3 +63,82 @@ def create_photo_for_member(
         "photo_thumbnail_path": path,
         "photo_high_resolution_path": path,
     }
+
+
+def require_member_photo(
+    *,
+    members_id: str,
+    access_token: str,
+    photo_id: int,
+    fetch_photo: Callable[..., dict[str, Any] | None] | None = None,
+) -> dict[str, Any]:
+    """自分の photo 行だけを返す。無ければ業務エラー。"""
+    if not members_id or not str(members_id).strip():
+        raise ValueError("members_id が空です")
+    if not access_token or not str(access_token).strip():
+        raise ValueError("access_token が空です")
+    if not isinstance(photo_id, int) or photo_id <= 0:
+        raise ValueError("photo_id が不正です")
+
+    fetcher = fetch_photo
+    if fetcher is None:
+        from app.infra.supabase_user import fetch_photo_for_member
+
+        fetcher = fetch_photo_for_member
+    try:
+        row = fetcher(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            photo_id=photo_id,
+        )
+    except Exception:
+        logger.exception("写真の所有者確認に失敗")
+        raise
+    if not isinstance(row, dict):
+        raise ValueError("写真が見つかりません")
+    return row
+
+
+def retire_replaced_photo(
+    *,
+    members_id: str,
+    access_token: str,
+    photo_id: int,
+    count_product_refs: Callable[..., int] | None = None,
+    delete_photo: Callable[..., None] | None = None,
+) -> None:
+    """他の製品が参照していなければ写真行と Storage を削除する。"""
+    if not isinstance(photo_id, int) or photo_id <= 0:
+        return
+    if not members_id or not str(members_id).strip():
+        return
+    counter = count_product_refs
+    if counter is None:
+        from app.infra.supabase_user import count_products_with_photo
+
+        counter = count_products_with_photo
+    deleter = delete_photo
+    if deleter is None:
+        from app.infra.photo_storage import delete_member_photo
+
+        deleter = delete_member_photo
+    try:
+        refs = counter(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            photo_id=photo_id,
+        )
+    except Exception:
+        logger.exception("旧写真の参照数を確認できません")
+        raise
+    if not isinstance(refs, int) or refs > 0:
+        return
+    try:
+        deleter(
+            members_id=str(members_id).strip(),
+            access_token=str(access_token).strip(),
+            photo_id=photo_id,
+        )
+    except Exception:
+        logger.exception("旧写真の削除に失敗")
+        raise

@@ -433,12 +433,26 @@ def record_storage_location_register_pick(
     ).execute()
 
 
+def normalize_storage_capacity(raw: Any) -> int:
+    """収納場所に入る枚数。1以上9999以下。"""
+    if isinstance(raw, bool) or raw is None:
+        raise ValueError("入る枚数を入力してください")
+    try:
+        count = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("入る枚数を入力してください") from exc
+    if count < 1 or count > 9999:
+        raise ValueError("入る枚数は1から9999にしてください")
+    return count
+
+
 def create_storage_location(
     *,
     members_id: str,
     access_token: str,
     name: str,
     icon: str,
+    capacity_count: int = 1,
 ) -> dict[str, Any]:
     name = name.strip()
     if not name:
@@ -452,6 +466,7 @@ def create_storage_location(
         "storage_location_icon": normalize_storage_icon(icon),
         "display_order": max_order + 1,
         "storage_location_use_flag": 1,
+        "storage_count_per_1": normalize_storage_capacity(capacity_count),
     }
     resp = client.table("storage_location").insert(payload).execute()
     data = resp.data or []
@@ -467,6 +482,7 @@ def update_storage_location(
     storage_location_id: int,
     name: str,
     icon: str,
+    capacity_count: int = 1,
 ) -> None:
     name = name.strip()
     if not name:
@@ -476,6 +492,7 @@ def update_storage_location(
         {
             "storage_location_name": name,
             "storage_location_icon": normalize_storage_icon(icon),
+            "storage_count_per_1": normalize_storage_capacity(capacity_count),
         }
     ).eq("members_id", members_id).eq(
         "storage_location_id", storage_location_id
