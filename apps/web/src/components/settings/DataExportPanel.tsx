@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { API_PATHS } from "@oshi/shared";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { Button } from "@/components/ui/button";
 
 type ExportKind = "text" | "media";
@@ -24,24 +24,21 @@ function apiBase(): string {
   );
 }
 
-async function authHeader(): Promise<HeadersInit> {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session?.access_token) {
-    throw new Error("unauthorized");
-  }
-  return { Authorization: `Bearer ${data.session.access_token}` };
-}
-
-async function sleep(ms: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function DataExportPanel() {
   const t = useTranslations("DataExport");
+  const session = useBrowserSession();
   const [busyKind, setBusyKind] = useState<ExportKind | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
+
+  const authHeader = useCallback((): HeadersInit => {
+    if (!session.accessToken) throw new Error("unauthorized");
+    return { Authorization: `Bearer ${session.accessToken}` };
+  }, [session.accessToken]);
 
   const downloadFile = useCallback(
     async (exportId: string) => {
@@ -64,7 +61,7 @@ export function DataExportPanel() {
       a.click();
       URL.revokeObjectURL(url);
     },
-    [],
+    [authHeader],
   );
 
   const runExport = useCallback(
@@ -134,7 +131,7 @@ export function DataExportPanel() {
         setBusyKind(null);
       }
     },
-    [downloadFile, t],
+    [authHeader, downloadFile, t],
   );
 
   return (

@@ -16,7 +16,7 @@ import { LucideIconBySlug } from "@/components/ui/LucideIconBySlug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { isPresetSlot } from "@/lib/tagPresets";
 import { GuestServerGate } from "@/components/auth/GuestServerGate";
 import { runAfterTick } from "@/lib/runAfterTick";
@@ -45,6 +45,7 @@ export default function StorageLocationsSettingsPage() {
   const tCommon = useTranslations("Common");
   const tPresets = useTranslations("TagPresets");
   const router = useRouter();
+  const session = useBrowserSession();
   const [items, setItems] = useState<StorageLocationItem[]>([]);
   const [dismissedSlots, setDismissedSlots] = useState<number[]>([]);
   const [reordering, setReordering] = useState(false);
@@ -66,17 +67,17 @@ export default function StorageLocationsSettingsPage() {
     return tPresets.has(key) ? tPresets(key) : tPresets("presetFallback", { slot });
   }
 
-  const getToken = useCallback(async () => {
-    const supabase = createClient();
-    const { data, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !data.session) {
+  const getToken = useCallback(() => {
+    if (session.status !== "ready") return null;
+    if (!session.accessToken) {
       router.push("/auth/login");
       return null;
     }
-    return data.session.access_token;
-  }, [router]);
+    return session.accessToken;
+  }, [router, session.accessToken, session.status]);
 
   const load = useCallback(async () => {
+    if (session.status !== "ready") return;
     setLoading(true);
     setError(null);
     try {
@@ -103,7 +104,7 @@ export default function StorageLocationsSettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [getToken, tCommon]);
+  }, [getToken, tCommon, session.status]);
 
   useEffect(() => runAfterTick(() => {
     void load();

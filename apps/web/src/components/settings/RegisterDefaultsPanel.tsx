@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { API_PATHS } from "@oshi/shared";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import {
   REGISTER_START_STEP_IDS,
   type RegisterStartStepId,
@@ -38,22 +38,21 @@ export function RegisterDefaultsPanel() {
     setKeepAtHandCount,
     setAutoSalesDesired,
   } = useDisplaySettings();
+  const session = useBrowserSession();
   const [storageItems, setStorageItems] = useState<StorageOption[]>([]);
 
   useEffect(() => {
+    if (session.status !== "ready" || !session.accessToken) return;
+    const token = session.accessToken;
     let cancelled = false;
     void (async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getSession();
-        const token = data.session?.access_token;
-        if (!token || cancelled) return;
         const res = await fetch(`${apiBase()}${API_PATHS.storageLocations}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok || cancelled) return;
         const json = (await res.json()) as { items?: StorageOption[] };
-        setStorageItems(json.items ?? []);
+        if (!cancelled) setStorageItems(json.items ?? []);
       } catch {
         /* ignore */
       }
@@ -61,7 +60,7 @@ export function RegisterDefaultsPanel() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session.accessToken, session.status]);
 
   // 削除済み ID は「指定しない」にフォールバック
   useEffect(() => {

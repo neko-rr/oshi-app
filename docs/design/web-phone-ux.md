@@ -21,7 +21,7 @@
 | タブ | ギャラリー／登録／検索／その他。横向きでも維持 |
 | デスクトップ | `lg+` はトップナビ。下部タブなし |
 | 例外 | 認証・`/dev` は下部タブなし |
-| 重なり | 一括バー・固定 CTA はタブ＋ safe-area と被らせない |
+| 重なり | 本文の下余白は `pb-above-bottom-tabs`（下部タブ＋safe-area）。`py-density-main` はユーティリティの `pb` より強いので、タブ分をそちらに足さない。一括バー・固定 CTA もタブと被らせない |
 
 採用: Lab A（[feedback/decisions.md](feedback/decisions.md) `responsive-shell-lab-a`）。
 

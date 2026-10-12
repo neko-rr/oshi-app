@@ -1,18 +1,16 @@
 ﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
-import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
+import { useRedirectIfSignedOut } from "@/components/auth/BrowserSessionProvider";
+import { NavLinkPendingOverlay } from "@/components/layout/NavLinkPendingHint";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/client";
 
 export default function SettingsPage() {
   const t = useTranslations("SettingsIndex");
-  const tCommon = useTranslations("Common");
-  const router = useRouter();
-  const [ready, setReady] = useState(false);
+  useRedirectIfSignedOut();
 
   const hubSections = [
     {
@@ -58,29 +56,6 @@ export default function SettingsPage() {
     },
   ] as const;
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.getSession();
-      if (cancelled) return;
-      if (error || !data.session) {
-        router.replace("/auth/login");
-        return;
-      }
-      setReady(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
-  if (!ready) {
-    return (
-      <p className="py-6 text-sm text-muted-foreground">{tCommon("loading")}</p>
-    );
-  }
-
   return (
     <div className="stack-density-lg">
       <div>
@@ -100,8 +75,9 @@ export default function SettingsPage() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="block rounded-md border border-border bg-card px-4 py-density text-card-foreground hover:opacity-90"
+                  className="relative block min-h-11 rounded-md border border-border bg-card px-4 py-density text-card-foreground transition-colors hover:bg-muted/40 active:bg-muted"
                 >
+                  <NavLinkPendingOverlay />
                   {item.label}
                 </Link>
               </li>
@@ -119,16 +95,18 @@ export default function SettingsPage() {
             <li>
               <Link
                 href="/dev/design-lab"
-                className="block rounded-md border border-dashed border-border bg-card px-4 py-3 text-card-foreground hover:opacity-90"
+                className="relative block min-h-11 rounded-md border border-dashed border-border bg-card px-4 py-3 text-card-foreground transition-colors hover:bg-muted/40 active:bg-muted"
               >
+                <NavLinkPendingOverlay />
                 {t("designLab")}
               </Link>
             </li>
             <li>
               <Link
                 href="/dev/design-lab/theme-colors"
-                className="block rounded-md border border-dashed border-border bg-card px-4 py-3 text-card-foreground hover:opacity-90"
+                className="relative block min-h-11 rounded-md border border-dashed border-border bg-card px-4 py-3 text-card-foreground transition-colors hover:bg-muted/40 active:bg-muted"
               >
+                <NavLinkPendingOverlay />
                 {t("designLabThemeColors")}
               </Link>
             </li>

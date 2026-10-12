@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { API_PATHS } from "@oshi/shared";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { createClient } from "@/lib/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ function apiBase(): string {
 export function DeleteAccountPanel() {
   const t = useTranslations("DeleteAccount");
   const router = useRouter();
+  const session = useBrowserSession();
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -31,16 +33,14 @@ export function DeleteAccountPanel() {
     setBusy(true);
     setErrorText(null);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data.session?.access_token) {
+      if (session.status !== "ready" || !session.accessToken) {
         setErrorText(t("errorUnauthorized"));
         return;
       }
       const res = await fetch(`${apiBase()}${API_PATHS.account}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${data.session.access_token}`,
+          Authorization: `Bearer ${session.accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ confirmation: CONFIRMATION }),
@@ -53,14 +53,14 @@ export function DeleteAccountPanel() {
         setErrorText(t("errorGeneric"));
         return;
       }
-      await supabase.auth.signOut();
+      await createClient().auth.signOut();
       router.replace("/auth/login");
     } catch {
       setErrorText(t("errorGeneric"));
     } finally {
       setBusy(false);
     }
-  }, [router, t, typed]);
+  }, [router, session.accessToken, session.status, t, typed]);
 
   return (
     <div className="flex flex-col gap-6">

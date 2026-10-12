@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { API_PATHS } from "@oshi/shared";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { canSyncUserPrefsToServer } from "@/lib/authGuest";
 import { DISPLAY_SETTINGS_LOCAL_KEY } from "@/lib/brand";
 import {
@@ -138,14 +138,6 @@ function apiBase(): string {
   );
 }
 
-function tryCreateClient() {
-  try {
-    return createClient();
-  } catch {
-    return null;
-  }
-}
-
 function clampLevel(raw: unknown, fallback: DisplayLevel): DisplayLevel {
   const n = typeof raw === "number" ? raw : Number(raw);
   if (!Number.isInteger(n) || n < MIN_LEVEL || n > MAX_LEVEL) return fallback;
@@ -257,10 +249,16 @@ async function putViaFastAPI(
 /** Provider 用の状態フック（JSX なし） */
 export function useDisplaySettingsState(): DisplaySettingsContextValue {
   const [prefs, setPrefs] = useState<DisplaySettings>(() => readLocal());
+  const browserSession = useBrowserSession();
+  const browserSessionRef = useRef(browserSession);
   const [isSyncing, setIsSyncing] = useState(false);
   const mounted = useRef(false);
   const debounceTimer = useRef<number | null>(null);
   const skipNextSync = useRef(false);
+
+  useEffect(() => {
+    browserSessionRef.current = browserSession;
+  }, [browserSession]);
 
   useEffect(() => {
     try {
@@ -284,12 +282,12 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
     debounceTimer.current = window.setTimeout(async () => {
       setIsSyncing(true);
       try {
-        const supabase = tryCreateClient();
-        if (!supabase) return;
-        const session = await supabase.auth.getSession();
-        const user = session.data?.session?.user;
-        const token = session.data?.session?.access_token;
-        if (!token || !canSyncUserPrefsToServer(user)) return;
+        const current = browserSessionRef.current;
+        const token = current.accessToken;
+        const user = token ? { is_anonymous: current.isAnonymous } : null;
+        if (current.status !== "ready" || !token || !canSyncUserPrefsToServer(user)) {
+          return;
+        }
         await putViaFastAPI(prefs, token);
       } finally {
         setIsSyncing(false);
@@ -301,15 +299,13 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
   }, [prefs]);
 
   useEffect(() => {
+    if (browserSession.status !== "ready") return;
+    const token = browserSession.accessToken;
+    const user = token ? { is_anonymous: browserSession.isAnonymous } : null;
+    if (!token || !canSyncUserPrefsToServer(user)) return;
     let alive = true;
     void (async () => {
       try {
-        const supabase = tryCreateClient();
-        if (!supabase) return;
-        const session = await supabase.auth.getSession();
-        const user = session.data?.session?.user;
-        const token = session.data?.session?.access_token;
-        if (!token || !canSyncUserPrefsToServer(user)) return;
         const server = await fetchViaFastAPI(token);
         if (server && alive) {
           skipNextSync.current = true;
@@ -322,7 +318,7 @@ export function useDisplaySettingsState(): DisplaySettingsContextValue {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [browserSession.accessToken, browserSession.isAnonymous, browserSession.status]);
 
   const setTextScale = useCallback((level: DisplayLevel) => {
     setPrefs((prev) => ({

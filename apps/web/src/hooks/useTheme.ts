@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { API_PATHS } from "@oshi/shared";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import { canSyncUserPrefsToServer } from "@/lib/authGuest";
 import { THEME_LOCAL_KEY } from "@/lib/brand";
 import {
@@ -43,14 +43,6 @@ function apiBase(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
     "http://127.0.0.1:8000"
   );
-}
-
-function tryCreateClient() {
-  try {
-    return createClient();
-  } catch {
-    return null;
-  }
 }
 
 function sanitizeTheme(raw: unknown, fallback: ThemeId): ThemeId {
@@ -104,10 +96,16 @@ export function useThemeState(
       return defaultTheme;
     }
   });
+  const browserSession = useBrowserSession();
+  const browserSessionRef = useRef(browserSession);
   const [isSyncing, setIsSyncing] = useState(false);
   const mounted = useRef(false);
   const debounceTimer = useRef<number | null>(null);
   const skipNextSync = useRef(false);
+
+  useEffect(() => {
+    browserSessionRef.current = browserSession;
+  }, [browserSession]);
 
   const applyDataTheme = useCallback((t: ThemeId) => {
     if (typeof document === "undefined") return;
@@ -140,12 +138,12 @@ export function useThemeState(
     debounceTimer.current = window.setTimeout(async () => {
       setIsSyncing(true);
       try {
-        const supabase = tryCreateClient();
-        if (!supabase) return;
-        const session = await supabase.auth.getSession();
-        const user = session.data?.session?.user;
-        const token = session.data?.session?.access_token;
-        if (!token || !canSyncUserPrefsToServer(user)) return;
+        const current = browserSessionRef.current;
+        const token = current.accessToken;
+        const user = token ? { is_anonymous: current.isAnonymous } : null;
+        if (current.status !== "ready" || !token || !canSyncUserPrefsToServer(user)) {
+          return;
+        }
         await putThemeViaFastAPI(
           sanitizeTheme(themeId, defaultTheme),
           token,
@@ -160,15 +158,13 @@ export function useThemeState(
   }, [themeId, defaultTheme]);
 
   useEffect(() => {
+    if (browserSession.status !== "ready") return;
+    const token = browserSession.accessToken;
+    const user = token ? { is_anonymous: browserSession.isAnonymous } : null;
+    if (!token || !canSyncUserPrefsToServer(user)) return;
     let alive = true;
     void (async () => {
       try {
-        const supabase = tryCreateClient();
-        if (!supabase) return;
-        const session = await supabase.auth.getSession();
-        const user = session.data?.session?.user;
-        const token = session.data?.session?.access_token;
-        if (!token || !canSyncUserPrefsToServer(user)) return;
         const serverTheme = await fetchThemeViaFastAPI(token);
         if (serverTheme && alive) {
           skipNextSync.current = true;
@@ -181,7 +177,7 @@ export function useThemeState(
     return () => {
       alive = false;
     };
-  }, []);
+  }, [browserSession.accessToken, browserSession.isAnonymous, browserSession.status]);
 
   const setTheme = useCallback(
     (t: ThemeId) => setThemeId(sanitizeTheme(t, defaultTheme)),

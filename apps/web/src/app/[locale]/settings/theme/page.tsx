@@ -1,8 +1,7 @@
 ﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
-import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import ThemePicker from "@/components/ui/ThemePicker";
 import { DisplaySettingsPanel } from "@/components/settings/DisplaySettingsPanel";
 import { FontPackPicker } from "@/components/settings/FontPackPicker";
@@ -11,36 +10,11 @@ import { MascotPickerPanel } from "@/components/settings/MascotPickerPanel";
 import { OshiAccentPanel } from "@/components/settings/OshiAccentPanel";
 import { ResidenceSettingsPanel } from "@/components/settings/ResidenceSettingsPanel";
 import { GuestContextNotice } from "@/components/auth/GuestContextNotice";
-import { createClient } from "@/lib/client";
+import { useRedirectIfSignedOut } from "@/components/auth/BrowserSessionProvider";
 
 export default function AppearanceSettingsPage() {
   const t = useTranslations("Appearance");
-  const router = useRouter();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.getSession();
-      if (cancelled) return;
-      if (error || !data.session) {
-        router.replace("/auth/login");
-        return;
-      }
-      setReady(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
-  if (!ready) {
-    return (
-      <p className="py-6 text-sm text-muted-foreground">{t("loading")}</p>
-    );
-  }
-
+  useRedirectIfSignedOut();
   return (
     <div className="stack-density-lg text-foreground">
       <div>

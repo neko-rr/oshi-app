@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { API_PATHS } from "@oshi/shared";
-import { createClient } from "@/lib/client";
+import { useBrowserSession } from "@/components/auth/BrowserSessionProvider";
 import {
   applyOshiAccentToDocument,
   defaultServerState,
@@ -29,14 +29,6 @@ function apiBase(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
     "http://127.0.0.1:8000"
   );
-}
-
-function tryCreateClient() {
-  try {
-    return createClient();
-  } catch {
-    return null;
-  }
 }
 
 export type OshiAccentContextValue = {
@@ -61,6 +53,7 @@ export const OshiAccentContext = createContext<OshiAccentContextValue | null>(
 );
 
 export function useOshiAccentState(): OshiAccentContextValue {
+  const browserSession = useBrowserSession();
   const [draft, setDraft] = useState<OshiAccentDraft>(() => readLocalDraft());
   const [server, setServer] = useState<OshiAccentServerState>(defaultServerState);
   const [previewLive, setPreviewLive] = useState(false);
@@ -87,12 +80,9 @@ export function useOshiAccentState(): OshiAccentContextValue {
   }, []);
 
   const refreshFromServer = useCallback(async () => {
-    const supabase = tryCreateClient();
-    if (!supabase) return;
+    const token = browserSession.accessToken;
+    if (browserSession.status !== "ready" || !token) return;
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) return;
       const res = await fetch(`${apiBase()}${API_PATHS.oshiAccentSettings}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -111,7 +101,7 @@ export function useOshiAccentState(): OshiAccentContextValue {
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [browserSession.accessToken, browserSession.status]);
 
   const saveToServer = useCallback(
     async (opts: { active: boolean }) => {
@@ -122,16 +112,14 @@ export function useOshiAccentState(): OshiAccentContextValue {
           message: "premium",
         };
       }
-      const supabase = tryCreateClient();
-      if (!supabase || !resolved) {
+      if (!resolved) {
         return { ok: false, code: "VALIDATION_ERROR", message: "invalid" };
       }
+      const token = browserSession.accessToken;
+      if (browserSession.status !== "ready" || !token) {
+        return { ok: false, code: "UNAUTHORIZED", message: "auth" };
+      }
       try {
-        const { data } = await supabase.auth.getSession();
-        const token = data.session?.access_token;
-        if (!token) {
-          return { ok: false, code: "UNAUTHORIZED", message: "auth" };
-        }
         const res = await fetch(`${apiBase()}${API_PATHS.oshiAccentSettings}`, {
           method: "PUT",
           headers: {
@@ -162,7 +150,7 @@ export function useOshiAccentState(): OshiAccentContextValue {
         return { ok: false, code: "INTERNAL_ERROR", message: "network" };
       }
     },
-    [draft.main_hex, draft.sub_hex, resolved, server.entitled, server.presets],
+    [browserSession.accessToken, browserSession.status, draft.main_hex, draft.sub_hex, resolved, server.entitled, server.presets],
   );
 
   useEffect(() => {

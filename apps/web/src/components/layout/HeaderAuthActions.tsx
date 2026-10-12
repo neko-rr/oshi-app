@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { useEffect, useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
-import { createClient } from "@/lib/client";
+import { useHasSession } from "@/hooks/useHasSession";
 
 /**
  * ヘッダー用。ログイン状態に応じてログイン／ログアウトを出す。
@@ -12,23 +11,7 @@ import { createClient } from "@/lib/client";
  */
 export function HeaderAuthActions() {
   const t = useTranslations("Nav");
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getSession();
-        if (!cancelled) setSignedIn(Boolean(data.session));
-      } catch {
-        if (!cancelled) setSignedIn(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const signedIn = useHasSession();
 
   if (signedIn === null) {
     return null;

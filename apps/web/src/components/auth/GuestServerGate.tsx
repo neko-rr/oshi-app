@@ -26,7 +26,18 @@ export function GuestServerGate({
 
   if (isAnonymous === null) {
     return (
-      <p className="py-6 text-sm text-muted-foreground">{tCommon("loading")}</p>
+      <div className="stack-density-lg text-foreground">
+        <div>
+          <Link
+            href={backHref}
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            {tCommon("backToSettings")}
+          </Link>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
+      </div>
     );
   }
 
