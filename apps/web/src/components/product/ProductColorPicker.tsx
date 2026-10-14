@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   PRODUCT_COLOR_CODES,
@@ -28,6 +28,7 @@ export function ProductColorPicker({
   hint = null,
 }: Props) {
   const t = useTranslations("ProductColor");
+  const labelId = useId();
   const [query, setQuery] = useState("");
   const selectedSet = useMemo(() => {
     const set = new Set<string>();
@@ -42,8 +43,10 @@ export function ProductColorPicker({
   });
 
   return (
-    <fieldset className="grid gap-2">
-      <legend className="text-sm font-medium">{legend}</legend>
+    <div className="grid gap-2" role="group" aria-labelledby={labelId}>
+      <p id={labelId} className="text-sm font-medium">
+        {legend}
+      </p>
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
       <input
         type="search"
@@ -53,21 +56,24 @@ export function ProductColorPicker({
         aria-label={t("searchPlaceholder")}
         className="h-9 w-full rounded-md border border-border bg-card px-3 text-sm"
       />
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5" role="group">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
         {visible.map((code) => {
           const active = selectedSet.has(code);
           return (
             <Button
               key={code}
               type="button"
-              variant="outline"
+              variant={active ? "default" : "outline"}
               size="sm"
               aria-pressed={active}
-              onClick={() => onToggle(code)}
+              onClick={(event) => {
+                event.preventDefault();
+                onToggle(code);
+              }}
               className={cn(
-                "h-auto min-h-11 justify-start rounded-full px-2 py-1 text-left text-xs font-normal",
+                "relative z-10 h-auto min-h-11 justify-start rounded-full px-2 py-1 text-left text-xs font-normal touch-manipulation",
                 active
-                  ? "border-primary bg-primary/10 text-foreground"
+                  ? "ring-2 ring-primary ring-offset-2"
                   : "border-border bg-card text-muted-foreground",
               )}
             >
@@ -81,7 +87,7 @@ export function ProductColorPicker({
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }
 

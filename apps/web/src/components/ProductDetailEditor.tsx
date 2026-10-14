@@ -11,6 +11,7 @@ import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { ProductColorPicker } from "@/components/product/ProductColorPicker";
+import { toggleProductColorCode } from "@/lib/productColor";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { Button } from "@/components/ui/button";
@@ -666,11 +667,7 @@ export function ProductDetailEditor({
         legend={t("productColorsLegend")}
         selected={productColorCodes}
         onToggle={(code) => {
-          setProductColorCodes((prev) =>
-            prev.includes(code)
-              ? prev.filter((item) => item !== code)
-              : [...prev, code],
-          );
+          setProductColorCodes((prev) => toggleProductColorCode(prev, code));
         }}
       />
 
