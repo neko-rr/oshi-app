@@ -71,7 +71,7 @@ test.describe("register wizard fixtures", () => {
   }) => {
     const { calls } = await openRegisterAs(page, context, "guest");
     await page
-      .locator("#barcode_image_upload")
+      .locator("#barcode_image_file")
       .setInputFiles(fixtureFile(fixtureCase.barcode_image));
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#wizard_barcode")).toHaveValue(
@@ -96,16 +96,18 @@ test.describe("register wizard fixtures", () => {
   }) => {
     const { calls } = await openRegisterAs(page, context, "permanent");
     await page
-      .locator("#barcode_image_upload")
+      .locator("#barcode_image_file")
       .setInputFiles(fixtureFile(fixtureCase.barcode_image));
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
       { timeout: 15_000 },
     );
     await page.getByRole("button", { name: /次へ（照合）|Next \(lookup\)/i }).click();
-    await expect(page.locator("#wizard_photo")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
+    ).toBeVisible();
     await page
-      .locator("#wizard_photo")
+      .locator("#wizard_photo_file")
       .setInputFiles(fixtureFile(fixtureCase.front_image));
     await expect(
       page.getByRole("img", {
@@ -146,7 +148,7 @@ test.describe("register wizard fixtures", () => {
   }) => {
     await openRegisterAs(page, context, "permanent");
     await page
-      .locator("#barcode_image_upload")
+      .locator("#barcode_image_file")
       .setInputFiles(fixtureFile(manifest.unreadable_image));
     await expect(
       page.getByText(/画像から読めません|Could not read barcode/),
@@ -163,7 +165,9 @@ test.describe("register wizard fixtures", () => {
     const { calls } = await openRegisterAs(page, context, "permanent");
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await dismissStartNudge(page);
-    await expect(page.locator("#wizard_photo")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await expect(page.locator("#product_name")).toBeVisible();
     await page.locator("#product_name").fill("E2E Photo Skip");
@@ -193,9 +197,11 @@ test.describe("register wizard fixtures", () => {
     ).toHaveCount(0);
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await dismissStartNudge(page);
-    await expect(page.locator("#wizard_photo")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
+    ).toBeVisible();
     await page
-      .locator("#wizard_photo")
+      .locator("#wizard_photo_file")
       .setInputFiles(fixtureFile(fixtureCase.front_image));
     await page.getByRole("button", { name: /^次へ$|^Next$/ }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
