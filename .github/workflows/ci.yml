@@ -83,7 +83,19 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck:web
       - name: Production build
-        run: pnpm build:web
+        run: |
+          # next/font はビルド時に Google Fonts を取る。一時失敗で解決が落ちることがある。
+          ok=0
+          for i in 1 2 3; do
+            if pnpm build:web; then
+              ok=1
+              break
+            fi
+            echo "web build failed (attempt ${i})"
+            rm -rf apps/web/.next
+            sleep 5
+          done
+          test "$ok" = 1
 
   design:
     name: design-quality

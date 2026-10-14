@@ -52,6 +52,7 @@ jobs:
               break
             fi
             echo "web build failed (attempt ${i})"
+            rm -rf apps/web/.next
             sleep 5
           done
           test "$ok" = 1
