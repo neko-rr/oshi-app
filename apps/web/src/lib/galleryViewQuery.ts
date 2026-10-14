@@ -1,6 +1,9 @@
 /** gallery_view ↔ GalleryListQuery 変換（offset は適用時に落とす）。 */
 
-import type { GalleryListQuery } from "./galleryListQuery";
+import {
+  parseProductColorList,
+  type GalleryListQuery,
+} from "./galleryListQuery";
 import { sanitizeListSort, type ListSortId } from "./displayPrefs";
 
 export const GALLERY_VIEW_MAX = 20;
@@ -13,6 +16,7 @@ export type GalleryViewItem = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   sales_desired?: boolean;
   want_object?: boolean;
   missing_price?: boolean;
@@ -40,12 +44,15 @@ export function galleryListQueryFromView(view: GalleryViewItem): GalleryListQuer
   const color_tag_slots = (view.color_tag_slots ?? []).filter(
     (n) => n >= 1 && n <= 7,
   );
+  const product_color_codes =
+    parseProductColorList((view.product_color_codes ?? []).join(",")) ?? [];
   const sort = sanitizeListSort(view.list_sort) as ListSortId;
   return {
     ...(q ? { q } : {}),
     ...(category_tag_ids.length > 0 ? { category_tag_ids } : {}),
     ...(storage_location_ids.length > 0 ? { storage_location_ids } : {}),
     ...(color_tag_slots.length > 0 ? { color_tag_slots } : {}),
+    ...(product_color_codes.length > 0 ? { product_color_codes } : {}),
     ...(view.sales_desired ? { sales_desired: true } : {}),
     ...(view.want_object ? { want_object: true } : {}),
     ...(view.missing_price ? { missing_price: true } : {}),
@@ -70,6 +77,7 @@ export function galleryViewPayloadFromQuery(
   category_tag_ids: number[];
   storage_location_ids: number[];
   color_tag_slots: number[];
+  product_color_codes: string[];
   sales_desired: boolean;
   want_object: boolean;
   missing_price: boolean;
@@ -88,6 +96,7 @@ export function galleryViewPayloadFromQuery(
     category_tag_ids: [...(query.category_tag_ids ?? [])],
     storage_location_ids: [...(query.storage_location_ids ?? [])],
     color_tag_slots: [...(query.color_tag_slots ?? [])],
+    product_color_codes: [...(query.product_color_codes ?? [])],
     sales_desired: Boolean(query.sales_desired),
     want_object: Boolean(query.want_object),
     missing_price: Boolean(query.missing_price),

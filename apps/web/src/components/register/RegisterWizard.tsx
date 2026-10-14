@@ -81,6 +81,7 @@ function toAssistSlice(draft: RegisterDraft): AssistDraftSlice {
     memo: draft.memo,
     category_tag_id: draft.categoryTagId,
     selected_slots: Array.from(draft.selectedSlots),
+    product_color_codes: draft.productColorCodes,
     visual_tags: draft.visualTags,
     unmatched_product_type: draft.unmatchedProductType,
   };
@@ -279,6 +280,20 @@ export function RegisterWizard() {
 
   function patchDraft(partial: Partial<RegisterDraft>) {
     setDraft((prev) => ({ ...prev, ...partial }));
+  }
+
+  function toggleProductColor(code: string) {
+    setDraft((prev) => {
+      const has = prev.productColorCodes.includes(code);
+      const productColorCodes = has
+        ? prev.productColorCodes.filter((item) => item !== code)
+        : [...prev.productColorCodes, code];
+      return {
+        ...prev,
+        productColorCodes,
+        fieldSources: markUserSource(prev.fieldSources, "product_color_codes"),
+      };
+    });
   }
 
   function toggleSlot(slot: number) {
@@ -650,10 +665,6 @@ export function RegisterWizard() {
             category_tag_id: c.category_tag_id,
             category_tag_name: c.category_tag_name,
           })),
-          colors.map((c) => ({
-            slot: c.slot,
-            color_tag_name: c.color_tag_name,
-          })),
         );
         const barcodeProtected =
           prev.fieldSources.product_name === "barcode" ||
@@ -667,6 +678,7 @@ export function RegisterWizard() {
           memo: merged.draft.memo,
           categoryTagId: merged.draft.category_tag_id,
           selectedSlots: new Set(merged.draft.selected_slots),
+          productColorCodes: merged.draft.product_color_codes,
           visualTags: merged.draft.visual_tags,
           unmatchedProductType: merged.draft.unmatched_product_type,
           fieldSources: merged.sources,
@@ -871,6 +883,7 @@ export function RegisterWizard() {
           want_object_flag: draft.wantObject,
           sales_desired_user_touched: draft.salesDesiredUserTouched,
           color_tag_slots: slots.length > 0 ? slots : null,
+          product_color_codes: draft.productColorCodes,
           category_tag_id: draft.categoryTagId,
           storage_location_id: draft.storageLocationId,
           external_refs: external_refs.length > 0 ? external_refs : null,
@@ -1083,6 +1096,8 @@ export function RegisterWizard() {
           categoryTagId={draft.categoryTagId}
           storageLocationId={draft.storageLocationId}
           selectedSlots={draft.selectedSlots}
+          productColorCodes={draft.productColorCodes}
+          onToggleProductColor={toggleProductColor}
           visualTags={draft.visualTags}
           unmatchedProductType={draft.unmatchedProductType}
           lookupCandidates={draft.lookupCandidates}

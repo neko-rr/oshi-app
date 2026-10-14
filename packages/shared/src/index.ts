@@ -59,6 +59,7 @@ export type ProductListItem = {
   currency_code?: string | null;
   category_tag?: ProductTagSummary | null;
   storage_location?: ProductTagSummary | null;
+  product_color_codes?: string[];
 };
 
 /** 製品に紐づく外部参照（編集モードの一覧） */
@@ -90,6 +91,7 @@ export type ProductEditListItem = ProductListItem & {
   category_tag_id?: number | null;
   storage_location_id?: number | null;
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   external_refs?: ProductExternalRefSummary[];
 };
 
@@ -104,6 +106,7 @@ export type ProductListResponse = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   sort?: string | null;
   /** 取得件数が limit 以上なら次ページの可能性あり */
   has_more?: boolean;
@@ -136,3 +139,4 @@ export type CreatePhotoResponse = {
 };
 
 export * from "./lucide_icon_catalog.js";
+export * from "./productColor.js";

@@ -3,10 +3,13 @@
  * 優先: 手入力 > バーコード > Vision > 空
  */
 
+import {
+  matchProductColorCodes,
+  sortProductColorCodes,
+} from "@oshi/shared";
 import type {
   AssistDraftSlice,
   CategoryOption,
-  ColorOption,
   FieldSource,
   FieldSources,
   VisionStructured,
@@ -37,21 +40,6 @@ export function matchCategoryId(
   return null;
 }
 
-export function matchColorSlots(
-  colors: string[],
-  colorOptions: ColorOption[],
-): number[] {
-  const slots: number[] = [];
-  for (const color of colors) {
-    for (const opt of colorOptions) {
-      if (namesMatch(color, opt.color_tag_name) && !slots.includes(opt.slot)) {
-        slots.push(opt.slot);
-      }
-    }
-  }
-  return slots.sort((a, b) => a - b);
-}
-
 export type ApplyAssistResult = {
   draft: AssistDraftSlice;
   sources: FieldSources;
@@ -65,11 +53,11 @@ export function applyAssistToDraft(
   draft: AssistDraftSlice,
   sources: FieldSources,
   categories: CategoryOption[],
-  colorOptions: ColorOption[],
 ): ApplyAssistResult {
   const nextDraft: AssistDraftSlice = {
     ...draft,
     selected_slots: [...draft.selected_slots],
+    product_color_codes: [...draft.product_color_codes],
     visual_tags: [...draft.visual_tags],
   };
   const nextSources: FieldSources = { ...sources };
@@ -115,14 +103,15 @@ export function applyAssistToDraft(
     }
   }
 
-  // 色: user が明示操作していなければ Vision 色をマージ追加
-  if (sources.color_tag_slots !== "user") {
-    const fromVision = matchColorSlots(vision.colors, colorOptions);
-    const merged = new Set(nextDraft.selected_slots);
-    for (const slot of fromVision) merged.add(slot);
-    nextDraft.selected_slots = Array.from(merged).sort((a, b) => a - b);
+  // グッズの色。カラータグ（任意分類）には入れない。
+  if (sources.product_color_codes !== "user") {
+    const fromVision = matchProductColorCodes(vision.colors);
     if (fromVision.length > 0) {
-      nextSources.color_tag_slots = "vision";
+      nextDraft.product_color_codes = sortProductColorCodes([
+        ...nextDraft.product_color_codes,
+        ...fromVision,
+      ]);
+      nextSources.product_color_codes = "vision";
     }
   }
 

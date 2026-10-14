@@ -230,3 +230,44 @@ def test_text_zip_contains_manifest_and_csv() -> None:
         assert "csv/products.csv" in names
         body = json.loads(zf.read("manifest.json").decode("utf-8"))
         assert body["format"] == FORMAT_NAME
+
+
+def test_csv_prefixes_formula_like_text() -> None:
+    """Excel が数式として開く先頭文字は、CSV では文字として出す。"""
+    manifest = build_manifest(
+        kind="text",
+        products=[
+            {
+                "registered_product_id": 1,
+                "product_name": "=1+1",
+                "character_name": "+plus",
+                "title": "-minus",
+                "memo": "@at",
+                "works_series_name": " =spaced",
+                "barcode_number": "普通の名前",
+                "purchase_price": 1200,
+                "currency_code": None,
+                "photo_id": None,
+                "category_tag_id": None,
+                "storage_location_id": None,
+                "creation_date": None,
+            }
+        ],
+        category_tags=[],
+        storage_locations=[],
+        color_tags=[],
+        product_color_tags=[],
+        photos=[],
+        include_media_paths=False,
+    )
+    blob = build_export_zip_bytes(manifest=manifest, media_files={})
+    with zipfile.ZipFile(BytesIO(blob)) as zf:
+        text = zf.read("csv/products.csv").decode("utf-8-sig")
+    assert "'=1+1" in text
+    assert "'+plus" in text
+    assert "'-minus" in text
+    assert "'@at" in text
+    assert "' =spaced" in text
+    assert "普通の名前" in text
+    assert "1200" in text
+    assert "'1200" not in text

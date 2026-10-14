@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ListSortId } from "@/lib/displayPrefs";
@@ -11,11 +12,13 @@ import {
   hasActiveGalleryFilters,
   withClearedCategory,
   withClearedColor,
+  withClearedProductColor,
   withClearedFilters,
   withClearedStorage,
   withSort,
   withToggledCategory,
   withToggledColorSlot,
+  withToggledProductColor,
   withClearedPurchaseMonth,
   withToggledDuplicateBarcode,
   withToggledMissingCategory,
@@ -28,6 +31,7 @@ import {
   withToggledWantObject,
 } from "@/lib/galleryListQuery";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
+import { PRODUCT_COLOR_CODES, PRODUCT_COLOR_HEX } from "@/lib/productColor";
 import { cn } from "@/lib/utils";
 
 export type GalleryFilterOption = {
@@ -73,6 +77,11 @@ export function GalleryFilterChips({
   const t = useTranslations("Gallery");
   const tCommon = useTranslations("Common");
   const tDisplay = useTranslations("DisplaySettings");
+  const tColor = useTranslations("ProductColor");
+  const [colorQuery, setColorQuery] = useState("");
+  const [goodsColorOpen, setGoodsColorOpen] = useState(
+    () => (listQuery.product_color_codes?.length ?? 0) > 0,
+  );
   const { setListSort } = useDisplaySettings();
 
   const baseQuery: GalleryListQuery = {
@@ -82,6 +91,13 @@ export function GalleryFilterChips({
   const selectedCats = new Set(listQuery.category_tag_ids ?? []);
   const selectedStorage = new Set(listQuery.storage_location_ids ?? []);
   const selectedColors = new Set(listQuery.color_tag_slots ?? []);
+  const selectedGoodsColors = new Set(listQuery.product_color_codes ?? []);
+  const colorNeedle = colorQuery.trim().toLowerCase();
+  const visibleGoodsColors = PRODUCT_COLOR_CODES.filter((code) => {
+    if (selectedGoodsColors.has(code)) return true;
+    if (!colorNeedle) return true;
+    return tColor(code).toLowerCase().includes(colorNeedle);
+  });
   const showSummary = hasActiveGalleryFilters(listQuery);
   const counts = galleryFilterSummaryCounts(listQuery);
   const summaryParts: string[] = [];
@@ -98,6 +114,11 @@ export function GalleryFilterChips({
   }
   if (counts.color > 0) {
     summaryParts.push(t("filterSummaryColor", { count: counts.color }));
+  }
+  if (counts.product_color > 0) {
+    summaryParts.push(
+      t("filterSummaryProductColor", { count: counts.product_color }),
+    );
   }
   if (counts.sales_desired) summaryParts.push(t("filterSummarySalesDesired"));
   if (counts.want_object) summaryParts.push(t("filterSummaryWant"));
@@ -318,6 +339,71 @@ export function GalleryFilterChips({
           </div>
         </div>
       ) : null}
+
+      <details
+        className="rounded-xl border border-border bg-card p-3"
+        open={goodsColorOpen}
+        onToggle={(event) =>
+          setGoodsColorOpen((event.currentTarget as HTMLDetailsElement).open)
+        }
+      >
+        <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            {t("productColor")}
+            {selectedGoodsColors.size > 0 ? (
+              <span className="inline-flex gap-1" aria-hidden>
+                {[...selectedGoodsColors].map((code) => (
+                  <span
+                    key={code}
+                    className="inline-block size-2.5 rounded-full border border-border"
+                    style={{
+                      backgroundColor:
+                        PRODUCT_COLOR_HEX[code as keyof typeof PRODUCT_COLOR_HEX],
+                    }}
+                  />
+                ))}
+              </span>
+            ) : null}
+          </span>
+        </summary>
+        <div className="mt-2 flex flex-col gap-2">
+          <input
+            type="search"
+            value={colorQuery}
+            onChange={(event) => setColorQuery(event.target.value)}
+            placeholder={tColor("searchPlaceholder")}
+            aria-label={tColor("searchPlaceholder")}
+            className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm"
+          />
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("productColor")}>
+            <Link
+              href={galleryListHref(withClearedProductColor(baseQuery))}
+              className={chipClass(selectedGoodsColors.size === 0)}
+              aria-pressed={selectedGoodsColors.size === 0}
+            >
+              {tCommon("all")}
+            </Link>
+            {visibleGoodsColors.map((code) => {
+              const active = selectedGoodsColors.has(code);
+              return (
+                <Link
+                  key={code}
+                  href={galleryListHref(withToggledProductColor(baseQuery, code))}
+                  className={chipClass(active)}
+                  aria-pressed={active}
+                >
+                  <span
+                    className="mr-1.5 inline-block size-2.5 rounded-full ring-1 ring-border"
+                    style={{ backgroundColor: PRODUCT_COLOR_HEX[code] }}
+                    aria-hidden
+                  />
+                  {tColor(code)}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </details>
 
       <div>
         <p className="mb-1.5 text-xs font-medium text-muted-foreground">

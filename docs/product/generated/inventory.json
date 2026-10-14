@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T13:50:33Z",
+  "generated_at": "2026-10-14T11:27:38Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -598,6 +598,10 @@
       "file": "apps/api/app/services/photo_service.py"
     },
     {
+      "name": "product_color_analytics_service",
+      "file": "apps/api/app/services/product_color_analytics_service.py"
+    },
+    {
       "name": "product_color_tag_service",
       "file": "apps/api/app/services/product_color_tag_service.py"
     },
@@ -651,5 +655,5 @@
       "detail": "deferred だが evidence_paths がある（整理候補）"
     }
   ],
-  "feature_count": 51
+  "feature_count": 52
 }

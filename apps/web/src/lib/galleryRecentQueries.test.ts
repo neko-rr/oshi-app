@@ -16,7 +16,7 @@ describe("fingerprintGalleryQuery", () => {
   it("ignores offset conceptually via normalize fields only", () => {
     assert.equal(
       fingerprintGalleryQuery({ q: "a", category_tag_ids: [1, 2] }),
-      "a|1,2||||||||||||",
+      "a|1,2|||||||||||||",
     );
   });
 });

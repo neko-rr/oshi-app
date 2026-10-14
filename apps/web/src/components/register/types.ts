@@ -64,6 +64,7 @@ export type RegisterDraft = {
   purchaseDate: string;
   memo: string;
   selectedSlots: Set<number>;
+  productColorCodes: string[];
   categoryTagId: number | null;
   storageLocationId: number | null;
   visualTags: string[];
@@ -105,6 +106,7 @@ export function emptyDraft(): RegisterDraft {
     purchaseDate: "",
     memo: "",
     selectedSlots: new Set(),
+    productColorCodes: [],
     categoryTagId: null,
     storageLocationId: null,
     visualTags: [],

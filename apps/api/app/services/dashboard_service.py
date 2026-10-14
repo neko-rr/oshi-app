@@ -39,6 +39,7 @@ def empty_dashboard() -> dict[str, Any]:
         "category_tags": [],
         "storage_locations": [],
         "color_tags": [],
+        "product_colors": [],
         "meta": {},
         "collection": empty_collection_summary(),
         "budgets": [],
@@ -97,6 +98,24 @@ def fetch_dashboard_charts(
             base["meta"] = meta
         except Exception:
             logger.exception("カラータグ割合の集計に失敗")
+        try:
+            from app.services.product_color_analytics_service import (
+                fetch_product_color_share,
+            )
+
+            goods = fetch_product_color_share(
+                members_id=members_id, access_token=access_token
+            )
+            base["product_colors"] = goods["items"]
+            meta = dict(base.get("meta") or {})
+            if not isinstance(meta, dict):
+                meta = {}
+            meta["product_color_assignment_total"] = goods["assignment_total"]
+            meta["product_color_product_total"] = goods["product_total"]
+            meta["product_color_uncolored_count"] = goods["uncolored_count"]
+            base["meta"] = meta
+        except Exception:
+            logger.exception("グッズの色の集計に失敗")
     if members_id:
         today = _calendar_today(_timezone_override(members_id, access_token))
         try:

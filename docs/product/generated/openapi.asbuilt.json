@@ -186,6 +186,25 @@
             "description": "カンマ区切り color_tag slot 1..7（同種 OR）"
           },
           {
+            "name": "product_color",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "カンマ区切りグッズの色コード（同種 OR）",
+              "title": "Product Color"
+            },
+            "description": "カンマ区切りグッズの色コード（同種 OR）"
+          },
+          {
             "name": "sort",
             "in": "query",
             "required": false,
@@ -2805,6 +2824,20 @@
             ],
             "title": "Color Tag Slots"
           },
+          "product_color_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Color Codes"
+          },
           "registration_quantity": {
             "anyOf": [
               {
@@ -3282,6 +3315,13 @@
             "type": "array",
             "title": "Color Tag Slots"
           },
+          "product_color_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Color Codes"
+          },
           "sales_desired": {
             "type": "boolean",
             "title": "Sales Desired",
@@ -3748,6 +3788,20 @@
               }
             ],
             "title": "Color Tag Slots"
+          },
+          "product_color_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Color Codes"
           },
           "external_refs": {
             "anyOf": [

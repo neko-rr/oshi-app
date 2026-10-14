@@ -78,6 +78,7 @@ export default async function GalleryPage({
     category_tag_id?: string;
     storage_location_id?: string;
     color_tag_slot?: string;
+    product_color?: string;
     sales_desired?: string;
     want_object?: string;
     missing_price?: string;
@@ -249,6 +250,7 @@ export default async function GalleryPage({
           category_tag_ids: listQuery.category_tag_ids,
           storage_location_ids: listQuery.storage_location_ids,
           color_tag_slots: listQuery.color_tag_slots,
+          product_color_codes: listQuery.product_color_codes,
           sales_desired: listQuery.sales_desired,
           want_object: listQuery.want_object,
           missing_price: listQuery.missing_price,

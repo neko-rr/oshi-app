@@ -643,6 +643,20 @@
       ]
     },
     {
+      "id": "product_colors",
+      "phase": "must",
+      "status": "shipped",
+      "title_ja": "グッズの色",
+      "evidence_paths": [
+        "apps/api/app/services/product_color.py",
+        "apps/web/src/components/product/ProductColorPicker.tsx",
+        "apps/web/src/components/dashboard/ProductColorSharePanel.tsx",
+        "supabase/migrations/20261014040000_registered_product_color_codes.sql"
+      ],
+      "expected_web_paths": [],
+      "expected_api_paths": []
+    },
+    {
       "id": "color_tags",
       "phase": "must",
       "status": "shipped",

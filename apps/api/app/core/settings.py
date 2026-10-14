@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     rakuten_live_calls: bool = False
     # ゲスト照合の Turnstile siteverify 専用。Web / Cloudflare には置かない
     turnstile_secret_key: str = ""
+    # 未処理例外の通知先。未設定なら送らない。https のみ。Web / Cloudflare には置かない
+    error_notify_webhook_url: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:

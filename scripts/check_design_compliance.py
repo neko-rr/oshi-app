@@ -42,6 +42,8 @@ ALLOW_HEX_GLOBS = (
     "app/settings/category-tags/",
     "app/[locale]/settings/color-tags/",
     "app/[locale]/settings/category-tags/",
+    # ゲスト登録のカラータグ見本（保存しないラベル色データ）
+    "lib/guestPreviewColorTags.ts",
 )
 ALLOW_RAW_BUTTON_GLOBS = (
     "components/design-lab/",

@@ -25,6 +25,7 @@ function blankDraft(): RegisterDraft {
     purchaseDate: "",
     memo: "",
     selectedSlots: new Set(),
+    productColorCodes: [],
     categoryTagId: null,
     storageLocationId: null,
     visualTags: [],
@@ -49,6 +50,7 @@ function blankDraft(): RegisterDraft {
       memo: "empty",
       category_tag_id: "empty",
       color_tag_slots: "empty",
+      product_color_codes: "empty",
       purchase_location: "empty",
       rakuten_ref: "empty",
       manual_url: "empty",
@@ -93,6 +95,7 @@ export function clearEventBundle(
     purchaseDate: "",
     categoryTagId: null,
     selectedSlots: new Set(),
+    productColorCodes: [],
     storageLocationId: defaults.defaultStorageLocationId,
     currencyCode: defaults.currencyCode.trim() || "",
     fieldSources: {
@@ -100,6 +103,7 @@ export function clearEventBundle(
       character_name: "empty",
       category_tag_id: "empty",
       color_tag_slots: "empty",
+      product_color_codes: "empty",
     },
   };
 }

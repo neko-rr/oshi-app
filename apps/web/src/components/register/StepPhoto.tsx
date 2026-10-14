@@ -2,9 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { ImageSourcePicker } from "@/components/photo/ImageSourcePicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RotateCcw, RotateCw } from "@/lib/icons";
 import {
   prepareRegisterPhoto,
@@ -53,10 +52,6 @@ export function StepPhoto({
   function clearPhoto() {
     onFileChange(null);
     setCompressError(null);
-    const el = document.getElementById(
-      "wizard_photo",
-    ) as HTMLInputElement | null;
-    if (el) el.value = "";
   }
 
   async function onPick(raw: File | null) {
@@ -74,10 +69,6 @@ export function StepPhoto({
         setCompressError(
           result.code === "too_large" ? t("tooLarge") : t("compressFailed"),
         );
-        const el = document.getElementById(
-          "wizard_photo",
-        ) as HTMLInputElement | null;
-        if (el) el.value = "";
         return;
       }
       onFileChange(result.file);
@@ -112,14 +103,13 @@ export function StepPhoto({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="wizard_photo">{t("label")}</Label>
-        <Input
-          id="wizard_photo"
-          type="file"
-          accept="image/*"
-          capture="environment"
+        <p className="text-sm font-medium">{t("label")}</p>
+        <ImageSourcePicker
+          idPrefix="wizard_photo"
           disabled={compressing}
-          onChange={(e) => void onPick(e.target.files?.[0] ?? null)}
+          fileLabel={t("pickFile")}
+          cameraLabel={t("takeCamera")}
+          onFile={(picked) => void onPick(picked)}
         />
         {compressing ? (
           <p className="text-xs text-muted-foreground" role="status">

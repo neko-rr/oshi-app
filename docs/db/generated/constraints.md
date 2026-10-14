@@ -24,6 +24,7 @@
 | `display_settings` | `display_settings_ui_density_check` | `CHECK (((ui_density >= 1) AND (ui_density <= 7)))` |
 | `gallery_view` | `gallery_view_color_tag_slots_check` | `CHECK ((color_tag_slots <@ ARRAY[1, 2, 3, 4, 5, 6, 7]))` |
 | `gallery_view` | `gallery_view_list_sort_check` | `CHECK ((list_sort = ANY (ARRAY['newest'::text, 'name'::text, 'created_at'::text])))` |
+| `gallery_view` | `gallery_view_product_color_codes_check` | `CHECK ((product_color_codes <@ ARRAY['white'::text, 'black'::text, 'gray'::text, 'red'::text, 'pink'::text, 'orange'::text, 'yellow'::text, 'green'::text, 'blue'::text, 'light_blue'::text, 'purple'::text, 'brown'::text, 'beige'::text, 'gold'::text, 'silver'::text]))` |
 | `gallery_view` | `gallery_view_purchase_month_check` | `CHECK ((purchase_month IS NULL) OR (purchase_month ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'::text))` |
 | `gallery_view` | `gallery_view_view_name_len_check` | `CHECK (((char_length(view_name) >= 1) AND (char_length(view_name) <= 40)))` |
 | `oshi_accent_settings` | `oshi_accent_settings_main_hex_format` | `CHECK ((main_hex ~ '^#[0-9A-Fa-f]{6}$'::text))` |
@@ -32,6 +33,7 @@
 | `product_external_ref` | `product_external_ref_manual_url` | `CHECK (((source <> 'manual'::text) OR (length(btrim(product_url)) > 0)))` |
 | `product_external_ref` | `product_external_ref_rakuten_required` | `CHECK (((source <> 'rakuten'::text) OR ((external_item_code IS NOT NULL) AND (length(btrim(external_item_code)) > 0) AND (shop_name IS NOT NULL) AND (length(btrim(shop_name)) > 0) AND (length(btrim(product_url)) > 0))))` |
 | `product_external_ref` | `product_external_ref_source_check` | `CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))` |
+| `registered_product` | `registered_product_product_color_codes_check` | `CHECK ((product_color_codes <@ ARRAY['white'::text, 'black'::text, 'gray'::text, 'red'::text, 'pink'::text, 'orange'::text, 'yellow'::text, 'green'::text, 'blue'::text, 'light_blue'::text, 'purple'::text, 'brown'::text, 'beige'::text, 'gold'::text, 'silver'::text]))` |
 | `registered_product_color_tag` | `registration_product_color_tag_slot_range` | `CHECK (((slot >= 1) AND (slot <= 7)))` |
 | `spending_budget` | `spending_budget_amount_check` | `CHECK (((monthly_amount >= 0) AND (monthly_amount <= 999999999)))` |
 | `spending_budget` | `spending_budget_currency_len_check` | `CHECK (((char_length(currency_code) >= 3) AND (char_length(currency_code) <= 8)))` |
@@ -151,6 +153,7 @@
 | `registered_product` | `idx_rpi_works` | `CREATE INDEX idx_rpi_works ON public.registered_product USING btree (work_id)` |
 | `registered_product` | `idx_rpi_works_series` | `CREATE INDEX idx_rpi_works_series ON public.registered_product USING btree (works_series_id)` |
 | `registered_product` | `registered_product_pkey` | `CREATE UNIQUE INDEX registered_product_pkey ON public.registered_product USING btree (registered_product_id)` |
+| `registered_product` | `registered_product_product_color_codes_idx` | `CREATE INDEX registered_product_product_color_codes_idx ON public.registered_product USING gin (product_color_codes)` |
 | `registered_product_color_tag` | `idx_rpct_member_product` | `CREATE INDEX idx_rpct_member_product ON public.registered_product_color_tag USING btree (members_id, registered_product_id)` |
 | `registered_product_color_tag` | `idx_rpct_member_slot` | `CREATE INDEX idx_rpct_member_slot ON public.registered_product_color_tag USING btree (members_id, slot)` |
 | `registered_product_color_tag` | `registered_product_color_tag_pk` | `CREATE UNIQUE INDEX registered_product_color_tag_pk ON public.registered_product_color_tag USING btree (members_id, registered_product_id, slot)` |

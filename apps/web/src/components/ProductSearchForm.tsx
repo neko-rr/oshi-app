@@ -17,6 +17,7 @@ type Props = {
     | "category_tag_ids"
     | "storage_location_ids"
     | "color_tag_slots"
+    | "product_color_codes"
     | "sales_desired"
     | "want_object"
     | "missing_price"
@@ -47,6 +48,7 @@ export function ProductSearchForm({
         category_tag_ids: preserveFilters?.category_tag_ids,
         storage_location_ids: preserveFilters?.storage_location_ids,
         color_tag_slots: preserveFilters?.color_tag_slots,
+        product_color_codes: preserveFilters?.product_color_codes,
         sales_desired: preserveFilters?.sales_desired,
         want_object: preserveFilters?.want_object,
         missing_price: preserveFilters?.missing_price,

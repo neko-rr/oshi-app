@@ -9,6 +9,7 @@ type GalleryListQuery = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   sales_desired?: boolean;
   want_object?: boolean;
   missing_price?: boolean;
@@ -28,6 +29,7 @@ type GalleryViewItem = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   sales_desired?: boolean;
   want_object?: boolean;
   missing_price?: boolean;
@@ -82,6 +84,7 @@ function galleryViewPayloadFromQuery(
     category_tag_ids: [...(query.category_tag_ids ?? [])],
     storage_location_ids: [...(query.storage_location_ids ?? [])],
     color_tag_slots: [...(query.color_tag_slots ?? [])],
+    product_color_codes: [...(query.product_color_codes ?? [])],
     sales_desired: Boolean(query.sales_desired),
     want_object: Boolean(query.want_object),
     missing_price: Boolean(query.missing_price),
@@ -124,6 +127,7 @@ assert.deepEqual(
     category_tag_ids: [3],
     storage_location_ids: [],
     color_tag_slots: [],
+    product_color_codes: [],
     sales_desired: false,
     want_object: false,
     missing_price: false,

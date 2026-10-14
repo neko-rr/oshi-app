@@ -35,6 +35,7 @@ PRODUCT_CORE_KEYS = frozenset(
         "category_tag_name",
         "storage_location_name",
         "color_tag_slots",
+        "product_color_codes",
         "registration_quantity",
         "sales_desired_flag",
         "sales_desired_quantity",
@@ -226,12 +227,25 @@ def build_manifest(
     }
 
 
+_FORMULA_LEAD = "=+-@"
+
+
+def _csv_cell(value: Any) -> Any:
+    """Excel が数式として開く文字始まりは、先頭に ' を付けて文字にする。"""
+    if not isinstance(value, str):
+        return value
+    stripped = value.lstrip(" \t\r\n")
+    if stripped[:1] in _FORMULA_LEAD:
+        return "'" + value
+    return value
+
+
 def _csv_bytes(headers: list[str], rows: list[list[Any]]) -> bytes:
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(headers)
     for row in rows:
-        writer.writerow(row)
+        writer.writerow([_csv_cell(cell) for cell in row])
     return buf.getvalue().encode("utf-8-sig")
 
 
@@ -257,6 +271,7 @@ def build_csv_files(manifest: dict[str, Any]) -> dict[str, bytes]:
             p.get("category_tag_name"),
             p.get("storage_location_name"),
             ",".join(str(s) for s in (p.get("color_tag_slots") or [])),
+            ",".join(str(s) for s in (p.get("product_color_codes") or [])),
             p.get("memo"),
             p.get("creation_date"),
             p.get("photo_id"),
@@ -278,6 +293,7 @@ def build_csv_files(manifest: dict[str, Any]) -> dict[str, bytes]:
                 "category_tag_name",
                 "storage_location_name",
                 "color_tag_slots",
+                "product_color_codes",
                 "memo",
                 "creation_date",
                 "photo_id",

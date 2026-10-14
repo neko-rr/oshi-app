@@ -158,6 +158,7 @@
 | 収納なし | `missing_storage` | `boolean` | NO | `false` |
 | 写真なし | `missing_photo` | `boolean` | NO | `false` |
 | 同じバーコード | `duplicate_barcode` | `boolean` | NO | `false` |
+| グッズの色コード一覧 | `product_color_codes` | `text[]` | NO | `'{}'::text[]` |
 
 ## `icon_tag`（アイコンタグ）
 
@@ -327,6 +328,7 @@
 | 製品シリーズコンプリートフラグ | `product_series_complete_flag` | `integer` | YES | `0` |
 | 製品グループ名 | `product_group_name` | `text` | YES | |
 | 通貨コード | `currency_code` | `text` | YES | |
+| グッズの色コード一覧 | `product_color_codes` | `text[]` | NO | `'{}'::text[]` |
 
 ## `registered_product_color_tag`（登録製品カラータグ）
 

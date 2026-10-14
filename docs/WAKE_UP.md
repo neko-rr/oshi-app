@@ -22,6 +22,7 @@ AI がローカルに置けない・**人間が Dashboard でやる作業**。
 ### Render（API）チェック
 
 - [ ] `SUPABASE_SECRET_KEY` を Dashboard に設定（値はチャット・Git に出さない）
+- [ ]（任意）`ERROR_NOTIFY_WEBHOOK_URL` を https の受信口にする。未設定なら通知しない。値は Git に出さない
 - [ ] 退会は通常 CRUD では使わない（`supabase_admin` 経由のみ）
 - [ ] **Free のまま**ならログイン起こし（`wakeApi`）を有効のまま（`NEXT_PUBLIC_API_WAKE_ON_AUTH` 未設定で可）
 - [ ] **有料常時起動に上げたら** Cloudflare で `NEXT_PUBLIC_API_WAKE_ON_AUTH=0`（手順: [deploy/README.md](deploy/README.md)「API 起床」）

@@ -3,7 +3,7 @@
 
 コード・SQL は英語物理名。**このファイルは意味の説明用**（自動生成）。
 
-生成日時(UTC): `2026-10-12 13:50:25Z`
+生成日時(UTC): `2026-10-14 11:27:41Z`
 
 ## 使い方
 
@@ -172,7 +172,7 @@
 ## ギャラリー保存ビュー（`gallery_view`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 20
+- **列数:** 21
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -196,6 +196,7 @@
 | 収納なし | `missing_storage` | `boolean` |  |
 | 写真なし | `missing_photo` | `boolean` |  |
 | 同じバーコード | `duplicate_barcode` | `boolean` |  |
+| グッズの色コード一覧 | `product_color_codes` | `text[]` |  |
 
 ## アイコンタグ（`icon_tag`）
 
@@ -343,7 +344,7 @@
 ## 登録製品（`registered_product`）
 
 - **状態:** アプリ連携済み（API 可）（`wired`）
-- **列数:** 48
+- **列数:** 49
 
 | 日本語列名 | 物理名 | 型 | 補足 |
 |------------|--------|----|------|
@@ -395,6 +396,7 @@
 | 製品シリーズコンプリートフラグ | `product_series_complete_flag` | `integer` | 真偽・0/1 フラグ |
 | 製品グループ名 | `product_group_name` | `text` |  |
 | 通貨コード | `currency_code` | `text` |  |
+| グッズの色コード一覧 | `product_color_codes` | `text[]` |  |
 
 ## 登録製品カラータグ（`registered_product_color_tag`）
 

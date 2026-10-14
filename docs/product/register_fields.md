@@ -24,7 +24,8 @@
 | メモ | `memo` | Vision 見た目タグの追記先 |
 | カテゴリ | `category_tag_id` | Vision `product_type` または楽天 genre 名マッチ |
 | 収納 | `storage_location_id` | |
-| 色 | `registered_product_color_tag` | Vision `colors` → スロット |
+| グッズの色 | `registered_product.product_color_codes` | 固定15色・複数可。Vision `colors` はここへ。多色コードは持たない |
+| カラータグ | `registered_product_color_tag` | ユーザー任意の分類（最大7）。自動では付けない |
 
 ## Oshi identity（推し活）
 
@@ -69,7 +70,7 @@
 | Vision | 反映先 |
 |--------|--------|
 | `product_type` | `category_tag` 名マッチ → `category_tag_id` |
-| `colors[]` | カラースロット |
+| `colors[]` | `product_color_codes`（グッズの色。カラータグではない） |
 | `visual_tags[]` | チップ → ユーザー操作で `memo` |
 | `description` | 空なら `memo` 種 |
 

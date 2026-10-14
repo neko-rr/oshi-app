@@ -110,6 +110,38 @@ def test_list_products_passes_tag_ids_to_fetch() -> None:
     assert captured["storage_location_ids"] == [22]
     assert captured["color_tag_slots"] == [3]
 
+
+def test_list_products_passes_product_color_codes_when_set() -> None:
+    """グッズの色があるときだけ fetch に渡す。空なら古い差し替えを壊さない。"""
+    captured: dict = {}
+
+    def fake_fetch(
+        *,
+        members_id: str,
+        access_token: str,
+        limit: int,
+        offset: int,
+        barcode_number: str | None = None,
+        q: str | None = None,
+        category_tag_ids: list[int] | None = None,
+        storage_location_ids: list[int] | None = None,
+        color_tag_slots: list[int] | None = None,
+        product_color_codes: list[str] | None = None,
+        sort: str | None = None,
+    ):
+        captured["product_color_codes"] = product_color_codes
+        return []
+
+    mid = "33333333-3333-3333-3333-333333333333"
+    list_products_for_member(
+        mid,
+        access_token="user-jwt",
+        product_color_codes=["pink", "black"],
+        fetch_page=fake_fetch,
+        sign_object=lambda **_: None,
+    )
+    assert captured["product_color_codes"] == ["pink", "black"]
+
 def test_list_products_filters_by_barcode_exact() -> None:
     def fake_fetch(
         *,

@@ -10,6 +10,7 @@ import { findResidenceRegion } from "@/lib/residencePrefs";
 import { isLikelyOfflineError, networkUserMessage } from "@/lib/networkError";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
+import { ProductColorPicker } from "@/components/product/ProductColorPicker";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ type ProductDetail = {
   category_tag_id: number | null;
   storage_location_id: number | null;
   color_tag_slots: number[];
+  product_color_codes?: string[];
   external_refs?: ExternalRef[];
 };
 
@@ -114,6 +116,7 @@ export function ProductDetailEditor({
     null,
   );
   const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
+  const [productColorCodes, setProductColorCodes] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [errorOffline, setErrorOffline] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -224,6 +227,7 @@ export function ProductDetailEditor({
             : null,
         );
         setSelectedSlots(new Set(detail.color_tag_slots ?? []));
+        setProductColorCodes(detail.product_color_codes ?? []);
       } catch (e: unknown) {
         if (!cancelled) {
           setError(
@@ -302,6 +306,7 @@ export function ProductDetailEditor({
         want_object_flag: wantObject,
         sales_desired_user_touched: salesDesiredUserTouched,
         color_tag_slots: Array.from(selectedSlots).sort((a, b) => a - b),
+        product_color_codes: productColorCodes,
       };
       if (categoryTagId != null) {
         body.category_tag_id = categoryTagId;
@@ -655,6 +660,18 @@ export function ProductDetailEditor({
           name: r.storage_location_name,
           icon: r.storage_location_icon,
         }))}
+      />
+
+      <ProductColorPicker
+        legend={t("productColorsLegend")}
+        selected={productColorCodes}
+        onToggle={(code) => {
+          setProductColorCodes((prev) =>
+            prev.includes(code)
+              ? prev.filter((item) => item !== code)
+              : [...prev, code],
+          );
+        }}
       />
 
       <fieldset className="grid gap-2">

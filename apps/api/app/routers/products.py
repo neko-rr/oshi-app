@@ -52,6 +52,11 @@ def list_products(
         max_length=64,
         description="カンマ区切り color_tag slot 1..7（同種 OR）",
     ),
+    product_color: str | None = Query(
+        default=None,
+        max_length=200,
+        description="カンマ区切りグッズの色コード（同種 OR）",
+    ),
     sort: str | None = Query(
         default="newest",
         description="newest / name / created_at",
@@ -109,6 +114,9 @@ def list_products(
         color_tag_slots = parse_positive_id_list(
             color_tag_slot, field="color_tag_slot", max_value=7, max_items=7
         )
+        from app.services.product_color import parse_product_color_query
+
+        product_color_codes = parse_product_color_query(product_color)
         view_norm = (view or "").strip() or None
         if view_norm not in {None, "edit"}:
             raise ValueError("未対応の view です")
@@ -123,6 +131,7 @@ def list_products(
             category_tag_ids=category_tag_ids or None,
             storage_location_ids=storage_location_ids or None,
             color_tag_slots=color_tag_slots or None,
+            product_color_codes=product_color_codes or None,
             sort=sort,
             view=view_norm,
             sales_desired=sales_desired,
@@ -150,6 +159,7 @@ def list_products(
         "category_tag_ids": category_tag_ids,
         "storage_location_ids": storage_location_ids,
         "color_tag_slots": color_tag_slots,
+        "product_color_codes": product_color_codes,
         "sort": sort or "newest",
         "has_more": len(items) >= limit,
     }
@@ -184,6 +194,7 @@ def create_product(
             category_tag_id=body.category_tag_id,
             storage_location_id=body.storage_location_id,
             color_tag_slots=body.color_tag_slots,
+            product_color_codes=body.product_color_codes,
             registration_quantity=body.registration_quantity,
             sales_desired_flag=body.sales_desired_flag,
             sales_desired_quantity=body.sales_desired_quantity,
@@ -311,6 +322,7 @@ def patch_product(
         "sales_desired_quantity",
         "want_object_flag",
         "photo_id",
+        "product_color_codes",
     ):
         if key not in data:
             continue

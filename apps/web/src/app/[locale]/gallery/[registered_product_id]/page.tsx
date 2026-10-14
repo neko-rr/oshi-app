@@ -76,6 +76,7 @@ export default async function GalleryDetailPage({
     category_tag_id?: string;
     storage_location_id?: string;
     color_tag_slot?: string;
+    product_color?: string;
     sales_desired?: string;
     want_object?: string;
     missing_price?: string;
