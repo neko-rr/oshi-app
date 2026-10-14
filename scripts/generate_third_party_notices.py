@@ -294,7 +294,7 @@ def collect_pip_packages() -> list[dict[str, Any]]:
     ):
         name = item["name"]
         # テスト専用は一覧から外す（実行時配布物ではない）
-        if name.lower() in {"pytest", "pytest-asyncio"}:
+        if name.lower() in {"pytest", "pytest-asyncio", "pillow"}:
             continue
         rows.append(
             {

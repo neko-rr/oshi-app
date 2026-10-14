@@ -24,14 +24,14 @@ def test_silhouette_png_corners_are_transparent() -> None:
     assert sources, "シルエット用 PNG が見つかりません"
     for path in sources:
         with Image.open(path) as image:
+            relative = path.relative_to(ROOT).as_posix()
             if image.mode != "RGBA":
-                failures.append(f"{path.relative_to(ROOT)} mode={image.mode}")
+                failures.append(f"{relative} mode={image.mode}")
                 continue
             width, height = image.size
             for point in ((0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)):
-                if image.getpixel(point)[3] != 0:
-                    failures.append(
-                        f"{path.relative_to(ROOT)} corner {point} alpha={image.getpixel(point)[3]}"
-                    )
+                alpha = image.getpixel(point)[3]
+                if alpha != 0:
+                    failures.append(f"{relative} corner {point} alpha={alpha}")
                     break
     assert failures == [], failures
