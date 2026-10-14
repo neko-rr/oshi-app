@@ -15,6 +15,7 @@ class GalleryViewCreateBody(BaseModel):
     category_tag_ids: list[int] = Field(default_factory=list)
     storage_location_ids: list[int] = Field(default_factory=list)
     color_tag_slots: list[int] = Field(default_factory=list)
+    product_color_codes: list[str] = Field(default_factory=list)
     sales_desired: bool = False
     want_object: bool = False
     missing_price: bool = False
@@ -77,6 +78,7 @@ def create_gallery_view(
             category_tag_ids=body.category_tag_ids,
             storage_location_ids=body.storage_location_ids,
             color_tag_slots=body.color_tag_slots,
+            product_color_codes=body.product_color_codes,
             sales_desired=body.sales_desired,
             want_object=body.want_object,
             missing_price=body.missing_price,

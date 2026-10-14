@@ -5,6 +5,8 @@ import { apiFetch } from "@/lib/api";
 import { isAnonymousUser } from "@/lib/authGuest";
 import { CollectionSummary } from "@/components/dashboard/CollectionSummary";
 import { ColorTagSharePanel } from "@/components/dashboard/ColorTagSharePanel";
+import { ProductColorSharePanel } from "@/components/dashboard/ProductColorSharePanel";
+import { PRODUCT_COLOR_CODES } from "@/lib/productColor";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 function metaNumber(meta: Record<string, unknown>, key: string): number {
@@ -14,6 +16,7 @@ function metaNumber(meta: Record<string, unknown>, key: string): number {
 
 type DashboardCharts = {
   color_tags: unknown[];
+  product_colors?: unknown[];
   meta: Record<string, unknown>;
   collection?: unknown;
   budgets?: unknown;
@@ -28,6 +31,10 @@ export default async function DashboardPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Dashboard");
+  const tColor = await getTranslations("ProductColor");
+  const productColorNames = Object.fromEntries(
+    PRODUCT_COLOR_CODES.map((code) => [code, tColor(code)]),
+  );
 
   const hasSupabase =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -120,6 +127,23 @@ export default async function DashboardPage({
               "color_tag_untagged_count",
             )}
             pieLabel={t("colorSharePieAria")}
+          />
+          <ProductColorSharePanel
+            title={t("productColorTitle")}
+            hint={t("productColorHint")}
+            items={charts.product_colors ?? []}
+            noDataLabel={t("productColorEmpty")}
+            uncoloredLabel={t("productColorUncolored", {
+              count: metaNumber(
+                charts.meta ?? {},
+                "product_color_uncolored_count",
+              ),
+            })}
+            uncoloredCount={metaNumber(
+              charts.meta ?? {},
+              "product_color_uncolored_count",
+            )}
+            names={productColorNames}
           />
         </div>
       ) : null}

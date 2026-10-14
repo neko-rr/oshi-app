@@ -15,6 +15,8 @@ export type GalleryListQuery = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  /** グッズの色コード。同種 OR */
+  product_color_codes?: string[];
   /** true のとき交換OKだけ */
   sales_desired?: boolean;
   /** true のとき欲しいだけ */
@@ -67,6 +69,40 @@ export function parseIdList(raw: string | undefined): number[] | undefined {
   return out.length > 0 ? out : undefined;
 }
 
+const PRODUCT_COLOR_CODE_SET = new Set([
+  "white",
+  "black",
+  "gray",
+  "red",
+  "pink",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "light_blue",
+  "purple",
+  "brown",
+  "beige",
+  "gold",
+  "silver",
+]);
+
+/** グッズの色コード。未知は捨てる。 */
+export function parseProductColorList(
+  raw: string | undefined,
+): string[] | undefined {
+  if (raw == null || raw.trim() === "") return undefined;
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const part of raw.split(",")) {
+    const code = part.trim().toLowerCase();
+    if (!PRODUCT_COLOR_CODE_SET.has(code) || seen.has(code)) continue;
+    seen.add(code);
+    out.push(code);
+  }
+  return out.length > 0 ? out : undefined;
+}
+
 /** カラースロット 1..7 */
 export function parseColorSlotList(raw: string | undefined): number[] | undefined {
   const ids = parseIdList(raw);
@@ -110,6 +146,7 @@ export function parseGalleryListQuery(params: {
   category_tag_id?: string;
   storage_location_id?: string;
   color_tag_slot?: string;
+  product_color?: string;
   sales_desired?: string;
   want_object?: string;
   missing_price?: string;
@@ -129,6 +166,7 @@ export function parseGalleryListQuery(params: {
   const category_tag_ids = parseIdList(params.category_tag_id);
   const storage_location_ids = parseIdList(params.storage_location_id);
   const color_tag_slots = parseColorSlotList(params.color_tag_slot);
+  const product_color_codes = parseProductColorList(params.product_color);
   const sales_desired = parseOnFlag(params.sales_desired);
   const want_object = parseOnFlag(params.want_object);
   const missing_price = parseOnFlag(params.missing_price);
@@ -145,6 +183,7 @@ export function parseGalleryListQuery(params: {
     ...(category_tag_ids ? { category_tag_ids } : {}),
     ...(storage_location_ids ? { storage_location_ids } : {}),
     ...(color_tag_slots ? { color_tag_slots } : {}),
+    ...(product_color_codes ? { product_color_codes } : {}),
     ...(sales_desired ? { sales_desired: true } : {}),
     ...(want_object ? { want_object: true } : {}),
     ...(missing_price ? { missing_price: true } : {}),
@@ -183,6 +222,9 @@ function withoutOffset(query: GalleryListQuery): GalleryListQuery {
       ? { storage_location_ids: query.storage_location_ids }
       : {}),
     ...(query.color_tag_slots ? { color_tag_slots: query.color_tag_slots } : {}),
+    ...(query.product_color_codes
+      ? { product_color_codes: query.product_color_codes }
+      : {}),
     ...(query.sales_desired ? { sales_desired: true } : {}),
     ...(query.want_object ? { want_object: true } : {}),
     ...ledgerQuery(query),
@@ -306,12 +348,43 @@ export function withClearedColor(query: GalleryListQuery): GalleryListQuery {
   return next;
 }
 
+function toggleCode(
+  codes: string[] | undefined,
+  code: string,
+): string[] | undefined {
+  const set = new Set(codes ?? []);
+  if (set.has(code)) set.delete(code);
+  else set.add(code);
+  const next = [...set];
+  return next.length > 0 ? next : undefined;
+}
+
+export function withToggledProductColor(
+  query: GalleryListQuery,
+  code: string,
+): GalleryListQuery {
+  const next = withoutOffset(query);
+  const codes = toggleCode(query.product_color_codes, code);
+  if (codes) next.product_color_codes = codes;
+  else delete next.product_color_codes;
+  return next;
+}
+
+export function withClearedProductColor(
+  query: GalleryListQuery,
+): GalleryListQuery {
+  const next = withoutOffset(query);
+  delete next.product_color_codes;
+  return next;
+}
+
 /** いまの絞り込み件数（異種 AND の要約用）。並びは含めない。 */
 export type GalleryFilterSummaryCounts = {
   q: boolean;
   category: number;
   storage: number;
   color: number;
+  product_color: number;
   sales_desired: boolean;
   want_object: boolean;
   missing_price: boolean;
@@ -331,6 +404,7 @@ export function galleryFilterSummaryCounts(
     category: query.category_tag_ids?.length ?? 0,
     storage: query.storage_location_ids?.length ?? 0,
     color: query.color_tag_slots?.length ?? 0,
+    product_color: query.product_color_codes?.length ?? 0,
     sales_desired: Boolean(query.sales_desired),
     want_object: Boolean(query.want_object),
     missing_price: Boolean(query.missing_price),
@@ -350,6 +424,7 @@ export function hasActiveGalleryFilters(query: GalleryListQuery): boolean {
     c.category > 0 ||
     c.storage > 0 ||
     c.color > 0 ||
+    c.product_color > 0 ||
     c.sales_desired ||
     c.want_object ||
     c.missing_price ||
@@ -392,6 +467,9 @@ export function buildGalleryListSearch(query: GalleryListQuery): string {
   if (storages) sp.set("storage_location_id", storages);
   const colors = formatIdList(query.color_tag_slots);
   if (colors) sp.set("color_tag_slot", colors);
+  if (query.product_color_codes && query.product_color_codes.length > 0) {
+    sp.set("product_color", query.product_color_codes.join(","));
+  }
   if (query.sales_desired) sp.set("sales_desired", "1");
   if (query.want_object) sp.set("want_object", "1");
   if (query.missing_price) sp.set("missing_price", "1");
@@ -448,6 +526,9 @@ export function productsApiPath(
   if (storages) sp.set("storage_location_id", storages);
   const colors = formatIdList(query.color_tag_slots);
   if (colors) sp.set("color_tag_slot", colors);
+  if (query.product_color_codes && query.product_color_codes.length > 0) {
+    sp.set("product_color", query.product_color_codes.join(","));
+  }
   if (query.sales_desired) sp.set("sales_desired", "1");
   if (query.want_object) sp.set("want_object", "1");
   if (query.missing_price) sp.set("missing_price", "1");

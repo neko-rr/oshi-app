@@ -29,7 +29,8 @@ type SilhouetteProps = {
 };
 
 /**
- * PNG をテーマ色の単色シルエットにする（muted-foreground）。
+ * PNG の透過部分を抜いて、テーマ色の単色シルエットにする。
+ * アルファを使う。白背景のままだと四角になる。
  */
 export function SilhouetteMask({
   src,
@@ -55,6 +56,7 @@ export function SilhouetteMask({
         maskRepeat: "no-repeat",
         WebkitMaskPosition: "center",
         maskPosition: "center",
+        maskMode: "alpha",
       }}
     />
   );

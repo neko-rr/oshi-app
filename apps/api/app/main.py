@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +21,9 @@ from app.routers.theme_settings import router as theme_settings_router
 from app.routers.oshi_accent_settings import router as oshi_accent_settings_router
 from app.routers.exports import router as exports_router
 from app.routers.account import router as account_router
+from app.services.error_notify import build_error_notice, notify_unhandled_error
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
@@ -77,6 +82,30 @@ def create_app() -> FastAPI:
                     "code": "VALIDATION_ERROR",
                     "message": "入力が不正です",
                     "details": exc.errors(),
+                }
+            },
+        )
+
+    @application.exception_handler(Exception)
+    async def unhandled_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
+        logger.exception("未処理の例外")
+        notice = build_error_notice(
+            method=request.method,
+            path=request.url.path,
+            exc=exc,
+        )
+        notify_unhandled_error(
+            webhook_url=settings.error_notify_webhook_url,
+            notice=notice,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": {
+                    "code": "INTERNAL",
+                    "message": "処理に失敗しました",
                 }
             },
         )

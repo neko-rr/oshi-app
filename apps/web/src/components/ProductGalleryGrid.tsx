@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ProductListItem } from "@oshi/shared";
 import { FormattedAppMoney } from "@/components/format/FormattedAppMoney";
+import { ProductColorDots } from "@/components/product/ProductColorPicker";
 import { ProductTagChip } from "@/components/tags/ProductTagChip";
+import type { ProductColorCode } from "@/lib/productColor";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_GALLERY_CARD_FIELDS,
@@ -83,12 +85,17 @@ function CardTextBlock({
   showPrice: boolean;
   showTags: boolean;
 }) {
+  const tColor = useTranslations("ProductColor");
   if (!showName && !showPrice && !showTags) return null;
   return (
     <>
       {showName ? (
         <p className="truncate text-sm font-medium leading-snug">{title}</p>
       ) : null}
+      <ProductColorDots
+        codes={item.product_color_codes}
+        labelFor={(code: ProductColorCode) => tColor(code)}
+      />
       {showPrice ? <PriceLine item={item} /> : null}
       {showTags ? <TagRow item={item} /> : null}
     </>

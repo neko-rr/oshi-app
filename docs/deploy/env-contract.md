@@ -67,6 +67,7 @@
 | `RAKUTEN_LIVE_CALLS` | 任意 | — | コード既定はオフ。キー再登録後は `1` で実呼出 | 同上 | 許可サイトと `RAKUTEN_ORIGIN` を一致 |
 | `TURNSTILE_SECRET_KEY` | ゲスト照合を使うなら **必須** | 秘密 | `.env` | Dashboard | ゲストのバーコード照合 siteverify。Web / CF 禁止。Auth 用 Secret と同じウィジェットでよい |
 | `OSHI_ACCENT_ENTITLED` | 任意 | — | 開発確認のみ `1`/`true` | 本番は未設定（false） | 推し色の保存・全体適用ゲート。課金前は全員ロック |
+| `ERROR_NOTIFY_WEBHOOK_URL` | 任意 | 秘密（URL にトークンが入りうる） | `.env` | Dashboard | 未処理例外を HTTPS で1件 POST。未設定なら送らない。http は無視。Web / CF 禁止 |
 
 テンプレ正本: `apps/api/.env.example`（Pydantic: `apps/api/app/core/settings.py`）。
 

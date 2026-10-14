@@ -16,6 +16,8 @@
 3. ダウンロードする
 
 写真は ID／Storage パスのみ。署名 URL は含めない。  
+`core` にカラータグ枠（`color_tag_slots`）とグッズの色（`product_color_codes`）を含める。  
+CSV の文字が `=` `+` `-` `@` で始まるときは、先頭に `'` を付けて表計算の数式にしない（数値はそのまま）。  
 外部商品参照（`product_external_refs`：楽天／任意URL）は manifest と CSV に含める（再購入用の安定 URL。期限付き署名は含めない）。
 
 ## B: 写真付き（推し整理向け）

@@ -2,7 +2,7 @@
 
 -- GENERATED schema baseline (documentation / disaster reference)
 -- 既存プロジェクトへの再適用用ではない。正の変更は supabase/migrations/ へ。
--- generated_at_utc: 2026-10-12T13:50:25.779830+00:00
+-- generated_at_utc: 2026-10-14T11:27:41.308072+00:00
 
 -- === category_tag ===
 CREATE TABLE IF NOT EXISTS public.category_tag (
@@ -147,7 +147,8 @@ CREATE TABLE IF NOT EXISTS public.gallery_view (
   missing_category boolean NOT NULL DEFAULT false,
   missing_storage boolean NOT NULL DEFAULT false,
   missing_photo boolean NOT NULL DEFAULT false,
-  duplicate_barcode boolean NOT NULL DEFAULT false
+  duplicate_barcode boolean NOT NULL DEFAULT false,
+  product_color_codes text[] NOT NULL DEFAULT '{}'::text[]
 );
 
 -- === icon_tag ===
@@ -306,7 +307,8 @@ CREATE TABLE IF NOT EXISTS public.registered_product (
   freebie_flag integer DEFAULT 0,
   product_series_complete_flag integer DEFAULT 0,
   product_group_name text,
-  currency_code text
+  currency_code text,
+  product_color_codes text[] NOT NULL DEFAULT '{}'::text[]
 );
 
 -- === registered_product_color_tag ===

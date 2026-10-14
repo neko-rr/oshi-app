@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { ProductColorPicker } from "@/components/product/ProductColorPicker";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
+import type { ProductColorCode } from "@/lib/productColor";
 import { runAfterTick } from "@/lib/runAfterTick";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
@@ -42,6 +44,7 @@ type Props = {
   categoryTagId: number | null;
   storageLocationId: number | null;
   selectedSlots: Set<number>;
+  productColorCodes: string[];
   visualTags: string[];
   unmatchedProductType: string | null;
   lookupCandidates: BarcodeLookupItem[];
@@ -81,6 +84,7 @@ type Props = {
   onCategoryTagId: (id: number | null) => void;
   onStorageLocationId: (id: number | null) => void;
   onToggleSlot: (slot: number) => void;
+  onToggleProductColor: (code: ProductColorCode) => void;
   onApplyVisualTag: (tag: string) => void;
   onClearEventBundle: () => void;
   onBack: () => void;
@@ -114,6 +118,7 @@ export function StepConfirm({
   categoryTagId,
   storageLocationId,
   selectedSlots,
+  productColorCodes,
   visualTags,
   unmatchedProductType,
   lookupCandidates,
@@ -153,6 +158,7 @@ export function StepConfirm({
   onCategoryTagId,
   onStorageLocationId,
   onToggleSlot,
+  onToggleProductColor,
   onApplyVisualTag,
   onClearEventBundle,
   onBack,
@@ -374,6 +380,13 @@ export function StepConfirm({
               }))}
             />
           ) : null}
+
+          <ProductColorPicker
+            legend={t("productColorsLegend")}
+            hint={t("productColorsHint")}
+            selected={productColorCodes}
+            onToggle={onToggleProductColor}
+          />
 
           {colors.length > 0 ? (
             <fieldset className="grid gap-2">

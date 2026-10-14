@@ -104,6 +104,7 @@ def test_collect_pip_packages_uses_requirements_constraints_only() -> None:
     assert by_name["fastapi"]["homepage"] == ""
     assert "pytest" not in by_name
     assert "pytest-asyncio" not in by_name
+    assert "pillow" not in by_name
 
 
 def test_write_outputs_syncs_web_and_docs(tmp_path: Path) -> None:

@@ -94,3 +94,6 @@ secrets/
 
 .cursor/hooks.local/
 .cursor/*.local.*
+
+# 個人の開発メモ。GitHub には載せない
+/cursor.md

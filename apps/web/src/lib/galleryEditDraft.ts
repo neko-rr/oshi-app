@@ -1,6 +1,7 @@
 /** ギャラリー編集モードの下書きと比較・保存ボディ。 */
 
 import type { ProductEditListItem, ProductExternalRefSummary } from "@oshi/shared";
+import { sortProductColorCodes } from "@oshi/shared";
 
 export type GalleryEditDraft = {
   product_name: string;
@@ -22,6 +23,7 @@ export type GalleryEditDraft = {
   category_tag_id: number | null;
   storage_location_id: number | null;
   color_tag_slots: number[];
+  product_color_codes: string[];
   rakuten_url: string;
   rakuten_code: string;
   rakuten_shop: string;
@@ -87,6 +89,7 @@ export function draftFromEditItem(
     category_tag_id: item.category_tag_id ?? null,
     storage_location_id: item.storage_location_id ?? null,
     color_tag_slots: sortedSlots(item.color_tag_slots),
+    product_color_codes: sortProductColorCodes(item.product_color_codes ?? []),
     rakuten_url: rakuten?.product_url?.trim() ?? "",
     rakuten_code: rakuten?.external_item_code?.trim() ?? "",
     rakuten_shop: rakuten?.shop_name?.trim() ?? "",
@@ -100,6 +103,7 @@ function comparable(draft: GalleryEditDraft): GalleryEditDraft {
     ...draft,
     product_name: draft.product_name.trim(),
     color_tag_slots: sortedSlots(draft.color_tag_slots),
+    product_color_codes: sortProductColorCodes(draft.product_color_codes),
   };
 }
 
@@ -164,6 +168,7 @@ export function patchBodyFromEditDraft(
     want_object_flag: draft.want_object,
     sales_desired_user_touched: draft.sales_desired_user_touched,
     color_tag_slots: sortedSlots(draft.color_tag_slots),
+    product_color_codes: sortProductColorCodes(draft.product_color_codes),
   };
   if (draft.category_tag_id != null) {
     body.category_tag_id = draft.category_tag_id;

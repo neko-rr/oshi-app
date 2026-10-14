@@ -693,6 +693,12 @@
           "type": "boolean",
           "not_null": true,
           "default": "false"
+        },
+        {
+          "column": "product_color_codes",
+          "type": "text[]",
+          "not_null": true,
+          "default": "'{}'::text[]"
         }
       ]
     },
@@ -1467,6 +1473,12 @@
           "type": "text",
           "not_null": false,
           "default": null
+        },
+        {
+          "column": "product_color_codes",
+          "type": "text[]",
+          "not_null": true,
+          "default": "'{}'::text[]"
         }
       ]
     },
@@ -2098,6 +2110,11 @@
       "tablename": "registered_product",
       "indexname": "registered_product_pkey",
       "indexdef": "CREATE UNIQUE INDEX registered_product_pkey ON public.registered_product USING btree (registered_product_id)"
+    },
+    {
+      "tablename": "registered_product",
+      "indexname": "registered_product_product_color_codes_idx",
+      "indexdef": "CREATE INDEX registered_product_product_color_codes_idx ON public.registered_product USING gin (product_color_codes)"
     },
     {
       "tablename": "registered_product_color_tag",
@@ -3144,6 +3161,11 @@
     },
     {
       "table_name": "gallery_view",
+      "constraint_name": "gallery_view_product_color_codes_check",
+      "definition": "CHECK ((product_color_codes <@ ARRAY['white'::text, 'black'::text, 'gray'::text, 'red'::text, 'pink'::text, 'orange'::text, 'yellow'::text, 'green'::text, 'blue'::text, 'light_blue'::text, 'purple'::text, 'brown'::text, 'beige'::text, 'gold'::text, 'silver'::text]))"
+    },
+    {
+      "table_name": "gallery_view",
       "constraint_name": "gallery_view_purchase_month_check",
       "definition": "CHECK ((purchase_month IS NULL) OR (purchase_month ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'::text))"
     },
@@ -3181,6 +3203,11 @@
       "table_name": "product_external_ref",
       "constraint_name": "product_external_ref_source_check",
       "definition": "CHECK ((source = ANY (ARRAY['rakuten'::text, 'amazon'::text, 'manual'::text])))"
+    },
+    {
+      "table_name": "registered_product",
+      "constraint_name": "registered_product_product_color_codes_check",
+      "definition": "CHECK ((product_color_codes <@ ARRAY['white'::text, 'black'::text, 'gray'::text, 'red'::text, 'pink'::text, 'orange'::text, 'yellow'::text, 'green'::text, 'blue'::text, 'light_blue'::text, 'purple'::text, 'brown'::text, 'beige'::text, 'gold'::text, 'silver'::text]))"
     },
     {
       "table_name": "registered_product_color_tag",

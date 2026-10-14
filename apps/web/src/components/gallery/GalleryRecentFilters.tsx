@@ -36,6 +36,7 @@ export function buildRecentQueryLabel(
     category: string;
     storage: string;
     color: string;
+    productColor: (code: string) => string;
     salesDesired: string;
     wantObject: string;
     missingPrice: string;
@@ -59,6 +60,9 @@ export function buildRecentQueryLabel(
   for (const slot of query.color_tag_slots ?? []) {
     parts.push(names?.colors.get(slot) ?? `${fallbacks.color}${slot}`);
   }
+  for (const code of query.product_color_codes ?? []) {
+    parts.push(fallbacks.productColor(code));
+  }
   if (query.sales_desired) parts.push(fallbacks.salesDesired);
   if (query.want_object) parts.push(fallbacks.wantObject);
   if (query.missing_price) parts.push(fallbacks.missingPrice);
@@ -80,6 +84,7 @@ export function GalleryRecentFilters({
   titleKey = "gallery",
 }: Props) {
   const t = useTranslations("Gallery");
+  const tColor = useTranslations("ProductColor");
   const tSearch = useTranslations("Search");
   const [entries, setEntries] = useState<GalleryRecentEntry[]>([]);
   const fingerprint = fingerprintGalleryQuery(listQuery);
@@ -90,6 +95,7 @@ export function GalleryRecentFilters({
       category: t("category"),
       storage: t("storage"),
       color: t("color"),
+      productColor: (code: string) => tColor(code as "red"),
       salesDesired: t("salesDesiredFilter"),
       wantObject: t("wantObjectFilter"),
       missingPrice: t("missingPriceFilter"),
@@ -99,7 +105,7 @@ export function GalleryRecentFilters({
       missingPhoto: t("missingPhotoFilter"),
       duplicateBarcode: t("duplicateBarcodeFilter"),
     }),
-    [t],
+    [t, tColor],
   );
 
   useEffect(
@@ -151,6 +157,7 @@ export function GalleryRecentFilters({
                 category_tag_ids: entry.query.category_tag_ids,
                 storage_location_ids: entry.query.storage_location_ids,
                 color_tag_slots: entry.query.color_tag_slots,
+                product_color_codes: entry.query.product_color_codes,
                 sales_desired: entry.query.sales_desired,
                 want_object: entry.query.want_object,
                 missing_price: entry.query.missing_price,

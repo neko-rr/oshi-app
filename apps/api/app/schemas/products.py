@@ -33,6 +33,7 @@ class CreateProductRequest(BaseModel):
     category_tag_id: int | None = None
     storage_location_id: int | None = None
     color_tag_slots: list[int] | None = None
+    product_color_codes: list[str] | None = None
     registration_quantity: int | None = Field(default=None, ge=1, le=999)
     sales_desired_flag: bool | int | None = None
     sales_desired_quantity: int | None = Field(default=None, ge=0, le=999)
@@ -75,6 +76,7 @@ class PatchProductRequest(BaseModel):
     clear_storage_location: bool = False
     clear_purchase_date: bool = False
     color_tag_slots: list[int] | None = None
+    product_color_codes: list[str] | None = None
     # 明示指定時のみ全置換（空配列で全削除）
     external_refs: list[ExternalRefInput] | None = None
 

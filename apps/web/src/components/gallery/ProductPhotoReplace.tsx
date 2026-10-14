@@ -10,9 +10,8 @@ import { replaceProductPhoto } from "@/lib/replaceProductPhoto";
 import { runAfterTick } from "@/lib/runAfterTick";
 import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
+import { ImageSourcePicker } from "@/components/photo/ImageSourcePicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 type Props = {
   registeredProductId: number;
@@ -51,10 +50,6 @@ export function ProductPhotoReplace({ registeredProductId }: Props) {
     setPreviewUrl(null);
     setError(null);
     setOffline(false);
-    const el = document.getElementById(
-      "detail_photo_replace",
-    ) as HTMLInputElement | null;
-    if (el) el.value = "";
   }
 
   async function onPick(raw: File | null) {
@@ -134,15 +129,13 @@ export function ProductPhotoReplace({ registeredProductId }: Props) {
         </p>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="detail_photo_replace">{t("replacePick")}</Label>
-        <Input
-          id="detail_photo_replace"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="min-h-11"
+        <p className="text-sm font-medium">{t("replacePick")}</p>
+        <ImageSourcePicker
+          idPrefix="detail_photo_replace"
           disabled={compressing || saving}
-          onChange={(e) => void onPick(e.target.files?.[0] ?? null)}
+          fileLabel={t("replacePickFile")}
+          cameraLabel={t("replaceTakeCamera")}
+          onFile={(picked) => void onPick(picked)}
         />
         {compressing ? (
           <p className="text-xs text-muted-foreground" role="status">

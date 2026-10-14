@@ -86,7 +86,14 @@ def normalize_product_row(row: dict[str, Any]) -> dict[str, Any]:
             icon_key="storage_location_icon",
         ),
         "color_tag_slots": [],
+        "product_color_codes": _product_color_codes_from_row(row),
     }
+
+
+def _product_color_codes_from_row(row: dict[str, Any]) -> list[str]:
+    from app.services.product_color import coerce_product_color_codes
+
+    return coerce_product_color_codes(row.get("product_color_codes"))
 
 
 def _external_refs_from_row(row: dict[str, Any]) -> list[dict[str, Any]]:
@@ -181,6 +188,7 @@ def list_products_for_member(
     category_tag_ids: list[int] | None = None,
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
+    product_color_codes: list[str] | None = None,
     sort: str | None = None,
     view: str | None = None,
     sales_desired: bool = False,
@@ -242,6 +250,10 @@ def list_products_for_member(
         "color_tag_slots": color_slots or None,
         "sort": sort_norm,
     }
+    # 空のときは渡さない。古い fetch 差し替えが TypeError で q を落とさないため
+    color_codes = list(product_color_codes or []) or None
+    if color_codes:
+        fetch_kwargs["product_color_codes"] = color_codes
     if view_norm == "edit":
         fetch_kwargs["view"] = "edit"
     # 未指定の fetch 差し替えが TypeError にならないよう、ON のときだけ渡す
@@ -378,6 +390,7 @@ def create_product_for_member(
     category_tag_id: int | None = None,
     storage_location_id: int | None = None,
     color_tag_slots: list[int] | None = None,
+    product_color_codes: list[str] | None = None,
     registration_quantity: int | None = None,
     sales_desired_flag: bool | int | None = None,
     sales_desired_quantity: int | None = None,
@@ -432,6 +445,13 @@ def create_product_for_member(
 
     mid = str(members_id).strip()
     token = str(access_token).strip()
+    from app.services.product_color import normalize_product_color_codes
+
+    color_codes = (
+        normalize_product_color_codes(product_color_codes)
+        if product_color_codes is not None
+        else None
+    )
 
     try:
         new_id = inserter(
@@ -456,6 +476,7 @@ def create_product_for_member(
             sales_desired_flag=sales_flag,
             sales_desired_quantity=sales_qty,
             want_object_flag=want_flag,
+            product_color_codes=color_codes,
         )
     except RuntimeError as exc:
         if str(exc) == "supabase_not_configured":
@@ -582,6 +603,12 @@ def patch_product_for_member(
     if "purchase_date" in patch_fields and patch_fields["purchase_date"] is not None:
         cleaned = str(patch_fields["purchase_date"]).strip()
         patch_fields["purchase_date"] = cleaned or None
+    if "product_color_codes" in patch_fields:
+        from app.services.product_color import normalize_product_color_codes
+
+        patch_fields["product_color_codes"] = normalize_product_color_codes(
+            patch_fields.get("product_color_codes") or []
+        )
 
     sales_keys_in_patch = (
         "sales_desired_flag" in patch_fields
@@ -878,6 +905,7 @@ def normalize_product_detail(row: dict[str, Any]) -> dict[str, Any]:
             icon_key="storage_location_icon",
         ),
         "color_tag_slots": [],
+        "product_color_codes": _product_color_codes_from_row(row),
     }
 
 

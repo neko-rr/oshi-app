@@ -19,6 +19,7 @@ purchase_price,
 currency_code,
 category_tag_id,
 storage_location_id,
+product_color_codes,
 photo(photo_thumbnail_url),
 category_tag(category_tag_name,category_tag_color,category_tag_icon),
 storage_location(storage_location_name,storage_location_icon)
@@ -153,6 +154,7 @@ def fetch_products_page(
     category_tag_ids: list[int] | None = None,
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
+    product_color_codes: list[str] | None = None,
     sort: str | None = None,
     view: str | None = None,
     sales_desired: bool = False,
@@ -184,6 +186,9 @@ def fetch_products_page(
     color_slots = [
         int(x) for x in (color_tag_slots or []) if 1 <= int(x) <= 7
     ]
+    from app.services.product_color import normalize_product_color_codes
+
+    goods_colors = normalize_product_color_codes(list(product_color_codes or []))
 
     # 色スロット: junction から product id を先に取得（ページング前）
     color_product_ids: list[int] | None = None
@@ -222,6 +227,8 @@ def fetch_products_page(
         query = query.in_("category_tag_id", cat_ids)
     if storage_ids_filter:
         query = query.in_("storage_location_id", storage_ids_filter)
+    if goods_colors:
+        query = query.overlaps("product_color_codes", goods_colors)
     if duplicate_barcode:
         duplicate_ids = _duplicate_barcode_product_ids(client, members_id)
         if color_product_ids is not None:
@@ -336,6 +343,7 @@ def insert_product_row(
     sales_desired_flag: int = 0,
     sales_desired_quantity: int | None = None,
     want_object_flag: int = 0,
+    product_color_codes: list[str] | None = None,
 ) -> int:
     """registered_product に1行 insert し ID を返す。"""
     client = create_user_client(access_token)
@@ -375,6 +383,8 @@ def insert_product_row(
         payload["registration_quantity"] = registration_quantity
     if sales_desired_quantity is not None:
         payload["sales_desired_quantity"] = sales_desired_quantity
+    if product_color_codes is not None:
+        payload["product_color_codes"] = product_color_codes
 
     response = (
         client.table("registered_product").insert(payload).execute()
@@ -413,6 +423,7 @@ sales_desired_quantity,
 want_object_flag,
 category_tag_id,
 storage_location_id,
+product_color_codes,
 photo(photo_thumbnail_url,photo_high_resolution_url),
 category_tag(category_tag_id,category_tag_name,category_tag_color,category_tag_icon),
 storage_location(storage_location_id,storage_location_name,storage_location_icon)

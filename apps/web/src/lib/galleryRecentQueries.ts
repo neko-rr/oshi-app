@@ -14,6 +14,7 @@ export type GalleryRecentQuery = {
   category_tag_ids?: number[];
   storage_location_ids?: number[];
   color_tag_slots?: number[];
+  product_color_codes?: string[];
   sales_desired?: boolean;
   want_object?: boolean;
   missing_price?: boolean;
@@ -38,6 +39,7 @@ function hasActiveFilters(query: GalleryRecentQuery): boolean {
   if ((query.category_tag_ids?.length ?? 0) > 0) return true;
   if ((query.storage_location_ids?.length ?? 0) > 0) return true;
   if ((query.color_tag_slots?.length ?? 0) > 0) return true;
+  if ((query.product_color_codes?.length ?? 0) > 0) return true;
   if (query.sales_desired) return true;
   if (query.want_object) return true;
   if (query.missing_price) return true;
@@ -57,6 +59,7 @@ export function fingerprintGalleryQuery(query: GalleryRecentQuery): string {
     (query.category_tag_ids ?? []).join(","),
     (query.storage_location_ids ?? []).join(","),
     (query.color_tag_slots ?? []).join(","),
+    (query.product_color_codes ?? []).join(","),
     query.sort ?? "",
     query.sales_desired ? "1" : "",
     query.want_object ? "1" : "",
@@ -82,6 +85,9 @@ export function normalizeRecentQuery(query: GalleryRecentQuery): GalleryRecentQu
       : {}),
     ...(query.color_tag_slots?.length
       ? { color_tag_slots: [...query.color_tag_slots] }
+      : {}),
+    ...(query.product_color_codes?.length
+      ? { product_color_codes: [...query.product_color_codes] }
       : {}),
     ...(query.sales_desired ? { sales_desired: true } : {}),
     ...(query.want_object ? { want_object: true } : {}),

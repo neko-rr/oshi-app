@@ -1,3 +1,5 @@
 -r requirements-prod.txt
 pytest>=8.3.0
 pytest-asyncio>=0.24.0
+# シルエット PNG の透過確認（tests/）。本番イメージには入れない。
+pillow>=10.4.0

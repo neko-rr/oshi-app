@@ -17,6 +17,7 @@ function baseDraft(partial: Partial<AssistDraftSlice> = {}): AssistDraftSlice {
     memo: "",
     category_tag_id: null,
     selected_slots: [],
+    product_color_codes: [],
     visual_tags: [],
     unmatched_product_type: null,
     ...partial,
@@ -26,12 +27,6 @@ function baseDraft(partial: Partial<AssistDraftSlice> = {}): AssistDraftSlice {
 const categories = [
   { category_tag_id: 10, category_tag_name: "缶バッジ" },
   { category_tag_id: 11, category_tag_name: "アクリル" },
-];
-
-const colorOptions = [
-  { slot: 1, color_tag_name: "赤" },
-  { slot: 2, color_tag_name: "青" },
-  { slot: 7, color_tag_name: "ピンク" },
 ];
 
 const visionFull: VisionStructured = {
@@ -53,11 +48,11 @@ describe("applyAssistToDraft", () => {
       baseDraft({ product_name: "楽天の商品名", purchase_price: "1200" }),
       sources,
       categories,
-      colorOptions,
     );
     assert.equal(draft.product_name, "楽天の商品名");
     assert.equal(draft.category_tag_id, 10);
-    assert.deepEqual(draft.selected_slots, [1, 7]);
+    assert.deepEqual(draft.selected_slots, []);
+    assert.deepEqual(draft.product_color_codes, ["red", "pink"]);
     assert.deepEqual(draft.visual_tags, ["キラキラ", "パステル", "アイドル系"]);
   });
 
@@ -69,7 +64,6 @@ describe("applyAssistToDraft", () => {
       baseDraft({ category_tag_id: 11 }),
       sources,
       categories,
-      colorOptions,
     );
     assert.equal(draft.category_tag_id, 11);
   });
@@ -80,13 +74,15 @@ describe("applyAssistToDraft", () => {
       baseDraft(),
       emptyFieldSources(),
       categories,
-      colorOptions,
     );
     assert.equal(draft.product_name, "Vision商品名");
     assert.equal(draft.category_tag_id, 10);
     assert.equal(sources.product_name, "vision");
     assert.equal(sources.category_tag_id, "vision");
     assert.equal(draft.memo, "Vision説明");
+    assert.deepEqual(draft.product_color_codes, ["red", "pink"]);
+    assert.equal(sources.product_color_codes, "vision");
+    assert.deepEqual(draft.selected_slots, []);
   });
 
   it("未知の product_type は unmatched に残す", () => {
@@ -96,7 +92,6 @@ describe("applyAssistToDraft", () => {
       baseDraft(),
       emptyFieldSources(),
       categories,
-      colorOptions,
     );
     assert.equal(draft.category_tag_id, null);
     assert.equal(draft.unmatched_product_type, "ぬいぐるみ特大");
@@ -110,8 +105,19 @@ describe("applyAssistToDraft", () => {
       baseDraft({ selected_slots: [2] }),
       sources,
       categories,
-      colorOptions,
     );
     assert.deepEqual(draft.selected_slots, [2]);
+  });
+
+  it("手で選んだグッズの色は Vision で上書きしない", () => {
+    const sources = emptyFieldSources();
+    sources.product_color_codes = "user";
+    const { draft } = applyAssistToDraft(
+      visionFull,
+      baseDraft({ product_color_codes: ["blue"] }),
+      sources,
+      categories,
+    );
+    assert.deepEqual(draft.product_color_codes, ["blue"]);
   });
 });

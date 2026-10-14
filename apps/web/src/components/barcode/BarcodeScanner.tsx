@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { ImageSourcePicker } from "@/components/photo/ImageSourcePicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   detectFromImageFile,
   detectFromVideoFrame,
@@ -156,14 +155,13 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
       </div>
 
       <div className="grid gap-1">
-        <Label htmlFor="barcode_image_upload">{t("uploadLabel")}</Label>
-        <Input
-          id="barcode_image_upload"
-          type="file"
-          accept="image/*"
-          capture="environment"
+        <p className="text-sm font-medium">{t("uploadLabel")}</p>
+        <ImageSourcePicker
+          idPrefix="barcode_image"
           disabled={disabled}
-          onChange={(e) => void onUploadChange(e.target.files?.[0] ?? null)}
+          fileLabel={t("pickFile")}
+          cameraLabel={t("takeCamera")}
+          onFile={(file) => void onUploadChange(file)}
         />
       </div>
 

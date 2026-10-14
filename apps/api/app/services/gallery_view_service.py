@@ -6,6 +6,7 @@ import logging
 from typing import Any
 
 from app.infra.supabase_user import create_user_client
+from app.services.product_color import normalize_product_color_codes
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ MAX_COLOR_SLOT = 7
 
 SELECT_COLS = (
     "gallery_view_id,view_name,q,category_tag_ids,storage_location_ids,"
-    "color_tag_slots,sales_desired,want_object,missing_price,"
+    "color_tag_slots,product_color_codes,sales_desired,want_object,missing_price,"
     "missing_purchase_date,purchase_month,missing_category,missing_storage,"
     "missing_photo,duplicate_barcode,list_sort,display_order,"
     "created_at,updated_at"
@@ -89,6 +90,9 @@ def _row_to_item(row: dict[str, Any]) -> dict[str, Any]:
         "category_tag_ids": list(row.get("category_tag_ids") or []),
         "storage_location_ids": list(row.get("storage_location_ids") or []),
         "color_tag_slots": list(row.get("color_tag_slots") or []),
+        "product_color_codes": normalize_product_color_codes(
+            list(row.get("product_color_codes") or [])
+        ),
         "sales_desired": bool(row.get("sales_desired")),
         "want_object": bool(row.get("want_object")),
         "missing_price": bool(row.get("missing_price")),
@@ -133,6 +137,7 @@ def create_gallery_view(
     category_tag_ids: list[int] | None = None,
     storage_location_ids: list[int] | None = None,
     color_tag_slots: list[int] | None = None,
+    product_color_codes: list[str] | None = None,
     sales_desired: bool = False,
     want_object: bool = False,
     missing_price: bool = False,
@@ -177,6 +182,7 @@ def create_gallery_view(
             storage_location_ids, field="storage_location_ids"
         ),
         "color_tag_slots": _normalize_color_slots(color_tag_slots),
+        "product_color_codes": normalize_product_color_codes(product_color_codes),
         "sales_desired": bool(sales_desired),
         "want_object": bool(want_object),
         "missing_price": bool(missing_price),

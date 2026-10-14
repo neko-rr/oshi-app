@@ -123,6 +123,7 @@ def test_list_products_passes_tag_filters_and_echoes() -> None:
                 "category_tag_id": "3,5",
                 "storage_location_id": "7",
                 "color_tag_slot": "1,2",
+                "product_color": "pink,black",
             },
             headers={"Authorization": "Bearer fake-jwt"},
         )
@@ -132,6 +133,8 @@ def test_list_products_passes_tag_filters_and_echoes() -> None:
     assert mocked.call_args[1]["category_tag_ids"] == [3, 5]
     assert mocked.call_args[1]["storage_location_ids"] == [7]
     assert mocked.call_args[1]["color_tag_slots"] == [1, 2]
+    assert mocked.call_args[1]["product_color_codes"] == ["black", "pink"]
+    assert body["product_color_codes"] == ["black", "pink"]
     assert body["q"] == "缶"
     assert body["category_tag_ids"] == [3, 5]
     assert body["storage_location_ids"] == [7]

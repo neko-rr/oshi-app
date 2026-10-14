@@ -44,7 +44,18 @@ jobs:
       - name: Build shared + web (stub-enabled artifact; not production CF)
         run: |
           pnpm build:shared
-          pnpm build:web
+          # next/font はビルド時に Google Fonts を取る。一時失敗で解決が落ちることがある。
+          ok=0
+          for i in 1 2 3; do
+            if pnpm build:web; then
+              ok=1
+              break
+            fi
+            echo "web build failed (attempt ${i})"
+            rm -rf apps/web/.next
+            sleep 5
+          done
+          test "$ok" = 1
       - name: Install Playwright Chromium
         run: pnpm -C apps/web exec playwright install chromium --with-deps
       - name: Start Next and run register E2E
