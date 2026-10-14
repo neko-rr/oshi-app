@@ -10,6 +10,7 @@ import {
 import { createClient } from "@/lib/client";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
 import { findResidenceRegion } from "@/lib/residencePrefs";
+import { toggleProductColorCode } from "@/lib/productColor";
 import { orderStorageLocationsForRegister } from "@/lib/registerPrefs";
 import type { DecodedBarcode } from "@/lib/barcode/formats";
 import { fetchDuplicateHints } from "@/lib/products/fetchDuplicateHints";
@@ -283,17 +284,11 @@ export function RegisterWizard() {
   }
 
   function toggleProductColor(code: string) {
-    setDraft((prev) => {
-      const has = prev.productColorCodes.includes(code);
-      const productColorCodes = has
-        ? prev.productColorCodes.filter((item) => item !== code)
-        : [...prev.productColorCodes, code];
-      return {
-        ...prev,
-        productColorCodes,
-        fieldSources: markUserSource(prev.fieldSources, "product_color_codes"),
-      };
-    });
+    setDraft((prev) => ({
+      ...prev,
+      productColorCodes: toggleProductColorCode(prev.productColorCodes, code),
+      fieldSources: markUserSource(prev.fieldSources, "product_color_codes"),
+    }));
   }
 
   function toggleSlot(slot: number) {

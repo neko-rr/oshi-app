@@ -5,11 +5,13 @@
 
 | ファイル | 内容 |
 |----------|------|
-| `screenshots/01-home-desktop.png` | 本番トップ（デスクトップ） |
-| `screenshots/01-home-mobile.png` | 本番トップ（モバイル） |
-| `screenshots/02-login-mobile.png` | 本番ログイン |
-| `screenshots/03-signup-mobile.png` | 本番新規登録 |
-| `screenshots/05-register-guest.png` | 製品登録（ゲスト開始後） |
+| `screenshots/01-gallery.png` | ギャラリー（所持・種類・収納） |
+| `screenshots/02-register-confirm.png` | 登録確認（正面写真と商品名） |
+| `screenshots/03-register-tags.png` | 写真からの見た目タグ提案 |
+| `screenshots/04-register-place.png` | 種類・収納場所・グッズの色 |
+| `screenshots/05-theme.png` | テーマ色 |
+| `screenshots/06-color-share.png` | 推し色の割合 |
 
-再撮影: `pnpm -C apps/web exec node scripts/capture_readme_screenshots.mjs`  
-連続遷移すると Cloudflare Worker 1102 になることがある。間隔を空けるか、必要な画面だけ撮る。
+2026-10-14 の実機撮影を、README 用に幅 720px へ縮小して置いている。元画像はリポジトリに置かない。
+
+公開トップだけの自動撮影は `apps/web/scripts/capture_readme_screenshots.mjs`。今の README が参照するファイル名とは別なので、実行しても上の6枚は置き換わらない。連続遷移すると Cloudflare Worker 1102 になることがある。

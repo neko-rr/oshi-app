@@ -5,7 +5,10 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { matchProductColorCodes } from "./productColor.ts";
+import {
+  matchProductColorCodes,
+  toggleProductColorCode,
+} from "./productColor.ts";
 
 describe("matchProductColorCodes", () => {
   it("写真の色名を複数のコードにする", () => {
@@ -18,6 +21,12 @@ describe("matchProductColorCodes", () => {
 
   it("多色ラベルは捨てる", () => {
     assert.deepEqual(matchProductColorCodes(["多色", "カラフル", "mixed"]), []);
+  });
+
+  it("手で選ぶと付き、もう一度押すと外れる", () => {
+    assert.deepEqual(toggleProductColorCode(["red"], "pink"), ["red", "pink"]);
+    assert.deepEqual(toggleProductColorCode(["red", "pink"], "red"), ["pink"]);
+    assert.deepEqual(toggleProductColorCode(["pink"], "pink"), []);
   });
 
   it("髪と瞳を別の色として残す", () => {

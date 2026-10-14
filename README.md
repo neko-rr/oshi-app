@@ -20,19 +20,44 @@
 
 グッズの保存、写真のアップロード、キーワード検索は本登録のあとです。ゲストの書き込みは API が拒否し、データベースの RLS でも拒否します。
 
-<p align="center">
-  <img src="docs/readme/screenshots/01-home-desktop.png" alt="Oshihaven トップ（デスクトップ）" width="720" />
-</p>
+実機で、登録から一覧まで進めた画面です。
 
-<p align="center">
-  <img src="docs/readme/screenshots/01-home-mobile.png" alt="トップ（モバイル）" width="200" />
-  &nbsp;
-  <img src="docs/readme/screenshots/02-login-mobile.png" alt="ログイン" width="200" />
-  &nbsp;
-  <img src="docs/readme/screenshots/03-signup-mobile.png" alt="新規登録" width="200" />
-  &nbsp;
-  <img src="docs/readme/screenshots/05-register-guest.png" alt="製品登録（ゲスト）" width="200" />
-</p>
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="docs/readme/screenshots/01-gallery.png" alt="ギャラリー。写真・種類・収納場所が一覧になっている" width="220" />
+      <br><b>ギャラリー</b>
+      <br>写真とタグで、所持と置き場所を見る
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/readme/screenshots/02-register-confirm.png" alt="登録の確認。正面写真と商品名、見た目タグの提案件数" width="220" />
+      <br><b>写真から登録</b>
+      <br>正面写真を置くと、名前の候補まで入る
+    </td>
+    <td align="center" width="33%">
+      <img src="docs/readme/screenshots/03-register-tags.png" alt="写真から提案された見た目タグ" width="220" />
+      <br><b>自動タグ</b>
+      <br>見た目のタグを提案し、タップでメモに足せる
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/readme/screenshots/04-register-place.png" alt="種類・収納場所・グッズの色の選択" width="220" />
+      <br><b>種類・収納・色</b>
+      <br>実物の置き場と、グッズの色を残す
+    </td>
+    <td align="center">
+      <img src="docs/readme/screenshots/05-theme.png" alt="ダークテーマと推し色の選択" width="220" />
+      <br><b>推しに寄せた見た目</b>
+      <br>テーマ色を、画面を開いたまま切り替えられる
+    </td>
+    <td align="center">
+      <img src="docs/readme/screenshots/06-color-share.png" alt="推し色の割合の円グラフ" width="220" />
+      <br><b>色の割合</b>
+      <br>付けた色が、箱の中でどれだけあるか
+    </td>
+  </tr>
+</table>
 
 ---
 

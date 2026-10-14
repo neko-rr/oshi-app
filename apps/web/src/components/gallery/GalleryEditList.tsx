@@ -7,6 +7,7 @@ import { useFeedback } from "@/components/feedback/FeedbackProvider";
 import { NetworkRetryNotice } from "@/components/feedback/NetworkRetryNotice";
 import { CurrencyCodePicker } from "@/components/settings/CurrencyCodePicker";
 import { ProductColorPicker } from "@/components/product/ProductColorPicker";
+import { toggleProductColorCode } from "@/lib/productColor";
 import { TagChipPicker } from "@/components/tags/TagChipPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -482,13 +483,11 @@ export function GalleryEditList({
                         legend={tDetail("productColorsLegend")}
                         selected={draft.product_color_codes}
                         onToggle={(code) => {
-                          const has = draft.product_color_codes.includes(code);
                           updateDraft(id, {
-                            product_color_codes: has
-                              ? draft.product_color_codes.filter(
-                                  (item) => item !== code,
-                                )
-                              : [...draft.product_color_codes, code],
+                            product_color_codes: toggleProductColorCode(
+                              draft.product_color_codes,
+                              code,
+                            ),
                           });
                         }}
                       />
