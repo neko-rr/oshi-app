@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-10-22T04:45:10Z`
+生成時刻 (UTC): `2026-10-22T10:53:39Z`
 
 ## アプリ本体
 
@@ -15,7 +15,7 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 | 名前 | 版 | ライセンス | 系統 |
 |------|----|------------|------|
 | @marsidev/react-turnstile | 1.6.1 | MIT | npm |
-| @opennextjs/cloudflare | 1.20.7 | MIT | npm |
+| @opennextjs/cloudflare | 1.20.12 | MIT | npm |
 | @radix-ui/react-avatar | 1.2.6 | MIT | npm |
 | @radix-ui/react-label | 2.1.15 | MIT | npm |
 | @radix-ui/react-slot | 1.3.3 | MIT | npm |
