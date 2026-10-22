@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T13:21:49Z",
+  "generated_at": "2026-10-22T04:45:10Z",
   "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "name": "next",
-      "version": "16.3.8",
+      "version": "16.4.2",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://nextjs.org"

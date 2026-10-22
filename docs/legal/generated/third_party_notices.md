@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-10-14T11:27:43Z`
+生成時刻 (UTC): `2026-10-22T04:45:10Z`
 
 ## アプリ本体
 
@@ -25,7 +25,7 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 | class-variance-authority | 0.7.1 | Apache-2.0 | npm |
 | clsx | 2.1.1 | MIT | npm |
 | lucide-react | 1.31.0 | ISC | npm |
-| next | 16.3.8 | MIT | npm |
+| next | 16.4.2 | MIT | npm |
 | next-intl | 4.14.8 | MIT | npm |
 | qrcode | 1.5.4 | MIT | npm |
 | radix-ui | 1.6.7 | MIT | npm |
