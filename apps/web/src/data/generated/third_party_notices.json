@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T04:45:10Z",
+  "generated_at": "2026-10-22T10:53:39Z",
   "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "name": "@opennextjs/cloudflare",
-      "version": "1.20.7",
+      "version": "1.20.12",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://github.com/opennextjs/opennextjs-cloudflare"
