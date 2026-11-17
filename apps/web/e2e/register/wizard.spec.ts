@@ -84,20 +84,18 @@ async function expectPhotoStep(page: Page) {
 }
 
 /**
- * ラベル付き「ファイルを選ぶ」経由で FileChooser に載せる。
- * hidden input への setInputFiles だけだと change が飛ばない環境がある。
+ * 手順内の file input にフィクスチャを載せる。
+ * 「Choose file」は hidden input の英名とラベルボタンの両方に当たるため、
+ * FileChooser クリックより id 指定の setInputFiles を正とする。
  */
-async function uploadViaChooseFileButton(
+async function uploadFixture(
   page: Page,
+  inputId: string,
   filePath: string,
 ): Promise<void> {
-  const chooserPromise = page.waitForEvent("filechooser", { timeout: 10_000 });
-  await page
-    .getByRole("button", { name: /ファイルを選ぶ|Choose file/i })
-    .first()
-    .click();
-  const chooser = await chooserPromise;
-  await chooser.setFiles(filePath);
+  const input = page.locator(`#${inputId}`);
+  await expect(input).toBeAttached();
+  await input.setInputFiles(filePath);
 }
 
 test.describe("register wizard fixtures", () => {
@@ -106,8 +104,9 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "guest");
-    await uploadViaChooseFileButton(
+    await uploadFixture(
       page,
+      "barcode_image_file",
       fixtureFile(fixtureCase.barcode_image),
     );
     await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -132,8 +131,9 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "permanent");
-    await uploadViaChooseFileButton(
+    await uploadFixture(
       page,
+      "barcode_image_file",
       fixtureFile(fixtureCase.barcode_image),
     );
     await expect(page.locator("#wizard_barcode")).toHaveValue(
@@ -142,8 +142,9 @@ test.describe("register wizard fixtures", () => {
     );
     await stepAction(page, /次へ（照合）|Next \(lookup\)/i).click();
     await expectPhotoStep(page);
-    await uploadViaChooseFileButton(
+    await uploadFixture(
       page,
+      "wizard_photo_file",
       fixtureFile(fixtureCase.front_image),
     );
     await expect(
@@ -186,8 +187,9 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     await openRegisterAs(page, context, "permanent");
-    await uploadViaChooseFileButton(
+    await uploadFixture(
       page,
+      "barcode_image_file",
       fixtureFile(manifest.unreadable_image),
     );
     await expect(
@@ -236,8 +238,9 @@ test.describe("register wizard fixtures", () => {
     await stepAction(page, /^スキップ$|^Skip$/).click();
     await dismissStartNudge(page);
     await expectPhotoStep(page);
-    await uploadViaChooseFileButton(
+    await uploadFixture(
       page,
+      "wizard_photo_file",
       fixtureFile(fixtureCase.front_image),
     );
     await stepAction(page, /^次へ$|^Next$/).click();
