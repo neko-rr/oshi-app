@@ -194,6 +194,11 @@ pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
 
 ローカルの OpenNext 変換は Windows 非保証。本番ビルドは Cloudflare CI（Linux）で行う。
 
+**Workers Builds が `@swc/core` / `Failed to load native binding` で落ちるとき:**  
+原因は多くの場合、CF ビルドマシン上の SWC ネイティブキャッシュ権限チェック（`ERR_SWC_NATIVE_CACHE`）。  
+正攻法はリポジトリの `pnpm.overrides` で `@swc/core` を **1.16.22 以上**に揃える（現行 lockfile）。  
+`SWC_NATIVE_BINDING_CACHE_SKIP_SECURITY_CHECK=1` は **最終手段**（ビルド時のキャッシュ配置チェックを緩めるだけだが、通常は不要。アプリの Auth / 秘密には無関係）。
+
 ## 5. ローカル起動
 
 ```powershell

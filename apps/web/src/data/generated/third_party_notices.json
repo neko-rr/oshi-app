@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-17T16:19:15Z",
+  "generated_at": "2026-11-17T18:44:03Z",
   "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -8,13 +8,6 @@
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://github.com/marsidev/react-turnstile"
-    },
-    {
-      "name": "@opennextjs/cloudflare",
-      "version": "1.20.17",
-      "license": "MIT",
-      "ecosystem": "npm",
-      "homepage": "https://github.com/opennextjs/opennextjs-cloudflare"
     },
     {
       "name": "@radix-ui/react-avatar",
@@ -56,7 +49,7 @@
       "version": "0.2.1",
       "license": "MIT",
       "ecosystem": "npm",
-      "homepage": "https://github.com/zxing-js/browser#readme"
+      "homepage": ""
     },
     {
       "name": "class-variance-authority",
@@ -70,7 +63,7 @@
       "version": "2.1.1",
       "license": "MIT",
       "ecosystem": "npm",
-      "homepage": "https://github.com/lukeed/clsx#readme"
+      "homepage": ""
     },
     {
       "name": "lucide-react",
@@ -78,20 +71,6 @@
       "license": "ISC",
       "ecosystem": "npm",
       "homepage": "https://lucide.dev"
-    },
-    {
-      "name": "next",
-      "version": "16.4.6",
-      "license": "MIT",
-      "ecosystem": "npm",
-      "homepage": "https://nextjs.org"
-    },
-    {
-      "name": "next-intl",
-      "version": "4.14.8",
-      "license": "MIT",
-      "ecosystem": "npm",
-      "homepage": "https://next-intl.dev"
     },
     {
       "name": "qrcode",
