@@ -108,12 +108,16 @@ export function BarcodeScanner({ onDetected, disabled }: Props) {
     if (!file || disabled) return;
     setError(null);
     await stopCamera();
-    const decoded = await detectFromImageFile(file);
-    if (!decoded) {
+    try {
+      const decoded = await detectFromImageFile(file);
+      if (!decoded) {
+        setError(t("imageDecodeFailed"));
+        return;
+      }
+      onDetected(decoded);
+    } catch {
       setError(t("imageDecodeFailed"));
-      return;
     }
-    onDetected(decoded);
   }
 
   return (

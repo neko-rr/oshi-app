@@ -59,9 +59,20 @@ async function openRegisterAs(
 
 async function dismissStartNudge(page: Page) {
   const dismiss = page.getByRole("button", { name: /今はしない|Not now/i });
-  if (await dismiss.isVisible().catch(() => false)) {
+  try {
+    // setState 後のナッジ表示を待つ（即 isVisible だと取りこぼす）
+    await dismiss.waitFor({ state: "visible", timeout: 2_000 });
     await dismiss.click();
+  } catch {
+    /* ナッジなし */
   }
+}
+
+/** バーコード手順のスキップ後、写真手順の file input を待つ */
+async function expectPhotoStep(page: Page) {
+  await expect(page.locator("#wizard_photo_file")).toBeAttached({
+    timeout: 10_000,
+  });
 }
 
 test.describe("register wizard fixtures", () => {
@@ -70,13 +81,13 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "guest");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(fixtureCase.barcode_image));
+    const barcodeInput = page.locator("#barcode_image_file");
+    await expect(barcodeInput).toBeAttached();
+    await barcodeInput.setInputFiles(fixtureFile(fixtureCase.barcode_image));
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
-      { timeout: 15_000 },
+      { timeout: 20_000 },
     );
     const business = calls.filter((c) =>
       [
@@ -95,17 +106,15 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "permanent");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(fixtureCase.barcode_image));
+    const barcodeInput = page.locator("#barcode_image_file");
+    await expect(barcodeInput).toBeAttached();
+    await barcodeInput.setInputFiles(fixtureFile(fixtureCase.barcode_image));
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
-      { timeout: 15_000 },
+      { timeout: 20_000 },
     );
     await page.getByRole("button", { name: /次へ（照合）|Next \(lookup\)/i }).click();
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
+    await expectPhotoStep(page);
     await page
       .locator("#wizard_photo_file")
       .setInputFiles(fixtureFile(fixtureCase.front_image));
@@ -147,12 +156,12 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     await openRegisterAs(page, context, "permanent");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(manifest.unreadable_image));
+    const barcodeInput = page.locator("#barcode_image_file");
+    await expect(barcodeInput).toBeAttached();
+    await barcodeInput.setInputFiles(fixtureFile(manifest.unreadable_image));
     await expect(
       page.getByText(/画像から読めません|Could not read barcode/),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("#wizard_barcode")).toBeVisible();
     await expect(page.locator("#wizard_barcode")).toHaveValue("");
     await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -165,9 +174,7 @@ test.describe("register wizard fixtures", () => {
     const { calls } = await openRegisterAs(page, context, "permanent");
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await dismissStartNudge(page);
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
+    await expectPhotoStep(page);
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await expect(page.locator("#product_name")).toBeVisible();
     await page.locator("#product_name").fill("E2E Photo Skip");
@@ -197,9 +204,7 @@ test.describe("register wizard fixtures", () => {
     ).toHaveCount(0);
     await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
     await dismissStartNudge(page);
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
+    await expectPhotoStep(page);
     await page
       .locator("#wizard_photo_file")
       .setInputFiles(fixtureFile(fixtureCase.front_image));

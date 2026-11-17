@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "screenshots": "playwright test e2e/screenshots.spec.ts",
-    "test:register-contract": "node --experimental-strip-types --test src/lib/e2eAuthStub.test.ts e2e/register/decode_contract.node.test.ts",
+    "test:register-contract": "node --experimental-strip-types --test src/lib/e2eAuthStub.test.ts src/lib/barcode/detect_timeout.test.ts e2e/register/decode_contract.node.test.ts",
     "test:register-e2e": "playwright test -c playwright.register.config.ts",
     "generate:register-fixtures": "node --experimental-strip-types e2e/register/generate_fixtures.ts",
     "cf:build": "opennextjs-cloudflare build",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@playwright/test": "^1.65.1",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
