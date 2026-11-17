@@ -129,9 +129,10 @@ where is_anonymous is true
 
 pnpm も同じ待ち時間（`pnpm-workspace.yaml` の `minimumReleaseAge`）。
 
-- [ ] [Renovate GitHub App](https://github.com/apps/renovate) を **このリポジトリだけ** にインストールし、出る「Configure Renovate」PR をマージする
+- [ ] [Renovate GitHub App](https://github.com/apps/renovate) を **このリポジトリだけ** にインストールし、出る「Configure Renovate」PR をマージする（**未完了だと週次更新 PR は一切出ない**）
 - [ ] GitHub の Dependabot **alerts（通知）** はオンでよい
 - [ ] Dependabot の **version updates / security updates はオフ**（セキュリティ更新が待ち時間を飛ばすため。更新 PR は Renovate だけ）
+- 補足: `minimumReleaseAge: 3 days` は「公開から3日待つ」設定。3日ごとに自動で上げるタイマーではない。実行は月曜朝（JST）のスケジュールのみ
 
 ## 4. デプロイ想定
 

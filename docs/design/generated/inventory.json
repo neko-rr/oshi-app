@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T13:21:41Z",
+  "generated_at": "2026-11-17T16:19:10Z",
   "pages": [
     {
       "path": "/auth/error",
@@ -24,6 +24,16 @@
     {
       "path": "/auth/login",
       "file": "apps/web/src/app/[locale]/auth/login/page.tsx",
+      "has_hex_ui": false,
+      "hex_line_count": 0,
+      "uses_lib_icons": false,
+      "lucide_direct": false,
+      "raw_button": false,
+      "is_dev": false
+    },
+    {
+      "path": "/auth/preparing",
+      "file": "apps/web/src/app/[locale]/auth/preparing/page.tsx",
       "has_hex_ui": false,
       "hex_line_count": 0,
       "uses_lib_icons": false,

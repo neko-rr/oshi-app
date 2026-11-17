@@ -5,6 +5,7 @@
 - [x] メール／パスワードでサインアップ・ログインできる
 - [x] ログイン画面で Google・メール／パスワード・ゲストをまとめて選べる
 - [x] Google は `/auth/callback` で PKCE の code をセッションに交換する
+- [x] 認証直後は Render Free 向けに `/health` 起床待ち（400ms 超でローディング。有料化後は `NEXT_PUBLIC_API_WAKE_ON_AUTH=0`）
 - [x] ログイン後 `/me`（API）で自分の `members_id` が取れる
 - [x] `/me` に `is_anonymous` が返り、ゲストと本登録を区別できる
 - [x] 「ゲストではじめる」で Anonymous セッションを開始できる

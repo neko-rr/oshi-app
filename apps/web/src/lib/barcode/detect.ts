@@ -1,4 +1,8 @@
+import { withTimeout } from "./detect_timeout";
 import { BARCODE_FORMATS, type DecodedBarcode } from "./formats";
+
+/** ネイティブ BarcodeDetector がハングする環境向けの上限 */
+export const NATIVE_DETECT_TIMEOUT_MS = 2_000;
 
 type BarcodeDetectorLike = {
   detect: (
@@ -99,8 +103,16 @@ export async function detectFromVideoFrame(
   video: HTMLVideoElement,
 ): Promise<DecodedBarcode | null> {
   if (video.readyState < 2) return null;
-  const native = await detectWithNative(video);
-  if (native) return native;
+  try {
+    const native = await withTimeout(
+      detectWithNative(video),
+      NATIVE_DETECT_TIMEOUT_MS,
+      "BarcodeDetector",
+    );
+    if (native) return native;
+  } catch {
+    /* タイムアウト → ZXing */
+  }
   return detectWithZxingFromVideo(video);
 }
 
@@ -111,9 +123,20 @@ export async function detectFromImageFile(
   const url = URL.createObjectURL(file);
   try {
     const img = await loadImage(url);
-    const native = await detectWithNative(img);
-    if (native) return native;
+    // Chromium ヘッドレス等で detect() が未解決のまま止まることがある
+    try {
+      const native = await withTimeout(
+        detectWithNative(img),
+        NATIVE_DETECT_TIMEOUT_MS,
+        "BarcodeDetector",
+      );
+      if (native) return native;
+    } catch {
+      /* タイムアウト・未対応 → ZXing へ */
+    }
     return detectWithZxingFromImage(img);
+  } catch {
+    return null;
   } finally {
     URL.revokeObjectURL(url);
   }

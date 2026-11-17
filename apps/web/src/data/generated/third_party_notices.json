@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T10:53:39Z",
+  "generated_at": "2026-11-17T16:19:15Z",
   "app_notice_ja": "Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ直下 LICENSE）です。本ページは、アプリが利用するオープンソース依存と、外部サービスの表示メモを掲示します。",
   "packages": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "name": "@opennextjs/cloudflare",
-      "version": "1.20.12",
+      "version": "1.20.17",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://github.com/opennextjs/opennextjs-cloudflare"
@@ -81,7 +81,7 @@
     },
     {
       "name": "next",
-      "version": "16.4.2",
+      "version": "16.4.6",
       "license": "MIT",
       "ecosystem": "npm",
       "homepage": "https://nextjs.org"
@@ -137,7 +137,7 @@
     },
     {
       "name": "fastapi",
-      "version": ">=0.115.0",
+      "version": ">=0.163.1",
       "license": "UNKNOWN",
       "ecosystem": "pip",
       "homepage": ""
@@ -180,6 +180,13 @@
     {
       "name": "python-multipart",
       "version": ">=0.0.9",
+      "license": "UNKNOWN",
+      "ecosystem": "pip",
+      "homepage": ""
+    },
+    {
+      "name": "starlette",
+      "version": ">=1.0.1",
       "license": "UNKNOWN",
       "ecosystem": "pip",
       "homepage": ""

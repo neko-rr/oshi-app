@@ -30,9 +30,13 @@
       "esbuild",
       "unrs-resolver",
       "workerd"
-    ]
+    ],
+    "overrides": {
+      "glob": ">=14.0.2",
+      "minimatch": ">=11.0.1"
+    }
   },
   "dependencies": {
-    "playwright": "^1.63.0"
+    "playwright": "1.65.1"
   }
 }

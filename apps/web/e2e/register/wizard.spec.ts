@@ -34,6 +34,9 @@ async function openRegisterAs(
     `http://127.0.0.1:${port}/`,
     `http://localhost:${port}/`,
   ];
+  page.on("pageerror", (err) => {
+    console.error("[e2e pageerror]", err.message);
+  });
   await context.addCookies(
     urls.map((url) => ({
       name: E2E_AUTH_COOKIE,
@@ -54,6 +57,10 @@ async function openRegisterAs(
   await expect(
     page.getByRole("heading", { name: /製品登録|Register product/i }),
   ).toBeVisible();
+  // クライアント hydrate 後に操作する
+  await expect(
+    page.getByRole("heading", { name: /手順 1|Step 1/i }),
+  ).toBeVisible();
   return guards;
 }
 
@@ -64,19 +71,49 @@ async function dismissStartNudge(page: Page) {
   }
 }
 
+/** 登録ステップ内の sticky アクションからボタンを取る */
+function stepAction(page: Page, name: RegExp) {
+  return page.locator(".register-sticky-actions").getByRole("button", { name });
+}
+
+async function expectPhotoStep(page: Page) {
+  await expect(
+    page.getByRole("heading", { name: /手順 2|Step 2/i }),
+  ).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator("#wizard_photo_file")).toBeAttached();
+}
+
+/**
+ * ラベル付き「ファイルを選ぶ」経由で FileChooser に載せる。
+ * hidden input への setInputFiles だけだと change が飛ばない環境がある。
+ */
+async function uploadViaChooseFileButton(
+  page: Page,
+  filePath: string,
+): Promise<void> {
+  const chooserPromise = page.waitForEvent("filechooser", { timeout: 10_000 });
+  await page
+    .getByRole("button", { name: /ファイルを選ぶ|Choose file/i })
+    .first()
+    .click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles(filePath);
+}
+
 test.describe("register wizard fixtures", () => {
   test("guest: バーコード読取はローカルのみ。照合APIは確認なしでは呼ばない", async ({
     page,
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "guest");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(fixtureCase.barcode_image));
+    await uploadViaChooseFileButton(
+      page,
+      fixtureFile(fixtureCase.barcode_image),
+    );
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
-      { timeout: 15_000 },
+      { timeout: 20_000 },
     );
     const business = calls.filter((c) =>
       [
@@ -95,33 +132,35 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "permanent");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(fixtureCase.barcode_image));
+    await uploadViaChooseFileButton(
+      page,
+      fixtureFile(fixtureCase.barcode_image),
+    );
     await expect(page.locator("#wizard_barcode")).toHaveValue(
       fixtureCase.expected_barcode,
-      { timeout: 15_000 },
+      { timeout: 20_000 },
     );
-    await page.getByRole("button", { name: /次へ（照合）|Next \(lookup\)/i }).click();
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
-    await page
-      .locator("#wizard_photo_file")
-      .setInputFiles(fixtureFile(fixtureCase.front_image));
+    await stepAction(page, /次へ（照合）|Next \(lookup\)/i).click();
+    await expectPhotoStep(page);
+    await uploadViaChooseFileButton(
+      page,
+      fixtureFile(fixtureCase.front_image),
+    );
     await expect(
       page.getByRole("img", {
         name: /正面写真のプレビュー|Preview of the selected front photo/i,
       }),
     ).toBeVisible();
-    await page.getByRole("button", { name: /^次へ$|^Next$/ }).click();
+    await stepAction(page, /^次へ$|^Next$/).click();
     await expect(page.locator("#product_name")).toBeVisible();
     const name = page.locator("#product_name");
     if (!(await name.inputValue()).trim()) {
       await name.fill("E2E Fallback Name");
     }
-    await page.getByRole("button", { name: /登録する|^Register$/i }).click();
-    await expect(page.getByRole("button", { name: /続けて登録|Register another/i })).toBeVisible({
+    await stepAction(page, /登録する|^Register$/i).click();
+    await expect(
+      page.getByRole("button", { name: /続けて登録|Register another/i }),
+    ).toBeVisible({
       timeout: 15_000,
     });
 
@@ -147,12 +186,13 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     await openRegisterAs(page, context, "permanent");
-    await page
-      .locator("#barcode_image_file")
-      .setInputFiles(fixtureFile(manifest.unreadable_image));
+    await uploadViaChooseFileButton(
+      page,
+      fixtureFile(manifest.unreadable_image),
+    );
     await expect(
       page.getByText(/画像から読めません|Could not read barcode/),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("#wizard_barcode")).toBeVisible();
     await expect(page.locator("#wizard_barcode")).toHaveValue("");
     await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -163,15 +203,13 @@ test.describe("register wizard fixtures", () => {
     context,
   }) => {
     const { calls } = await openRegisterAs(page, context, "permanent");
-    await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
+    await stepAction(page, /^スキップ$|^Skip$/).click();
     await dismissStartNudge(page);
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
+    await expectPhotoStep(page);
+    await stepAction(page, /^スキップ$|^Skip$/).click();
     await expect(page.locator("#product_name")).toBeVisible();
     await page.locator("#product_name").fill("E2E Photo Skip");
-    await page.getByRole("button", { name: /登録する|^Register$/i }).click();
+    await stepAction(page, /登録する|^Register$/i).click();
     await expect(
       page.getByRole("button", { name: /続けて登録|Register another/i }),
     ).toBeVisible({ timeout: 15_000 });
@@ -195,15 +233,14 @@ test.describe("register wizard fixtures", () => {
     await expect(
       page.getByRole("button", { name: /画面だけ確認|Preview screens only/ }),
     ).toHaveCount(0);
-    await page.getByRole("button", { name: /^スキップ$|^Skip$/ }).click();
+    await stepAction(page, /^スキップ$|^Skip$/).click();
     await dismissStartNudge(page);
-    await expect(
-      page.getByRole("button", { name: /ファイルを選ぶ|Choose file/ }),
-    ).toBeVisible();
-    await page
-      .locator("#wizard_photo_file")
-      .setInputFiles(fixtureFile(fixtureCase.front_image));
-    await page.getByRole("button", { name: /^次へ$|^Next$/ }).click();
+    await expectPhotoStep(page);
+    await uploadViaChooseFileButton(
+      page,
+      fixtureFile(fixtureCase.front_image),
+    );
+    await stepAction(page, /^次へ$|^Next$/).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator("#product_name")).toBeVisible();
     expect(apiCallsOf(calls, "POST", API_PATHS.assistVisionDescribe)).toHaveLength(
@@ -211,7 +248,7 @@ test.describe("register wizard fixtures", () => {
     );
     expect(apiCallsOf(calls, "POST", API_PATHS.photos)).toHaveLength(0);
     await page.locator("#product_name").fill("E2E Guest Save");
-    await page.getByRole("button", { name: /登録する|^Register$/i }).click();
+    await stepAction(page, /登録する|^Register$/i).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(
       page.getByText(/製品を保存するには本登録|save products/i),

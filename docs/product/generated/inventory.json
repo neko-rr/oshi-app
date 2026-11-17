@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:27:38Z",
+  "generated_at": "2026-11-17T16:19:08Z",
   "openapi_source": "fastapi.app.openapi()",
   "web_routes": [
     {
@@ -26,6 +26,11 @@
       "path": "/auth/login",
       "kind": "page",
       "file": "apps/web/src/app/[locale]/auth/login/page.tsx"
+    },
+    {
+      "path": "/auth/preparing",
+      "kind": "page",
+      "file": "apps/web/src/app/[locale]/auth/preparing/page.tsx"
     },
     {
       "path": "/auth/sign-up",

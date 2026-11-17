@@ -15,7 +15,8 @@
 
 | 項目 | 内容 |
 |------|------|
-| 実装 | `apps/web/src/lib/wakeApi.ts`（呼び出し: ログインフォーム・ゲスト開始・`auth/callback`） |
+| 実装 | `apps/web/src/lib/wakeApi.ts` の `waitForApiReady`（ログイン・ゲスト・`/auth/preparing`） |
+| UI | 400ms 超えたときだけ「サーバーを起動しています」オーバーレイ（起きていればほぼ出ない） |
 | 無効化 | Cloudflare / ローカルで `NEXT_PUBLIC_API_WAKE_ON_AUTH=0` |
 | スリープ条件 | API への HTTP が **連続15分なし**（操作中の `apiFetch` があれば寝ない） |
 

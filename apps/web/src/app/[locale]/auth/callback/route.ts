@@ -3,10 +3,10 @@ import { type NextRequest } from "next/server";
 
 import { sanitizeAuthRedirectPath } from "@/lib/authRedirect";
 import { createClient } from "@/lib/server";
-import { wakeApi } from "@/lib/wakeApi";
 
 /**
  * Google 等 OAuth の PKCE 戻り。code をセッション Cookie に交換する。
+ * API 起床待ちは /auth/preparing のクライアント側で行う（Workers タイムアウト回避）。
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,9 +17,8 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Render Free 起床。リダイレクト前に短く待ち、リクエストが届くようにする
-      await wakeApi({ timeoutMs: 4_000 });
-      redirect(next);
+      const preparing = new URLSearchParams({ next });
+      redirect(`/auth/preparing?${preparing.toString()}`);
     }
     redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
   }
