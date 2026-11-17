@@ -25,6 +25,8 @@ export function ImageSourcePicker({
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const cameraRef = useRef<HTMLInputElement | null>(null);
+  const fileCapture = imageInputCapture("file");
+  const cameraCapture = imageInputCapture("camera");
 
   function take(input: HTMLInputElement) {
     const file = input.files?.[0] ?? null;
@@ -57,7 +59,8 @@ export function ImageSourcePicker({
         id={`${idPrefix}_file`}
         type="file"
         accept="image/*"
-        capture={imageInputCapture("file")}
+        // undefined を渡すと環境によって capture="" になり読取が壊れることがある
+        {...(fileCapture ? { capture: fileCapture } : {})}
         className="sr-only"
         tabIndex={-1}
         disabled={disabled}
@@ -68,7 +71,7 @@ export function ImageSourcePicker({
         id={`${idPrefix}_camera`}
         type="file"
         accept="image/*"
-        capture={imageInputCapture("camera")}
+        {...(cameraCapture ? { capture: cameraCapture } : {})}
         className="sr-only"
         tabIndex={-1}
         disabled={disabled}
