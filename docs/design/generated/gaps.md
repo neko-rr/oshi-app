@@ -2,7 +2,7 @@
 
 # デザインギャップ（as-built）
 
-生成時刻 (UTC): `2026-10-07T13:21:41Z`
+生成時刻 (UTC): `2026-11-17T16:19:10Z`
 
 検査: page.tsx の hex / lucide / raw button、`design_adoption.json`、compliance。
 
@@ -29,7 +29,7 @@
 
 ## page.tsx 要約
 
-- 本番 page 数: 24
+- 本番 page 数: 25
 - `@/lib/icons` 使用: 0
 - lucide 直 import: 0
 - UI hex 疑い: 0
