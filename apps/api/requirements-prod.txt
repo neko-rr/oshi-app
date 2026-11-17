@@ -1,5 +1,7 @@
 # 本番実行用。テスト用パッケージは入れない。ローカル／CI は requirements.txt。
-fastapi>=0.115.0
+# Starlette BadHost 対策のため FastAPI を Starlette 1.0.1+ 対応線へ
+fastapi>=0.163.1
+starlette>=1.0.1
 uvicorn[standard]>=0.32.0
 pydantic>=2.9.0
 pydantic-settings>=2.6.0

@@ -23,6 +23,8 @@ build/
 .turbo/
 out/
 coverage/
+package-lock.json
+apps/web/.wrangler/
 __pycache__/
 *.py[cod]
 *$py.class

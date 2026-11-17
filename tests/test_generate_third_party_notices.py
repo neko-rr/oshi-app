@@ -99,7 +99,9 @@ def test_collect_pip_packages_uses_requirements_constraints_only() -> None:
     rows = mod.collect_pip_packages()
     by_name = {row["name"]: row for row in rows}
     assert "fastapi" in by_name
-    assert by_name["fastapi"]["version"] == ">=0.115.0"
+    assert by_name["fastapi"]["version"] == ">=0.163.1"
+    assert "starlette" in by_name
+    assert by_name["starlette"]["version"] == ">=1.0.1"
     assert by_name["fastapi"]["license"] == "UNKNOWN"
     assert by_name["fastapi"]["homepage"] == ""
     assert "pytest" not in by_name

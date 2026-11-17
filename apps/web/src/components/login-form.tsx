@@ -25,7 +25,8 @@ import {
 import { GuestStartButton } from "@/components/auth/GuestStartButton";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { AuthTurnstile } from "@/components/auth/AuthTurnstile";
-import { wakeApiInBackground } from "@/lib/wakeApi";
+import { ApiWakeOverlay } from "@/components/auth/ApiWakeOverlay";
+import { waitForApiReady } from "@/lib/wakeApi";
 import {
   authCaptchaBlockReason,
   readTurnstileSiteKey,
@@ -50,6 +51,7 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [wakingApi, setWakingApi] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaRemount, setCaptchaRemount] = useState(0);
 
@@ -94,8 +96,10 @@ export function LoginForm({
       if (signError) throw signError;
       clearCaptcha();
 
-      // Render Free 起床（失敗してもログイン継続。有料化後は wakeApi を止める）
-      wakeApiInBackground();
+      // Render Free 起床待ち（起きていれば即完了。有料化後は waitForApiReady が即 ready）
+      setWakingApi(true);
+      await waitForApiReady();
+      setWakingApi(false);
 
       let dest = destAfterAuth;
       try {
@@ -116,6 +120,7 @@ export function LoginForm({
       router.push(dest);
     } catch (err: unknown) {
       clearCaptcha();
+      setWakingApi(false);
       setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setIsLoading(false);
@@ -124,6 +129,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {wakingApi ? <ApiWakeOverlay /> : null}
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>

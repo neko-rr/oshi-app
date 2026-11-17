@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import {
   googleOAuthCallbackUrl,
   sanitizeAuthRedirectPath,
+  sanitizePreparingNext,
 } from "./authRedirect.ts";
 
 describe("sanitizeAuthRedirectPath", () => {
@@ -18,6 +19,23 @@ describe("sanitizeAuthRedirectPath", () => {
     assert.equal(sanitizeAuthRedirectPath("https://evil.example/"), "/");
     assert.equal(sanitizeAuthRedirectPath("//evil.example"), "/");
     assert.equal(sanitizeAuthRedirectPath("gallery"), "/");
+  });
+
+  it("パーセントエンコードした // や ://・パス走査も拒否する", () => {
+    assert.equal(sanitizeAuthRedirectPath("/%2F%2Fevil.example"), "/");
+    assert.equal(sanitizeAuthRedirectPath("%2F%2Fevil.example"), "/");
+    assert.equal(sanitizeAuthRedirectPath("/%2f%2fevil.example"), "/");
+    assert.equal(sanitizeAuthRedirectPath("/gallery%2F..%2F.."), "/");
+    assert.equal(sanitizeAuthRedirectPath("/https%3A%2F%2Fevil.example"), "/");
+  });
+});
+
+describe("sanitizePreparingNext", () => {
+  it("preparing 自身へのループは / にする", () => {
+    assert.equal(sanitizePreparingNext("/auth/preparing"), "/");
+    assert.equal(sanitizePreparingNext("/auth/preparing?next=/gallery"), "/");
+    assert.equal(sanitizePreparingNext("/en/auth/preparing"), "/");
+    assert.equal(sanitizePreparingNext("/gallery"), "/gallery");
   });
 });
 

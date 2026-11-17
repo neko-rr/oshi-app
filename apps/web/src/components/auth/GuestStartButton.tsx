@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/client";
-import { wakeApiInBackground } from "@/lib/wakeApi";
+import { sanitizeAuthRedirectPath } from "@/lib/authRedirect";
+import { waitForApiReady } from "@/lib/wakeApi";
 import {
   authCaptchaBlockReason,
   readTurnstileSiteKey,
   resolveCaptchaToken,
 } from "@/lib/authCaptcha";
 import { AuthTurnstile } from "@/components/auth/AuthTurnstile";
+import { ApiWakeOverlay } from "@/components/auth/ApiWakeOverlay";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -29,7 +31,9 @@ export function GuestStartButton({
   const t = useTranslations("Guest");
   const tCaptcha = useTranslations("AuthCaptcha");
   const router = useRouter();
+  const dest = sanitizeAuthRedirectPath(redirectTo);
   const [busy, setBusy] = useState(false);
+  const [wakingApi, setWakingApi] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaRemount, setCaptchaRemount] = useState(0);
@@ -67,11 +71,14 @@ export function GuestStartButton({
       });
       if (signError) throw signError;
       clearCaptcha();
-      wakeApiInBackground();
-      router.push(redirectTo);
+      setWakingApi(true);
+      await waitForApiReady();
+      setWakingApi(false);
+      router.push(dest);
       router.refresh();
     } catch (err: unknown) {
       clearCaptcha();
+      setWakingApi(false);
       setError(err instanceof Error ? err.message : t("startError"));
     } finally {
       setBusy(false);
@@ -80,6 +87,7 @@ export function GuestStartButton({
 
   return (
     <div className={className}>
+      {wakingApi ? <ApiWakeOverlay /> : null}
       <AuthTurnstile
         action="guest"
         remountKey={captchaRemount}

@@ -149,6 +149,10 @@
     "error": "Could not start Google sign-in",
     "errorLinkConflict": "This Google account is already linked to another user. Please log in."
   },
+  "ApiWake": {
+    "title": "Starting the server",
+    "body": "Please wait. This can take up to about a minute."
+  },
   "Appearance": {
     "back": "← Settings",
     "title": "Appearance",

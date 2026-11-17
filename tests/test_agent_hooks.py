@@ -34,11 +34,14 @@ def test_secret_guard_hook_json_denies_no_verify() -> None:
         [sys.executable, str(ROOT / "scripts" / "secret_guard.py"), "hook"],
         input=payload,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         cwd=ROOT,
         check=False,
     )
     assert p.returncode == 0
+    assert p.stdout is not None
     body = json.loads(p.stdout)
     assert body.get("permission") == "deny"
 

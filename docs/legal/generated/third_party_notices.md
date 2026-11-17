@@ -4,7 +4,7 @@
 
 # サードパーティ／外部サービス NOTICE
 
-生成時刻 (UTC): `2026-10-22T10:53:39Z`
+生成時刻 (UTC): `2026-11-17T14:45:14Z`
 
 ## アプリ本体
 
@@ -15,7 +15,6 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 | 名前 | 版 | ライセンス | 系統 |
 |------|----|------------|------|
 | @marsidev/react-turnstile | 1.6.1 | MIT | npm |
-| @opennextjs/cloudflare | 1.20.12 | MIT | npm |
 | @radix-ui/react-avatar | 1.2.6 | MIT | npm |
 | @radix-ui/react-label | 2.1.15 | MIT | npm |
 | @radix-ui/react-slot | 1.3.3 | MIT | npm |
@@ -25,21 +24,20 @@ Oshihaven 本体のソースコードは All Rights Reserved（リポジトリ�
 | class-variance-authority | 0.7.1 | Apache-2.0 | npm |
 | clsx | 2.1.1 | MIT | npm |
 | lucide-react | 1.31.0 | ISC | npm |
-| next | 16.4.2 | MIT | npm |
-| next-intl | 4.14.8 | MIT | npm |
 | qrcode | 1.5.4 | MIT | npm |
 | radix-ui | 1.6.7 | MIT | npm |
 | react | 19.3.0 | MIT | npm |
 | react-dom | 19.3.0 | MIT | npm |
 | tailwind-merge | 3.6.0 | MIT | npm |
 | tw-animate-css | 1.4.0 | MIT | npm |
-| fastapi | >=0.115.0 | UNKNOWN | pip |
+| fastapi | >=0.163.1 | UNKNOWN | pip |
 | httpx | >=0.27.0 | UNKNOWN | pip |
 | pydantic | >=2.9.0 | UNKNOWN | pip |
 | pydantic-settings | >=2.6.0 | UNKNOWN | pip |
 | PyJWT | [crypto]>=2.9.0 | UNKNOWN | pip |
 | python-dotenv | >=1.0.0 | UNKNOWN | pip |
 | python-multipart | >=0.0.9 | UNKNOWN | pip |
+| starlette | >=1.0.1 | UNKNOWN | pip |
 | supabase | >=2.10.0 | UNKNOWN | pip |
 | tzdata | >=2024.1 | UNKNOWN | pip |
 | uvicorn | [standard]>=0.32.0 | UNKNOWN | pip |
